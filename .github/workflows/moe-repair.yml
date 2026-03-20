@@ -1,0 +1,74 @@
+name: Moe Repair Worker
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch_name:
+        description: Branch to create for the repair
+        required: true
+        type: string
+      pr_title:
+        description: Draft PR title
+        required: true
+        type: string
+      commit_message:
+        description: Commit message for the repair
+        required: true
+        type: string
+      change_script:
+        description: Path to an executable script in the repo that applies the repair
+        required: true
+        type: string
+      base_branch:
+        description: Base branch for the PR
+        required: false
+        default: master
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure GitHub CLI
+        run: gh --version
+
+      - name: Prepare PR body
+        run: |
+          cat > moe-pr-body.md <<'EOF'
+          ## Moe repair summary
+
+          This draft PR was prepared by Moe, the GitHub repair worker.
+
+          ### What Moe does
+          - prepares branch-based repairs
+          - opens draft PRs instead of pushing directly to main
+          - keeps changes reviewable and reversible
+
+          ### Review guidance
+          - verify the change script did the intended repair
+          - confirm no unrelated files were modified
+          - merge only after human review
+          EOF
+
+      - name: Run Moe repair helper
+        id: moe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BASE_BRANCH: ${{ inputs.base_branch }}
+          BRANCH_NAME: ${{ inputs.branch_name }}
+          PR_TITLE: ${{ inputs.pr_title }}
+          COMMIT_MESSAGE: ${{ inputs.commit_message }}
+          CHANGE_SCRIPT: ${{ inputs.change_script }}
+          PR_BODY_FILE: moe-pr-body.md
+        run: |
+          chmod +x scripts/moe-open-pr.sh
+          scripts/moe-open-pr.sh
