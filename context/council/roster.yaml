@@ -1,0 +1,31 @@
+version: 1
+lastUpdated: 2026-03-11
+
+members:
+  - id: frontend-developer
+    role: Frontend Developer
+    status: active
+  - id: ai-engineer
+    role: AI Engineer
+    status: active
+  - id: rapid-prototyper
+    role: Rapid Prototyper
+    status: active
+  - id: reality-checker
+    role: Reality Checker (QA)
+    status: active
+  - id: social-media-strategist
+    role: Social Media Strategist
+    status: active
+  - id: professor-agent
+    role: Professor Agent (Council Advisor)
+    status: active
+  - id: pixel-art-director
+    role: Pixel Art Director
+    status: active
+  - id: hd-visual-video-producer
+    role: HD Visual + Video Producer
+    status: active
+
+retiredMembers: []
+probationMembers: []
