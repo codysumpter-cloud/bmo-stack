@@ -35,3 +35,22 @@ Recovery rules:
 - If Telegram breaks, keep it on host.
 - If nemoclaw list and openshell sandbox list disagree, trust openshell.
 - If important sandbox files are missing, recover from ~/bmo-context.
+## Worker Naming Policy (Adventure Time)
+
+All workers must follow the Adventure Time naming policy:
+- Unique Adventure Time world name
+- Matching personality  
+- Clearly defined role
+
+See `context/WORKER_NAMING_REGISTRY.md` for the complete registry and policy.
+
+## GitHub Caretaker Worker: Cosmic Owl
+
+Implemented as a GitHub Action that:
+- Runs on schedule and workflow_dispatch
+- Watches for repo drift and risk
+- Opens issues or PRs with findings (never pushes directly to main by default)
+- Produces optional maintenance reports
+- Uses least-privilege permissions
+
+See `.github/workflows/github-caretaker.yml` for implementation.

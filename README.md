@@ -160,3 +160,53 @@ Despite the automation added via Makefile targets, the following steps remain ma
 6. **Council agent definitions**: While the core agents (Prismo, BMO, NEPTR, Finn, etc.) are defined in `context/council/`, you may need to add or update specialist agents as your use case evolves.
 
 All other aspects (identity system, local‑first config, service templates, memory structure, shared bootstrap logic, nemoclaw submodule inclusion) are automated and ready to use. The repository is hardened and documented for immediate use across macOS, WSL2, and Linux hosts.
+## GitHub Caretaker Worker: Cosmic Owl
+
+This repository includes a GitHub Action that acts as a caretaker for the repo, following the Adventure Time worker naming policy.
+
+### What It Does
+- Runs on a daily schedule (02:00 UTC) and can be triggered manually via `workflow_dispatch`.
+- Checks key health metrics:
+  - Number of open issues (threshold: >10)
+  - Number of open pull requests (threshold: >5)
+  - Days since last commit (threshold: >14 days)
+- If any metric exceeds its threshold, it opens a GitHub issue titled "Cosmic Owl Maintenance Report: YYYY-MM-DD" with a short report.
+- If all metrics are within thresholds, it logs that no issue is needed (no spam).
+- Uses least-privilege permissions: `contents: read` and `issues: write`.
+- Does **not** push directly to the main branch by default; it prefers to open issues or pull requests for any needed changes.
+
+### What It Does Not Do
+- It does not automatically fix issues or apply changes (no direct pushes).
+- It does not comment on every issue or PR.
+- It does not perform complex analysis; it is a simple watchdog.
+- It does not require any secrets or tokens beyond the default `GITHUB_TOKEN`.
+
+### What Is Still Manual
+- Interpreting the reports and deciding on actions.
+- Triage of any opened issues.
+- Actual fixes, refactoring, or documentation improvements (these would be done by human maintainers or potentially delegated to other workers like Moe or Finn via manual workflows).
+- Adjusting thresholds or adding new checks (requires editing the workflow).
+
+### Sample Maintenance Report Format
+When an issue is opened, it follows this format:
+
+```
+## Cosmic Owl Maintenance Report
+
+**Date**: 2026-03-20
+
+### Metrics
+- Open Issues: 12 (threshold: >10)
+- Open Pull Requests: 3 (threshold: >5)
+- Days Since Last Commit: 2 (threshold: >14 days)
+
+⚠️ High number of open issues
+```
+
+(The above example would trigger because open issues > 10.)
+
+### Related Files
+- Worker definition: `context/council/COSMIC_OWL.md`
+- Naming policy and registry: `context/WORKER_NAMING_REGISTRY.md`
+- GitHub Action: `.github/workflows/github-caretaker.yml`
+
