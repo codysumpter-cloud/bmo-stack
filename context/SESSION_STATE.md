@@ -13,6 +13,13 @@ Important decisions:
 4. Share project files, not live runtime state.
 5. Prefer one-message replies unless asked otherwise.
 
+Restart recovery:
+- At every session start, read host context first (BOOTSTRAP.md, SESSION_STATE.md, SYSTEMMAP.md, RUNBOOK.md, BACKLOG.md)
+- Then read local session files (SOUL.md, USER.md, memory/YYYY-MM-DD.md, MEMORY.md if main session)
+- Check TASK_STATE.md and WORK_IN_PROGRESS.md for interrupted work
+- Inspect git status of current repo before asking to restate anything
+- Resume interrupted work when safe
+
 Known facts:
 - Earlier sandbox-local files should be assumed lost unless recovered elsewhere.
 - nemoclaw list can be stale.
