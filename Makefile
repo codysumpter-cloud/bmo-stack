@@ -1,4 +1,4 @@
-.PHONY: up down status logs doctor
+.PHONY: up down status logs doctor sync-context
 
 # Docker Compose file
 COMPOSE_FILE=compose.yaml
@@ -15,6 +15,9 @@ status:
 logs:
 	docker compose -f $(COMPOSE_FILE) logs -f
 
+sync-context:
+	./scripts/sync-context.sh
+
 doctor:
 	@echo "Checking Docker and Docker Compose..."
 	@which docker >/dev/null 2>&1 || { echo "Error: docker not found"; exit 1; }
@@ -26,6 +29,9 @@ doctor:
 	else \
 		echo "Warning: OpenClaw config not found at $$HOME/.openclaw/openclaw.json"; \
 	fi
+	@echo "Checking OpenShell..."
+	@which openshell >/dev/null 2>&1 || { echo "Error: openshell not found"; exit 1; }
+	@echo "OpenShell is available."
 	@echo "Checking context files..."
 	@if [ -d ./context ] && [ -f ./context/BOOTSTRAP.md ]; then \
 		echo "Context files present."; \

@@ -1,52 +1,13 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Bootstrap script for Linux (VPS / private cloud host)
 
 set -euo pipefail
 
-echo "=== BMO Stack Bootstrap for Linux ==="
+# Source common functions
+source "$(dirname "$0")/common.sh"
 
-# Check for Docker
-if ! command -v docker &> /dev/null; then
-    echo "Error: Docker is not installed. Please install Docker Engine."
-    echo "On Ubuntu/Debian: sudo apt-get install -y docker.io"
-    echo "On RHEL/CentOS: sudo yum install -y docker"
-    exit 1
-fi
-
-# Check for Docker Compose (v2)
-if ! docker compose version &> /dev/null; then
-    echo "Error: Docker Compose v2 is not available. Please install the Docker Compose plugin."
-    echo "See: https://docs.docker.com/compose/install/linux/"
-    exit 1
-fi
-
-# Check for OpenClaw (host)
-if [ ! -d "$HOME/.openclaw" ]; then
-    echo "Warning: OpenClaw directory not found at $HOME/.openclaw"
-    echo "Please install OpenClaw on your host machine first."
-    echo "See: https://docs.openclaw.ai"
-else
-    echo "OpenClaw directory found at $HOME/.openclaw"
-fi
-
-# Check for context files
-if [ ! -f "./context/BOOTSTRAP.md" ]; then
-    echo "Error: Context files are missing. Please ensure you are in the bmo-stack directory."
-    exit 1
-fi
-
-# Copy .env.example to .env if it doesn't exist
-if [ ! -f ./.env ]; then
-    if [ -f ./.env.example ]; then
-        cp ./.env.example ./.env
-        echo "Created .env from .env.example. Please edit it to add your API keys."
-    else
-        echo "Error: .env.example not found."
-        exit 1
-    fi
-else
-    echo ".env already exists. Skipping copy."
-fi
+# Run common bootstrap steps (checks and .env creation)
+run_bootstrap
 
 echo ""
 echo "=== Next Steps ==="

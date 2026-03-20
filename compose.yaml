@@ -1,51 +1,28 @@
 version: '3.8'
 
+# NOTE: This docker-compose file is for OPTIONAL auxiliary services.
+# The core BMO Stack does NOT require Docker:
+#   - Host OpenClaw handles Telegram (runs on host)
+#   - Worker sandbox (bmo-tron) is managed by OpenShell/NemoClaw on host
+#   - Context lives in ~/bmo-context (outside containers)
+#
+# If you want to run auxiliary services (e.g., a database for the worker),
+# you can use this compose file. Otherwise, you may ignore it.
+
 services:
-  openclaw:
-    image: openclaw/openclaw:latest
-    container_name: bmo_openclaw
-    restart: unless-stopped
-    env_file:
-      - .env
-    volumes:
-      - ./context:/home/node/.openclaw/workspace/bmo-context:ro
-      - ./data/openclaw:/home/node/.openclaw
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-    ports:
-      - "3000:3000"
-    # Telegram is handled by the host, so we don't expose the bot directly here.
-    # The OpenClaw gateway runs on the host, and this container is for the worker.
-    # However, note: the requirement says Telegram runs on host OpenClaw.
-    # This service is for the worker (sandbox) and other services.
-    # We'll adjust: we are not running the Telegram bot in this container.
-    # Instead, we are setting up the environment for the worker.
-    # For now, we'll run a placeholder that keeps the container alive for the worker.
-    command: ["tail", "-f", "/dev/null"]
-
-  # We are not running the Telegram bot in Docker because it runs on the host.
-  # This compose file is for setting up the worker environment and any other services.
-  # If we need to run the OpenClaw gateway in Docker for development, we can, but
-  # the requirement says Telegram runs on host OpenClaw. We'll assume the host
-  # already has OpenClaw gateway running.
-
-  # Optional: if we want to run the OpenClaw gateway in Docker for a dev setup,
-  # we can uncomment and adjust. But for now, we focus on the worker.
-
-  # We are creating a service that represents the worker environment.
-  # The worker will be used via `openshell` commands, which require the gateway.
-  # We assume the host's gateway is running and accessible.
-
-  # For a fully self-contained dev setup, we could run the gateway here, but
-  # then we would have to manage the host's Telegram connection. Let's keep it simple.
-
-  # We'll add a service for the OpenShell server (nemoclaw) if needed, but
-  # the requirement is to use the existing host setup. We are making the
-  # worker portable, so we assume the host has nemoclaw/OpenShell installed.
-
-  # Therefore, this compose file is mainly for defining the environment and
-  # for any additional services (like a database) that the worker might need.
-
-  # For now, we only have a placeholder for the worker container.
+  # Example auxiliary service: PostgreSQL database
+  # Uncomment and configure as needed.
+  #
+  # postgres:
+  #   image: postgres:15-alpine
+  #   container_name: bmo_postgres
+  #   restart: unless-stopped
+  #   env_file:
+  #     - .env
+  #   volumes:
+  #     - pgdata:/var/lib/postgresql/data
+  #   ports:
+  #     - "5432:5432"
 
 volumes:
-  data:
+  pgdata:
