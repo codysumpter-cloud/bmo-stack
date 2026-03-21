@@ -807,3 +807,44 @@ Last updated: 2026-03-20 13:15 UTC
   - Verification complete: false
   - Manual steps remaining: Auto-checkpoint: agent must still manually record meaningful steps during operations; this script only provides temporal checkpointing.
   - Safe to resume: true
+
+- 2026-03-21 01:21 UTC
+  - Repo: /home/prismtek/.openclaw/workspace/bmo-stack
+  - Branch: beginner-onboarding
+  - Files touched: INTERRUPTED_WORK.tmp,scripts/auto-checkpoint.sh,scripts/sync-context.sh
+  - Last successful step: auto-checkpoint (agent should manually record meaningful steps)
+  - Next intended step: auto-checkpoint (agent should manually record meaningful steps)
+  - Verification complete: false
+  - Manual steps remaining: Auto-checkpoint: agent must still manually record meaningful steps during operations; this script only provides temporal checkpointing.
+  - Safe to resume: true
+
+- 2026-03-21 01:26 UTC
+  - Repo: /home/prismtek/.openclaw/workspace/bmo-stack
+  - Branch: beginner-onboarding
+  - Files touched: INTERRUPTED_WORK.tmp,scripts/auto-checkpoint.sh,scripts/sync-context.sh
+  - Last successful step: auto-checkpoint (agent should manually record meaningful steps)
+  - Next intended step: auto-checkpoint (agent should manually record meaningful steps)
+  - Verification complete: false
+  - Manual steps remaining: Auto-checkpoint: agent must still manually record meaningful steps during operations; this script only provides temporal checkpointing.
+  - Safe to resume: true
+
+- 2026-03-21 01:31 UTC
+  - Repo: /home/prismtek/.openclaw/workspace/bmo-stack
+  - Branch: beginner-onboarding
+  - Files touched: INTERRUPTED_WORK.tmp,scripts/auto-checkpoint.sh,scripts/sync-context.sh
+  - Last successful step: auto-checkpoint (agent should manually record meaningful steps)
+  - Next intended step: auto-checkpoint (agent should manually record meaningful steps)
+  - Verification complete: false
+  - Manual steps remaining: Auto-checkpoint: agent must still manually record meaningful steps during operations; this script only provides temporal checkpointing.
+  - Safe to resume: true
+
+- 2026-03-21 01:37 UTC
+  - Repo: /home/prismtek/.openclaw/workspace/bmo-stack
+  - Branch: beginner-onboarding
+  - Files touched: INTERRUPTED_WORK.tmp,scripts/auto-checkpoint.sh,scripts/sync-context.sh
+  - Last successful step: auto-checkpoint (agent should manually record meaningful steps)
+  - Next intended step: auto-checkpoint (agent should manually record meaningful steps)
+  - Verification complete: false
+  - Manual steps remaining: Auto-checkpoint: agent must still manually record meaningful steps during operations; this script only provides temporal checkpointing.
+  - Safe to resume: true
+- 2026-03-21 01:37 UTC: Created model directory structure and documented Nemotron 3 Super 120B specs for omniAPI localization strategy
