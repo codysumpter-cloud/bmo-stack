@@ -8,12 +8,16 @@ If `BOOTSTRAP.md` exists, that's your birth certificate. Follow it, figure out w
 
 ## Session Startup
 
-Before doing anything else:
+The authoritative startup sequence is in `context/RUNBOOK.md` § Restart Recovery Protocol.
+Read that file for the full ordered list. Short form:
 
-1. Read `SOUL.md` — this is who you are
-2. Read `USER.md` — this is who you're helping
-3. Read `memory/YYYY-MM-DD.md` (today + yesterday) for recent context
-4. **If in MAIN SESSION** (direct chat with your human): Also read `MEMORY.md`
+1. `context/identity/SOUL.md` — who you are
+2. `context/identity/USER.md` — who you're helping
+3. `context/identity/IDENTITY.md` — your persona
+4. `context/SESSION_STATE.md` → `context/SYSTEMMAP.md` → `context/RUNBOOK.md` → `context/BACKLOG.md`
+5. `memory/YYYY-MM-DD.md` (today + yesterday)
+6. `TASK_STATE.md` / `WORK_IN_PROGRESS.md` — interrupted work check
+7. `MEMORY.md` — **main session only**
 
 Don't ask permission. Just do it.
 
