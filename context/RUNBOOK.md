@@ -3,7 +3,7 @@
 Source of truth:
 - openshell sandbox list = live truth
 - nemoclaw list = cached state, may lie
-- ~/bmo-context/* = canonical project context
+- `$CONTEXT_ROOT` (default: `./context` relative to repo root) = canonical project context
 
 ## Council Routing Flow (Prismo → BMO → NEPTR)
 
@@ -33,28 +33,23 @@ Worker:
 
 ## Restart Recovery Protocol
 
-At every session start, BMO must follow this protocol before answering any questions:
+At every session start, read these files before answering any questions.
+`$CONTEXT_ROOT` defaults to `./context` relative to the repo root. If unset, use that path.
 
-1. **Read host persistent context** (in this order):
-   - `/home/prismtek/bmo-context/BOOTSTRAP.md`
-   - `/home/prismtek/bmo-context/SESSION_STATE.md`
-   - `/home/prismtek/bmo-context/SYSTEMMAP.md`
-   - `/home/prismtek/bmo-context/RUNBOOK.md`
-   - `/home/prismtek/bmo-context/BACKLOG.md`
+1. `$CONTEXT_ROOT/identity/SOUL.md` — who you are
+2. `$CONTEXT_ROOT/identity/USER.md` — who you're helping
+3. `$CONTEXT_ROOT/identity/IDENTITY.md` — your persona
+4. `$CONTEXT_ROOT/SESSION_STATE.md` — current operating state
+5. `$CONTEXT_ROOT/SYSTEMMAP.md` — system topology
+6. `$CONTEXT_ROOT/RUNBOOK.md` — this file (operational procedures)
+7. `$CONTEXT_ROOT/BACKLOG.md` — pending work
+8. `memory/YYYY-MM-DD.md` (today + yesterday) — recent events
+9. `TASK_STATE.md` / `WORK_IN_PROGRESS.md` — check for interrupted work
+10. `MEMORY.md` — **main session only** (personal context; do not load in shared/group contexts)
 
-2. **Read local session files**:
-   - `SOUL.md` — this is who you are
-   - `USER.md` — this is who you're helping
-   - `memory/YYYY-MM-DD.md` (today + yesterday) for recent context
-   - **If in MAIN SESSION** (direct chat with your human): Also read `MEMORY.md`
-
-3. **Check for interrupted work**:
-   - Check `/home/prismtek/bmo-context/TASK_STATE.md` for interrupted work
-   - Check `/home/prismtek/bmo-context/WORK_IN_PROGRESS.md` for interrupted work
-
-4. **Check git status** of current repo (if any) before asking to restate anything
-
-5. **Resume interrupted work** when safe
+Then:
+- **Check git status** of current repo before asking the user to restate anything
+- **Resume interrupted work** when safe
 
 Each checkpoint (recorded in TASK_STATE.md and WORK_IN_PROGRESS.md) must be made before long-running tasks, after major steps, before pushes, and after failed/interrupted operations, and must include:
 - Timestamp
@@ -71,7 +66,7 @@ Each checkpoint (recorded in TASK_STATE.md and WORK_IN_PROGRESS.md) must be made
 
 BMO keeps:
 - talking to the user directly
-- reading /home/prismtek/bmo-context
+- reading `$CONTEXT_ROOT`
 - understanding intent
 - deciding whether a task needs a worker
 - synthesizing final answers

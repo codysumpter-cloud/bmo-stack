@@ -4,7 +4,7 @@ Current architecture:
 - Host OpenClaw = Telegram-facing bot
 - NemoClaw / OpenShell = sandboxed worker
 - Current worker sandbox name: bmo-tron
-- Canonical context folder: ~/bmo-context
+- Canonical context folder: `$CONTEXT_ROOT` (default: `./context` relative to repo root)
 
 Important decisions:
 1. Telegram runs on host, not in the sandbox.
@@ -14,9 +14,8 @@ Important decisions:
 5. Prefer one-message replies unless asked otherwise.
 
 Restart recovery:
-- At every session start, read host context first (BOOTSTRAP.md, SESSION_STATE.md, SYSTEMMAP.md, RUNBOOK.md, BACKLOG.md)
-- Then read local session files (SOUL.md, USER.md, memory/YYYY-MM-DD.md, MEMORY.md if main session)
-- Check TASK_STATE.md and WORK_IN_PROGRESS.md for interrupted work
+- Authoritative startup sequence is in `context/RUNBOOK.md` § Restart Recovery Protocol
+- Short form: identity files → session state → system map → runbook → backlog → memory → interrupted work check
 - Inspect git status of current repo before asking to restate anything
 - Resume interrupted work when safe
 
