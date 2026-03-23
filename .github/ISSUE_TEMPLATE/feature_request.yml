@@ -1,0 +1,66 @@
+name: Feature request
+description: Suggest an improvement to bootstrap, worker ergonomics, documentation, automation, or repo workflow.
+title: "feat: "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the idea. A good feature request explains the problem first, not just the proposed solution.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: What part of the repo would this improve?
+      options:
+        - bootstrap / install
+        - OpenClaw main / worker split
+        - sandbox / Docker / OpenShell
+        - Telegram / channel routing
+        - context / council files
+        - GitHub Actions / automation
+        - documentation
+        - other
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem are you trying to solve?
+      placeholder: Describe the friction, missing capability, or repeated pain point.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed change
+      placeholder: Describe the improvement you want.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      placeholder: Mention workarounds or other ideas you considered.
+
+  - type: textarea
+    id: impact
+    attributes:
+      label: Expected impact
+      description: Who benefits and how?
+      placeholder: Faster setup, fewer routing mistakes, better docs, safer automation, etc.
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Quick checks
+      options:
+        - label: I checked for an existing issue or PR first.
+          required: true
+        - label: This request does not include secrets or sensitive config.
+          required: true

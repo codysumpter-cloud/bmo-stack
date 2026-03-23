@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: OpenClaw docs
+    url: https://docs.openclaw.ai
+    about: Check official OpenClaw documentation before filing setup or configuration issues.
+  - name: BMO Stack README
+    url: https://github.com/codysumpter-cloud/bmo-stack/blob/master/README.md
+    about: Review the repository setup, worker, and context guidance.
