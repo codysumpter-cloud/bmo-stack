@@ -1,0 +1,72 @@
+{
+  "request_id": "assist_demo_low_pressure_001",
+  "product": "flowcommander",
+  "capability": "diagnostic_assist",
+  "actor": {
+    "user_id": "tech_demo",
+    "role": "technician"
+  },
+  "session": {
+    "station_id": "station_booster_a",
+    "work_order_id": "wo_1042",
+    "service_log_id": "svc_1042",
+    "diagnostic_session_id": "diag_1042"
+  },
+  "workflow": {
+    "screen": "diagnose",
+    "step_key": "check-hz",
+    "symptom": "low_pressure"
+  },
+  "context": {
+    "station": {
+      "id": "station_booster_a",
+      "name": "Booster Train A",
+      "controller_type": "VFD",
+      "oem": "Example OEM"
+    },
+    "alerts": [],
+    "recent_history": [
+      {
+        "id": "hist_001",
+        "summary": "Two prior low-pressure calls in the last 30 days."
+      }
+    ],
+    "readings": [
+      {
+        "metric_type": "pressure",
+        "metric_label": "Discharge pressure",
+        "metric_value": 48.2,
+        "unit": "psi",
+        "source": "technician_entry"
+      },
+      {
+        "metric_type": "hz",
+        "metric_label": "Lead pump frequency",
+        "metric_value": 41.0,
+        "unit": "hz",
+        "source": "technician_entry"
+      }
+    ],
+    "responses": [
+      {
+        "step_key": "confirm-pressure",
+        "prompt": "Confirm actual discharge pressure versus setpoint.",
+        "response": "48.2 psi"
+      },
+      {
+        "step_key": "check-hz",
+        "prompt": "Is the lead pump frequency below the normal control band?",
+        "response": "yes",
+        "notes": "Persistent across steady demand."
+      }
+    ]
+  },
+  "user_input": {
+    "question": "Why is pressure staying low even though the lead pump is running?"
+  },
+  "policy": {
+    "allow_write_suggestions": false,
+    "customer_visible": false,
+    "must_return_structured": true
+  }
+}
