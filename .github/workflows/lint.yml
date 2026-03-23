@@ -1,0 +1,46 @@
+name: lint
+
+on:
+  push:
+    branches:
+      - master
+      - feat/**
+      - fix/**
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  shell-and-workflow-lint:
+    name: shell-and-workflow-lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install lint dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y shellcheck shfmt
+
+      - name: Run shellcheck
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t shell_files < <(git ls-files '*.sh')
+          if [ "${#shell_files[@]}" -eq 0 ]; then
+            echo "No shell scripts found to lint."
+            exit 1
+          fi
+          shellcheck -x -P SCRIPTDIR "${shell_files[@]}"
+
+      - name: Check shell formatting
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t shell_files < <(git ls-files '*.sh')
+          shfmt -d -i 2 -ci "${shell_files[@]}"
+
+      - name: Run actionlint
+        uses: rhysd/actionlint@v1
