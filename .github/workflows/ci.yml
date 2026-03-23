@@ -1,0 +1,64 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - master
+      - feat/**
+      - fix/**
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Validate key files exist
+        run: |
+          test -f README.md
+          test -f Makefile
+          test -f compose.yaml
+          test -f .env.example
+          test -f docs/OPENCLAW_AGENT_SPLIT.md
+          test -f scripts/configure-openclaw-agents.sh
+          test -f scripts/github-maintenance-report.sh
+          test -f .github/workflows/github-caretaker.yml
+          test -d context
+          test -d context/council
+
+      - name: Validate bash script syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t files < <(git ls-files 'scripts/*.sh')
+          if [ "${#files[@]}" -eq 0 ]; then
+            echo "No shell scripts found under scripts/."
+            exit 1
+          fi
+          for file in "${files[@]}"; do
+            echo "Checking $file"
+            bash -n "$file"
+          done
+
+      - name: Validate important Makefile targets
+        run: |
+          grep -q '^up:' Makefile
+          grep -q '^doctor:' Makefile
+          grep -q '^doctor-plus:' Makefile
+          grep -q '^worker-create:' Makefile
+          grep -q '^worker-ready:' Makefile
+          grep -q '^recover-session:' Makefile
+          grep -q '^health-check:' Makefile
+
+      - name: Validate context bootstrap files
+        run: |
+          test -f context/BOOTSTRAP.md
+          test -f context/SESSION_STATE.md
+          test -f context/SYSTEMMAP.md
+          test -f context/RUNBOOK.md
+          test -f context/BACKLOG.md
