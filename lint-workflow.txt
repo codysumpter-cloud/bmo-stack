@@ -1,0 +1,1 @@
+uses: rhysd/actionlint@v1.7.11
