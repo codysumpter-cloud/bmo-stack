@@ -15,7 +15,7 @@ if [ -f "$ENV_FILE" ]; then
 fi
 
 OMNI_BASE_URL="${BMO_OMNI_BASE_URL:-${OMNI_LOCAL_BASE_URL:-$DEFAULT_OMNI_BASE_URL}}"
-TOKEN_VALUE="${BMO_OMNI_TOKEN:-${PRISMBOT_API_TOKEN:-}}"
+TOKEN_VALUE="${BMO_API_TOKEN:-${BMO_OMNI_TOKEN:-${PRISMBOT_API_TOKEN:-}}}"
 
 [ -d "$OMNI_DIR" ] || {
   echo "Error: omni-bmo repo not found at $OMNI_DIR" >&2
@@ -33,6 +33,7 @@ if [ -f "$OMNI_DIR/venv/bin/activate" ]; then
   . "$OMNI_DIR/venv/bin/activate"
 fi
 
+export BMO_API_TOKEN="$TOKEN_VALUE"
 export PRISMBOT_API_TOKEN="$TOKEN_VALUE"
 export OMNI_BASE_URL="$OMNI_BASE_URL"
 
@@ -42,9 +43,9 @@ echo "Launching omni-bmo from: $OMNI_DIR"
 echo "Using Omni base URL: $OMNI_BASE_URL"
 
 if [ -n "$TOKEN_VALUE" ]; then
-  echo "Omni token present via environment"
+  echo "BMO/Omni token present via environment"
 else
-  echo "Warning: no Omni token present in environment"
+  echo "Warning: no BMO/Omni token present in environment"
 fi
 
 exec python3 agent.py

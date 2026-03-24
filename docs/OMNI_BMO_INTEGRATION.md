@@ -2,19 +2,22 @@
 
 ## Goal
 
-Run the `omni-bmo` local embodied agent on the same MacBook while keeping `bmo-stack` as the host/orchestration layer.
+Run `omni-bmo` on the same MacBook while keeping `bmo-stack` as the canonical host/orchestration layer.
 
-This bridge does **not** merge the repos. It gives you a clean way to:
+This bridge does **not** make PrismBot a runtime dependency.
+
+It gives you a clean way to:
 
 - sync `omni-bmo`
 - check readiness
-- provide a shared env contract
+- provide a shared BMO-first env contract
 - launch `omni-bmo` from the `bmo-stack` workspace
 
 ## Repo roles
 
-- `bmo-stack` = host/runtime/orchestration stack
-- `omni-bmo` = local embodied runtime (voice, face, vision, local loop)
+- `bmo-stack` = canonical host/runtime/orchestration stack
+- `omni-bmo` = donor repo for local embodied runtime features
+- `PrismBot` = archived donor repo only
 
 ## Quickstart
 
@@ -53,6 +56,16 @@ bash scripts/bmo-omni-launch.sh
 - Omni API health endpoint reachability
 - basic binary availability (`git`, `python3`, `openclaw`, `ollama`, `curl`)
 
+## Naming rules
+
+Prefer these names:
+
+- `BMO_API_TOKEN`
+- `BMO_OMNI_TOKEN`
+- `BMO_OMNI_BASE_URL`
+
+Legacy names such as `PRISMBOT_API_TOKEN` are fallback-only compatibility bridges.
+
 ## Current assumptions
 
 - `omni-bmo` lives at `./omni-bmo` by default
@@ -65,17 +78,18 @@ bash scripts/bmo-omni-launch.sh
 - it does not provision `omni-bmo` dependencies automatically
 - it does not rewrite `omni-bmo/config.json`
 - it does not install LaunchAgent/systemd services for you
-- it does not merge PrismBot or `omni-bmo` app layers into `bmo-stack`
+- it does not make PrismBot a runtime dependency
 
 ## Recommended operator flow
 
-- keep all three repos separate on disk
-- keep `bmo-stack` as the control/orchestration repo
+- keep `bmo-stack` as the source of truth
+- use PrismBot and `omni-bmo` as donor repos only
 - use helper scripts here to verify and launch `omni-bmo`
-- only add tighter integration after the basic bridge is stable
+- only add tighter integration after the bridge is stable
 
 ## Related
 
+- `docs/BMO_CONSOLIDATION.md`
 - `scripts/sync-omni-bmo.sh`
 - `scripts/bmo-omni-doctor.sh`
 - `scripts/bmo-omni-launch.sh`

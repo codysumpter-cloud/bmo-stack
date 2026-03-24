@@ -32,6 +32,7 @@ if [ -f "$ENV_FILE" ]; then
 fi
 
 OMNI_BASE_URL="${BMO_OMNI_BASE_URL:-${OMNI_LOCAL_BASE_URL:-$DEFAULT_OMNI_BASE_URL}}"
+TOKEN_VALUE="${BMO_API_TOKEN:-${BMO_OMNI_TOKEN:-${PRISMBOT_API_TOKEN:-}}}"
 
 check_command() {
   local cmd="$1"
@@ -69,7 +70,7 @@ check_url() {
   fi
 }
 
-printf '%s\n' "omni-bmo bridge doctor"
+printf '%s\n' "BMO omni bridge doctor"
 printf '%s\n' "repo root: $ROOT_DIR"
 printf '%s\n' "omni dir:  $OMNI_DIR"
 printf '%s\n' "env file:  $ENV_FILE"
@@ -88,10 +89,10 @@ check_file "$OMNI_DIR/config.json" "omni-bmo config"
 check_file "$OMNI_DIR/venv/bin/python" "omni-bmo venv python"
 check_file "$ENV_FILE" "bmo omni env"
 
-if [ -n "${PRISMBOT_API_TOKEN:-}" ] || [ -n "${BMO_OMNI_TOKEN:-}" ]; then
-  pass "Omni token environment is configured"
+if [ -n "$TOKEN_VALUE" ]; then
+  pass "BMO/Omni token environment is configured"
 else
-  warn "No Omni token configured (set PRISMBOT_API_TOKEN or BMO_OMNI_TOKEN if required)"
+  warn "No BMO/Omni token configured (prefer BMO_API_TOKEN or BMO_OMNI_TOKEN; PRISMBOT_API_TOKEN is legacy-only)"
 fi
 
 check_url "$OMNI_BASE_URL/health"
