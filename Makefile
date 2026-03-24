@@ -1,4 +1,4 @@
-.PHONY: up down status logs doctor sync-context sync-context-host-to-repo sync-context-repo-to-host worker-create worker-upload-config worker-connect worker-status openclaw-start openclaw-status recover-session worker-ready health-check doctor-plus checkpoint
+.PHONY: up down status logs doctor sync-context sync-context-host-to-repo sync-context-repo-to-host worker-create worker-upload-config worker-connect worker-status openclaw-start openclaw-status recover-session worker-ready health-check doctor-plus checkpoint omni-sync omni-doctor omni-launch
 
 # Docker Compose file
 COMPOSE_FILE=compose.yaml
@@ -101,3 +101,13 @@ checkpoint:
 health-check:
 	@echo "Running PrismBot-style health check..."
 	@./scripts/bot-health.sh
+
+# omni-bmo bridge targets
+omni-sync:
+	@bash ./scripts/sync-omni-bmo.sh
+
+omni-doctor:
+	@bash ./scripts/bmo-omni-doctor.sh
+
+omni-launch:
+	@bash ./scripts/bmo-omni-launch.sh
