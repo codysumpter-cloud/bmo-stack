@@ -11,6 +11,9 @@ from typing import Any
 ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_WORKSPACE = Path(os.environ.get("OPENCLAW_WORKSPACE", str(ROOT))).expanduser()
 HOME = Path.home()
+GLOBAL_SKILLS = HOME / ".openclaw" / "skills"
+WORKSPACE_SKILLS = DEFAULT_WORKSPACE / "skills"
+REPO_SKILLS = ROOT / "skills"
 
 
 def run(cmd: list[str], timeout: int = 15) -> dict[str, Any]:
@@ -28,36 +31,57 @@ def run(cmd: list[str], timeout: int = 15) -> dict[str, Any]:
         return {"ok": False, "error": "timeout", "timeout_seconds": timeout}
 
 
-def main() -> None:
-    paths = {
-        "repo_root": str(ROOT),
-        "repo_skills": str(ROOT / "skills"),
-        "workspace": str(DEFAULT_WORKSPACE),
-        "workspace_skills": str(DEFAULT_WORKSPACE / "skills"),
-        "managed_skills": str(HOME / ".openclaw" / "skills"),
-        "config": str(HOME / ".openclaw" / "openclaw.json"),
+def directory_summary(path: Path) -> dict[str, Any]:
+    exists = path.exists()
+    is_dir = path.is_dir()
+    children = []
+    if exists and is_dir:
+        children = sorted(entry.name for entry in path.iterdir() if entry.is_dir())
+
+    return {
+        "path": str(path),
+        "exists": exists,
+        "is_dir": is_dir,
+        "skill_count": len(children),
+        "sample": children[:10],
     }
 
+
+def main() -> None:
     report: dict[str, Any] = {
         "paths": {
-            name: {
-                "path": path,
-                "exists": Path(path).exists(),
-                "is_dir": Path(path).is_dir(),
-            }
-            for name, path in paths.items()
+            "repo_root": directory_summary(ROOT),
+            "repo_skills": directory_summary(REPO_SKILLS),
+            "workspace": directory_summary(DEFAULT_WORKSPACE),
+            "workspace_skills": directory_summary(WORKSPACE_SKILLS),
+            "global_skills": directory_summary(GLOBAL_SKILLS),
+            "config": {
+                "path": str(HOME / ".openclaw" / "openclaw.json"),
+                "exists": (HOME / ".openclaw" / "openclaw.json").exists(),
+                "is_dir": (HOME / ".openclaw" / "openclaw.json").is_dir(),
+            },
+        },
+        "skill_search_order": [
+            str(WORKSPACE_SKILLS),
+            str(GLOBAL_SKILLS),
+            "bundled skills",
+        ],
+        "manual_install_targets": {
+            "preferred_default": str(GLOBAL_SKILLS),
+            "workspace_override": str(WORKSPACE_SKILLS),
         },
         "binaries": {
             "openclaw": shutil.which("openclaw"),
             "clawhub": shutil.which("clawhub"),
+            "jq": shutil.which("jq"),
         },
         "checks": {},
         "recommendations": [
-            "Run 'openclaw skills check' to see missing requirements.",
-            "Run 'openclaw skills list --eligible' to confirm what the agent can use right now.",
-            "Install a single missing skill with 'clawhub install <skill-slug>' instead of retrying a hanging bulk update.",
-            "If clawhub hangs, retry with 'timeout 30 clawhub install <skill-slug>' so the shell fails fast instead of wedging the session.",
-            "Start a new agent session after installing or changing skills so the refreshed skill snapshot is picked up.",
+            "Prefer targeted installs over bulk updates during incidents.",
+            "Try 'timeout 30 clawhub install <skill-slug>' before any broader sync/update attempt.",
+            "If registry install hangs, review the skill source and fall back to 'bash scripts/install-skill-fallback.sh /path/to/skill --global'.",
+            "Use '--workspace' only when you intentionally want a repo-scoped override that should win over global or bundled skills.",
+            "Restart the agent session after adding or changing skills so the refreshed skill snapshot is picked up.",
         ],
     }
 
