@@ -2,7 +2,7 @@ name: autonomous-skill-evolution
 
 on:
   schedule:
-    - cron: "0 * * * *" # every hour
+    - cron: "0 * * * *"
   workflow_dispatch:
 
 permissions:
@@ -14,22 +14,31 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.x'
 
-      - name: Run autonomous evolution
-        run: |
-          python3 scripts/skill_autonomy.py --generate-skill --stats
+      - name: Run evolution
+        run: python3 scripts/skill_autonomy.py --generate-skill --stats
 
-      - name: Create PR if changes
+      - name: Validate registry
+        run: python3 scripts/validate-skills.py
+
+      - name: Confidence gate
+        run: python3 scripts/skill_confidence.py
+
+      - name: Skill health (auto-disable bad)
+        run: python3 scripts/skill_health.py
+
+      - name: Skill decay (prune unused)
+        run: python3 scripts/skill_decay.py
+
+      - name: Create PR
         uses: peter-evans/create-pull-request@v6
         with:
-          commit-message: "chore: autonomous skill evolution"
-          branch: auto/skill-evolution
-          title: "Auto: skill evolution update"
-          body: "Automated evolution from memory"
+          commit-message: "auto: guarded evolution"
+          branch: auto/guarded-evolution
+          title: "Auto: guarded evolution"
+          body: "Validated + confidence-gated + self-protected evolution"
