@@ -1,0 +1,46 @@
+name: lint
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  shell-and-workflow-lint:
+    name: shell-and-workflow-lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run actionlint
+        uses: rhysd/actionlint@v1.7.11
+
+      - name: Install shell lint dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y shellcheck shfmt
+
+      - name: Run shellcheck and shfmt on changed shell scripts
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
+          diff_range="origin/${{ github.base_ref }}...HEAD"
+
+          mapfile -t shell_files < <(git diff --name-only "$diff_range" -- '*.sh')
+
+          if [ "${#shell_files[@]}" -eq 0 ]; then
+            echo "No changed shell scripts to lint."
+            exit 0
+          fi
+
+          printf 'Linting shell files:\n'
+          printf ' - %s\n' "${shell_files[@]}"
+
+          shellcheck -x -P SCRIPTDIR "${shell_files[@]}"
+          shfmt -d -i 2 -ci "${shell_files[@]}"
