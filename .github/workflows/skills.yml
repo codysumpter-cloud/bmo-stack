@@ -31,5 +31,8 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: Validate skills registry
-        run: python3 scripts/validate-skills.py
+      - name: Build dynamic plan
+  run: python3 scripts/skill_plan.py --goal "improve system reliability"
+
+- name: Execute dynamic plan
+  run: ./scripts/skill_execute_plan.sh workflows/dynamic-plan.json
