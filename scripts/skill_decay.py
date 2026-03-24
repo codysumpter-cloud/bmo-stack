@@ -29,19 +29,29 @@ def main() -> None:
     last_used: dict[str, float] = {}
     for item in memory.get("history", []):
         skill = item.get("skill")
-        ts = item.get("ts", time.time())
-        if skill:
-            last_used[skill] = max(last_used.get(skill, 0), ts)
+        ts = item.get("ts")
+        if skill and isinstance(ts, (int, float)):
+            last_used[skill] = max(last_used.get(skill, 0.0), float(ts))
 
     now = time.time()
     changed = False
 
     for skill, meta in registry.get("skills", {}).items():
-        last = last_used.get(skill, 0)
-        if now - last > DECAY_SECONDS:
+        last = last_used.get(skill)
+        currently_decayed = bool(meta.get("decayed"))
+
+        if last is None:
+            continue
+
+        should_decay = (now - last) > DECAY_SECONDS
+        if should_decay and not currently_decayed:
             meta["decayed"] = True
             changed = True
             print(f"Decayed {skill}")
+        elif not should_decay and currently_decayed:
+            meta.pop("decayed", None)
+            changed = True
+            print(f"Recovered {skill}")
 
     if changed:
         save(REGISTRY, registry)
