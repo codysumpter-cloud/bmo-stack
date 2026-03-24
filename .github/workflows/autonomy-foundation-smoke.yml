@@ -58,5 +58,32 @@ jobs:
       - name: Score skills
         run: python3 scripts/skill_confidence.py --output workflows/smoke-scorecard.json
 
+      - name: Assert scorecard schema
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          scorecard = json.loads(Path("workflows/smoke-scorecard.json").read_text(encoding="utf-8"))
+          assert scorecard["score_model"] == "beta-prior-v1"
+          assert isinstance(scorecard["skills"], dict)
+          assert "ci-failure-diagnosis" in scorecard["skills"]
+
+          sample = scorecard["skills"]["ci-failure-diagnosis"]
+          required = {
+              "attempts",
+              "successes",
+              "failures",
+              "success_rate",
+              "posterior_confidence",
+              "recency_weight",
+              "disabled",
+              "decayed",
+              "final_score",
+          }
+          missing = required - set(sample)
+          assert not missing, f"missing fields: {sorted(missing)}"
+          PY
+
       - name: Replan loop
         run: bash scripts/skill_replan.sh
