@@ -1,0 +1,62 @@
+name: autonomy-foundation-smoke
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Verify toolchain
+        run: jq --version
+
+      - name: Seed memory fixture
+        run: |
+          python3 - <<'PY'
+          import json
+          import time
+          from pathlib import Path
+
+          data = {
+              "history": [
+                  {
+                      "input": "ci failed",
+                      "skill": "ci-failure-diagnosis",
+                      "action": "show",
+                      "success": True,
+                      "ts": int(time.time()) - 60,
+                  }
+              ]
+          }
+
+          Path("skills/memory.json").write_text(
+              json.dumps(data, indent=2) + "\n",
+              encoding="utf-8",
+          )
+          PY
+
+      - name: Run goal planner
+        run: python3 scripts/skill_goal_plan.py --goal "improve system reliability" --output smoke-plan.json
+
+      - name: Execute planned evolution
+        run: bash scripts/skill_execute_plan.sh workflows/smoke-plan.json
+
+      - name: Reflect
+        run: python3 scripts/skill_reflect.py --output workflows/smoke-reflection.json
+
+      - name: Score skills
+        run: python3 scripts/skill_confidence.py --output workflows/smoke-scorecard.json
+
+      - name: Replan loop
+        run: bash scripts/skill_replan.sh

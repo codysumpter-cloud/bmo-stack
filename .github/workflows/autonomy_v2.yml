@@ -24,7 +24,7 @@ jobs:
         run: python3 scripts/skill_goal_plan.py --goal "improve system reliability"
 
       - name: Execute plan
-        run: ./scripts/skill_execute_plan.sh workflows/dynamic-plan.json
+        run: bash scripts/skill_execute_plan.sh workflows/dynamic-plan.json
 
       - name: Reflect + replan
         run: bash scripts/skill_replan.sh

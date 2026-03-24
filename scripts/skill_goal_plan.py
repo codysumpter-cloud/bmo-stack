@@ -11,8 +11,8 @@ PLAN_DIR = ROOT / "workflows"
 TEMPLATES = {
     "diagnose-and-fix": {
         "steps": [
-            {"name": "detect", "run": "./scripts/skill-auto.sh --text \"{input}\""},
-            {"name": "recover", "run": "./scripts/skill-recover-learned.sh --apply --text \"{input}\""},
+            {"name": "detect", "run": "bash scripts/skill-auto.sh --text \"{input}\""},
+            {"name": "recover", "run": "bash scripts/skill-recover-learned.sh --apply --text \"{input}\""},
             {"name": "report", "run": "python3 scripts/skill_stats.py"},
         ]
     },

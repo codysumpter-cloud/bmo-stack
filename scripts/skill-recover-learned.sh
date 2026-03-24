@@ -33,7 +33,7 @@ trigger_scores() {
     | map({
         skill: .key,
         action: .value.default_action,
-        score: ([.value.triggers[] | select($txt | contains(.))] | length)
+        score: ([.value.triggers[] | ascii_downcase | select($txt | contains(.))] | length)
       })
     | map(select(.score > 0))
     | .[]
@@ -58,6 +58,7 @@ best_match() {
   local text="$1"
   local best=""
   local best_score=-999
+  local bonus total
 
   while IFS=$'\t' read -r skill action score; do
     bonus="$(memory_bonus "$skill")"
@@ -65,7 +66,7 @@ best_match() {
 
     if [ "$total" -gt "$best_score" ]; then
       best_score="$total"
-      best="$skill	$action	$score	$bonus	$total"
+      best="$skill\t$action\t$score\t$bonus\t$total"
     fi
   done < <(trigger_scores "$text")
 
@@ -90,16 +91,21 @@ main() {
   for ((attempt = 1; attempt <= MAX_RETRIES; attempt++)); do
     match="$(best_match "$lower")"
 
+    if [ -z "$match" ]; then
+      echo "No learned recovery match found." >&2
+      exit 1
+    fi
+
     skill="$(printf '%s' "$match" | cut -f1)"
     action="$(printf '%s' "$match" | cut -f2)"
 
     echo "Attempt $attempt: $skill $action"
 
     if [ "$AUTO_APPLY" = true ]; then
-      if "$SKILL_RUNNER" run "$skill" "$action"; then
-        "$ROOT_DIR/scripts/skill-learn.sh" log "$raw" "$skill" "$action" true || true
+      if bash "$SKILL_RUNNER" run "$skill" "$action"; then
+        bash "$ROOT_DIR/scripts/skill-learn.sh" log "$raw" "$skill" "$action" true || true
       else
-        "$ROOT_DIR/scripts/skill-learn.sh" log "$raw" "$skill" "$action" false || true
+        bash "$ROOT_DIR/scripts/skill-learn.sh" log "$raw" "$skill" "$action" false || true
       fi
     fi
   done
