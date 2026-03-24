@@ -22,9 +22,11 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: Run autonomous evolution
-        run: |
-          python3 scripts/skill_autonomy.py --generate-skill --stats
+- name: Build dynamic plan
+  run: python3 scripts/skill_plan.py --goal "improve system reliability"
+
+- name: Execute dynamic plan
+  run: ./scripts/skill_execute_plan.sh workflows/dynamic-plan.json
 
       - name: Create PR if changes
         uses: peter-evans/create-pull-request@v6
