@@ -1,0 +1,81 @@
+{
+  "skills": {
+    "telegram-routing": {
+      "actions": ["status", "fix"],
+      "triggers": [
+        "telegram",
+        "bind telegram",
+        "routed to worker",
+        "reply broken"
+      ],
+      "default_action": "fix"
+    },
+    "sandbox-debugging": {
+      "actions": ["explain", "recreate", "status"],
+      "triggers": [
+        "sandbox",
+        "main agent appears sandboxed",
+        "worker behavior",
+        "docker containers missing",
+        "sandbox explain"
+      ],
+      "default_action": "explain"
+    },
+    "ci-failure-diagnosis": {
+      "actions": ["show"],
+      "triggers": [
+        "ruleset",
+        "required checks",
+        "ci failed",
+        "actionlint",
+        "shellcheck",
+        "shfmt",
+        "unable to resolve action",
+        "process completed with exit code"
+      ],
+      "default_action": "show"
+    },
+    "bootstrap-recovery": {
+      "actions": ["doctor", "configure"],
+      "triggers": [
+        "env file",
+        ".env missing",
+        "docker not running",
+        "compose failure",
+        "half-configured",
+        "bootstrap"
+      ],
+      "default_action": "doctor"
+    },
+    "context-sync": {
+      "actions": ["apply", "host-to-repo", "repo-to-host"],
+      "triggers": [
+        "identity drift",
+        "context drift",
+        "workspace files missing",
+        "set-identity"
+      ],
+      "default_action": "apply"
+    },
+    "openclaw-agent-split": {
+      "actions": ["status", "fix-routing", "reapply-identity"],
+      "triggers": [
+        "main sandbox off",
+        "bmo-tron",
+        "agent split",
+        "routing verification"
+      ],
+      "default_action": "status"
+    },
+    "browser-automation": {
+      "actions": ["show"],
+      "triggers": [
+        "browser automation",
+        "web ui",
+        "ui automation",
+        "browser worker"
+      ],
+      "default_action": "show"
+    }
+  }
+}
