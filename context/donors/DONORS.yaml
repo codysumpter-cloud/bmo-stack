@@ -1,0 +1,65 @@
+version: 1
+lastReviewed: 2026-03-25
+
+repos:
+  - name: bmo-stack
+    role: canonical_runtime
+    status: active
+    importPolicy:
+      allowed:
+        - host runtime contracts
+        - council rules
+        - delivery rules
+        - context and memory policy
+      forbidden:
+        - importing donor repo code without explicit review
+    notes: |
+      This repo is the source of truth for the live BMO/OpenClaw stack.
+
+  - name: prismtek-site
+    role: content_donor
+    status: active
+    importPolicy:
+      allowed:
+        - route inventory
+        - copy and content blocks
+        - static asset inventory
+        - Cloudflare Pages deploy assumptions
+      forbidden:
+        - runtime architecture
+        - agent policy
+        - worker logic
+    notes: |
+      Use this repo to preserve and migrate prismtek.dev content.
+      Treat it as a website/content donor, not as a runtime donor.
+
+  - name: omni-bmo
+    role: runtime_ops_donor
+    status: active
+    importPolicy:
+      allowed:
+        - runtime profile patterns
+        - validation matrix patterns
+        - doctor and launcher patterns
+        - local-first fallback ideas
+        - voice and reactive-face runtime ideas
+      forbidden:
+        - Pi/hardware-specific assumptions as global defaults
+        - enclosure-specific or device-specific policy as canonical stack behavior
+    notes: |
+      Mine this repo for runtime discipline and validation rigor.
+
+  - name: PrismBot
+    role: policy_product_donor
+    status: active
+    importPolicy:
+      allowed:
+        - AGENTS conventions
+        - memory and heartbeat patterns
+        - website factory standards
+        - operator UX concepts
+      forbidden:
+        - importing the monorepo app sprawl into bmo-stack
+        - treating PrismBot runtime layout as the canonical BMO runtime
+    notes: |
+      Mine this repo for product patterns and operator ergonomics, not for direct stack structure.

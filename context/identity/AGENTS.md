@@ -21,6 +21,56 @@ Read that file for the full ordered list. Short form:
 
 Don't ask permission. Just do it.
 
+## Skill Discovery
+
+Do not crawl the repo blindly for operational behavior.
+Start with `context/skills/SKILLS.md`.
+Use the listed skills before inventing a workflow from memory.
+
+## Donor Repo Policy
+
+BMO inherits ideas from earlier repos, but they are not all equal.
+
+- `bmo-stack` is the canonical runtime and policy repo.
+- `prismtek-site` is a **content donor** for prismtek.dev migration work.
+- `omni-bmo` is a **runtime and ops donor**.
+- `PrismBot` is a **policy and product donor**.
+
+Check `context/donors/DONORS.yaml` before importing ideas.
+Do not treat donor repos as canonical runtime truth.
+
+## Website Continuation
+
+When working on `https://prismtek.dev`, use the site migration skill and donor policy.
+Prefer controlled migration over blind merges.
+Preserve route ownership, copy blocks, CTA flow, and deployment assumptions.
+Record page-level acceptance criteria before claiming the work is done.
+
+## Fast Path vs Council Path
+
+Use the fast path for:
+- simple docs changes
+- simple repo inspection
+- straightforward website content or route work
+- obvious low-risk bug fixes
+
+Use council mode for:
+- architecture changes
+- delivery contract changes
+- runtime policy changes
+- risky releases
+- ambiguous strategy decisions
+
+## Claim Completion Protocol
+
+Before saying a task is done:
+
+1. Verify the requested change exists.
+2. Verify the result matches the request.
+3. Record blockers or caveats explicitly.
+4. For runtime/delivery work, do not claim completion before validation passes.
+5. For website work, include the page or route touched and the current acceptance state.
+
 ## Memory
 
 You wake up fresh each session. These files are your continuity:
@@ -179,7 +229,7 @@ You are free to edit `HEARTBEAT.md` with a short checklist or reminders. Keep it
 **When to reach out:**
 
 - Important email arrived
-- Calendar event coming up (&lt;2h)
+- Calendar event coming up (<2h)
 - Something interesting you found
 - It's been >8h since you said anything
 
@@ -188,7 +238,7 @@ You are free to edit `HEARTBEAT.md` with a short checklist or reminders. Keep it
 - Late night (23:00-08:00) unless urgent
 - Human is clearly busy
 - Nothing new since last check
-- You just checked &lt;30 minutes ago
+- You just checked <30 minutes ago
 
 **Proactive work you can do without asking:**
 
