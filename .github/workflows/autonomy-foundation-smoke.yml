@@ -96,11 +96,40 @@ jobs:
 
           report = json.loads(Path("workflows/skills-diagnosis.json").read_text(encoding="utf-8"))
           assert isinstance(report["skill_search_order"], list)
-          assert len(report["skill_search_order"]) == 3
+          assert len(report["skill_search_order"] ) == 3
           assert "manual_install_targets" in report
           assert "preferred_default" in report["manual_install_targets"]
           assert "workspace_override" in report["manual_install_targets"]
           PY
+
+      - name: Apply BMO runtime profile
+        run: python3 scripts/apply-bmo-runtime-profile.py dev --env-file workflows/test-bmo-runtime.env --output workflows/bmo-runtime-profile.json
+
+      - name: Assert BMO runtime profile schema
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          profile = json.loads(Path("workflows/bmo-runtime-profile.json").read_text(encoding="utf-8"))
+          assert profile["profile"] == "dev"
+          assert profile["values"]["BMO_TEXT_MODEL"]
+          assert profile["values"]["BMO_VISION_MODEL"]
+          assert profile["values"]["BMO_TTS_MODE"]
+          PY
+
+      - name: Assert generated runtime env is sourceable
+        run: |
+          set -a
+          . workflows/test-bmo-runtime.env
+          set +a
+          test "$BMO_SYSTEM_PROMPT_EXTRAS" = "Keep responses concise, practical, and BMO-like."
+
+      - name: Render BMO idle face
+        run: bash scripts/bmo-face.sh idle
+
+      - name: Run BMO runtime doctor
+        run: BMO_RUNTIME_ENV_FILE=workflows/test-bmo-runtime.env bash scripts/bmo-runtime-doctor.sh
 
       - name: Replan loop
         run: bash scripts/skill_replan.sh
