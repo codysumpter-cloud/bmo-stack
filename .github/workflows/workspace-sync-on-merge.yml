@@ -1,0 +1,47 @@
+name: BMO Workspace Sync on Merge
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Git ref to sync from
+        required: false
+        default: master
+        type: string
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: bmo-workspace-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    if: vars.BMO_WORKSPACE_SYNC_ENABLED == 'true'
+    runs-on: self-hosted
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || github.ref }}
+
+      - name: Run workspace sync
+        env:
+          BMO_OPENCLAW_HOST_WORKSPACE: ${{ vars.BMO_OPENCLAW_HOST_WORKSPACE }}
+          BMO_OPENCLAW_WORKER_WORKSPACE: ${{ vars.BMO_OPENCLAW_WORKER_WORKSPACE }}
+        run: |
+          bash scripts/sync-openclaw-workspaces.sh
+
+      - name: Write workflow summary
+        run: |
+          {
+            echo "## BMO workspace sync"
+            echo "- Ref: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || github.ref_name }}"
+            echo "- Host workspace: ${BMO_OPENCLAW_HOST_WORKSPACE:-unset}"
+            echo "- Worker workspace: ${BMO_OPENCLAW_WORKER_WORKSPACE:-unset}"
+          } >> "$GITHUB_STEP_SUMMARY"
