@@ -6,11 +6,14 @@ set -euo pipefail
 # Default directions: both ways, but we can specify
 SYNC_FROM_HOST=${SYNC_FROM_HOST:-true}
 SYNC_TO_HOST=${SYNC_TO_HOST:-true}
+SYNC_DELETE=${SYNC_DELETE:-false}
+CONTEXT_EXCLUDES=(TASK_STATE.md WORK_IN_PROGRESS.md MEMORY.md memory/)
 
 print_usage() {
-    echo "Usage: $0 [--host-to-repo] [--repo-to-host] [--help]"
+    echo "Usage: $0 [--host-to-repo] [--repo-to-host] [--delete] [--help]"
     echo "  --host-to-repo   Sync from ~/bmo-context to ./context (default: enabled)"
     echo "  --repo-to-host   Sync from ./context to ~/bmo-context (default: enabled)"
+    echo "  --delete         Delete files absent from source after applying excludes (default: disabled)"
     echo "  --help           Show this help"
 }
 
@@ -23,6 +26,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --repo-to-host)
             SYNC_FROM_HOST=false
+            shift
+            ;;
+        --delete)
+            SYNC_DELETE=true
             shift
             ;;
         --help)
@@ -54,21 +61,30 @@ if [ ! -d "$REPO_CONTEXT" ]; then
     exit 1
 fi
 
+RSYNC_ARGS=(-av)
+if [ "$SYNC_DELETE" = true ]; then
+    RSYNC_ARGS+=(--delete)
+fi
+for item in "${CONTEXT_EXCLUDES[@]}"; do
+    RSYNC_ARGS+=(--exclude "$item")
+done
+
 echo "Syncing context:"
 echo "  Host: $HOST_CONTEXT"
 echo "  Repo: $REPO_CONTEXT"
+echo "  Delete: $SYNC_DELETE"
 echo ""
 
 if [ "$SYNC_FROM_HOST" = true ]; then
     echo "Syncing from host to repo..."
-    rsync -av --delete "$HOST_CONTEXT/" "$REPO_CONTEXT/"
+    rsync "${RSYNC_ARGS[@]}" "$HOST_CONTEXT/" "$REPO_CONTEXT/"
     echo "Done."
     echo ""
 fi
 
 if [ "$SYNC_TO_HOST" = true ]; then
     echo "Syncing from repo to host..."
-    rsync -av --delete "$REPO_CONTEXT/" "$HOST_CONTEXT/"
+    rsync "${RSYNC_ARGS[@]}" "$REPO_CONTEXT/" "$HOST_CONTEXT/"
     echo "Done."
     echo ""
 fi
