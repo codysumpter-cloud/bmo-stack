@@ -1,0 +1,29 @@
+{
+  "site": "prismtek.dev",
+  "lastReviewed": "2026-03-25",
+  "discoverySource": {
+    "live_homepage": "navigation + homepage sections",
+    "donor_repo": "prismtek-site"
+  },
+  "routes": [
+    {"route": "/", "label": "Home", "status": "in_progress", "priority": "P0", "type": "homepage"},
+    {"route": "/arcade-games/", "label": "Arcade Games", "status": "todo", "priority": "P0", "type": "content"},
+    {"route": "/pixel-studio/", "label": "Pixel Studio", "status": "todo", "priority": "P1", "type": "content"},
+    {"route": "/community-center/", "label": "Community Center", "status": "todo", "priority": "P1", "type": "community"},
+    {"route": "/memory-wall/", "label": "Memory Wall", "status": "todo", "priority": "P2", "type": "community"},
+    {"route": "/prism-creatures/", "label": "Prism Creatures", "status": "todo", "priority": "P1", "type": "feature"},
+    {"route": "/my-account/", "label": "My Account", "status": "todo", "priority": "P1", "type": "account"},
+    {"route": "/school-safe/", "label": "School Safe", "status": "todo", "priority": "P2", "type": "policy"},
+    {"route": "/projects/", "label": "Projects", "status": "todo", "priority": "P0", "type": "content"},
+    {"route": "/downloads/", "label": "Downloads", "status": "todo", "priority": "P0", "type": "content"},
+    {"route": "/links/", "label": "Links", "status": "todo", "priority": "P2", "type": "utility"},
+    {"route": "/build-log/", "label": "Build Log", "status": "todo", "priority": "P0", "type": "content"}
+  ],
+  "homepageSections": [
+    "welcome intro",
+    "quick start CTA row",
+    "featured games carousel",
+    "creature showcase",
+    "account actions"
+  ]
+}

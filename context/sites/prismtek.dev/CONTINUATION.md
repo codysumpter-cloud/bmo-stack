@@ -30,31 +30,34 @@ Known donor fact:
 2. Rebuild route by route instead of doing blind merges.
 3. Preserve CTA flow and editable copy blocks.
 4. Record route ownership and acceptance criteria before claiming a page is complete.
+5. Prefer reusable sections over page-specific hacks.
 
-## Recommended route-by-route workflow
+## Execution files
 
-1. Identify target route
-2. Pull donor content and asset references
-3. Rebuild with reusable sections
-4. Check mobile responsiveness
-5. Check CTA path and link integrity
-6. Record acceptance state
+- `context/sites/prismtek.dev/ROUTE_INVENTORY.md`
+- `context/sites/prismtek.dev/SECTION_LIBRARY.md`
+- `context/sites/prismtek.dev/PAGE_ACCEPTANCE.md`
+- `context/sites/prismtek.dev/MIGRATION_WORKFLOW.md`
+- `context/sites/prismtek.dev/DEPLOY_NOTES.md`
+- `context/council/NEPTR_WEBSITE_CHECKLIST.md`
 
-## Route inventory starter
+## Current focus
 
-Fill this out as work continues:
+Use the live homepage and donor repos to drive a controlled migration.
+Start with high-traffic pages and shared section blocks first:
 
-- `/` — homepage — status: TODO
-- `/services` — status: TODO
-- `/portfolio` — status: TODO
-- `/about` — status: TODO
-- `/contact` — status: TODO
+1. home
+2. arcade games
+3. projects
+4. downloads
+5. build log
 
-## Acceptance checklist for each page
+## Done rule for website work
 
-- responsive from 320px to desktop
-- clear primary CTA
-- clear secondary CTA or next step
-- no broken links
-- copy blocks easy to edit
-- deployment target noted
+A page is not done until:
+- route ownership is explicit
+- section parity is recorded
+- CTA flow is intact
+- mobile responsiveness is checked
+- link integrity is checked
+- NEPTR website checklist passes

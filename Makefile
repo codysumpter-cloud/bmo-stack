@@ -1,4 +1,4 @@
-.PHONY: up down status logs doctor sync-context sync-context-host-to-repo sync-context-repo-to-host worker-create worker-upload-config worker-connect worker-status openclaw-start openclaw-status recover-session worker-ready health-check doctor-plus checkpoint omni-sync omni-doctor omni-launch recover-bmo update-all runtime-doctor runtime-profile-dev runtime-profile-snappy runtime-profile-robust runtime-face-idle runtime-loop runtime-router runtime-profile2-dev runtime-profile2-snappy runtime-profile2-robust runtime-stt-once runtime-face-rich-idle runtime-launch runtime-launch-dry runtime-cloud-once runtime-cloud-dry workspace-sync site-caretaker launchd-install
+.PHONY: up down status logs doctor sync-context sync-context-host-to-repo sync-context-repo-to-host worker-create worker-upload-config worker-connect worker-status openclaw-start openclaw-status recover-session worker-ready health-check doctor-plus checkpoint omni-sync omni-doctor omni-launch recover-bmo update-all runtime-doctor runtime-profile-dev runtime-profile-snappy runtime-profile-robust runtime-face-idle runtime-loop runtime-router runtime-profile2-dev runtime-profile2-snappy runtime-profile2-robust runtime-stt-once runtime-face-rich-idle runtime-launch runtime-launch-dry runtime-cloud-once runtime-cloud-dry workspace-sync site-caretaker site-route-report site-page-checklist launchd-install
 
 # Docker Compose file
 COMPOSE_FILE=compose.yaml
@@ -166,6 +166,12 @@ workspace-sync:
 
 site-caretaker:
 	@python3 ./scripts/bmo-site-caretaker.py $(if $(ARGS),$(ARGS))
+
+site-route-report:
+	@python3 ./scripts/prismtek_site_route_report.py
+
+site-page-checklist:
+	@cat ./context/council/NEPTR_WEBSITE_CHECKLIST.md
 
 launchd-install:
 	@python3 ./scripts/bmo-launchd-install.py $(if $(ARGS),$(ARGS))
