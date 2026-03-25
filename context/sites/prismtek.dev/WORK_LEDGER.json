@@ -1,0 +1,56 @@
+{
+  "site": "prismtek.dev",
+  "lastUpdated": "2026-03-25T15:00:00Z",
+  "entries": [
+    {
+      "route": "/",
+      "label": "Home",
+      "owner": "BMO",
+      "status": "in_progress",
+      "phase": "discover",
+      "acceptance": "partial",
+      "next_step": "Lock homepage CTA flow and reusable section mapping.",
+      "blockers": []
+    },
+    {
+      "route": "/arcade-games/",
+      "label": "Arcade Games",
+      "owner": "BMO",
+      "status": "todo",
+      "phase": "discover",
+      "acceptance": "pending",
+      "next_step": "Scaffold the route brief and donor intake.",
+      "blockers": []
+    },
+    {
+      "route": "/projects/",
+      "label": "Projects",
+      "owner": "BMO",
+      "status": "todo",
+      "phase": "discover",
+      "acceptance": "pending",
+      "next_step": "Scaffold the route brief and donor intake.",
+      "blockers": []
+    },
+    {
+      "route": "/downloads/",
+      "label": "Downloads",
+      "owner": "BMO",
+      "status": "todo",
+      "phase": "discover",
+      "acceptance": "pending",
+      "next_step": "Scaffold the route brief and donor intake.",
+      "blockers": []
+    },
+    {
+      "route": "/build-log/",
+      "label": "Build Log",
+      "owner": "BMO",
+      "status": "todo",
+      "phase": "discover",
+      "acceptance": "pending",
+      "next_step": "Scaffold the route brief and donor intake.",
+      "blockers": []
+    }
+  ]
+}

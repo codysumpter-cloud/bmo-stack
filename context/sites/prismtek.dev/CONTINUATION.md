@@ -31,14 +31,20 @@ Known donor fact:
 3. Preserve CTA flow and editable copy blocks.
 4. Record route ownership and acceptance criteria before claiming a page is complete.
 5. Prefer reusable sections over page-specific hacks.
+6. Keep route status, ledger status, and acceptance state aligned.
 
 ## Execution files
 
+- `context/sites/prismtek.dev/ROUTES.json`
 - `context/sites/prismtek.dev/ROUTE_INVENTORY.md`
 - `context/sites/prismtek.dev/SECTION_LIBRARY.md`
 - `context/sites/prismtek.dev/PAGE_ACCEPTANCE.md`
 - `context/sites/prismtek.dev/MIGRATION_WORKFLOW.md`
 - `context/sites/prismtek.dev/DEPLOY_NOTES.md`
+- `context/sites/prismtek.dev/WORK_LEDGER.json`
+- `context/sites/prismtek.dev/WORK_LEDGER.md`
+- `context/sites/prismtek.dev/work-items/`
+- `context/sites/prismtek.dev/intake/`
 - `context/council/NEPTR_WEBSITE_CHECKLIST.md`
 
 ## Current focus
@@ -60,4 +66,6 @@ A page is not done until:
 - CTA flow is intact
 - mobile responsiveness is checked
 - link integrity is checked
+- page acceptance is updated
+- work ledger is updated
 - NEPTR website checklist passes
