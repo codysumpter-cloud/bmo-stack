@@ -1,4 +1,4 @@
-.PHONY: up down status logs doctor sync-context sync-context-host-to-repo sync-context-repo-to-host worker-create worker-upload-config worker-connect worker-status openclaw-start openclaw-status recover-session worker-ready health-check doctor-plus checkpoint omni-sync omni-doctor omni-launch recover-bmo update-all runtime-doctor runtime-profile-dev runtime-profile-snappy runtime-profile-robust runtime-face-idle runtime-loop runtime-router runtime-profile2-dev runtime-profile2-snappy runtime-profile2-robust runtime-stt-once runtime-face-rich-idle runtime-launch runtime-launch-dry runtime-cloud-once runtime-cloud-dry workspace-sync site-caretaker site-route-report site-work-report site-route-scaffold site-route-update site-page-checklist launchd-install
+.PHONY: up down status logs doctor sync-context sync-context-host-to-repo sync-context-repo-to-host worker-create worker-upload-config worker-connect worker-status openclaw-start openclaw-status recover-session worker-ready health-check doctor-plus checkpoint omni-sync omni-doctor omni-launch recover-bmo update-all runtime-doctor runtime-profile-dev runtime-profile-snappy runtime-profile-robust runtime-face-idle runtime-loop runtime-router runtime-profile2-dev runtime-profile2-snappy runtime-profile2-robust runtime-stt-once runtime-face-rich-idle runtime-launch runtime-launch-dry runtime-cloud-once runtime-cloud-dry workspace-sync site-caretaker site-route-report site-work-report site-route-scaffold site-route-update site-donor-extract site-page-checklist site-parity-matrix site-react-template launchd-install
 
 # Docker Compose file
 COMPOSE_FILE=compose.yaml
@@ -85,34 +85,27 @@ worker-connect:
 worker-status:
 	openshell sandbox list | grep bmo-tron || echo "Sandbox bmo-tron not found."
 
-# New target: worker-ready creates the sandbox and uploads config in one go
 worker-ready: worker-create worker-upload-config
 	@echo "Worker sandbox bmo-tron is ready for use."
 
-# Session recovery
 recover-session:
 	@./scripts/recover-session.sh
 
-# Checkpoint target
 checkpoint:
 	@./scripts/checkpoint.sh $(if $(ARGS),$(ARGS))
 
-# Health check target
 health-check:
 	@echo "Running BMO health check..."
 	@./scripts/bot-health.sh
 
-# BMO recovery target
 recover-bmo:
 	@echo "Running BMO recovery..."
 	@./scripts/bot-recover.sh
 
-# Multi-repo update target
 update-all:
 	@echo "Updating local BMO repos..."
 	@./scripts/update-all.sh
 
-# BMO native runtime targets
 runtime-doctor:
 	@bash ./scripts/bmo-runtime-doctor.sh
 
@@ -179,13 +172,21 @@ site-route-scaffold:
 site-route-update:
 	@python3 ./scripts/prismtek_site_route_update.py $(if $(ARGS),$(ARGS))
 
+site-donor-extract:
+	@python3 ./scripts/prismtek_site_donor_extract.py $(if $(ARGS),$(ARGS))
+
 site-page-checklist:
 	@cat ./context/council/NEPTR_WEBSITE_CHECKLIST.md
+
+site-parity-matrix:
+	@cat ./context/sites/prismtek.dev/FUNCTIONAL_PARITY_MATRIX.md
+
+site-react-template:
+	@cat ./context/sites/prismtek.dev/REACT_TEMPLATE.md
 
 launchd-install:
 	@python3 ./scripts/bmo-launchd-install.py $(if $(ARGS),$(ARGS))
 
-# omni-bmo bridge targets
 omni-sync:
 	@bash ./scripts/sync-omni-bmo.sh
 

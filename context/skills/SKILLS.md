@@ -11,11 +11,15 @@ Use it first instead of crawling the repo.
 
 - `context/skills/donor-ingest.skill.md`
   - Trigger: importing ideas, docs, routes, runtime behavior, or policy from old repos
-  - Use when work references `prismtek-site`, `omni-bmo`, or `PrismBot`
+  - Use when work references `prismtek-site`, `prismtek-site-replica`, `omni-bmo`, or `PrismBot`
 
 - `context/skills/site-migration.skill.md`
   - Trigger: prismtek.dev migration, page recreation, route inventory, asset parity
   - Use when building or continuing the website
+
+- `context/skills/react-parity-migration.skill.md`
+  - Trigger: swapping a live route into React while preserving the current site's look and functionality
+  - Use when implementing routes in the React template donor and checking parity against the live site
 
 - `context/skills/runtime-validation.skill.md`
   - Trigger: profile changes, runtime changes, release readiness, smoke checks
