@@ -1,4 +1,4 @@
-.PHONY: up down status logs doctor sync-context sync-context-host-to-repo sync-context-repo-to-host worker-create worker-upload-config worker-connect worker-status openclaw-start openclaw-status recover-session worker-ready health-check doctor-plus checkpoint omni-sync omni-doctor omni-launch recover-bmo update-all
+.PHONY: up down status logs doctor sync-context sync-context-host-to-repo sync-context-repo-to-host worker-create worker-upload-config worker-connect worker-status openclaw-start openclaw-status recover-session worker-ready health-check doctor-plus checkpoint omni-sync omni-doctor omni-launch recover-bmo update-all runtime-doctor runtime-profile-dev runtime-profile-snappy runtime-profile-robust runtime-face-idle runtime-loop
 
 # Docker Compose file
 COMPOSE_FILE=compose.yaml
@@ -111,6 +111,25 @@ recover-bmo:
 update-all:
 	@echo "Updating local BMO repos..."
 	@./scripts/update-all.sh
+
+# BMO native runtime targets
+runtime-doctor:
+	@bash ./scripts/bmo-runtime-doctor.sh
+
+runtime-profile-dev:
+	@python3 ./scripts/apply-bmo-runtime-profile.py dev
+
+runtime-profile-snappy:
+	@python3 ./scripts/apply-bmo-runtime-profile.py snappy
+
+runtime-profile-robust:
+	@python3 ./scripts/apply-bmo-runtime-profile.py robust
+
+runtime-face-idle:
+	@bash ./scripts/bmo-face.sh idle
+
+runtime-loop:
+	@python3 ./scripts/bmo_voice_loop.py
 
 # omni-bmo bridge targets
 omni-sync:

@@ -102,5 +102,27 @@ jobs:
           assert "workspace_override" in report["manual_install_targets"]
           PY
 
+      - name: Apply BMO runtime profile
+        run: python3 scripts/apply-bmo-runtime-profile.py dev --env-file workflows/test-bmo-runtime.env --output workflows/bmo-runtime-profile.json
+
+      - name: Assert BMO runtime profile schema
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          profile = json.loads(Path("workflows/bmo-runtime-profile.json").read_text(encoding="utf-8"))
+          assert profile["profile"] == "dev"
+          assert profile["values"]["BMO_TEXT_MODEL"]
+          assert profile["values"]["BMO_VISION_MODEL"]
+          assert profile["values"]["BMO_TTS_MODE"]
+          PY
+
+      - name: Render BMO idle face
+        run: bash scripts/bmo-face.sh idle
+
+      - name: Run BMO runtime doctor
+        run: BMO_RUNTIME_ENV_FILE=workflows/test-bmo-runtime.env bash scripts/bmo-runtime-doctor.sh
+
       - name: Replan loop
         run: bash scripts/skill_replan.sh
