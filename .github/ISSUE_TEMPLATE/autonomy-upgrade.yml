@@ -1,0 +1,55 @@
+name: Autonomy upgrade request
+description: Request a GitHub-driven upgrade that can be planned and implemented through the autonomy flow
+title: "autonomy: "
+labels:
+  - autonomy:ready
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template for safe, bounded improvements that can be planned and executed from GitHub.
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What should change?
+      placeholder: Add a safe default profile for BMO browser tasks
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: Which files, systems, or areas are expected to change?
+      placeholder: profiles/, docs/, scripts/
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: How will we know the issue is done?
+      placeholder: A new profile exists, docs are updated, and runtime-doctor still passes
+    validations:
+      required: true
+  - type: dropdown
+    id: risk
+    attributes:
+      label: Risk level
+      options:
+        - low
+        - medium
+        - high
+    validations:
+      required: true
+  - type: checkboxes
+    id: guardrails
+    attributes:
+      label: Guardrails
+      options:
+        - label: This change should not modify secrets, credentials, or .env files
+          required: true
+        - label: This change should not modify vendor/nemoclaw directly
+          required: true
+        - label: This change can be reviewed through a draft PR before merge
+          required: true
