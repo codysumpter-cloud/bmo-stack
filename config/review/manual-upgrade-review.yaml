@@ -1,0 +1,26 @@
+mode: manual_review_only
+stack: bmo-stack
+contract_version: 2026-03-25.v1
+
+review_focus:
+  - safe runtime defaults
+  - verifier quality
+  - task-state clarity
+  - first-party skill patterns
+  - operator docs and runbooks
+  - smoke tests and evals
+  - GitHub automation safety
+
+usually_skip:
+  - multi-tenant control planes
+  - enterprise-only workflow logic
+  - hidden background automation
+  - cross-repo coupling
+  - branding imports
+
+review_rules:
+  - Never bulk-import another stack.
+  - Preserve BMO local-first behavior.
+  - Prefer boring and reviewable changes.
+  - Record source, scope, and verification for each adoption.
+  - Keep rollback straightforward.
