@@ -5,6 +5,7 @@ import argparse
 import json
 import os
 import shlex
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -62,11 +63,15 @@ def call_face(face_script: Path, state: str) -> None:
         subprocess.run(["bash", str(face_script), state], check=False)
 
 
-def capture_turn(backend: str, command: str) -> str:
+def build_listen_command(backend: str, command: str) -> str:
     cmd = [sys.executable, str(ROOT / "scripts" / "bmo-stt-listen.py"), "--backend", backend]
     if backend == "command" and command:
         cmd.extend(["--command", command])
-    completed = subprocess.run(cmd, capture_output=True, text=True, check=True)
+    return " ".join(shlex.quote(part) for part in cmd)
+
+
+def capture_turn(backend: str, command: str) -> str:
+    completed = subprocess.run(build_listen_command(backend, command), shell=True, capture_output=True, text=True, check=True)
     return completed.stdout.strip()
 
 
@@ -80,13 +85,22 @@ def route_task(task: str, task_class: str | None, force_route: str | None) -> di
     return json.loads(completed.stdout)
 
 
-def speak_reply(tts: str, text: str) -> None:
-    if not text:
+def speak_text(text: str, mode: str) -> None:
+    if not text.strip():
         return
-    subprocess.run([sys.executable, str(ROOT / "scripts" / "bmo_voice_loop.py"), "--once", text, "--tts", tts, "--model", os.environ.get("BMO_TEXT_MODEL", "nemotron-mini:4b-instruct-q2_K")], check=False)
+
+    if mode == "off":
+        return
+
+    if mode in {"auto", "say"} and shutil.which("say"):
+        subprocess.run(["say", text], check=False)
+        return
+
+    if mode in {"auto", "piper"} and shutil.which("piper"):
+        subprocess.run(["piper"], input=text, text=True, check=False)
 
 
-def run_cloud_turn(prompt: str, selected_runtime: dict[str, object], dry_run: bool) -> str:
+def run_cloud_turn(prompt: str, selected_runtime: dict[str, object]) -> str:
     cmd = [
         sys.executable,
         str(ROOT / "scripts" / "bmo-cloud-generate.py"),
@@ -99,8 +113,6 @@ def run_cloud_turn(prompt: str, selected_runtime: dict[str, object], dry_run: bo
         "--api-style",
         str(selected_runtime.get("api_style", "openai")),
     ]
-    if dry_run:
-        cmd.append("--dry-run")
     completed = subprocess.run(cmd, capture_output=True, text=True, check=True)
     return completed.stdout.strip()
 
@@ -162,8 +174,8 @@ def main() -> None:
         cmd = [sys.executable, str(ROOT / "scripts" / "bmo_voice_loop.py"), "--tts", args.tts]
         if args.once is not None:
             cmd.extend(["--once", args.once])
-        elif args.backend == "command" and args.command:
-            cmd.extend(["--listen-command", f"{sys.executable} {shlex.quote(str(ROOT / 'scripts' / 'bmo-stt-listen.py'))} --backend command --command {shlex.quote(args.command)}"])
+        else:
+            cmd.extend(["--listen-command", build_listen_command(args.backend, args.command)])
         subprocess.run(cmd, env=env, check=True)
         return
 
@@ -172,11 +184,11 @@ def main() -> None:
         if not user_text:
             raise SystemExit("Empty input provided to --once")
         call_face(face_script, "thinking")
-        reply = run_cloud_turn(user_text, selected_runtime, dry_run=False)
+        reply = run_cloud_turn(user_text, selected_runtime)
         call_face(face_script, "speaking")
         if reply:
             print(reply)
-        speak_reply(args.tts, reply)
+        speak_text(reply, args.tts)
         call_face(face_script, "idle")
         return
 
@@ -190,11 +202,11 @@ def main() -> None:
         if user_text.lower() in {"exit", "quit"}:
             break
         call_face(face_script, "thinking")
-        reply = run_cloud_turn(user_text, selected_runtime, dry_run=False)
+        reply = run_cloud_turn(user_text, selected_runtime)
         call_face(face_script, "speaking")
         if reply:
             print(f"bmo> {reply}")
-        speak_reply(args.tts, reply)
+        speak_text(reply, args.tts)
         call_face(face_script, "idle")
 
 
