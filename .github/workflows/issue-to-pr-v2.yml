@@ -49,7 +49,7 @@ jobs:
           fi
       - id: plan
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           mkdir -p .github/autonomy
           bash scripts/github-issue-planner-v2.sh "${{ github.repository }}" "${{ steps.issue.outputs.issue_number }}" > .github/autonomy/plan.json
@@ -61,7 +61,7 @@ jobs:
           print(f"branch_name={plan['branch_name']}")
           PY
       - env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           python3 - <<'PY' > .github/autonomy/plan-comment.md
           import json
@@ -96,18 +96,35 @@ jobs:
         with:
           name: bmo-autonomy-plan-v2-${{ needs.plan.outputs.issue_number }}
           path: .github/autonomy
-      - run: |
-          git switch -c "${{ needs.plan.outputs.branch_name }}"
+      - name: Create or reuse autonomy branch
+        run: |
+          branch="${{ needs.plan.outputs.branch_name }}"
+          git fetch origin "$branch" || true
+          if git show-ref --verify --quiet "refs/remotes/origin/$branch"; then
+            git switch -C "$branch" "origin/$branch"
+          else
+            git switch -c "$branch"
+          fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
       - run: bash scripts/github-builtin-autonomy-executor.sh .github/autonomy/plan.json
       - run: bash scripts/github-neptr-verify.sh .github/autonomy/plan.json > .github/autonomy/verify.json
-      - run: |
+      - name: Commit changes
+        run: |
           git add .
-          git commit -m "autonomy: scaffold issue #${{ needs.plan.outputs.issue_number }}"
-          git push --set-upstream origin "${{ needs.plan.outputs.branch_name }}"
-      - env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          if git diff --cached --quiet; then
+            echo "No content changes to commit."
+          else
+            git commit -m "autonomy: scaffold issue #${{ needs.plan.outputs.issue_number }}"
+          fi
+          git push --force-with-lease --set-upstream origin "${{ needs.plan.outputs.branch_name }}"
+      - id: existing_pr
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          existing_url="$(gh pr list --repo "${{ github.repository }}" --head "${{ needs.plan.outputs.branch_name }}" --json url --jq '.[0].url // ""')"
+          echo "url=$existing_url" >> "$GITHUB_OUTPUT"
+      - name: Build PR body
         run: |
           python3 - <<'PY' > .github/autonomy/pr-body.md
           import json
@@ -126,4 +143,15 @@ jobs:
           for item in verify['checks']:
               print(f"- {item['name']}: {item['status']}")
           PY
-          gh pr create --repo "${{ github.repository }}" --base "${{ github.event.repository.default_branch }}" --head "${{ needs.plan.outputs.branch_name }}" --title "autonomy: scaffold issue #${{ needs.plan.outputs.issue_number }}" --body-file .github/autonomy/pr-body.md --draft
+      - name: Open draft pull request
+        if: steps.existing_pr.outputs.url == ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr create --repo "${{ github.repository }}" --base "${{ github.event.repository.default_branch || 'master' }}" --head "${{ needs.plan.outputs.branch_name }}" --title "autonomy: scaffold issue #${{ needs.plan.outputs.issue_number }}" --body-file .github/autonomy/pr-body.md --draft
+      - name: Comment existing PR link
+        if: steps.existing_pr.outputs.url != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue comment "${{ needs.plan.outputs.issue_number }}" --repo "${{ github.repository }}" --body "Autonomy rerun updated the existing draft PR: ${{ steps.existing_pr.outputs.url }}"
