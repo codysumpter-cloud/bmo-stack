@@ -1,0 +1,24 @@
+{
+  "steps": [
+    {
+      "name": "validate",
+      "run": "python3 scripts/validate-skills.py"
+    },
+    {
+      "name": "confidence",
+      "run": "python3 scripts/skill_confidence.py"
+    },
+    {
+      "name": "health",
+      "run": "python3 scripts/skill_health.py"
+    },
+    {
+      "name": "decay",
+      "run": "python3 scripts/skill_decay.py"
+    }
+  ],
+  "template_used": "guarded-evolution",
+  "input": "improve system reliability based on recent failures",
+  "goal": "improve system reliability based on recent failures",
+  "planner_mode": "dynamic"
+}
