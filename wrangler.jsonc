@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "prismtek-ai",
+  "name": "prismtek-api",
   "compatibility_date": "2026-03-26",
   "main": "cloudflare/prismtek-api/index.ts"
 }
