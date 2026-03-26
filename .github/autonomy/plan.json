@@ -1,0 +1,21 @@
+{
+  "issue_number": 96,
+  "issue_url": "https://github.com/codysumpter-cloud/bmo-stack/issues/96",
+  "issue_title": "docs: define BMO product boundary and non-goals",
+  "issue_body": "# Title\n\ndocs: define BMO product boundary and non-goals\n\n# Labels\n\ndocs, architecture, bmo, priority:P0\n\n## Summary\n\nCreate a clear product boundary document for `bmo-stack` so future changes stay aligned with its intended role as a local-first personal/family agent stack.\n\n## Problem\n\nThe repo already has strong building blocks, but the product boundary is still implicit. Without an explicit boundary, it will be easy to accidentally mix in enterprise concerns, risky defaults, or features that belong in `automindlab-stack`.\n\n## Goal\n\nDefine what BMO is, what it owns, and what it explicitly does not own.\n\n## Scope\n\nAdd and wire up:\n- `docs/BMO_PRODUCT_BOUNDARY.md`\n- README reference to the boundary doc\n- `SYSTEMMAP.md` reference to the boundary doc\n\n## Required content\n\nThe boundary doc should state:\n\n### BMO is\n- local-first\n- host-first\n- single-user / family-oriented\n- safe by default\n- able to use an optional disposable worker\n- designed to keep canonical context outside disposable workers\n\n### BMO owns\n- local runtime ergonomics\n- context and memory hygiene\n- personal workflow skills\n- safe profile defaults\n- optional sandbox use for risky work\n\n### BMO does not own\n- tenant isolation\n- enterprise approval workflows\n- business records and reporting\n- customer-facing service contracts\n- multi-tenant policy control planes\n\n## Non-goals\n- no new runtime behavior\n- no service refactors\n- no worker implementation changes in this issue\n\n## Tasks\n- [ ] Create `docs/BMO_PRODUCT_BOUNDARY.md`\n- [ ] Add a short \"Product boundary\" section to `README.md`\n- [ ] Add a pointer from `SYSTEMMAP.md`\n- [ ] Include a short \"belongs in AutoMindLab, not BMO\" section\n- [ ] Keep the document short enough to be read in under 5 minutes\n\n## Acceptance criteria\n- [ ] The repo has a single canonical BMO boundary doc\n- [ ] README links to it\n- [ ] The document clearly defines ownership and non-goals\n- [ ] A contributor can tell whether a proposed feature belongs in BMO or not\n\n## Notes\nUse plain language. This is a control document, not marketing copy.",
+  "summary": "Autonomy scaffold plan for issue #96: docs: define BMO product boundary and non-goals",
+  "scope": "runtime",
+  "risk": "medium",
+  "executor_allowed": true,
+  "branch_name": "autonomy/issue-96-docs-define-bmo-product-boundary-and-non-goals",
+  "suggested_targets": [
+    "scripts/",
+    "Makefile",
+    "context/"
+  ],
+  "checks": [
+    "make doctor",
+    "make runtime-doctor || true"
+  ],
+  "run_id": "23613697765"
+}

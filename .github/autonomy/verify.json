@@ -1,0 +1,16 @@
+{
+  "issue_number": 96,
+  "scope": "runtime",
+  "checks": [
+    {
+      "name": "make doctor",
+      "status": "failed",
+      "returncode": 2
+    },
+    {
+      "name": "make runtime-doctor || true",
+      "status": "passed",
+      "returncode": 0
+    }
+  ]
+}
