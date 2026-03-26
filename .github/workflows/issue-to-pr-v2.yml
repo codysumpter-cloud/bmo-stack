@@ -1,4 +1,4 @@
-name: BMO Issue to PR v2
+name: BMO Issue to PR v3
 
 on:
   issues:
@@ -31,6 +31,7 @@ jobs:
       branch_name: ${{ steps.plan.outputs.branch_name }}
       dry_run: ${{ steps.flags.outputs.dry_run }}
       executor_allowed: ${{ steps.plan.outputs.executor_allowed }}
+      execution_mode: ${{ steps.plan.outputs.execution_mode }}
     steps:
       - uses: actions/checkout@v4
       - id: issue
@@ -52,13 +53,15 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           mkdir -p .github/autonomy
-          bash scripts/github-issue-planner-v2.sh "${{ github.repository }}" "${{ steps.issue.outputs.issue_number }}" > .github/autonomy/plan.json
+          python3 scripts/github-issue-planner-v3.py "${{ github.repository }}" "${{ steps.issue.outputs.issue_number }}" > .github/autonomy/plan.json
+          python3 scripts/github-autonomy-selftest.py .github/autonomy/plan.json
           python3 - <<'PY' >> "$GITHUB_OUTPUT"
           import json
           from pathlib import Path
           plan = json.loads(Path('.github/autonomy/plan.json').read_text(encoding='utf-8'))
           print(f"executor_allowed={'true' if plan['executor_allowed'] else 'false'}")
           print(f"branch_name={plan['branch_name']}")
+          print(f"execution_mode={plan['execution_mode']}")
           PY
       - env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -67,18 +70,26 @@ jobs:
           import json
           from pathlib import Path
           plan = json.loads(Path('.github/autonomy/plan.json').read_text(encoding='utf-8'))
-          print('## BMO autonomy plan (v2)')
+          print('## BMO autonomy plan (v3)')
           print('')
           print(f"- Issue: #{plan['issue_number']}")
           print(f"- Scope: `{plan['scope']}`")
           print(f"- Risk: `{plan['risk']}`")
+          print(f"- Execution mode: `{plan['execution_mode']}`")
           print(f"- Executor allowed: `{str(plan['executor_allowed']).lower()}`")
           print(f"- Proposed branch: `{plan['branch_name']}`")
+          if plan.get('blocked_reason'):
+            print(f"- Blocked reason: {plan['blocked_reason']}")
+          if plan.get('target_files'):
+            print('')
+            print('### Target files')
+            for item in plan['target_files']:
+              print(f"- `{item}`")
           PY
           gh issue comment "${{ steps.issue.outputs.issue_number }}" --repo "${{ github.repository }}" --body-file .github/autonomy/plan-comment.md
       - uses: actions/upload-artifact@v4
         with:
-          name: bmo-autonomy-plan-v2-${{ steps.issue.outputs.issue_number }}
+          name: bmo-autonomy-plan-v3-${{ steps.issue.outputs.issue_number }}
           path: .github/autonomy/plan.json
 
   scaffold:
@@ -94,7 +105,7 @@ jobs:
           fetch-depth: 0
       - uses: actions/download-artifact@v4
         with:
-          name: bmo-autonomy-plan-v2-${{ needs.plan.outputs.issue_number }}
+          name: bmo-autonomy-plan-v3-${{ needs.plan.outputs.issue_number }}
           path: .github/autonomy
       - run: |
           git switch -c "${{ needs.plan.outputs.branch_name }}"
@@ -104,7 +115,7 @@ jobs:
       - run: bash scripts/github-neptr-verify.sh .github/autonomy/plan.json > .github/autonomy/verify.json
       - run: |
           git add .
-          git commit -m "autonomy: scaffold issue #${{ needs.plan.outputs.issue_number }}"
+          git commit -m "${{ needs.plan.outputs.execution_mode }} issue #${{ needs.plan.outputs.issue_number }}"
           git push --set-upstream origin "${{ needs.plan.outputs.branch_name }}"
       - env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -120,10 +131,22 @@ jobs:
           print(f"Refs #{plan['issue_number']}")
           print('')
           print('## Execution mode')
-          print('- builtin-scaffold')
+          print(f"- {plan['execution_mode']}")
+          if plan.get('blocked_reason'):
+            print(f"- blocked reason: {plan['blocked_reason']}")
+          print('')
+          print('## Suggested targets')
+          for item in plan['suggested_targets']:
+            print(f"- `{item}`")
           print('')
           print('## Verification')
           for item in verify['checks']:
               print(f"- {item['name']}: {item['status']}")
           PY
-          gh pr create --repo "${{ github.repository }}" --base "${{ github.event.repository.default_branch }}" --head "${{ needs.plan.outputs.branch_name }}" --title "autonomy: scaffold issue #${{ needs.plan.outputs.issue_number }}" --body-file .github/autonomy/pr-body.md --draft
+          python3 - <<'PY' > .github/autonomy/pr-title.txt
+          import json
+          from pathlib import Path
+          plan = json.loads(Path('.github/autonomy/plan.json').read_text(encoding='utf-8'))
+          print(plan['pr_title'])
+          PY
+          gh pr create --repo "${{ github.repository }}" --base "${{ github.event.repository.default_branch }}" --head "${{ needs.plan.outputs.branch_name }}" --title "$(cat .github/autonomy/pr-title.txt)" --body-file .github/autonomy/pr-body.md --draft

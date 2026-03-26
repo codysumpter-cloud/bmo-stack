@@ -133,3 +133,41 @@ jobs:
 
       - name: Replan loop
         run: bash scripts/skill_replan.sh
+
+      - name: Validate autonomy planner v3 scripts
+        run: python3 -m py_compile scripts/github-issue-planner-v3.py scripts/github-autonomy-selftest.py
+
+      - name: Seed autonomy planner v3 sample plan
+        run: |
+          mkdir -p .github/autonomy
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          plan = {
+              "issue_number": 999,
+              "issue_url": "https://github.com/codysumpter-cloud/bmo-stack/issues/999",
+              "issue_title": "docs: sample issue",
+              "issue_body": "Update `docs/example.md`",
+              "summary": "Autonomy plan for issue #999: docs: sample issue",
+              "scope": "docs",
+              "risk": "low",
+              "execution_mode": "builtin_scaffold",
+              "executor_allowed": True,
+              "blocked_reason": "",
+              "branch_name": "autonomy/issue-999-sample-issue",
+              "packet_path": ".github/autonomy/issues/issue-999-sample-issue.md",
+              "target_files": ["docs/example.md"],
+              "suggested_targets": ["docs/example.md"],
+              "checks": ["python3 scripts/github-autonomy-selftest.py .github/autonomy/plan.json"],
+              "pr_title": "autonomy: scaffold issue #999",
+              "run_id": "smoke",
+          }
+          Path(".github/autonomy/plan.json").write_text(
+              json.dumps(plan, indent=2) + "\n",
+              encoding="utf-8",
+          )
+          PY
+
+      - name: Validate autonomy planner v3 sample plan
+        run: python3 scripts/github-autonomy-selftest.py .github/autonomy/plan.json
