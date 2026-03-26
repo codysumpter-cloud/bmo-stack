@@ -100,6 +100,7 @@ jobs:
           name: bmo-autonomy-plan-v2-${{ needs.plan.outputs.issue_number }}
           path: .github/autonomy
       - run: |
+          git fetch origin
           git switch -c "${{ needs.plan.outputs.branch_name }}" || git switch "${{ needs.plan.outputs.branch_name }}"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
