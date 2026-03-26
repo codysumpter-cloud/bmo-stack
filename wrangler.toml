@@ -4,3 +4,10 @@ main = "cloudflare/prismtek-api/index.ts"
 
 [observability]
 enabled = true
+
+[vars]
+AI_GATEWAY_ACCOUNT_ID = "f01a748c33b3ce40b51c32de57d0a1a2"
+AI_GATEWAY_GATEWAY_NAME = "prismbot-gateway"
+
+[[ai]]
+binding = "AI"  # available in env.AI in your Worker
