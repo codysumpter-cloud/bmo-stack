@@ -1,0 +1,129 @@
+name: BMO Issue to PR v2
+
+on:
+  issues:
+    types: [labeled]
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: GitHub issue number to process
+        required: true
+        type: string
+      dry_run:
+        description: Only generate the plan comment
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  plan:
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      github.event.label.name == 'autonomy:execute'
+    runs-on: ubuntu-latest
+    outputs:
+      issue_number: ${{ steps.issue.outputs.issue_number }}
+      branch_name: ${{ steps.plan.outputs.branch_name }}
+      dry_run: ${{ steps.flags.outputs.dry_run }}
+      executor_allowed: ${{ steps.plan.outputs.executor_allowed }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: issue
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "issue_number=${{ inputs.issue_number }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "issue_number=${{ github.event.issue.number }}" >> "$GITHUB_OUTPUT"
+          fi
+      - id: flags
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "dry_run=${{ inputs.dry_run }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "dry_run=false" >> "$GITHUB_OUTPUT"
+          fi
+      - id: plan
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p .github/autonomy
+          bash scripts/github-issue-planner-v2.sh "${{ github.repository }}" "${{ steps.issue.outputs.issue_number }}" > .github/autonomy/plan.json
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          from pathlib import Path
+          plan = json.loads(Path('.github/autonomy/plan.json').read_text(encoding='utf-8'))
+          print(f"executor_allowed={'true' if plan['executor_allowed'] else 'false'}")
+          print(f"branch_name={plan['branch_name']}")
+          PY
+      - env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python3 - <<'PY' > .github/autonomy/plan-comment.md
+          import json
+          from pathlib import Path
+          plan = json.loads(Path('.github/autonomy/plan.json').read_text(encoding='utf-8'))
+          print('## BMO autonomy plan (v2)')
+          print('')
+          print(f"- Issue: #{plan['issue_number']}")
+          print(f"- Scope: `{plan['scope']}`")
+          print(f"- Risk: `{plan['risk']}`")
+          print(f"- Executor allowed: `{str(plan['executor_allowed']).lower()}`")
+          print(f"- Proposed branch: `{plan['branch_name']}`")
+          PY
+          gh issue comment "${{ steps.issue.outputs.issue_number }}" --repo "${{ github.repository }}" --body-file .github/autonomy/plan-comment.md
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bmo-autonomy-plan-v2-${{ steps.issue.outputs.issue_number }}
+          path: .github/autonomy/plan.json
+
+  scaffold:
+    needs: plan
+    if: |
+      needs.plan.outputs.dry_run != 'true' &&
+      needs.plan.outputs.executor_allowed == 'true' &&
+      vars.BMO_AUTONOMY_EXECUTION_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/download-artifact@v4
+        with:
+          name: bmo-autonomy-plan-v2-${{ needs.plan.outputs.issue_number }}
+          path: .github/autonomy
+      - run: |
+          git switch -c "${{ needs.plan.outputs.branch_name }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      - run: bash scripts/github-builtin-autonomy-executor.sh .github/autonomy/plan.json
+      - run: bash scripts/github-neptr-verify.sh .github/autonomy/plan.json > .github/autonomy/verify.json
+      - run: |
+          git add .
+          git commit -m "autonomy: scaffold issue #${{ needs.plan.outputs.issue_number }}"
+          git push --set-upstream origin "${{ needs.plan.outputs.branch_name }}"
+      - env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python3 - <<'PY' > .github/autonomy/pr-body.md
+          import json
+          from pathlib import Path
+          plan = json.loads(Path('.github/autonomy/plan.json').read_text(encoding='utf-8'))
+          verify = json.loads(Path('.github/autonomy/verify.json').read_text(encoding='utf-8'))
+          print('## Summary')
+          print(plan['summary'])
+          print('')
+          print(f"Refs #{plan['issue_number']}")
+          print('')
+          print('## Execution mode')
+          print('- builtin-scaffold')
+          print('')
+          print('## Verification')
+          for item in verify['checks']:
+              print(f"- {item['name']}: {item['status']}")
+          PY
+          gh pr create --repo "${{ github.repository }}" --base "${{ github.event.repository.default_branch }}" --head "${{ needs.plan.outputs.branch_name }}" --title "autonomy: scaffold issue #${{ needs.plan.outputs.issue_number }}" --body-file .github/autonomy/pr-body.md --draft
