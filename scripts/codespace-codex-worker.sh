@@ -73,7 +73,7 @@ run_prompt() {
     cmd+=(--output-last-message "$BMO_CODEX_OUTPUT_FILE")
   fi
 
-  "${cmd[@]}" - < "$prompt_file"
+  "${cmd[@]}" - <"$prompt_file"
 }
 
 main() {
