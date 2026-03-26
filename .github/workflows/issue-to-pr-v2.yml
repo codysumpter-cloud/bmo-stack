@@ -108,7 +108,7 @@ jobs:
       - run: |
           git add .
           git commit -m "autonomy: scaffold issue #${{ needs.plan.outputs.issue_number }}"
-          git push --set-upstream origin "${{ needs.plan.outputs.branch_name }}"
+          git push --force --set-upstream origin "${{ needs.plan.outputs.branch_name }}"
       - env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
