@@ -1,0 +1,83 @@
+{
+  "generated_at": 1774567946,
+  "score_model": "beta-prior-v1",
+  "skills": {
+    "bootstrap-recovery": {
+      "attempts": 0,
+      "successes": 0,
+      "failures": 0,
+      "success_rate": 0.0,
+      "posterior_confidence": 0.5,
+      "recency_weight": 1.0,
+      "disabled": false,
+      "decayed": false,
+      "final_score": 0.5
+    },
+    "browser-automation": {
+      "attempts": 0,
+      "successes": 0,
+      "failures": 0,
+      "success_rate": 0.0,
+      "posterior_confidence": 0.5,
+      "recency_weight": 1.0,
+      "disabled": false,
+      "decayed": false,
+      "final_score": 0.5
+    },
+    "ci-failure-diagnosis": {
+      "attempts": 0,
+      "successes": 0,
+      "failures": 0,
+      "success_rate": 0.0,
+      "posterior_confidence": 0.5,
+      "recency_weight": 1.0,
+      "disabled": false,
+      "decayed": false,
+      "final_score": 0.5
+    },
+    "context-sync": {
+      "attempts": 0,
+      "successes": 0,
+      "failures": 0,
+      "success_rate": 0.0,
+      "posterior_confidence": 0.5,
+      "recency_weight": 1.0,
+      "disabled": false,
+      "decayed": false,
+      "final_score": 0.5
+    },
+    "openclaw-agent-split": {
+      "attempts": 0,
+      "successes": 0,
+      "failures": 0,
+      "success_rate": 0.0,
+      "posterior_confidence": 0.5,
+      "recency_weight": 1.0,
+      "disabled": false,
+      "decayed": false,
+      "final_score": 0.5
+    },
+    "sandbox-debugging": {
+      "attempts": 0,
+      "successes": 0,
+      "failures": 0,
+      "success_rate": 0.0,
+      "posterior_confidence": 0.5,
+      "recency_weight": 1.0,
+      "disabled": false,
+      "decayed": false,
+      "final_score": 0.5
+    },
+    "telegram-routing": {
+      "attempts": 0,
+      "successes": 0,
+      "failures": 0,
+      "success_rate": 0.0,
+      "posterior_confidence": 0.5,
+      "recency_weight": 1.0,
+      "disabled": false,
+      "decayed": false,
+      "final_score": 0.5
+    }
+  }
+}
