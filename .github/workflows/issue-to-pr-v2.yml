@@ -94,14 +94,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: "${{ needs.plan.outputs.branch_name }}"
           fetch-depth: 0
       - uses: actions/download-artifact@v4
         with:
           name: bmo-autonomy-plan-v2-${{ needs.plan.outputs.issue_number }}
           path: .github/autonomy
       - run: |
-          git fetch origin
-          git switch -c "${{ needs.plan.outputs.branch_name }}" || git switch "${{ needs.plan.outputs.branch_name }}"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
       - run: bash scripts/github-builtin-autonomy-executor.sh .github/autonomy/plan.json
@@ -109,7 +108,7 @@ jobs:
       - run: |
           git add .
           git commit -m "autonomy: scaffold issue #${{ needs.plan.outputs.issue_number }}"
-          git push --force-with-lease --set-upstream origin "${{ needs.plan.outputs.branch_name }}"
+          git push --force --set-upstream origin HEAD
       - env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
