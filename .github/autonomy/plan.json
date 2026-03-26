@@ -1,0 +1,19 @@
+{
+  "issue_number": 103,
+  "issue_url": "https://github.com/codysumpter-cloud/bmo-stack/issues/103",
+  "issue_title": "docs: add test file for autonomy verification",
+  "issue_body": "This is a low-risk test issue to verify autonomous PR creation.\n\n## Summary\nAdd a simple test file to verify the autonomy workflow works correctly.\n\n## Goal\nCreate a documentation file that confirms the autonomy system can create PRs automatically.\n\n## Tasks\n- [ ] Create  with basic content\n- [ ] Verify the file appears in the generated PR\n\nThis issue should trigger the autonomy:execute workflow and create a draft PR automatically.",
+  "summary": "Autonomy scaffold plan for issue #103: docs: add test file for autonomy verification",
+  "scope": "automation",
+  "risk": "low",
+  "executor_allowed": true,
+  "branch_name": "autonomy/issue-103-docs-add-test-file-for-autonomy-verification",
+  "suggested_targets": [
+    ".github/workflows/",
+    "scripts/"
+  ],
+  "checks": [
+    "make doctor"
+  ],
+  "run_id": "23617049110"
+}

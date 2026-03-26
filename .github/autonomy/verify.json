@@ -1,0 +1,11 @@
+{
+  "issue_number": 103,
+  "scope": "automation",
+  "checks": [
+    {
+      "name": "make doctor",
+      "status": "failed",
+      "returncode": 2
+    }
+  ]
+}
