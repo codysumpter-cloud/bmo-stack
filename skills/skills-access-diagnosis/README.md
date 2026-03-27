@@ -16,7 +16,7 @@ Diagnose why an agent cannot see or use installed skills, especially when `clawh
 Run:
 
 ```bash
-python3 scripts/skills_access_diagnosis.py
+node scripts/skills-access-diagnosis.mjs
 ```
 
 This checks:
@@ -26,6 +26,12 @@ This checks:
 - `openclaw skills list --eligible`
 - `openclaw skills check`
 - `clawhub --help`
+
+Or run it through the skill runner:
+
+```bash
+bash scripts/skill.sh run skills-access-diagnosis run
+```
 
 ## Operator guidance
 
@@ -64,6 +70,7 @@ If `clawhub update` hangs while trying to install Google Workspace (`gog`):
 
 ## Related
 
+- `scripts/skills-access-diagnosis.mjs`
 - `scripts/skills_access_diagnosis.py`
 - `scripts/skill.sh`
 - `scripts/skill-auto.sh`

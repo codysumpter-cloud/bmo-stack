@@ -78,7 +78,7 @@
       "default_action": "show"
     },
     "skills-access-diagnosis": {
-      "actions": ["show"],
+      "actions": ["show", "run"],
       "triggers": [
         "cannot access skills",
         "skills missing",
@@ -86,7 +86,7 @@
         "skill install stuck",
         "openclaw skills check"
       ],
-      "default_action": "show"
+      "default_action": "run"
     }
   }
 }

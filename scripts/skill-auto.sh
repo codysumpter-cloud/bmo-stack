@@ -76,7 +76,7 @@ suggest_for_text() {
   fi
 
   if printf '%s' "$lower" | grep -Eq 'cannot access skills|skills missing|clawhub|skill install stuck|skills list --eligible|openclaw skills check'; then
-    echo "skills-access-diagnosis show"
+    echo "skills-access-diagnosis run"
     return
   fi
 
