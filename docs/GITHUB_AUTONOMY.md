@@ -16,19 +16,21 @@ Operate BMO upgrades from GitHub issues and pull requests instead of ad hoc loca
 6. A draft PR is opened.
 7. After merge, the workspace sync workflow updates the local OpenClaw workspaces.
 
+For a MacBook runtime that is not running a GitHub self-hosted runner continuously, pair that merge-triggered workflow with the local LaunchAgent helper so the OpenClaw workspace mirror still refreshes automatically on a short interval.
+
 ## Required labels
 
-- `autonomy:ready`
+- `autonomy:execute`
 - `autonomy:needs-human`
 - `risk:high`
 
 ## Required repo variables
 
 - `BMO_AUTONOMY_EXECUTION_ENABLED`
-- `BMO_GITHUB_AUTONOMY_EXECUTOR`
 - `BMO_WORKSPACE_SYNC_ENABLED`
 - `BMO_OPENCLAW_HOST_WORKSPACE`
 - `BMO_OPENCLAW_WORKER_WORKSPACE`
+- `BMO_GITHUB_AUTONOMY_EXECUTOR` (optional only for the legacy self-hosted executor path)
 
 ## Runner requirements
 
@@ -52,9 +54,12 @@ The execution and sync jobs must run on a self-hosted runner that has:
 
 ## Current scaffold
 
-- `.github/workflows/issue-to-pr.yml`
+- `.github/workflows/issue-to-pr-v2.yml`
 - `.github/workflows/workspace-sync-on-merge.yml`
-- `scripts/github-issue-planner.sh`
+- `scripts/github-issue-planner-v3.py`
+- `scripts/github-autonomy-selftest.py`
 - `scripts/github-change-executor.sh`
 - `scripts/github-neptr-verify.sh`
 - `scripts/sync-openclaw-workspaces.sh`
+- `scripts/bmo-workspace-sync.py`
+- `scripts/bmo-launchd-install.py`

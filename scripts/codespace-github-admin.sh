@@ -41,15 +41,16 @@ doctor() {
 }
 
 set_vars() {
-  : "${BMO_GITHUB_AUTONOMY_EXECUTOR:?Set BMO_GITHUB_AUTONOMY_EXECUTOR in $CONFIG_FILE}"
   : "${BMO_OPENCLAW_HOST_WORKSPACE:?Set BMO_OPENCLAW_HOST_WORKSPACE in $CONFIG_FILE}"
   : "${BMO_OPENCLAW_WORKER_WORKSPACE:?Set BMO_OPENCLAW_WORKER_WORKSPACE in $CONFIG_FILE}"
 
   gh variable set BMO_AUTONOMY_EXECUTION_ENABLED --repo "$REPO_FULL_NAME" --body "${BMO_AUTONOMY_EXECUTION_ENABLED:-false}"
   gh variable set BMO_WORKSPACE_SYNC_ENABLED --repo "$REPO_FULL_NAME" --body "${BMO_WORKSPACE_SYNC_ENABLED:-false}"
-  gh variable set BMO_GITHUB_AUTONOMY_EXECUTOR --repo "$REPO_FULL_NAME" --body "$BMO_GITHUB_AUTONOMY_EXECUTOR"
   gh variable set BMO_OPENCLAW_HOST_WORKSPACE --repo "$REPO_FULL_NAME" --body "$BMO_OPENCLAW_HOST_WORKSPACE"
   gh variable set BMO_OPENCLAW_WORKER_WORKSPACE --repo "$REPO_FULL_NAME" --body "$BMO_OPENCLAW_WORKER_WORKSPACE"
+  if [ -n "${BMO_GITHUB_AUTONOMY_EXECUTOR:-}" ]; then
+    gh variable set BMO_GITHUB_AUTONOMY_EXECUTOR --repo "$REPO_FULL_NAME" --body "$BMO_GITHUB_AUTONOMY_EXECUTOR"
+  fi
 
   echo "Configured BMO repo variables."
 }
@@ -87,14 +88,14 @@ EOF
   gh issue create \
     --repo "$REPO_FULL_NAME" \
     --title "autonomy: refresh BMO operator docs index" \
-    --label "autonomy:ready" \
+    --label "autonomy:execute" \
     --body "$issue_body"
 }
 
 run_dry_run() {
   local issue_number="$1"
 
-  gh workflow run issue-to-pr.yml \
+  gh workflow run issue-to-pr-v2.yml \
     --repo "$REPO_FULL_NAME" \
     -f issue_number="$issue_number" \
     -f dry_run=true

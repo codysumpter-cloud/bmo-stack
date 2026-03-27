@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "defaultMode": "prompt",
+  "capabilities": {
+    "workspace.read": "allow",
+    "workspace.write": "allow",
+    "workspace.exec.safe": "allow",
+    "workspace.exec.network": "prompt",
+    "workspace.read.outsideRoot": "prompt",
+    "git.mutate": "prompt",
+    "external.open": "prompt",
+    "system.install": "deny",
+    "system.elevate": "deny"
+  },
+  "safeCommandExact": [
+    "git status",
+    "git diff",
+    "git diff --stat",
+    "git branch --show-current",
+    "node -v",
+    "python --version"
+  ],
+  "safeCommandPrefixes": [
+    "git status ",
+    "git diff ",
+    "git log ",
+    "git show ",
+    "rg ",
+    "dir",
+    "ls",
+    "Get-ChildItem",
+    "Get-Content",
+    "Select-String",
+    "type ",
+    "cat "
+  ],
+  "blockedCommandTokens": [
+    "remove-item",
+    "del ",
+    "erase ",
+    "rmdir ",
+    "rd ",
+    "format-",
+    "shutdown",
+    "restart-computer",
+    "stop-computer",
+    "set-executionpolicy",
+    "invoke-expression",
+    "iex ",
+    "start-process",
+    "schtasks",
+    "sc.exe",
+    "reg add",
+    "reg delete",
+    "curl ",
+    "Invoke-WebRequest",
+    "Invoke-RestMethod"
+  ]
+}

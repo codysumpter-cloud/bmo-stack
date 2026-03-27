@@ -40,6 +40,16 @@ If you need to refresh all local repos:
 make update-all
 ```
 
+If you want the MacBook workspace mirror to stay current automatically:
+
+```bash
+make launchd-install
+launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/cloud.codysumpter.bmo-workspace-sync.plist
+launchctl kickstart -k gui/$(id -u)/cloud.codysumpter.bmo-workspace-sync
+```
+
+That LaunchAgent runs `scripts/bmo-workspace-sync.py` at login and every 5 minutes by default, keeping `~/.openclaw/workspace/bmo-stack` aligned with the repo and syncing repo context into `~/bmo-context`.
+
 If BMO is unhealthy:
 
 ```bash

@@ -2,7 +2,7 @@ name: Autonomy upgrade request
 description: Request a GitHub-driven upgrade that can be planned and implemented through the autonomy flow
 title: "autonomy: "
 labels:
-  - autonomy:ready
+  - autonomy:execute
 body:
   - type: markdown
     attributes:
