@@ -17,7 +17,7 @@ Examples:
   ./scripts/skill.sh run openclaw-agent-split status
   ./scripts/skill.sh run telegram-routing fix
   ./scripts/skill.sh run sandbox-debugging explain
-  ./scripts/skill.sh run skills-access-diagnosis show
+  ./scripts/skill.sh run skills-access-diagnosis run
 EOF
 }
 
@@ -173,8 +173,18 @@ run_browser_automation() {
 }
 
 run_skills_access_diagnosis() {
-  local action="${1:-show}"
+  local action="${1:-run}"
   case "$action" in
+    run)
+      if command -v node >/dev/null 2>&1; then
+        node "$ROOT_DIR/scripts/skills-access-diagnosis.mjs"
+      elif command -v python3 >/dev/null 2>&1; then
+        python3 "$ROOT_DIR/scripts/skills_access_diagnosis.py"
+      else
+        echo "Error: skills-access-diagnosis requires either node or python3 on PATH" >&2
+        exit 1
+      fi
+      ;;
     show)
       show_skill skills-access-diagnosis
       ;;
