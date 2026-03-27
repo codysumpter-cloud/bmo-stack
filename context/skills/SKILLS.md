@@ -3,6 +3,13 @@
 This file is the entry point for skill discovery.
 Use it first instead of crawling the repo.
 
+## How to load skills
+
+- Start here for stack-wide workflows and `context/` contracts.
+- Then use `skills/README.md` for repo-local operational skills.
+- Use `skills/index.json` only when you need the machine-readable trigger or action map.
+- Pick the skill that matches the real owner path before touching scripts.
+
 ## Core operational skills
 
 - `context/skills/context-bootstrap.skill.md`

@@ -10,29 +10,36 @@
 
 ## Restart recovery protocol
 
-At session start, read these in order:
+Start at `AGENTS.md` at the repo root.
+After that, read these in order:
 
 1. `memory.md` in direct main-session work only
 2. `soul.md`
 3. `routines.md`
 4. `RESPONSE_GUIDE.md`
-5. `context/identity/SOUL.md`
-6. `context/identity/USER.md`
-7. `context/identity/IDENTITY.md`
-8. `context/SESSION_STATE.md`
-9. `context/SYSTEMMAP.md`
-10. `context/RUNBOOK.md`
-11. `context/BACKLOG.md`
-12. `context/skills/SKILLS.md`
-13. `skills/README.md`
-14. `memory/YYYY-MM-DD.md` for today and yesterday, when present
-15. `TASK_STATE.md`
-16. `WORK_IN_PROGRESS.md`
+5. `context/identity/AGENTS.md`
+6. `context/identity/SOUL.md`
+7. `context/identity/USER.md`
+8. `context/identity/IDENTITY.md`
+9. `context/SESSION_STATE.md`
+10. `context/SYSTEMMAP.md`
+11. `context/RUNBOOK.md`
+12. `context/BACKLOG.md`
+13. `context/skills/SKILLS.md`
+14. `skills/README.md`
+15. `memory/YYYY-MM-DD.md` for today and yesterday, when present
+16. `TASK_STATE.md`
+17. `WORK_IN_PROGRESS.md`
+
+This ordering is authoritative only when it matches `AGENTS.md` and
+`context/identity/AGENTS.md`.
 
 Then:
 
 - check `git status` before asking the user to restate context
 - resume interrupted work when the checkpoint files say it is safe
+- use `skills/index.json` only when you need the machine-readable trigger or action map for a
+  repo-local skill
 - if the active checkout is a workspace mirror under `~/.openclaw/workspace`, refresh it before claiming repo files are missing:
   - `python3 scripts/bmo-workspace-sync.py --workspace-dir ~/.openclaw/workspace/bmo-stack --host-context ~/bmo-context`
 - for runtime routing tasks, inspect `python3 scripts/bmo-model-router.py --task "..."`
@@ -80,6 +87,8 @@ Run these before ad hoc debugging when they fit:
 4. `make workspace-sync`
 5. `make site-caretaker`
 6. `make worker-ready`
+
+`make worker-ready` changes sandbox state, so prefer it after the status and routing checks above.
 
 ## Council routing flow
 
