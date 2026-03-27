@@ -221,11 +221,17 @@ main() {
       list_skills
       ;;
     show)
-      [ $# -ge 2 ] || { usage; exit 1; }
+      [ $# -ge 2 ] || {
+        usage
+        exit 1
+      }
       show_skill "$2"
       ;;
     run)
-      [ $# -ge 2 ] || { usage; exit 1; }
+      [ $# -ge 2 ] || {
+        usage
+        exit 1
+      }
       run_skill "$2" "${3:-}"
       ;;
     *)
