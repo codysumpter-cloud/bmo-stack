@@ -18,8 +18,14 @@ jobs:
         with:
           python-version: '3.x'
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
       - name: Verify toolchain
-        run: jq --version
+        run: |
+          jq --version
+          node --version
 
       - name: Seed memory fixture
         run: |

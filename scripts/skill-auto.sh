@@ -70,6 +70,16 @@ suggest_for_text() {
     return
   fi
 
+  if printf '%s' "$lower" | grep -Eq 'browser automation|web ui|ui automation|browser worker'; then
+    echo "browser-automation show"
+    return
+  fi
+
+  if printf '%s' "$lower" | grep -Eq 'cannot access skills|skills missing|clawhub|skill install stuck|skills list --eligible|openclaw skills check'; then
+    echo "skills-access-diagnosis show"
+    return
+  fi
+
   echo ""
 }
 

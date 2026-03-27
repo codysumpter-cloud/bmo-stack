@@ -17,6 +17,7 @@ Examples:
   ./scripts/skill.sh run openclaw-agent-split status
   ./scripts/skill.sh run telegram-routing fix
   ./scripts/skill.sh run sandbox-debugging explain
+  ./scripts/skill.sh run skills-access-diagnosis show
 EOF
 }
 
@@ -171,6 +172,19 @@ run_browser_automation() {
   esac
 }
 
+run_skills_access_diagnosis() {
+  local action="${1:-show}"
+  case "$action" in
+    show)
+      show_skill skills-access-diagnosis
+      ;;
+    *)
+      echo "Unknown action for skills-access-diagnosis: $action" >&2
+      exit 1
+      ;;
+  esac
+}
+
 run_skill() {
   local skill="$1"
   local action="${2:-}"
@@ -182,6 +196,7 @@ run_skill() {
     sandbox-debugging) run_sandbox_debugging "$action" ;;
     ci-failure-diagnosis) run_ci_failure_diagnosis "$action" ;;
     browser-automation) run_browser_automation "$action" ;;
+    skills-access-diagnosis) run_skills_access_diagnosis "$action" ;;
     *)
       echo "Error: unknown skill '$skill'" >&2
       exit 1
@@ -196,11 +211,17 @@ main() {
       list_skills
       ;;
     show)
-      [ $# -ge 2 ] || { usage; exit 1; }
+      [ $# -ge 2 ] || {
+        usage
+        exit 1
+      }
       show_skill "$2"
       ;;
     run)
-      [ $# -ge 2 ] || { usage; exit 1; }
+      [ $# -ge 2 ] || {
+        usage
+        exit 1
+      }
       run_skill "$2" "${3:-}"
       ;;
     *)

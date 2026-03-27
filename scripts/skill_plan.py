@@ -18,7 +18,7 @@ TEMPLATES = {
     },
     "guarded-evolution": {
         "steps": [
-            {"name": "validate", "run": "python3 scripts/validate-skills.py"},
+            {"name": "validate", "run": "node scripts/validate-skills.mjs"},
             {"name": "confidence", "run": "python3 scripts/skill_confidence.py"},
             {"name": "health", "run": "python3 scripts/skill_health.py"},
             {"name": "decay", "run": "python3 scripts/skill_decay.py"},
