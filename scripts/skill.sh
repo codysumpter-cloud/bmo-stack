@@ -17,7 +17,7 @@ Examples:
   ./scripts/skill.sh run openclaw-agent-split status
   ./scripts/skill.sh run telegram-routing fix
   ./scripts/skill.sh run sandbox-debugging explain
-  ./scripts/skill.sh run skills-access-diagnosis show
+  ./scripts/skill.sh run skills-access-diagnosis run
 EOF
 }
 
@@ -173,8 +173,11 @@ run_browser_automation() {
 }
 
 run_skills_access_diagnosis() {
-  local action="${1:-show}"
+  local action="${1:-run}"
   case "$action" in
+    run)
+      node "$ROOT_DIR/scripts/skills-access-diagnosis.mjs"
+      ;;
     show)
       show_skill skills-access-diagnosis
       ;;
