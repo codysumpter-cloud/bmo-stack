@@ -14,16 +14,30 @@ CONFIG_PATH="${OPENCLAW_CONFIG:-$OPENCLAW_HOME/openclaw.json}"
 
 echo "=== Configuring OpenClaw agent split for bmo-stack ==="
 
-which openclaw >/dev/null 2>&1 || { echo "Error: openclaw not found"; exit 1; }
-which python3 >/dev/null 2>&1 || { echo "Error: python3 not found"; exit 1; }
-which rsync >/dev/null 2>&1 || { echo "Error: rsync not found"; exit 1; }
+which openclaw >/dev/null 2>&1 || {
+  echo "Error: openclaw not found"
+  exit 1
+}
+which python3 >/dev/null 2>&1 || {
+  echo "Error: python3 not found"
+  exit 1
+}
+which rsync >/dev/null 2>&1 || {
+  echo "Error: rsync not found"
+  exit 1
+}
 
 mkdir -p "$MAIN_WORKSPACE" "$WORKER_WORKSPACE" \
-         "$MAIN_WORKSPACE/context" "$WORKER_WORKSPACE/context" \
-         "$MAIN_AGENT_DIR" "$WORKER_AGENT_DIR"
+  "$MAIN_WORKSPACE/context" "$WORKER_WORKSPACE/context" \
+  "$MAIN_AGENT_DIR" "$WORKER_AGENT_DIR"
 
 echo "Seeding main workspace bootstrap files..."
 cp "$ROOT_DIR/AGENTS.md" "$MAIN_WORKSPACE/AGENTS.md"
+for file in memory.md soul.md routines.md RESPONSE_GUIDE.md HEARTBEAT.md; do
+  if [ -f "$ROOT_DIR/$file" ]; then
+    cp "$ROOT_DIR/$file" "$MAIN_WORKSPACE/$file"
+  fi
+done
 cp "$ROOT_DIR/context/identity/SOUL.md" "$MAIN_WORKSPACE/SOUL.md"
 cp "$ROOT_DIR/context/identity/USER.md" "$MAIN_WORKSPACE/USER.md"
 cp "$ROOT_DIR/context/identity/IDENTITY.md" "$MAIN_WORKSPACE/IDENTITY.md"
@@ -33,14 +47,11 @@ fi
 if [ -f "$ROOT_DIR/context/TOOLS.md" ]; then
   cp "$ROOT_DIR/context/TOOLS.md" "$MAIN_WORKSPACE/TOOLS.md"
 fi
-if [ -f "$ROOT_DIR/context/HEARTBEAT.md" ]; then
-  cp "$ROOT_DIR/context/HEARTBEAT.md" "$MAIN_WORKSPACE/HEARTBEAT.md"
-fi
 rsync -a "$ROOT_DIR/context/" "$MAIN_WORKSPACE/context/"
 
 echo "Seeding worker workspace..."
 rsync -a --delete "$MAIN_WORKSPACE/" "$WORKER_WORKSPACE/"
-cat > "$WORKER_WORKSPACE/IDENTITY.md" <<'EOF'
+cat >"$WORKER_WORKSPACE/IDENTITY.md" <<'EOF'
 # IDENTITY.md - Worker Identity
 
 - **Name:** BMO Secure Worker

@@ -18,6 +18,11 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v6
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -76,3 +81,6 @@ jobs:
 
       - name: Validate BMO routines
         run: node scripts/bmo-routines.mjs validate
+
+      - name: Validate BMO operating system files
+        run: node scripts/validate-bmo-operating-system.mjs

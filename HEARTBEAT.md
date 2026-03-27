@@ -14,7 +14,7 @@ Keep it short so heartbeat turns stay cheap and predictable.
 - [ ] GitHub: new issues or PRs needing action?
 - [ ] `TASK_STATE.md`: interrupted work to resume?
 - [ ] `WORK_IN_PROGRESS.md`: stale or blocked tasks?
-- [ ] `memory/YYYY-MM-DD.md`: write today’s notes if missing?
+- [ ] `memory/YYYY-MM-DD.md`: write today's notes if missing?
 - [ ] Runtime or delivery: any obvious failures that need surfacing?
 
 ## Surface immediately

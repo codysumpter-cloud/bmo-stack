@@ -12,9 +12,15 @@ command -v rsync >/dev/null 2>&1 || {
 mkdir -p "$HOST_WORKSPACE/context" "$WORKER_WORKSPACE/context"
 
 cp "$ROOT_DIR/AGENTS.md" "$HOST_WORKSPACE/AGENTS.md"
+for file in memory.md soul.md routines.md RESPONSE_GUIDE.md HEARTBEAT.md; do
+  if [ -f "$ROOT_DIR/$file" ]; then
+    cp "$ROOT_DIR/$file" "$HOST_WORKSPACE/$file"
+  fi
+done
 rsync -a \
   --exclude 'TASK_STATE.md' \
   --exclude 'WORK_IN_PROGRESS.md' \
+  --exclude 'memory.md' \
   --exclude 'MEMORY.md' \
   --exclude 'memory/' \
   "$ROOT_DIR/context/" "$HOST_WORKSPACE/context/"

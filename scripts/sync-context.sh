@@ -7,7 +7,7 @@ set -euo pipefail
 SYNC_FROM_HOST=${SYNC_FROM_HOST:-true}
 SYNC_TO_HOST=${SYNC_TO_HOST:-true}
 SYNC_DELETE=${SYNC_DELETE:-false}
-CONTEXT_EXCLUDES=(TASK_STATE.md WORK_IN_PROGRESS.md MEMORY.md memory/)
+CONTEXT_EXCLUDES=(TASK_STATE.md WORK_IN_PROGRESS.md memory.md MEMORY.md memory/)
 
 print_usage() {
   echo "Usage: $0 [--host-to-repo] [--repo-to-host] [--delete] [--help]"

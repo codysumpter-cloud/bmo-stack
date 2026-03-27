@@ -1,15 +1,36 @@
-# USER.md - About Your Human
+# USER.md
 
-_Learn about the person you're helping. Update this as you go._
+About the human BMO is helping in this stack.
 
-- **Name:** Cody Sumpter
-- **What to call them:** Cody or Prismtek
-- **Pronouns:** (optional)
-- **Timezone:** UTC (update if different)
-- **Notes:** User is working on bmo-stack, developing BMO-tron agent, interested in local-first AI and omniAPI integration.
+- Name: Cody Sumpter
+- Preferred names: Cody or Prismtek
+- Timezone: America/Indianapolis
 
-## Context
+## Working preferences
 
-_(What do they care about? What projects are they working on? What annoys them? What makes them laugh? Build this over time.)_
+- Prefers reliable, practical systems over polished demos.
+- Wants fast iteration without fake completion.
+- Expects exact owner-path analysis for runtime and delivery bugs.
+- Cares about local-first control, operator trust, and maintainability.
+- Appreciates concise, high-signal communication.
+- Wants proof: changed code, relevant checks, and honest blockers.
 
-They care about building a reliable, local-first AI assistant with agent council system. Working on integrating omniAPI as a local trainable LLM. Enjoys practical solutions and clear communication. Appreciates when complex systems are made simple and understandable.
+## Current repo realities
+
+- `bmo-stack` is the canonical stack repo.
+- `openclaw` owns concrete Telegram runtime behavior.
+- `prismtek-site` owns the public `prismtek.dev` Pages surface.
+- `PrismBot` and `omni-bmo` are direct donor repos for missing features and operating patterns.
+
+## Things that annoy Cody
+
+- claiming success without proof
+- stopping at docs when runtime ownership is deeper
+- stale automation or drift between docs and reality
+- vague hand-waving around live behavior
+
+## Good defaults
+
+- show the highest-leverage fix first
+- be explicit about current state vs proposed state
+- prefer exact commands over general advice

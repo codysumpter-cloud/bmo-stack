@@ -1,5 +1,9 @@
 version: 1
-lastReviewed: 2026-03-25
+lastReviewed: 2026-03-27
+
+notes: |
+  `bmo-stack` evolved directly out of `PrismBot` and `omni-bmo`.
+  Treat those two repos as the primary donor sources when auditing missing features.
 
 repos:
   - name: bmo-stack
@@ -31,7 +35,7 @@ repos:
         - worker logic
     notes: |
       Use this repo to preserve and migrate prismtek.dev content.
-      Treat it as a website/content donor, not as a runtime donor.
+      Treat it as a website or content donor, not as a runtime donor.
 
   - name: omni-bmo
     role: runtime_ops_donor
@@ -44,7 +48,7 @@ repos:
         - local-first fallback ideas
         - voice and reactive-face runtime ideas
       forbidden:
-        - Pi/hardware-specific assumptions as global defaults
+        - Pi or hardware-specific assumptions as global defaults
         - enclosure-specific or device-specific policy as canonical stack behavior
     notes: |
       Mine this repo for runtime discipline and validation rigor.
@@ -56,6 +60,7 @@ repos:
       allowed:
         - AGENTS conventions
         - memory and heartbeat patterns
+        - response guide patterns
         - website factory standards
         - operator UX concepts
       forbidden:

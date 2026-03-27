@@ -14,6 +14,7 @@ DEFAULT_CONTEXT_HOST = Path.home() / "bmo-context"
 DEFAULT_CONTEXT_EXCLUDES = [
     "TASK_STATE.md",
     "WORK_IN_PROGRESS.md",
+    "memory.md",
     "MEMORY.md",
     "memory/",
 ]
