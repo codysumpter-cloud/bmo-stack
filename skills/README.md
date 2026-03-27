@@ -27,6 +27,10 @@ A skill is not meant to replace the canonical repo docs. It is meant to make a f
   - recovery steps for missing `.env`, Docker not running, or broken local bootstrap state
 - `context-sync/`
   - host/repo context synchronization and when to use each sync mode
+- `browser-automation/`
+  - optional browser/UI automation profile guidance for sanctioned tasks
+- `skills-access-diagnosis/`
+  - diagnose why installed skills are missing, stuck, or not visible to the agent
 
 ## Suggested skill format
 

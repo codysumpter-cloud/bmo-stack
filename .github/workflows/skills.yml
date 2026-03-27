@@ -4,14 +4,14 @@ on:
   pull_request:
     paths:
       - 'skills/**'
-      - 'scripts/validate-skills.py'
+      - 'scripts/validate-skills.mjs'
       - '.github/workflows/skills.yml'
   push:
     branches:
       - master
     paths:
       - 'skills/**'
-      - 'scripts/validate-skills.py'
+      - 'scripts/validate-skills.mjs'
       - '.github/workflows/skills.yml'
 
 permissions:
@@ -26,10 +26,10 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
-          python-version: '3.x'
+          node-version: '22'
 
       - name: Validate skills registry
-        run: python3 scripts/validate-skills.py
+        run: node scripts/validate-skills.mjs

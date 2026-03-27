@@ -76,6 +76,17 @@
         "browser worker"
       ],
       "default_action": "show"
+    },
+    "skills-access-diagnosis": {
+      "actions": ["show"],
+      "triggers": [
+        "cannot access skills",
+        "skills missing",
+        "clawhub hangs",
+        "skill install stuck",
+        "openclaw skills check"
+      ],
+      "default_action": "show"
     }
   }
 }

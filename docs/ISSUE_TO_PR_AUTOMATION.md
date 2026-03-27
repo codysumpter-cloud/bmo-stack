@@ -80,4 +80,4 @@ proof for safe automatic application.
 - runtime and delivery issues remain manual until the live owner path and automated tests are in place
 - builtin mode creates a bounded implementation packet instead of speculative edits
 - the generated draft PR should still be reviewed before merge
-- the older `autonomy:ready` workflow remains in the repo, but `autonomy:execute` is the intended trigger for the current flow
+- `autonomy:execute` is the only supported label trigger for the current planner-v3 flow
