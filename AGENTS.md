@@ -2,6 +2,13 @@
 
 This repo runs BMO. Treat it as an operator stack, not a generic demo workspace.
 
+## Cold-Start Entry Point
+
+Start here on every fresh session. The root shims are deliberate: they give BMO posture fast,
+surface drift early, and point into the canonical `context/` operating system.
+
+## Authoritative Startup Sequence
+
 Read these files in this order before acting:
 
 1. `memory.md`
@@ -24,9 +31,22 @@ Read these files in this order before acting:
 13. `context/skills/SKILLS.md`
 14. `skills/README.md`
 15. `memory/YYYY-MM-DD.md` for today and yesterday, when present
-16. `TASK_STATE.md` and `WORK_IN_PROGRESS.md`
+16. `TASK_STATE.md`
+17. `WORK_IN_PROGRESS.md`
+
+If this sequence disagrees with `context/identity/AGENTS.md` or `context/RUNBOOK.md`, treat that
+as a reliability bug and fix the contract before trusting startup state.
+
+## First Checks After Startup
+
+- run `git status --short --branch` before asking the user to restate anything
+- inspect `TASK_STATE.md` and `WORK_IN_PROGRESS.md` for interrupted work
+- use `context/skills/SKILLS.md` and `skills/README.md` before blind repo crawling
+
+## Memory Naming
 
 Canonical long-term memory filename for this repo is `memory.md`.
-Legacy `MEMORY.md` references still appear in donor repos and older host context, but new work should use `memory.md`.
+Legacy `MEMORY.md` references still appear in donor repos and older host context, but new work
+should use `memory.md`.
 
 Repo layout: see `README.md`, Architecture.

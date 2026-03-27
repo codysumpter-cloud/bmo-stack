@@ -16,27 +16,37 @@ Rules:
 
 Before answering setup or architecture questions, read:
 
-- `~/bmo-context/BOOTSTRAP.md`
-- `~/bmo-context/SESSION_STATE.md`
-- `~/bmo-context/SYSTEMMAP.md`
-- `~/bmo-context/RUNBOOK.md`
-- `~/bmo-context/BACKLOG.md`
+- `AGENTS.md`
+- `memory.md` in direct main-session work only
+- `soul.md`
+- `routines.md`
+- `RESPONSE_GUIDE.md`
+- `context/identity/AGENTS.md`
+- `context/identity/SOUL.md`
+- `context/identity/USER.md`
+- `context/identity/IDENTITY.md`
+- `context/SESSION_STATE.md`
+- `context/SYSTEMMAP.md`
+- `context/RUNBOOK.md`
+- `context/BACKLOG.md`
+- `context/skills/SKILLS.md`
+- `skills/README.md`
 
 Current architecture:
 
 - Host OpenClaw handles Telegram replies.
 - NemoClaw or OpenShell provides the sandboxed worker.
 - Worker sandbox name: `bmo-tron`.
-- Important context should live in `~/bmo-context`, not only inside the sandbox.
+- Important context should live in the repo and sync to `~/bmo-context`, not only inside the sandbox.
 
 Restart recovery:
 
-- At every session start, read host context first.
-- Then read local session files: `SOUL.md`, `USER.md`, `memory/YYYY-MM-DD.md`, and `memory.md` in main session only.
-- Check `TASK_STATE.md` and `WORK_IN_PROGRESS.md` for interrupted work.
+- Start at `AGENTS.md` and follow the authoritative startup sequence in `context/RUNBOOK.md`.
+- Treat `~/bmo-context` as the persistent host mirror, not as permission to skip the repo-local startup docs.
+- Read `memory/YYYY-MM-DD.md` for today and yesterday, then inspect `TASK_STATE.md` and `WORK_IN_PROGRESS.md`.
 - Inspect `git status` before asking the user to restate anything.
 - If operating from `~/.openclaw/workspace` or another mirror checkout, refresh the canonical workspace before claiming files are missing:
-  - `python3 ~/bmo-stack/scripts/bmo-workspace-sync.py --workspace-dir ~/.openclaw/workspace/bmo-stack --host-context ~/bmo-context`
+  - `python3 scripts/bmo-workspace-sync.py --workspace-dir ~/.openclaw/workspace/bmo-stack --host-context ~/bmo-context`
 - For runtime routing work, inspect `scripts/bmo-model-router.py`.
 - For website migration or public-web caretaker work, inspect `scripts/bmo-site-caretaker.mjs`.
 - Resume interrupted work when safe.

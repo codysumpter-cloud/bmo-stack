@@ -4,6 +4,17 @@ This directory defines reusable, task-scoped skill modules for `bmo-stack`.
 
 The goal is to make common operational capabilities easy to discover, document, and reuse without forcing contributors to reverse-engineer shell scripts or scattered docs.
 
+## Source of truth
+
+- `context/skills/SKILLS.md`
+  - human-first entrypoint for stack-wide skills and `context/` workflows
+- `skills/index.json`
+  - machine-readable trigger and action registry for repo-local skills
+- `skills/<name>/README.md`
+  - task-scoped operating playbook for that specific skill
+
+If the registry and README drift, fix both before trusting skill discovery.
+
 Before ad hoc debugging, start with:
 
 - `routines.md`
@@ -44,14 +55,20 @@ It is meant to make a focused workflow easier to execute correctly.
   - optional browser and UI automation guidance for sanctioned tasks
 - `skills-access-diagnosis/`
   - diagnose why installed skills are missing, stuck, or not visible to the agent
+- `sandbox-debugging/`
+  - inspect and repair worker sandbox drift, policy mismatches, and missing containers
+- `ci-failure-diagnosis/`
+  - quickly classify failing GitHub checks before fixing the real owner path
 
 ## Suggested skill format
 
 Each skill directory should contain a `README.md` with:
 
 - purpose
+- owner path and source-of-truth repo or runtime
 - trigger symptoms
 - commands or workflow
+- validation or proof path
 - expected good state
 - troubleshooting notes
 - related files

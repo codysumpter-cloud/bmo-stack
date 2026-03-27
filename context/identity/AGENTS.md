@@ -2,30 +2,36 @@
 
 This workspace exists to make BMO reliable in real use.
 
-## Quick-start
+## Cold-start Entry Point
 
-For shallow or generic cold starts, read these root entrypoints first:
+`AGENTS.md` at the repo root is the required cold-start entrypoint.
+If a runtime lands here first, immediately load `AGENTS.md` so the root quick-start files are not
+skipped.
 
-- `memory.md`
-- `soul.md`
-- `routines.md`
-- `RESPONSE_GUIDE.md`
+## Authoritative Startup Sequence
 
-Canonical startup sequence:
+After entering through `AGENTS.md`, read these in order:
 
-1. `context/identity/SOUL.md`
-2. `context/identity/USER.md`
-3. `context/identity/IDENTITY.md`
-4. `context/SESSION_STATE.md`
-5. `context/SYSTEMMAP.md`
-6. `context/RUNBOOK.md`
-7. `context/BACKLOG.md`
-8. `context/skills/SKILLS.md`
-9. `skills/README.md`
-10. `memory/YYYY-MM-DD.md` for today and yesterday, when present
-11. `TASK_STATE.md`
-12. `WORK_IN_PROGRESS.md`
-13. `memory.md` in direct main-session work only
+1. `memory.md` in direct main-session work only
+2. `soul.md`
+3. `routines.md`
+4. `RESPONSE_GUIDE.md`
+5. `context/identity/AGENTS.md`
+6. `context/identity/SOUL.md`
+7. `context/identity/USER.md`
+8. `context/identity/IDENTITY.md`
+9. `context/SESSION_STATE.md`
+10. `context/SYSTEMMAP.md`
+11. `context/RUNBOOK.md`
+12. `context/BACKLOG.md`
+13. `context/skills/SKILLS.md`
+14. `skills/README.md`
+15. `memory/YYYY-MM-DD.md` for today and yesterday, when present
+16. `TASK_STATE.md`
+17. `WORK_IN_PROGRESS.md`
+
+If this list drifts from `AGENTS.md` or `context/RUNBOOK.md`, treat it as an operating-system bug
+and repair the docs or validator before continuing.
 
 After startup:
 

@@ -4,6 +4,11 @@ This is the quick-start map for BMO's preferred routines.
 The machine-readable source lives in `config/routines/bmo-core-routines.json`.
 The operator-facing explanation lives in `docs/BMO_ROUTINES.md`.
 
+## Operating rule
+
+Treat the JSON routine pack as the source of truth.
+If this file or `docs/BMO_ROUTINES.md` drifts from it, fix the contract before trusting the order.
+
 ## Preferred routine order
 
 1. `make doctor-plus`
@@ -18,6 +23,8 @@ The operator-facing explanation lives in `docs/BMO_ROUTINES.md`.
    Inspect `prismtek-site` before claiming public-web parity.
 6. `make worker-ready`
    Prepare the `bmo-tron` worker sandbox before delegated execution.
+
+`make worker-ready` mutates sandbox state, so prefer it after the status and routing checks above.
 
 ## Donor-aware reminder
 
