@@ -52,3 +52,9 @@ Each skill directory should contain a `README.md` with:
 - GitHub automation docs
 
 This skill layer makes that operational knowledge more modular and easier to reuse in future repos or agent-facing runtime systems.
+
+For operator rollout and external skill recommendations, start with:
+
+- `docs/SKILLS_INSTALL.md`
+- `docs/SKILLS_RECOMMENDED.md`
+- `config/skills/bmo-baseline-pack.json`

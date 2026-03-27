@@ -11,67 +11,54 @@ Prefer skills that are:
 - low-friction to configure
 - useful in everyday repo, research, and ops workflows
 
-## Baseline pack
+## Start with local BMO routines
 
-These are the first skills worth enabling on a normal BMO workstation:
+Before installing more community skills, make sure the repo-local BMO routines are available and understood:
 
-- `github` — repo, issues, PRs, metadata
-- `summarize` — quick digestion of pages and documents
-- `weather` — deterministic utility and tool-path verification
-- `healthcheck` — basic environment sanity checks
-- `clawhub` — skill distribution and registry operations
+- `openclaw-agent-split` — verify host `main` versus sandbox worker routing
+- `telegram-routing` — confirm Telegram is bound to `main`
+- `skills-access-diagnosis` — debug visibility/install drift before adding more skills
+- `bootstrap-recovery` — recover broken local bootstrap state
+- `context-sync` — keep repo, host context, and workspace mirror aligned
+- `browser-automation` — sanctioned browser automation profile guidance
 
-## Knowledge and note-taking
+You can inspect the current shortlist with:
 
-Enable when the operator already uses a local knowledge system:
+```bash
+node scripts/bmo-skill-pack.mjs list
+```
 
-- `obsidian`
-- `bear-notes`
-- `apple-reminders`
-- `things-mac`
+## Curated community shortlist
 
-## Communication and personal ops
+The baseline pack in `config/skills/bmo-baseline-pack.json` is the current high-value shortlist for BMO workstations.
+These choices are intentionally narrow and map to the strongest practical categories from the curated OpenClaw skills ecosystem:
 
-Enable only if there is a real workflow for them:
-
-- `gog`
-- `imsg`
-- `himalaya`
-- `discord`
-- `slack`
-
-These often require additional auth or policy review.
-
-## Media and transcription
-
-Useful when BMO needs to summarize or inspect local artifacts:
-
-- `openai-whisper`
-- `video-frames`
-- `nano-pdf`
-- `songsee`
-
-## Home and device control
-
-Enable only on trusted machines with explicit operator approval:
-
-- `openhue`
-- `sonoscli`
-
-## Creation and automation
-
-Useful for extending BMO once the baseline is stable:
-
-- `skill-creator`
-- `browser-automation`
-- `gh-issues`
+- `trumppo-gh` (`gh`)
+  - Git & GitHub operations through the GitHub CLI
+- `zjianru-web-search-pro` (`web-search-pro`)
+  - explainable search and retrieval for web research
+- `amaofx-filesystem` (`filesystem`)
+  - stronger local file and directory analysis
+- `femto-mcp-chrome` (`mcp-chrome`)
+  - browser automation when the browser profile is explicitly enabled
+- `steipete-bear-notes` (`bear-notes`)
+  - optional Mac note capture/search for Bear users
 
 ## Recommended rollout order
 
-1. Baseline pack
-2. One knowledge skill
-3. One communication skill if needed
-4. Media / automation skills as real tasks demand them
+1. local BMO routines first
+2. `trumppo-gh`
+3. `zjianru-web-search-pro`
+4. `amaofx-filesystem`
+5. `femto-mcp-chrome` only after browser automation policy is approved
+6. optional note skill such as `steipete-bear-notes`
+
+After each install:
+
+```bash
+openclaw skills list --eligible
+openclaw skills check
+```
 
 ## Avoid this mistake
 
@@ -86,5 +73,7 @@ Each added skill increases:
 
 ## Related
 
+- `config/skills/bmo-baseline-pack.json`
+- `scripts/bmo-skill-pack.mjs`
 - `docs/SKILLS_INSTALL.md`
 - `docs/NETWORK_POLICY.md`

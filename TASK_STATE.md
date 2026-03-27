@@ -1,29 +1,31 @@
 # Task State
 
-Last updated: 2026-03-20 13:15 UTC
+Last updated: 2026-03-27 03:06 UTC
 
 ## Current Task
-- Description: Implement restart recovery system for BMO-tron agent
-- Active repo: /home/prismtek/.openclaw/workspace/bmo-stack
-- Branch: master
+- Description: Harden live bmo-stack repo health, skills install/discovery, and operator/runtime ownership docs
+- Active repo: C:\Users\cody_\Git\bmo-stack
+- Branch: codex/bmo-practical-hardening
 - Files touched: 
-  - /home/prismtek/bmo-context/TASK_STATE.md
-  - /home/prismtek/bmo-context/WORK_IN_PROGRESS.md
-  - /home/prismtek/.openclaw/workspace/AGENTS.md
-  - /home/prismtek/bmo-context/BOOTSTRAP.md
-  - /home/prismtek/bmo-context/SESSION_STATE.md
-  - /home/prismtek/bmo-context/RUNBOOK.md
-  - /home/prismtek/bmo-context/BACKLOG.md
-  - /home/prismtek/.openclaw/workspace/bmo-stack/scripts/recover-session.sh
-  - /home/prismtek/.openclaw/workspace/bmo-stack/Makefile
-- Last successful step: Created recover-session.sh script and added make recover-session target; updated all host context files with restart recovery protocol
-- Next intended step: Test the recovery system with a simulated interruption and verify agent follows host-context-first protocol
-- Verification complete: false
+- .github/workflows/autonomy-foundation-smoke.yml
+- .github/workflows/skills.yml
+- config/skills/bmo-baseline-pack.json
+- docs/BMO_ON_MY_MACBOOK.md
+- docs/NETWORK_POLICY.md
+- docs/SKILLS_INSTALL.md
+- docs/SKILLS_RECOMMENDED.md
+- scripts/bmo-skill-pack.mjs
+- scripts/skills-access-diagnosis.mjs
+- scripts/skills_access_diagnosis.py
+- skills/README.md
+- skills/skills-access-diagnosis/README.md
+- Last successful step: Cherry-picked the live branch repo-health fixes, added the BMO baseline skill-pack manifest/tool, updated workflow validation, and aligned network/runtime ownership docs with the current OpenClaw and NemoClaw model
+- Next intended step: Run final diff checks, push the branch, and publish the review-ready summary with validation proof
+- Verification complete: true
 - Manual steps remaining: 
-  - Verify checkpoint system functions during actual operations (agent must record checkpoints manually for now)
-  - Test restart recovery with simulated interruption
-  - Ensure agent follows host-context-first protocol consistently
-- Safe to resume: true (no active work that would be unsafe to interrupt)
+  - Merge the openclaw `/exec` hardening PR before claiming that fix is live on `main`
+  - Pull/restart the MacBook runtime after merge for live Telegram verification
+- Safe to resume: true
 
 ## Checkpoints
 - Each checkpoint must be recorded before long-running tasks, after major steps, before pushes, and after failed/interrupted operations.
@@ -46,6 +48,16 @@ Last updated: 2026-03-20 13:15 UTC
   - Next intended step: Verify recovery system works and report completion
   - Verification complete: false
   - Manual steps remaining: Verify checkpoint system functions during actual operations; test restart recovery
+  - Safe to resume: true
+
+- 2026-03-27 03:06 UTC
+  - Repo: C:\Users\cody_\Git\bmo-stack
+  - Branch: codex/bmo-practical-hardening
+  - Files touched: .github/workflows/autonomy-foundation-smoke.yml, .github/workflows/skills.yml, config/skills/bmo-baseline-pack.json, docs/BMO_ON_MY_MACBOOK.md, docs/NETWORK_POLICY.md, docs/SKILLS_INSTALL.md, docs/SKILLS_RECOMMENDED.md, scripts/bmo-skill-pack.mjs, scripts/skills-access-diagnosis.mjs, scripts/skills_access_diagnosis.py, skills/README.md, skills/skills-access-diagnosis/README.md
+  - Last successful step: Added a validated BMO skill-pack artifact, swapped workflows/docs to the cross-platform skills diagnosis path, and aligned operator docs to the real OpenClaw runtime ownership model
+  - Next intended step: Run final diff checks, push the branch, and publish the review-ready summary with validation proof
+  - Verification complete: true
+  - Manual steps remaining: Merge/pull the openclaw `/exec` hardening change and restart the MacBook runtime before claiming that fix is live on `main`
   - Safe to resume: true
 
 - 2026-03-20 13:15 UTC

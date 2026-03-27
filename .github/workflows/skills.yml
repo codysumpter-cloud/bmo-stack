@@ -4,6 +4,8 @@ on:
   pull_request:
     paths:
       - 'skills/**'
+      - 'config/skills/**'
+      - 'scripts/bmo-skill-pack.mjs'
       - 'scripts/validate-skills.mjs'
       - '.github/workflows/skills.yml'
   push:
@@ -11,6 +13,8 @@ on:
       - master
     paths:
       - 'skills/**'
+      - 'config/skills/**'
+      - 'scripts/bmo-skill-pack.mjs'
       - 'scripts/validate-skills.mjs'
       - '.github/workflows/skills.yml'
 
@@ -33,3 +37,6 @@ jobs:
 
       - name: Validate skills registry
         run: node scripts/validate-skills.mjs
+
+      - name: Validate BMO skill pack
+        run: node scripts/bmo-skill-pack.mjs list

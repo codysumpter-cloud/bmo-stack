@@ -14,6 +14,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
       - uses: actions/setup-python@v5
         with:
           python-version: '3.x'
@@ -92,7 +96,10 @@ jobs:
           PY
 
       - name: Run diagnosis script
-        run: python3 scripts/skills_access_diagnosis.py > workflows/skills-diagnosis.json
+        run: node scripts/skills-access-diagnosis.mjs > workflows/skills-diagnosis.json
+
+      - name: Render BMO skill pack
+        run: node scripts/bmo-skill-pack.mjs json > workflows/bmo-skill-pack.json
 
       - name: Assert diagnosis schema
         run: |
@@ -106,6 +113,19 @@ jobs:
           assert "manual_install_targets" in report
           assert "preferred_default" in report["manual_install_targets"]
           assert "workspace_override" in report["manual_install_targets"]
+          PY
+
+      - name: Assert skill pack schema
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          pack = json.loads(Path("workflows/bmo-skill-pack.json").read_text(encoding="utf-8"))
+          assert pack["pack_name"] == "bmo-baseline"
+          assert len(pack["skill_search_order"]) == 3
+          assert len(pack["local_routines"]) >= 3
+          assert len(pack["community_shortlist"]) >= 3
           PY
 
       - name: Apply BMO runtime profile

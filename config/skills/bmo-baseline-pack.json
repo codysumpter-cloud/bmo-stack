@@ -1,0 +1,98 @@
+{
+  "version": 1,
+  "pack_name": "bmo-baseline",
+  "description": "Curated shortlist of local routines and external skills for reliable BMO operator workstations.",
+  "skill_search_order": [
+    "<workspace>/skills",
+    "~/.openclaw/skills",
+    "bundled skills"
+  ],
+  "local_routines": [
+    {
+      "name": "openclaw-agent-split",
+      "why": "Verify host main-agent routing and the bmo-tron worker split before deeper runtime work."
+    },
+    {
+      "name": "telegram-routing",
+      "why": "Confirm Telegram is bound to the host-facing main agent instead of the worker."
+    },
+    {
+      "name": "skills-access-diagnosis",
+      "why": "Diagnose missing, stuck, or invisible skills before adding more capability."
+    },
+    {
+      "name": "bootstrap-recovery",
+      "why": "Recover broken bootstrap state without guesswork."
+    },
+    {
+      "name": "context-sync",
+      "why": "Keep repo, host context, and workspace mirror aligned."
+    },
+    {
+      "name": "browser-automation",
+      "why": "Document the sanctioned browser automation profile before enabling browser-driving skills."
+    }
+  ],
+  "community_shortlist": [
+    {
+      "slug": "trumppo-gh",
+      "display_name": "gh",
+      "category": "Git & GitHub",
+      "why": "Reliable GitHub issue, PR, and repo operations through the gh CLI.",
+      "install": "clawhub install trumppo-gh",
+      "verify": [
+        "openclaw skills list --eligible",
+        "openclaw skills check"
+      ],
+      "notes": "Review auth scope before enabling write operations."
+    },
+    {
+      "slug": "zjianru-web-search-pro",
+      "display_name": "web-search-pro",
+      "category": "Search & Research",
+      "why": "Explainable search and retrieval flows for web research.",
+      "install": "clawhub install zjianru-web-search-pro",
+      "verify": [
+        "openclaw skills list --eligible",
+        "openclaw skills check"
+      ],
+      "notes": "Keep network policy narrow and confirm the result is operator-visible."
+    },
+    {
+      "slug": "amaofx-filesystem",
+      "display_name": "filesystem",
+      "category": "Search & Research",
+      "why": "Stronger local file and directory analysis for repo-scale work.",
+      "install": "clawhub install amaofx-filesystem",
+      "verify": [
+        "openclaw skills list --eligible",
+        "openclaw skills check"
+      ],
+      "notes": "Prefer workspace-scoped approval if the host has sensitive paths."
+    },
+    {
+      "slug": "femto-mcp-chrome",
+      "display_name": "mcp-chrome",
+      "category": "Browser & Automation",
+      "why": "Browser automation for real UI workflows after the baseline pack is stable.",
+      "install": "clawhub install femto-mcp-chrome",
+      "verify": [
+        "openclaw skills list --eligible",
+        "openclaw skills check"
+      ],
+      "notes": "Enable only on workstations with an explicit browser automation policy."
+    },
+    {
+      "slug": "steipete-bear-notes",
+      "display_name": "bear-notes",
+      "category": "Notes & PKM",
+      "why": "Low-friction note capture and search on operator MacBooks that already use Bear.",
+      "install": "clawhub install steipete-bear-notes",
+      "verify": [
+        "openclaw skills list --eligible",
+        "openclaw skills check"
+      ],
+      "notes": "Optional. Skip it on machines that do not already use Bear."
+    }
+  ]
+}

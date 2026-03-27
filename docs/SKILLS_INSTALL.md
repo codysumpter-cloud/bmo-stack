@@ -4,6 +4,12 @@
 
 Make skill installation boring, predictable, and recoverable.
 
+Before you install anything, preview the current BMO shortlist:
+
+```bash
+node scripts/bmo-skill-pack.mjs list
+```
+
 Use this order:
 
 1. Try a targeted `clawhub install <skill-slug>`.
@@ -24,7 +30,8 @@ Avoid `clawhub update --all` while debugging a stuck registry or network problem
 
 ## Search order and precedence
 
-BMO should assume the following effective search order when the same skill name exists in more than one place:
+BMO should assume the following effective search order when the same skill name exists in more than one place.
+This matches the official OpenClaw skill precedence model surfaced in the curated community references:
 
 1. `<workspace>/skills` (highest precedence)
 2. `~/.openclaw/skills`
@@ -61,7 +68,7 @@ After the install succeeds, start a fresh agent session.
 Run:
 
 ```bash
-python3 scripts/skills_access_diagnosis.py
+node scripts/skills-access-diagnosis.mjs
 ```
 
 This reports:
@@ -74,6 +81,23 @@ This reports:
 - `openclaw skills list --eligible`
 - `openclaw skills check`
 
+Python fallback is still available if Node is not practical on the target host:
+
+```bash
+python3 scripts/skills_access_diagnosis.py
+```
+
+## Source review before install
+
+The curated community lists are discovery aids, not security proof.
+
+Before enabling an external skill:
+
+- review the skill source
+- confirm the binary/API it depends on is already part of your workflow
+- confirm there is an operator-visible way to verify success
+- prefer a single new skill per session until the environment is stable
+
 ## Recommended operator behavior
 
 - Prefer one-skill-at-a-time installs.
@@ -83,6 +107,9 @@ This reports:
 
 ## Related
 
+- `scripts/bmo-skill-pack.mjs`
+- `config/skills/bmo-baseline-pack.json`
+- `scripts/skills-access-diagnosis.mjs`
 - `scripts/skills_access_diagnosis.py`
 - `scripts/install-skill-fallback.sh`
 - `docs/SKILLS_RECOMMENDED.md`

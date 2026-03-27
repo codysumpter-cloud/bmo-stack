@@ -78,7 +78,7 @@ def main() -> None:
         "checks": {},
         "recommendations": [
             "Prefer targeted installs over bulk updates during incidents.",
-            "Try 'timeout 30 clawhub install <skill-slug>' before any broader sync/update attempt.",
+            "Try one targeted 'clawhub install <skill-slug>' first; if it stalls for roughly 30 seconds, stop it and switch to the manual fallback.",
             "If registry install hangs, review the skill source and fall back to 'bash scripts/install-skill-fallback.sh /path/to/skill --global'.",
             "Use '--workspace' only when you intentionally want a repo-scoped override that should win over global or bundled skills.",
             "Restart the agent session after adding or changing skills so the refreshed skill snapshot is picked up.",

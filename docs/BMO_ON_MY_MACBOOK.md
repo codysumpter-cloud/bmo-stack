@@ -4,9 +4,12 @@
 
 Run one coherent BMO setup on a MacBook without pretending the old donor repos are still the live runtime.
 
-## What is live
+## Runtime ownership today
 
-- `bmo-stack` is the only live runtime and operator control plane.
+- `bmo-stack` is the operator control plane, context source, and workspace-sync source.
+- `openclaw` is the live host runtime source that owns Telegram delivery behavior.
+- `/usr/local/lib/node_modules/openclaw` should resolve to the checked-out `~/code/openclaw` repo.
+- `~/.openclaw/workspace/bmo-stack` is a mirrored workspace for context and repo files. It is not the same thing as the live Telegram runtime code.
 - BMO is the only front-facing agent.
 - Council members are internal subagents.
 
@@ -20,6 +23,7 @@ Run one coherent BMO setup on a MacBook without pretending the old donor repos a
 ```text
 ~/code/
   bmo-stack/
+  openclaw/
   omni-bmo/        # optional donor/runtime bridge target
   PrismBot/        # optional archived reference copy
 ```
@@ -50,6 +54,17 @@ launchctl kickstart -k gui/$(id -u)/cloud.codysumpter.bmo-workspace-sync
 
 That LaunchAgent runs `scripts/bmo-workspace-sync.py` at login and every 5 minutes by default, keeping `~/.openclaw/workspace/bmo-stack` aligned with the repo and syncing repo context into `~/bmo-context`.
 
+From `openclaw`, update the live runtime code:
+
+```bash
+cd ~/code/openclaw
+git fetch origin
+git checkout main
+git pull --ff-only origin main
+node --test ./extensions/telegram/src/delivery-regressions.test.js
+launchctl kickstart -k gui/$(id -u)/ai.openclaw.gateway
+```
+
 If BMO is unhealthy:
 
 ```bash
@@ -58,9 +73,20 @@ make recover-bmo
 
 ## Integration rules
 
-- Keep new runtime logic BMO-first.
+- Keep new operator logic BMO-first in `bmo-stack`.
+- Keep concrete Telegram/runtime delivery fixes in `openclaw`, then pull them onto the MacBook and restart the gateway.
 - Use PrismBot docs/scripts as migration references only.
 - Use `omni-bmo` helpers only through BMO bridge scripts unless there is a good reason not to.
+
+## Verify the live runtime path
+
+Run these on the MacBook before claiming a Telegram/runtime fix is live:
+
+```bash
+realpath /usr/local/lib/node_modules/openclaw
+realpath "$(which openclaw)"
+launchctl list | grep ai.openclaw.gateway
+```
 
 ## Related
 
