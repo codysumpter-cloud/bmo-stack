@@ -76,6 +76,7 @@ function Start-BmoDesktopApp {
 
   Add-Type -AssemblyName System.Windows.Forms
   Add-Type -AssemblyName System.Drawing
+  Add-Type -AssemblyName Microsoft.VisualBasic
 
   $settings = Initialize-BmoSettings
 
@@ -377,15 +378,39 @@ function Start-BmoDesktopApp {
   $insertReadButton.Width = 102
   $insertReadButton.FlatStyle = 'Flat'
 
+  $openFileExternalButton = New-Object System.Windows.Forms.Button
+  $openFileExternalButton.Text = 'Open External'
+  $openFileExternalButton.Left = 218
+  $openFileExternalButton.Top = 10
+  $openFileExternalButton.Width = 112
+  $openFileExternalButton.FlatStyle = 'Flat'
+
+  $newFileButton = New-Object System.Windows.Forms.Button
+  $newFileButton.Text = 'New File'
+  $newFileButton.Left = 10
+  $newFileButton.Top = 42
+  $newFileButton.Width = 90
+  $newFileButton.FlatStyle = 'Flat'
+
+  $newFolderButton = New-Object System.Windows.Forms.Button
+  $newFolderButton.Text = 'New Folder'
+  $newFolderButton.Left = 108
+  $newFolderButton.Top = 42
+  $newFolderButton.Width = 102
+  $newFolderButton.FlatStyle = 'Flat'
+
   $fileTree = New-Object System.Windows.Forms.TreeView
   $fileTree.Left = 10
-  $fileTree.Top = 48
+  $fileTree.Top = 78
   $fileTree.Width = 350
-  $fileTree.Height = 760
+  $fileTree.Height = 730
   $fileTree.Font = New-BmoFont -Size 9.5
 
   [void]$fileTreePanel.Controls.Add($refreshTreeButton)
   [void]$fileTreePanel.Controls.Add($insertReadButton)
+  [void]$fileTreePanel.Controls.Add($openFileExternalButton)
+  [void]$fileTreePanel.Controls.Add($newFileButton)
+  [void]$fileTreePanel.Controls.Add($newFolderButton)
   [void]$fileTreePanel.Controls.Add($fileTree)
 
   $editorPanel = New-Object System.Windows.Forms.Panel
@@ -450,42 +475,70 @@ function Start-BmoDesktopApp {
   $refreshRepoButton.Text = 'Refresh'
   $refreshRepoButton.Left = 10
   $refreshRepoButton.Top = 10
-  $refreshRepoButton.Width = 88
+  $refreshRepoButton.Width = 78
   $refreshRepoButton.FlatStyle = 'Flat'
 
   $worktreeDiffButton = New-Object System.Windows.Forms.Button
   $worktreeDiffButton.Text = 'Worktree Diff'
-  $worktreeDiffButton.Left = 106
+  $worktreeDiffButton.Left = 96
   $worktreeDiffButton.Top = 10
-  $worktreeDiffButton.Width = 102
+  $worktreeDiffButton.Width = 98
   $worktreeDiffButton.FlatStyle = 'Flat'
 
   $stagedDiffButton = New-Object System.Windows.Forms.Button
   $stagedDiffButton.Text = 'Staged Diff'
-  $stagedDiffButton.Left = 216
+  $stagedDiffButton.Left = 202
   $stagedDiffButton.Top = 10
-  $stagedDiffButton.Width = 96
+  $stagedDiffButton.Width = 88
   $stagedDiffButton.FlatStyle = 'Flat'
 
   $openChangedFileButton = New-Object System.Windows.Forms.Button
   $openChangedFileButton.Text = 'Open File'
-  $openChangedFileButton.Left = 320
+  $openChangedFileButton.Left = 298
   $openChangedFileButton.Top = 10
-  $openChangedFileButton.Width = 88
+  $openChangedFileButton.Width = 82
   $openChangedFileButton.FlatStyle = 'Flat'
 
   $copyChangeSummaryButton = New-Object System.Windows.Forms.Button
-  $copyChangeSummaryButton.Text = 'Copy Summary'
-  $copyChangeSummaryButton.Left = 416
+  $copyChangeSummaryButton.Text = 'Copy Prep'
+  $copyChangeSummaryButton.Left = 388
   $copyChangeSummaryButton.Top = 10
-  $copyChangeSummaryButton.Width = 96
+  $copyChangeSummaryButton.Width = 92
   $copyChangeSummaryButton.FlatStyle = 'Flat'
+
+  $stageSelectedButton = New-Object System.Windows.Forms.Button
+  $stageSelectedButton.Text = 'Stage Selected'
+  $stageSelectedButton.Left = 10
+  $stageSelectedButton.Top = 44
+  $stageSelectedButton.Width = 110
+  $stageSelectedButton.FlatStyle = 'Flat'
+
+  $unstageSelectedButton = New-Object System.Windows.Forms.Button
+  $unstageSelectedButton.Text = 'Unstage Selected'
+  $unstageSelectedButton.Left = 128
+  $unstageSelectedButton.Top = 44
+  $unstageSelectedButton.Width = 118
+  $unstageSelectedButton.FlatStyle = 'Flat'
+
+  $stageAllButton = New-Object System.Windows.Forms.Button
+  $stageAllButton.Text = 'Stage All'
+  $stageAllButton.Left = 254
+  $stageAllButton.Top = 44
+  $stageAllButton.Width = 88
+  $stageAllButton.FlatStyle = 'Flat'
+
+  $unstageAllButton = New-Object System.Windows.Forms.Button
+  $unstageAllButton.Text = 'Unstage All'
+  $unstageAllButton.Left = 350
+  $unstageAllButton.Top = 44
+  $unstageAllButton.Width = 96
+  $unstageAllButton.FlatStyle = 'Flat'
 
   $changedFilesList = New-Object System.Windows.Forms.ListView
   $changedFilesList.Left = 10
-  $changedFilesList.Top = 48
+  $changedFilesList.Top = 80
   $changedFilesList.Width = 470
-  $changedFilesList.Height = 360
+  $changedFilesList.Height = 328
   $changedFilesList.View = 'Details'
   $changedFilesList.FullRowSelect = $true
   $changedFilesList.GridLines = $true
@@ -497,6 +550,10 @@ function Start-BmoDesktopApp {
   [void]$changesPanel.Controls.Add($stagedDiffButton)
   [void]$changesPanel.Controls.Add($openChangedFileButton)
   [void]$changesPanel.Controls.Add($copyChangeSummaryButton)
+  [void]$changesPanel.Controls.Add($stageSelectedButton)
+  [void]$changesPanel.Controls.Add($unstageSelectedButton)
+  [void]$changesPanel.Controls.Add($stageAllButton)
+  [void]$changesPanel.Controls.Add($unstageAllButton)
   [void]$changesPanel.Controls.Add($changedFilesList)
 
   $worktreePanel = New-Object System.Windows.Forms.Panel
@@ -514,15 +571,64 @@ function Start-BmoDesktopApp {
   $worktreesList.Left = 10
   $worktreesList.Top = 48
   $worktreesList.Width = 470
-  $worktreesList.Height = 280
+  $worktreesList.Height = 150
   $worktreesList.View = 'Details'
   $worktreesList.FullRowSelect = $true
   $worktreesList.GridLines = $true
   [void]$worktreesList.Columns.Add('Branch', 120)
   [void]$worktreesList.Columns.Add('Path', 330)
 
+  $copyCommitPrepButton = New-Object System.Windows.Forms.Button
+  $copyCommitPrepButton.Text = 'Copy Commit Prep'
+  $copyCommitPrepButton.Left = 10
+  $copyCommitPrepButton.Top = 208
+  $copyCommitPrepButton.Width = 120
+  $copyCommitPrepButton.FlatStyle = 'Flat'
+
+  $commitStagedButton = New-Object System.Windows.Forms.Button
+  $commitStagedButton.Text = 'Commit Staged'
+  $commitStagedButton.Left = 138
+  $commitStagedButton.Top = 208
+  $commitStagedButton.Width = 104
+  $commitStagedButton.FlatStyle = 'Flat'
+
+  $commitMessageLabel = New-Object System.Windows.Forms.Label
+  $commitMessageLabel.Text = 'Commit message'
+  $commitMessageLabel.AutoSize = $true
+  $commitMessageLabel.Left = 10
+  $commitMessageLabel.Top = 244
+
+  $commitMessageBox = New-Object System.Windows.Forms.TextBox
+  $commitMessageBox.Left = 10
+  $commitMessageBox.Top = 266
+  $commitMessageBox.Width = 470
+  $commitMessageBox.Height = 70
+  $commitMessageBox.Multiline = $true
+  $commitMessageBox.Font = New-BmoFont -Size 9.5
+
+  $recentCommitsLabel = New-Object System.Windows.Forms.Label
+  $recentCommitsLabel.Text = 'Recent commits'
+  $recentCommitsLabel.AutoSize = $true
+  $recentCommitsLabel.Left = 10
+  $recentCommitsLabel.Top = 346
+
+  $recentCommitsBox = New-Object System.Windows.Forms.RichTextBox
+  $recentCommitsBox.Left = 10
+  $recentCommitsBox.Top = 368
+  $recentCommitsBox.Width = 470
+  $recentCommitsBox.Height = 110
+  $recentCommitsBox.ReadOnly = $true
+  $recentCommitsBox.Font = New-BmoFont -Name 'Consolas' -Size 9
+  $recentCommitsBox.BackColor = $palette.White
+
   [void]$worktreePanel.Controls.Add($useWorktreeButton)
   [void]$worktreePanel.Controls.Add($worktreesList)
+  [void]$worktreePanel.Controls.Add($copyCommitPrepButton)
+  [void]$worktreePanel.Controls.Add($commitStagedButton)
+  [void]$worktreePanel.Controls.Add($commitMessageLabel)
+  [void]$worktreePanel.Controls.Add($commitMessageBox)
+  [void]$worktreePanel.Controls.Add($recentCommitsLabel)
+  [void]$worktreePanel.Controls.Add($recentCommitsBox)
 
   [void]$sourceLeft.Panel1.Controls.Add($changesPanel)
   [void]$sourceLeft.Panel2.Controls.Add($worktreePanel)
@@ -679,11 +785,13 @@ function Start-BmoDesktopApp {
   $skillsTab = New-Object System.Windows.Forms.TabPage('Skills')
   $validationTab = New-Object System.Windows.Forms.TabPage('Validation')
   $docsTab = New-Object System.Windows.Forms.TabPage('Docs')
+  $settingsTab = New-Object System.Windows.Forms.TabPage('Settings')
 
   [void]$operationsTabs.TabPages.Add($routinesTab)
   [void]$operationsTabs.TabPages.Add($skillsTab)
   [void]$operationsTabs.TabPages.Add($validationTab)
   [void]$operationsTabs.TabPages.Add($docsTab)
+  [void]$operationsTabs.TabPages.Add($settingsTab)
 
   $routinesSplit = New-Object System.Windows.Forms.SplitContainer
   $routinesSplit.Dock = 'Fill'
@@ -695,8 +803,9 @@ function Start-BmoDesktopApp {
   $routinesList.FullRowSelect = $true
   $routinesList.GridLines = $true
   [void]$routinesList.Columns.Add('Routine', 180)
-  [void]$routinesList.Columns.Add('Command', 220)
-  [void]$routinesList.Columns.Add('Owner', 90)
+  [void]$routinesList.Columns.Add('Ready', 70)
+  [void]$routinesList.Columns.Add('Last', 70)
+  [void]$routinesList.Columns.Add('Command', 180)
 
   $routineDetailPanel = New-Object System.Windows.Forms.Panel
   $routineDetailPanel.Dock = 'Fill'
@@ -741,8 +850,8 @@ function Start-BmoDesktopApp {
   $skillsList.FullRowSelect = $true
   $skillsList.GridLines = $true
   [void]$skillsList.Columns.Add('Skill', 200)
-  [void]$skillsList.Columns.Add('Default', 120)
-  [void]$skillsList.Columns.Add('Command', 190)
+  [void]$skillsList.Columns.Add('Ready', 80)
+  [void]$skillsList.Columns.Add('Command', 230)
 
   $skillDetailPanel = New-Object System.Windows.Forms.Panel
   $skillDetailPanel.Dock = 'Fill'
@@ -787,7 +896,9 @@ function Start-BmoDesktopApp {
   $validationList.FullRowSelect = $true
   $validationList.GridLines = $true
   [void]$validationList.Columns.Add('Validation', 220)
-  [void]$validationList.Columns.Add('Command', 290)
+  [void]$validationList.Columns.Add('Ready', 80)
+  [void]$validationList.Columns.Add('Last', 80)
+  [void]$validationList.Columns.Add('Command', 200)
 
   $validationDetailPanel = New-Object System.Windows.Forms.Panel
   $validationDetailPanel.Dock = 'Fill'
@@ -834,6 +945,127 @@ function Start-BmoDesktopApp {
   [void]$docsSplit.Panel1.Controls.Add($docsList)
   [void]$docsSplit.Panel2.Controls.Add($docPreview)
   [void]$docsTab.Controls.Add($docsSplit)
+
+  $settingsPanel = New-Object System.Windows.Forms.Panel
+  $settingsPanel.Dock = 'Fill'
+  $settingsPanel.Padding = New-Object System.Windows.Forms.Padding(10)
+
+  $safeModeLabel = New-Object System.Windows.Forms.Label
+  $safeModeLabel.Text = 'Safe execution mode'
+  $safeModeLabel.AutoSize = $true
+  $safeModeLabel.Left = 10
+  $safeModeLabel.Top = 12
+
+  $safeModeCombo = New-Object System.Windows.Forms.ComboBox
+  $safeModeCombo.Left = 10
+  $safeModeCombo.Top = 34
+  $safeModeCombo.Width = 220
+  $safeModeCombo.DropDownStyle = 'DropDownList'
+  [void]$safeModeCombo.Items.Add('prompt')
+  [void]$safeModeCombo.Items.Add('deny-unknown')
+
+  $maxOutputLabel = New-Object System.Windows.Forms.Label
+  $maxOutputLabel.Text = 'Max output characters'
+  $maxOutputLabel.AutoSize = $true
+  $maxOutputLabel.Left = 10
+  $maxOutputLabel.Top = 78
+
+  $maxOutputBox = New-Object System.Windows.Forms.TextBox
+  $maxOutputBox.Left = 10
+  $maxOutputBox.Top = 100
+  $maxOutputBox.Width = 140
+  $maxOutputBox.Font = New-BmoFont -Name 'Consolas' -Size 9.5
+
+  $providerModeLabel = New-Object System.Windows.Forms.Label
+  $providerModeLabel.Text = 'Provider mode'
+  $providerModeLabel.AutoSize = $true
+  $providerModeLabel.Left = 280
+  $providerModeLabel.Top = 12
+
+  $providerModeCombo = New-Object System.Windows.Forms.ComboBox
+  $providerModeCombo.Left = 280
+  $providerModeCombo.Top = 34
+  $providerModeCombo.Width = 220
+  $providerModeCombo.DropDownStyle = 'DropDownList'
+  [void]$providerModeCombo.Items.Add('offline')
+  [void]$providerModeCombo.Items.Add('openai-compatible')
+
+  $providerEndpointLabel = New-Object System.Windows.Forms.Label
+  $providerEndpointLabel.Text = 'Provider endpoint'
+  $providerEndpointLabel.AutoSize = $true
+  $providerEndpointLabel.Left = 280
+  $providerEndpointLabel.Top = 78
+
+  $providerEndpointBox = New-Object System.Windows.Forms.TextBox
+  $providerEndpointBox.Left = 280
+  $providerEndpointBox.Top = 100
+  $providerEndpointBox.Width = 420
+  $providerEndpointBox.Font = New-BmoFont -Name 'Consolas' -Size 9.5
+
+  $providerModelLabel = New-Object System.Windows.Forms.Label
+  $providerModelLabel.Text = 'Provider model'
+  $providerModelLabel.AutoSize = $true
+  $providerModelLabel.Left = 280
+  $providerModelLabel.Top = 144
+
+  $providerModelBox = New-Object System.Windows.Forms.TextBox
+  $providerModelBox.Left = 280
+  $providerModelBox.Top = 166
+  $providerModelBox.Width = 220
+  $providerModelBox.Font = New-BmoFont -Name 'Consolas' -Size 9.5
+
+  $providerApiKeyLabel = New-Object System.Windows.Forms.Label
+  $providerApiKeyLabel.Text = 'Provider API key'
+  $providerApiKeyLabel.AutoSize = $true
+  $providerApiKeyLabel.Left = 280
+  $providerApiKeyLabel.Top = 210
+
+  $providerApiKeyBox = New-Object System.Windows.Forms.TextBox
+  $providerApiKeyBox.Left = 280
+  $providerApiKeyBox.Top = 232
+  $providerApiKeyBox.Width = 420
+  $providerApiKeyBox.Font = New-BmoFont -Name 'Consolas' -Size 9.5
+  $providerApiKeyBox.UseSystemPasswordChar = $true
+
+  $saveSettingsButton = New-Object System.Windows.Forms.Button
+  $saveSettingsButton.Text = 'Save Settings'
+  $saveSettingsButton.Left = 10
+  $saveSettingsButton.Top = 150
+  $saveSettingsButton.Width = 110
+  $saveSettingsButton.FlatStyle = 'Flat'
+
+  $openDataRootButton = New-Object System.Windows.Forms.Button
+  $openDataRootButton.Text = 'Open Data Root'
+  $openDataRootButton.Left = 128
+  $openDataRootButton.Top = 150
+  $openDataRootButton.Width = 110
+  $openDataRootButton.FlatStyle = 'Flat'
+
+  $settingsInfoBox = New-Object System.Windows.Forms.RichTextBox
+  $settingsInfoBox.Left = 10
+  $settingsInfoBox.Top = 290
+  $settingsInfoBox.Width = 900
+  $settingsInfoBox.Height = 290
+  $settingsInfoBox.ReadOnly = $true
+  $settingsInfoBox.Font = New-BmoFont -Name 'Consolas' -Size 9.25
+  $settingsInfoBox.BackColor = $palette.White
+
+  [void]$settingsPanel.Controls.Add($safeModeLabel)
+  [void]$settingsPanel.Controls.Add($safeModeCombo)
+  [void]$settingsPanel.Controls.Add($maxOutputLabel)
+  [void]$settingsPanel.Controls.Add($maxOutputBox)
+  [void]$settingsPanel.Controls.Add($providerModeLabel)
+  [void]$settingsPanel.Controls.Add($providerModeCombo)
+  [void]$settingsPanel.Controls.Add($providerEndpointLabel)
+  [void]$settingsPanel.Controls.Add($providerEndpointBox)
+  [void]$settingsPanel.Controls.Add($providerModelLabel)
+  [void]$settingsPanel.Controls.Add($providerModelBox)
+  [void]$settingsPanel.Controls.Add($providerApiKeyLabel)
+  [void]$settingsPanel.Controls.Add($providerApiKeyBox)
+  [void]$settingsPanel.Controls.Add($saveSettingsButton)
+  [void]$settingsPanel.Controls.Add($openDataRootButton)
+  [void]$settingsPanel.Controls.Add($settingsInfoBox)
+  [void]$settingsTab.Controls.Add($settingsPanel)
 
   [void]$operationsTab.Controls.Add($operationsTabs)
   [void]$operationsTab.Controls.Add($operationsTopPanel)
@@ -896,6 +1128,80 @@ function Start-BmoDesktopApp {
     } catch {
       [System.Windows.Forms.MessageBox]::Show('Clipboard copy failed in this session.', 'Clipboard')
     }
+  }
+
+  function Get-SelectedWorkspaceItemPath {
+    if ($null -eq $fileTree.SelectedNode -or $null -eq $fileTree.SelectedNode.Tag) {
+      return $state.workspace
+    }
+
+    $selectedPath = [string]$fileTree.SelectedNode.Tag
+    try {
+      $item = Get-Item -LiteralPath $selectedPath -ErrorAction Stop
+      if ($item.PSIsContainer) {
+        return $selectedPath
+      }
+      return (Split-Path -Parent $selectedPath)
+    } catch {
+      return $state.workspace
+    }
+  }
+
+  function Prompt-WorkspaceRelativePath {
+    param(
+      [string]$Title,
+      [string]$Prompt,
+      [string]$DefaultValue = ''
+    )
+
+    return [Microsoft.VisualBasic.Interaction]::InputBox($Prompt, $Title, $DefaultValue)
+  }
+
+  function Update-ProviderFieldState {
+    $isProviderEnabled = ($providerModeCombo.SelectedItem -eq 'openai-compatible')
+    $providerEndpointBox.Enabled = $isProviderEnabled
+    $providerModelBox.Enabled = $isProviderEnabled
+    $providerApiKeyBox.Enabled = $isProviderEnabled
+  }
+
+  function Refresh-Settings {
+    $settings = Get-BmoSettings
+    if ($safeModeCombo.Items.Contains($settings.safeExecutionMode)) {
+      $safeModeCombo.SelectedItem = $settings.safeExecutionMode
+    } else {
+      $safeModeCombo.SelectedItem = 'prompt'
+    }
+
+    $maxOutputBox.Text = [string]$settings.maxOutputCharacters
+    if ($providerModeCombo.Items.Contains($settings.provider.mode)) {
+      $providerModeCombo.SelectedItem = $settings.provider.mode
+    } else {
+      $providerModeCombo.SelectedItem = 'offline'
+    }
+    $providerEndpointBox.Text = [string]$settings.provider.endpoint
+    $providerModelBox.Text = [string]$settings.provider.model
+    $providerApiKeyBox.Text = [string]$settings.provider.apiKey
+    Update-ProviderFieldState
+
+    $settingsInfoBox.Text = @"
+Settings file:
+$(Get-BmoSettingsPath)
+
+Data root:
+$(Get-BmoDataRoot)
+
+Current workspace:
+$($state.workspace)
+
+Safe execution mode:
+$($settings.safeExecutionMode)
+
+Provider mode:
+$($settings.provider.mode)
+
+Preferred runtime profile:
+$($settings.preferredRuntimeProfile)
+"@
   }
 
   function Confirm-CommandApproval {
@@ -1094,12 +1400,22 @@ $commandText
         [void]$worktreesList.Items.Add($item)
       }
 
+      $recentCommits = Get-BmoRecentCommits -WorkspacePath $workspace -Limit 10
+      $recentCommitsBox.Text = if (@($recentCommits).Count -gt 0) {
+        (@($recentCommits | ForEach-Object { $_.line }) -join "`r`n")
+      } elseif ($repo.isGitRepo) {
+        'No commit history is available yet.'
+      } else {
+        'Open a git repo to inspect recent commits.'
+      }
+
       if ($changedFilesList.Items.Count -eq 0) {
         $diffView.Text = if ($repo.isGitRepo) { 'No changed files.' } else { 'Open a git repo to inspect diffs.' }
       }
     } catch {
       $repoSummaryLabel.Text = 'Repo inspection failed.'
       $diffView.Text = $_.Exception.Message
+      $recentCommitsBox.Text = $_.Exception.Message
     }
   }
 
@@ -1132,6 +1448,13 @@ $commandText
     $workspace = Get-WorkspaceOrThrow
     $toolText = Get-BmoToolStatusText -ToolStatus (Get-BmoToolStatus)
     $guidance = Get-BmoNextStepGuidance -WorkspacePath $workspace
+    $settings = Get-BmoSettings
+    $validationCatalog = Get-BmoValidationCatalog -WorkspacePath $workspace
+    $validationSummary = if (@($validationCatalog).Count -gt 0) {
+      @($validationCatalog | Select-Object -First 4 | ForEach-Object { "- $($_.name): $($_.lastStatus)" }) -join "`r`n"
+    } else {
+      'No validation actions are registered.'
+    }
     $healthBox.Text = @"
 Workspace:
 $workspace
@@ -1139,21 +1462,29 @@ $workspace
 Data root:
 $(Get-BmoDataRoot)
 
+Safe mode:
+$($settings.safeExecutionMode)
+
+Provider mode:
+$($settings.provider.mode)
+
 Tooling:
 $toolText
+
+Latest validation status:
+$validationSummary
 
 Next steps:
 $guidance
 "@
 
     $profileCombo.Items.Clear()
-    $profiles = Get-BmoRuntimeProfiles
+    $profiles = Get-BmoRuntimeProfileCatalog -WorkspacePath $workspace
     foreach ($profile in $profiles) {
       [void]$profileCombo.Items.Add($profile.id)
     }
-    $currentSettings = Get-BmoSettings
     if ($profileCombo.Items.Count -gt 0) {
-      $preferred = $currentSettings.preferredRuntimeProfile
+      $preferred = $settings.preferredRuntimeProfile
       if ($profileCombo.Items.Contains($preferred)) {
         $profileCombo.SelectedItem = $preferred
       } else {
@@ -1162,10 +1493,11 @@ $guidance
     }
 
     $routinesList.Items.Clear()
-    foreach ($routine in @(Get-BmoRoutinePack -WorkspacePath $workspace).routines) {
+    foreach ($routine in Get-BmoRoutineCatalog -WorkspacePath $workspace) {
       $item = New-Object System.Windows.Forms.ListViewItem([string]$routine.name)
+      [void]$item.SubItems.Add([string]$routine.readiness)
+      [void]$item.SubItems.Add([string]$routine.lastStatus)
       [void]$item.SubItems.Add([string]$routine.command)
-      [void]$item.SubItems.Add([string]$routine.owner_surface)
       $item.Tag = $routine
       [void]$routinesList.Items.Add($item)
     }
@@ -1173,15 +1505,17 @@ $guidance
     $skillsList.Items.Clear()
     foreach ($skill in Get-BmoSkillCatalog -WorkspacePath $workspace) {
       $item = New-Object System.Windows.Forms.ListViewItem([string]$skill.name)
-      [void]$item.SubItems.Add([string]$skill.defaultAction)
+      [void]$item.SubItems.Add([string]$skill.commandReadiness)
       [void]$item.SubItems.Add([string]$skill.recommendedCommand)
       $item.Tag = $skill
       [void]$skillsList.Items.Add($item)
     }
 
     $validationList.Items.Clear()
-    foreach ($validation in Get-BmoValidationActions) {
+    foreach ($validation in $validationCatalog) {
       $item = New-Object System.Windows.Forms.ListViewItem([string]$validation.name)
+      [void]$item.SubItems.Add([string]$validation.readiness)
+      [void]$item.SubItems.Add([string]$validation.lastStatus)
       [void]$item.SubItems.Add([string]$validation.command)
       $item.Tag = $validation
       [void]$validationList.Items.Add($item)
@@ -1194,6 +1528,8 @@ $guidance
       $item.Tag = $doc
       [void]$docsList.Items.Add($item)
     }
+
+    Refresh-Settings
   }
 
   function Refresh-Overview {
@@ -1266,8 +1602,13 @@ $(Get-BmoNextStepGuidance -WorkspacePath $workspace)
     $routine = $routinesList.SelectedItems[0].Tag
     $routineDetailsBox.Text = @"
 Name: $($routine.name)
-Command: $($routine.command)
+Raw command: $($routine.rawCommand)
+Effective command: $($routine.command)
 Owner: $($routine.owner_surface)
+Readiness: $($routine.readiness)
+Readiness note: $($routine.readinessReason)
+Execution note: $($routine.executionNote)
+Last task status: $($routine.lastStatus)
 
 Purpose:
 $($routine.purpose)
@@ -1286,7 +1627,11 @@ $(@($routine.related_files) -join "`r`n")
     $skillDetailsBox.Text = @"
 Skill: $($skill.name)
 Default action: $($skill.defaultAction)
+Raw suggested command: $($skill.rawRecommendedCommand)
 Suggested command: $($skill.recommendedCommand)
+Readiness: $($skill.commandReadiness)
+Readiness note: $($skill.commandReadinessReason)
+Execution note: $($skill.executionNote)
 Document: $($skill.documentPath)
 
 Description:
@@ -1305,7 +1650,12 @@ $(@($skill.triggers) -join ', ')
     $validation = $validationList.SelectedItems[0].Tag
     $validationDetailsBox.Text = @"
 Validation: $($validation.name)
-Command: $($validation.command)
+Raw command: $($validation.rawCommand)
+Effective command: $($validation.command)
+Readiness: $($validation.readiness)
+Readiness note: $($validation.readinessReason)
+Execution note: $($validation.executionNote)
+Last task status: $($validation.lastStatus)
 
 Description:
 $($validation.description)
@@ -1467,6 +1817,62 @@ $($validation.description)
     }
   })
 
+  $openFileExternalButton.Add_Click({
+    try {
+      if ($null -eq $fileTree.SelectedNode -or $null -eq $fileTree.SelectedNode.Tag) {
+        throw 'Select a file or folder first.'
+      }
+      $selectedPath = [string]$fileTree.SelectedNode.Tag
+      Start-Process explorer.exe "/select,$selectedPath" | Out-Null
+      Set-StatusText 'Opened item in Explorer.'
+    } catch {
+      [System.Windows.Forms.MessageBox]::Show($_.Exception.Message, 'Open external')
+    }
+  })
+
+  $newFileButton.Add_Click({
+    try {
+      $workspace = Get-WorkspaceOrThrow
+      $defaultBase = Get-BmoRelativePath -WorkspacePath $workspace -TargetPath (Get-SelectedWorkspaceItemPath)
+      if ($defaultBase -eq '.') {
+        $defaultBase = 'notes.txt'
+      } elseif (-not [string]::IsNullOrWhiteSpace($defaultBase)) {
+        $defaultBase = (Join-Path $defaultBase 'new-file.txt')
+      }
+      $relativePath = Prompt-WorkspaceRelativePath -Title 'New File' -Prompt 'Enter a relative file path inside the workspace.' -DefaultValue $defaultBase
+      if ([string]::IsNullOrWhiteSpace($relativePath)) {
+        return
+      }
+      [void](New-BmoWorkspaceFile -WorkspacePath $workspace -RelativePath $relativePath)
+      Refresh-FileTree
+      Load-FileIntoEditor -AbsolutePath (Join-Path $workspace $relativePath)
+      Set-StatusText "Created file $relativePath"
+    } catch {
+      [System.Windows.Forms.MessageBox]::Show($_.Exception.Message, 'New file')
+    }
+  })
+
+  $newFolderButton.Add_Click({
+    try {
+      $workspace = Get-WorkspaceOrThrow
+      $defaultBase = Get-BmoRelativePath -WorkspacePath $workspace -TargetPath (Get-SelectedWorkspaceItemPath)
+      if ($defaultBase -eq '.') {
+        $defaultBase = 'new-folder'
+      } elseif (-not [string]::IsNullOrWhiteSpace($defaultBase)) {
+        $defaultBase = (Join-Path $defaultBase 'new-folder')
+      }
+      $relativePath = Prompt-WorkspaceRelativePath -Title 'New Folder' -Prompt 'Enter a relative folder path inside the workspace.' -DefaultValue $defaultBase
+      if ([string]::IsNullOrWhiteSpace($relativePath)) {
+        return
+      }
+      [void](New-BmoWorkspaceDirectory -WorkspacePath $workspace -RelativePath $relativePath)
+      Refresh-FileTree
+      Set-StatusText "Created folder $relativePath"
+    } catch {
+      [System.Windows.Forms.MessageBox]::Show($_.Exception.Message, 'New folder')
+    }
+  })
+
   $fileEditor.Add_TextChanged({
     if (-not $state.loadingFile -and -not [string]::IsNullOrWhiteSpace($state.currentFileRelative)) {
       $saveFileButton.Enabled = ($fileEditor.Text -ne $state.currentFileOriginal)
@@ -1518,6 +1924,76 @@ $($validation.description)
     }
   })
 
+  $stageSelectedButton.Add_Click({
+    if ($changedFilesList.SelectedItems.Count -eq 0) {
+      return
+    }
+
+    try {
+      $relativePath = [string]$changedFilesList.SelectedItems[0].Tag
+      $approval = Confirm-CommandApproval -CommandText ("git add -- " + (ConvertTo-BmoPowerShellLiteral -Text $relativePath)) -ActionLabel 'stage selected file'
+      if ($null -eq $approval) {
+        return
+      }
+      [void](Invoke-BmoGitStageFiles -WorkspacePath $state.workspace -RelativePaths @($relativePath) -Approved:$approval.approved)
+      Refresh-Tasks
+      Refresh-Overview
+      Set-StatusText "Staging $relativePath"
+    } catch {
+      [System.Windows.Forms.MessageBox]::Show($_.Exception.Message, 'Stage selected')
+    }
+  })
+
+  $unstageSelectedButton.Add_Click({
+    if ($changedFilesList.SelectedItems.Count -eq 0) {
+      return
+    }
+
+    try {
+      $relativePath = [string]$changedFilesList.SelectedItems[0].Tag
+      $approval = Confirm-CommandApproval -CommandText ("git restore --staged -- " + (ConvertTo-BmoPowerShellLiteral -Text $relativePath)) -ActionLabel 'unstage selected file'
+      if ($null -eq $approval) {
+        return
+      }
+      [void](Invoke-BmoGitUnstageFiles -WorkspacePath $state.workspace -RelativePaths @($relativePath) -Approved:$approval.approved)
+      Refresh-Tasks
+      Refresh-Overview
+      Set-StatusText "Unstaging $relativePath"
+    } catch {
+      [System.Windows.Forms.MessageBox]::Show($_.Exception.Message, 'Unstage selected')
+    }
+  })
+
+  $stageAllButton.Add_Click({
+    try {
+      $approval = Confirm-CommandApproval -CommandText 'git add -A' -ActionLabel 'stage all changes'
+      if ($null -eq $approval) {
+        return
+      }
+      [void](Invoke-BmoGitStageFiles -WorkspacePath $state.workspace -Approved:$approval.approved)
+      Refresh-Tasks
+      Refresh-Overview
+      Set-StatusText 'Staging all changes.'
+    } catch {
+      [System.Windows.Forms.MessageBox]::Show($_.Exception.Message, 'Stage all')
+    }
+  })
+
+  $unstageAllButton.Add_Click({
+    try {
+      $approval = Confirm-CommandApproval -CommandText 'git restore --staged .' -ActionLabel 'unstage all changes'
+      if ($null -eq $approval) {
+        return
+      }
+      [void](Invoke-BmoGitUnstageFiles -WorkspacePath $state.workspace -Approved:$approval.approved)
+      Refresh-Tasks
+      Refresh-Overview
+      Set-StatusText 'Unstaging all changes.'
+    } catch {
+      [System.Windows.Forms.MessageBox]::Show($_.Exception.Message, 'Unstage all')
+    }
+  })
+
   $useWorktreeButton.Add_Click({
     if ($worktreesList.SelectedItems.Count -eq 0) {
       return
@@ -1528,6 +2004,34 @@ $($validation.description)
     Add-BmoRecentWorkspace -WorkspacePath $state.workspace
     Refresh-All
     Set-StatusText "Switched workspace to $path"
+  })
+
+  $copyCommitPrepButton.Add_Click({
+    try {
+      Copy-TextToClipboard -Text (Get-BmoCommitPrepNote -WorkspacePath $state.workspace)
+    } catch {
+      [System.Windows.Forms.MessageBox]::Show($_.Exception.Message, 'Copy commit prep')
+    }
+  })
+
+  $commitStagedButton.Add_Click({
+    try {
+      $message = $commitMessageBox.Text.Trim()
+      if ([string]::IsNullOrWhiteSpace($message)) {
+        throw 'Enter a commit message first.'
+      }
+      $previewCommand = 'git commit -m ' + (ConvertTo-BmoPowerShellLiteral -Text $message)
+      $approval = Confirm-CommandApproval -CommandText $previewCommand -ActionLabel 'local commit'
+      if ($null -eq $approval) {
+        return
+      }
+      [void](Invoke-BmoGitCommit -WorkspacePath $state.workspace -Message $message -Approved:$approval.approved)
+      Refresh-Tasks
+      Refresh-Overview
+      Set-StatusText 'Started local commit task.'
+    } catch {
+      [System.Windows.Forms.MessageBox]::Show($_.Exception.Message, 'Commit staged')
+    }
   })
 
   $refreshTasksButton.Add_Click({ Refresh-Tasks })
@@ -1578,6 +2082,10 @@ $($validation.description)
       return
     }
     $routine = $routinesList.SelectedItems[0].Tag
+    if (-not $routine.ready) {
+      [System.Windows.Forms.MessageBox]::Show($routine.readinessReason, 'Routine blocked')
+      return
+    }
     $approval = Confirm-CommandApproval -CommandText $routine.command -ActionLabel 'routine'
     if ($null -eq $approval) {
       return
@@ -1603,6 +2111,10 @@ $($validation.description)
     $skill = $skillsList.SelectedItems[0].Tag
     if ([string]::IsNullOrWhiteSpace($skill.recommendedCommand)) {
       [System.Windows.Forms.MessageBox]::Show('This skill is documentation-only in the current repo. Open the doc instead.', 'Skill command')
+      return
+    }
+    if (-not $skill.commandReady) {
+      [System.Windows.Forms.MessageBox]::Show($skill.commandReadinessReason, 'Skill action blocked')
       return
     }
     $approval = Confirm-CommandApproval -CommandText $skill.recommendedCommand -ActionLabel 'skill action'
@@ -1632,6 +2144,10 @@ $($validation.description)
       return
     }
     $validation = $validationList.SelectedItems[0].Tag
+    if (-not $validation.ready) {
+      [System.Windows.Forms.MessageBox]::Show($validation.readinessReason, 'Validation blocked')
+      return
+    }
     $approval = Confirm-CommandApproval -CommandText $validation.command -ActionLabel 'validation'
     if ($null -eq $approval) {
       return
@@ -1648,8 +2164,12 @@ $($validation.description)
     }
 
     $selectedProfile = [string]$profileCombo.SelectedItem
-    $profile = @(Get-BmoRuntimeProfiles | Where-Object { $_.id -eq $selectedProfile } | Select-Object -First 1)
+    $profile = @(Get-BmoRuntimeProfileCatalog -WorkspacePath $state.workspace | Where-Object { $_.id -eq $selectedProfile } | Select-Object -First 1)
     if ($profile.Count -eq 0) {
+      return
+    }
+    if (-not $profile[0].ready) {
+      [System.Windows.Forms.MessageBox]::Show($profile[0].readinessReason, 'Profile action blocked')
       return
     }
     $approval = Confirm-CommandApproval -CommandText $profile[0].command -ActionLabel 'runtime profile'
@@ -1660,6 +2180,45 @@ $($validation.description)
     Refresh-Tasks
     Refresh-Overview
     Set-StatusText "Started profile action $selectedProfile"
+  })
+
+  $providerModeCombo.Add_SelectedIndexChanged({ Update-ProviderFieldState })
+  $saveSettingsButton.Add_Click({
+    try {
+      $settings = Get-BmoSettings
+      $safeMode = [string]$safeModeCombo.SelectedItem
+      $providerMode = [string]$providerModeCombo.SelectedItem
+      $maxOutput = 0
+      if (-not [int]::TryParse($maxOutputBox.Text.Trim(), [ref]$maxOutput)) {
+        throw 'Max output characters must be an integer.'
+      }
+      if ($maxOutput -lt 1000) {
+        throw 'Max output characters must be at least 1000.'
+      }
+
+      $settings.safeExecutionMode = if ([string]::IsNullOrWhiteSpace($safeMode)) { 'prompt' } else { $safeMode }
+      $settings.maxOutputCharacters = $maxOutput
+      $settings.provider.mode = if ([string]::IsNullOrWhiteSpace($providerMode)) { 'offline' } else { $providerMode }
+      $settings.provider.endpoint = $providerEndpointBox.Text.Trim()
+      $settings.provider.model = $providerModelBox.Text.Trim()
+      $settings.provider.apiKey = $providerApiKeyBox.Text
+      Save-BmoSettings -Settings $settings
+      Refresh-Settings
+      Refresh-Overview
+      Refresh-Operations
+      Set-StatusText 'Saved workstation settings.'
+    } catch {
+      [System.Windows.Forms.MessageBox]::Show($_.Exception.Message, 'Save settings')
+    }
+  })
+
+  $openDataRootButton.Add_Click({
+    try {
+      Start-Process explorer.exe (Get-BmoDataRoot) | Out-Null
+      Set-StatusText 'Opened BMO data root.'
+    } catch {
+      [System.Windows.Forms.MessageBox]::Show($_.Exception.Message, 'Open data root')
+    }
   })
 
   $timer = New-Object System.Windows.Forms.Timer
