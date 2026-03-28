@@ -1,5 +1,7 @@
 {
   "version": 1,
+  "sourceOfTruth": "docs/UNIFIED_OPERATOR_APP.md",
+  "bridgeMode": "local-first",
   "capabilityGroups": [
     {
       "id": "prompt-intake",
