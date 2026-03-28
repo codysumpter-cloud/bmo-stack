@@ -1,17 +1,17 @@
 # Task State
 
-Last updated: 2026-03-28 13:29 UTC
+Last updated: 2026-03-28 13:36 UTC
 
 ## Current status
 
-- Description: Restore green CI on `master` after the BMO operating-system validator started failing on date-sensitive daily memory enforcement.
+- Description: Close out the date-sensitive BMO validator repair after merge and confirm `master` is green again.
 - Active repo: `C:\Users\cody_\Git\bmo-stack`
 - Branch: `master`
-- Last successful step: identified the failing GitHub Actions run on `master`, patched `scripts/validate-bmo-operating-system.mjs`, and validated the same repo-contract checks the `ci` workflow runs.
-- Next intended step: publish the fix to remote and confirm the rerun on `master` returns to green.
-- Verification complete: false
+- Last successful step: merged PR `#123` so commit `c39036c8ad66d0071ff80af477c2aa2dc91169b3` landed on `master`, then verified the follow-up `ci`, `codeql`, and `Publish continuity` runs completed successfully.
+- Next intended step: return to the next unfinished operator task from the backlog when a new request arrives.
+- Verification complete: true
 - Manual steps remaining:
-  - publish the fix to remote and confirm the workflow reruns cleanly
+  - none for the CI repair
 - Safe to resume: true
 
 ## Recent checkpoints
@@ -54,4 +54,14 @@ Last updated: 2026-03-28 13:29 UTC
   - Next intended step: commit, push, and confirm the remote rerun goes green
   - Verification complete: false
   - Manual steps remaining: commit/push and remote workflow confirmation
+  - Safe to resume: true
+
+- 2026-03-28 13:36 UTC
+  - Repo: `C:\Users\cody_\Git\bmo-stack`
+  - Branch: `master`
+  - Files touched: `memory/2026-03-28.md`, `TASK_STATE.md`, `WORK_IN_PROGRESS.md`
+  - Last successful step: confirmed PR `#123` merged and the follow-up `master` runs for `ci`, `codeql`, and `Publish continuity` all passed
+  - Next intended step: wait for the next requested task
+  - Verification complete: true
+  - Manual steps remaining: none for this repair
   - Safe to resume: true

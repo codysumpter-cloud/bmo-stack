@@ -1,33 +1,25 @@
 # Work In Progress
 
-Last updated: 2026-03-28 13:29 UTC
+Last updated: 2026-03-28 13:36 UTC
 
 ## Current focus
 
-- Active mission: restore green GitHub Actions status on `master` without weakening the documented BMO startup contract.
-- Why now: `ci` is red on `master` because the operating-system validator hard-requires a date-specific memory note that the docs explicitly describe as optional.
+- Active mission: none currently active; the date-sensitive validator repair is closed out.
+- Why now: checkpoint state needed to catch up with the completed merge and successful `master` reruns.
 - Owner paths in play:
-  - `scripts/validate-bmo-operating-system.mjs`
-  - `.github/workflows/ci.yml`
-  - `AGENTS.md`
-  - `context/identity/AGENTS.md`
-  - `context/RUNBOOK.md`
   - `memory/2026-03-28.md`
   - `TASK_STATE.md`
   - `WORK_IN_PROGRESS.md`
 
 ## Current work packet
 
-- keep the startup contract honest between docs and validation code
-- publish the repair so `master` regains a green status
+- record that the CI repair is complete and verified
+- leave the repo in a safe resume state
 
 ## Next milestone
 
-- commit and publish the CI repair
-- confirm the remote workflow reruns cleanly
+- wait for the next requested operator task
 
 ## Risks and watchouts
 
-- do not paper over the failure by only adding a one-day file
-- do not weaken the validator beyond the actual documented contract
-- keep checkpoint files current once publish status changes
+- avoid leaving stale “in progress” checkpoint text after merged work completes
