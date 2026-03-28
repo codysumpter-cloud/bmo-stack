@@ -1,0 +1,77 @@
+{
+  "version": 1,
+  "sourceOfTruth": "docs/UNIFIED_OPERATOR_APP.md",
+  "bridgeMode": "local-first",
+  "capabilityGroups": [
+    {
+      "id": "prompt-intake",
+      "name": "Prompt intake and plan shaping",
+      "owner": "shared",
+      "description": "Capture the request once and preserve structured planning context across apps."
+    },
+    {
+      "id": "council-review",
+      "name": "Council review and verification",
+      "owner": "web",
+      "description": "Run bounded review and keep approval visible before action."
+    },
+    {
+      "id": "generation-handoff",
+      "name": "Generation, artifacts, and handoff",
+      "owner": "shared",
+      "description": "Expose the same handoff story and generated outputs across browser and workstation surfaces."
+    },
+    {
+      "id": "repo-docs",
+      "name": "Repo visibility, files, and docs",
+      "owner": "local",
+      "description": "Keep repo state, docs shortcuts, and file editing anchored to the workstation."
+    },
+    {
+      "id": "validation-runtime",
+      "name": "Validation and runtime recovery",
+      "owner": "local",
+      "description": "Make guarded execution and runtime checks explicit and operator-visible."
+    }
+  ],
+  "documentShortcuts": [
+    {
+      "id": "unified-operator",
+      "name": "Unified Operator Contract",
+      "path": "docs/UNIFIED_OPERATOR_APP.md",
+      "description": "Shared capability map and trust boundaries."
+    },
+    {
+      "id": "enterprise-factory-bridge",
+      "name": "Enterprise Factory Bridge",
+      "path": "docs/ENTERPRISE_APP_FACTORY_BRIDGE.md",
+      "description": "How browser planning surfaces hand off to the local workstation."
+    }
+  ],
+  "validationActions": [
+    {
+      "id": "validate-operating-system",
+      "name": "Validate operating system",
+      "command": "node scripts/validate-bmo-operating-system.mjs",
+      "description": "Verify startup, donor, and checkpoint files."
+    },
+    {
+      "id": "validate-routines",
+      "name": "Validate routines pack",
+      "command": "node scripts/bmo-routines.mjs validate",
+      "description": "Check the routine registry before runtime work."
+    },
+    {
+      "id": "worker-status",
+      "name": "Worker status",
+      "command": "bash ./scripts/bmo-worker-status",
+      "description": "Check gateway, worker, and checkpoint health."
+    },
+    {
+      "id": "runtime-doctor",
+      "name": "Runtime doctor",
+      "command": "make runtime-doctor",
+      "description": "Validate runtime profile and launch assumptions."
+    }
+  ]
+}
