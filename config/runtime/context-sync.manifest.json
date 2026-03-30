@@ -1,0 +1,23 @@
+{
+  "version": "2026-03-30.v1",
+  "manifestId": "bmo-context-sync",
+  "strategy": "local-first-host-repo-worker",
+  "canonicalRoots": [
+    {"path": "context/", "owner": "repo"},
+    {"path": "skills/", "owner": "repo"},
+    {"path": "docs/", "owner": "repo"},
+    {"path": "scripts/", "owner": "repo"},
+    {"path": "Makefile", "owner": "repo"},
+    {"path": "routines.md", "owner": "repo"}
+  ],
+  "syncTargets": [
+    {"path": "~/bmo-context", "mode": "repo-to-host"},
+    {"path": "bmo-tron", "mode": "host-to-worker-mirror"}
+  ],
+  "excludes": [".git/", "node_modules/", "vendor/"],
+  "rules": [
+    "Canonical state stays in the repo or approved downstream systems, never only inside a disposable worker.",
+    "The host context is a synced execution mirror, not the long-term source of truth.",
+    "The worker is disposable and must be reseeded from the host or repo."
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bmostack.dev/schemas/runtime/access-report.schema.json",
+  "title": "Runtime Access Report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["classification", "summary", "accessibleInputs", "blockedInputs", "fallbacksUsed", "assistantMayClaimFullAnalysis"],
+  "properties": {
+    "classification": {"type": "string", "enum": ["full-analysis", "transcript-based", "visual-only-fallback", "metadata-only", "inaccessible", "partial-access"]},
+    "summary": {"type": "string", "minLength": 1},
+    "accessibleInputs": {"type": "array", "items": {"$ref": "#/$defs/inputRef"}},
+    "blockedInputs": {"type": "array", "items": {"$ref": "#/$defs/blockedInput"}},
+    "fallbacksUsed": {"type": "array", "items": {"type": "string", "enum": ["none", "transcript", "visual", "metadata", "manual-operator-note"]}},
+    "assistantMayClaimFullAnalysis": {"type": "boolean"}
+  },
+  "allOf": [{
+    "if": {"properties": {"classification": {"const": "full-analysis"}}},
+    "then": {"properties": {"assistantMayClaimFullAnalysis": {"const": true}, "blockedInputs": {"maxItems": 0}}},
+    "else": {"properties": {"assistantMayClaimFullAnalysis": {"const": false}}}
+  }],
+  "$defs": {
+    "inputRef": {"type": "object", "additionalProperties": false, "required": ["kind", "ref", "accessMode"], "properties": {"kind": {"type": "string", "enum": ["local-file", "direct-url", "youtube-public", "web-page", "api-resource", "repo-file"]}, "ref": {"type": "string", "minLength": 1}, "accessMode": {"type": "string", "enum": ["direct", "connector", "derived"]}}},
+    "blockedInput": {"type": "object", "additionalProperties": false, "required": ["kind", "ref", "reason"], "properties": {"kind": {"type": "string"}, "ref": {"type": "string", "minLength": 1}, "reason": {"type": "string", "enum": ["not-found", "auth-required", "network-blocked", "tool-unavailable", "unsupported-format", "rate-limited", "unknown"]}, "detail": {"type": "string"}}}
+  }
+}

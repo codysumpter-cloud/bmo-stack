@@ -1,0 +1,18 @@
+{
+  "version": "2026-03-30.v1",
+  "policyId": "bmo-runtime-delegation-policy",
+  "defaults": {
+    "requireVerifierBeforeComplete": true,
+    "maxDelegationDepth": 2,
+    "maxRetriesPerTask": 1,
+    "maxChildrenPerTask": 3,
+    "maxTotalTasksPerRun": 8,
+    "defaultWorkerProfileId": "safe-readonly",
+    "defaultConflictMode": "escalate-to-host"
+  },
+  "forbidden": [
+    "canonical-state-in-disposable-worker",
+    "direct-external-channel-binding-on-worker",
+    "completion-claim-without-verifier-evidence"
+  ]
+}
