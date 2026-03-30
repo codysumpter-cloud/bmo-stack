@@ -11,7 +11,10 @@
     {"id": "cost-usage", "name": "Token / cost usage", "dataSource": "cost_events", "required": true},
     {"id": "memory-touched", "name": "Memory files touched", "dataSource": "memory_versions", "required": true},
     {"id": "latest-artifacts", "name": "Latest artifacts", "dataSource": "run_artifacts", "required": true},
-    {"id": "blocked-runs", "name": "Blocked runs", "dataSource": "task_runs", "required": true}
+    {"id": "blocked-runs", "name": "Blocked runs", "dataSource": "task_runs", "required": true},
+    {"id": "agent-heartbeats", "name": "Agent Heartbeats", "dataSource": "agent_heartbeats", "required": true},
+    {"id": "local-token-usage", "name": "Local Model Token Usage", "dataSource": "local_token_usage", "required": true},
+    {"id": "skill-execution-logs", "name": "Skill Execution Logs", "dataSource": "skill_execution_logs", "required": true}
   ],
   "reviewQueues": ["research", "content", "code", "quality", "operator"]
 }

@@ -1,0 +1,8 @@
+{
+  "name": "daily-agent-checkin",
+  "description": "Daily check-in with the agent council to review memory and task state",
+  "type": "checkin",
+  "agent": "council",
+  "task": "Review today's memory files and update task state if needed",
+  "schedule": "0 9 * * *"
+}
