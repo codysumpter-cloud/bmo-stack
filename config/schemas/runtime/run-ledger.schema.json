@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bmostack.dev/schemas/runtime/run-ledger.schema.json",
+  "title": "Runtime Run Ledger",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["runId", "status", "startedAt", "updatedAt", "rootTaskId", "entries", "accessReport", "finalVerification"],
+  "properties": {
+    "runId": {"type": "string", "minLength": 1},
+    "status": {"type": "string", "enum": ["running", "completed", "completed-partial", "failed", "blocked", "cancelled"]},
+    "startedAt": {"type": "string", "format": "date-time"},
+    "updatedAt": {"type": "string", "format": "date-time"},
+    "rootTaskId": {"type": "string", "minLength": 1},
+    "checkpointKey": {"type": "string"},
+    "accessReport": {"$ref": "access-report.schema.json"},
+    "entries": {"type": "array", "items": {"type": "object", "additionalProperties": false, "required": ["at", "actor", "event", "taskId"], "properties": {"at": {"type": "string", "format": "date-time"}, "actor": {"type": "string", "enum": ["host", "worker", "verifier", "operator", "service"]}, "event": {"type": "string", "enum": ["task-created", "task-delegated", "task-retried", "partial-returned", "verification-started", "verification-passed", "verification-failed", "merge-completed", "run-failed", "run-blocked"]}, "taskId": {"type": "string"}, "detail": {"type": "string"}}}},
+    "finalVerification": {"type": "object", "additionalProperties": false, "required": ["status", "verifier", "checks", "completionClaimAllowed"], "properties": {"status": {"type": "string"}, "verifier": {"type": "string"}, "checks": {"type": "array", "items": {"type": "object"}}, "completionClaimAllowed": {"type": "boolean"}}}
+  }
+}

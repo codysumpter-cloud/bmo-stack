@@ -1,0 +1,10 @@
+{
+  "version": "2026-03-30.v1",
+  "profiles": [
+    {"id": "safe-readonly", "permissionTier": "read-only", "allowedCapabilities": ["read-repo", "read-files", "structured-analysis"], "forbiddenCapabilities": ["network-write", "repo-write", "external-send"]},
+    {"id": "research-networked", "permissionTier": "network-read", "allowedCapabilities": ["read-repo", "read-files", "web-research"], "forbiddenCapabilities": ["network-write", "repo-write", "external-send"]},
+    {"id": "repo-mutating", "permissionTier": "repo-mutate", "allowedCapabilities": ["read-repo", "write-repo", "run-validation"], "forbiddenCapabilities": ["external-send"]},
+    {"id": "communications-draft-only", "permissionTier": "draft-only", "allowedCapabilities": ["draft-message", "analyze-thread", "prepare-response"], "forbiddenCapabilities": ["send-message", "reply-live-without-host"]},
+    {"id": "browser-proof", "permissionTier": "network-read", "allowedCapabilities": ["browser-validate", "capture-evidence"], "forbiddenCapabilities": ["irreversible-submit", "external-send"]}
+  ]
+}

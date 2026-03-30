@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bmostack.dev/schemas/runtime/media-intake-request.schema.json",
+  "title": "Media Intake Request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["sourceKind", "sourceRef", "fallbackPolicy"],
+  "properties": {
+    "sourceKind": {"type": "string", "enum": ["local-file", "direct-url", "youtube-public", "public-media"]},
+    "sourceRef": {"type": "string", "minLength": 1},
+    "fallbackPolicy": {"type": "string", "enum": ["transcript-then-visual", "visual-then-metadata", "metadata-only", "fail-closed"]}
+  }
+}

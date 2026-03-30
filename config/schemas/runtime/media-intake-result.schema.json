@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bmostack.dev/schemas/runtime/media-intake-result.schema.json",
+  "title": "Media Intake Result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["status", "normalizedKind", "accessReport", "failure"],
+  "properties": {
+    "status": {"type": "string", "enum": ["ready", "partial", "blocked", "failed"]},
+    "normalizedKind": {"type": "string", "enum": ["image", "video", "audio", "document", "unknown"]},
+    "accessReport": {"$ref": "access-report.schema.json"},
+    "failure": {"type": "object", "additionalProperties": false, "required": ["category", "retryable", "summary"], "properties": {"category": {"type": "string", "enum": ["none", "blocked-access", "budget-exhausted", "validation-failed", "conflict", "tool-failure", "runtime-error", "policy-blocked"]}, "retryable": {"type": "boolean"}, "summary": {"type": "string"}, "detail": {"type": "string"}}}
+  }
+}
