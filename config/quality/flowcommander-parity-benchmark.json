@@ -1,0 +1,21 @@
+{
+  "benchmarkId": "flowcommander.v1",
+  "releaseThreshold": 85,
+  "weights": {
+    "functionality": 20,
+    "uxCompleteness": 15,
+    "reliability": 15,
+    "clarity": 10,
+    "maintainability": 10,
+    "validationEvidence": 10,
+    "operatorTrust": 10,
+    "performanceBasics": 5,
+    "accessibilityBasics": 5
+  },
+  "blockingDimensions": [
+    "functionality",
+    "reliability",
+    "validationEvidence",
+    "operatorTrust"
+  ]
+}
