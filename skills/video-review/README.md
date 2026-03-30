@@ -5,7 +5,9 @@ description: Review and summarize online videos (especially YouTube) by extracti
 
 # Video Review
 
-Use this skill when the user wants a real video breakdown instead of metadata-only comments.
+## Purpose
+Review and summarize online videos (especially YouTube) by extracting transcript and keyframes with local tools.
+Use when the user asks you to "watch" a video link, react to a video, summarize a video, or extract highlights and timestamps.
 
 ## Workflow
 
@@ -37,12 +39,11 @@ python3 skills/video-review/scripts/review_video.py --url "<video-url-or-file>" 
 
 ## Smoke Test
 Verify end-to-end function:
-```bash
-python3 skills/video-review/scripts/review_video.py \
-  --url "https://www.youtube.com/watch?v=jNQXAC9IVRw" \
-  --out-dir "./test-output" \
+\`\`\`bash
+python3 skills/video-review/scripts/review_video.py \\
+  --url "https://www.youtube.com/watch?v=jNQXAC9IVRw" \\
+  --out-dir "./test-output" \\
   --sample-seconds 5
 # Expect: test-output/*/REVIEW.md with content summary, transcript.txt, frames/
-```
+\`\`\`
 Dependencies: yt-dlp, ffmpeg, whisper CLI
-

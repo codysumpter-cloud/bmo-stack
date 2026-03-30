@@ -5,7 +5,10 @@ description: Read arbitrary user-provided links/files/media with best-effort fal
 
 # Universal Intake
 
-Use this when users send links, videos, images, or shared pages and want analysis.
+## Purpose
+Provide a consistent interface for reading and analyzing user-provided links, files, and media (especially videos) with automatic fallbacks when direct access is blocked or unavailable.
+
+Use this when a user shares a link, file, or video and wants analysis, summary, or key information extracted.
 
 ## Workflow
 
@@ -32,17 +35,17 @@ Use this when users send links, videos, images, or shared pages and want analysi
 
 ## Smoke Test
 Verify end-to-end function:
-```bash
+\`\`\`bash
 # Test with a URL
-./skills/universal-intake/scripts/fetch_any_link.sh "https://example.com" ./test-output
+./skills/universal-intake/scripts/fetch_any_link.sh \"https://example.com\" ./test-output
 # Expect: fetched content in test-output/
 
 # Test with local file
-./skills/universal-intake/scripts/fetch_any_link.sh ${PWD}/SKILL.md ./test-output
+./skills/universal-intake/scripts/fetch_any_link.sh \${PWD}/SKILL.md ./test-output
 # Expect: SKILL.md copied to test-output/
 
 # Test YouTube metadata
-./skills/universal-intake/scripts/fetch_any_link.sh "https://www.youtube.com/watch?v=jNQXAC9IVRw" ./test-output
+./skills/universal-intake/scripts/fetch_any_link.sh \"https://www.youtube.com/watch?v=jNQXAC9IVRw\" ./test-output
 # Expect: metadata.json in test-output/
-```
+\`\`\`
 Dependencies: yt-dlp, ffmpeg (for keyframes)
