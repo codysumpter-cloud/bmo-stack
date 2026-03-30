@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "manifest_id": "bmo-model-routing-policy",
+  "defaultPolicy": "cheap-reasoner",
+  "policies": [
+    {
+      "id": "cheap-reasoner",
+      "purpose": "Triage, drafting, classification, and low-risk recurring tasks.",
+      "useFor": ["summaries", "classification", "drafting", "queue-processing"],
+      "mustNotClaimCompletionWithoutVerification": true
+    },
+    {
+      "id": "deep-research",
+      "purpose": "Evidence-backed research, market analysis, and source comparison.",
+      "useFor": ["research", "competitor-analysis", "trend-analysis"],
+      "requiresCitationsOrArtifacts": true
+    },
+    {
+      "id": "coding",
+      "purpose": "Implementation planning, code changes, and repo-aware task execution.",
+      "useFor": ["patching", "refactors", "tests", "migration-work"],
+      "requiresReviewQueue": "code"
+    },
+    {
+      "id": "verification",
+      "purpose": "Claim checking, QA, code review, and completion gating.",
+      "useFor": ["verification", "qa", "review", "acceptance-checks"],
+      "cannotAuthorPrimaryArtifacts": true
+    },
+    {
+      "id": "long-context-synthesis",
+      "purpose": "Orchestration, cross-run synthesis, and founder-level decision support.",
+      "useFor": ["orchestration", "multi-artifact-synthesis", "daily-briefs"],
+      "requiresVisibleRunContext": true
+    }
+  ]
+}
