@@ -59,6 +59,10 @@ It is meant to make a focused workflow easier to execute correctly.
   - inspect and repair worker sandbox drift, policy mismatches, and missing containers
 - `ci-failure-diagnosis/`
   - quickly classify failing GitHub checks before fixing the real owner path
+- `universal-intake/`
+  - read arbitrary user-provided links/files/media with best-effort fallbacks (web fetch, browser relay, yt-dlp, ffmpeg keyframes), then return actionable summaries and blockers
+- `video-review/`
+  - review and summarize online videos (especially YouTube) by extracting transcript + keyframes with local tools
 
 ## Suggested skill format
 
@@ -83,4 +87,10 @@ Each skill directory should contain a `README.md` with:
 - context files
 - GitHub automation docs
 
-This skill layer makes that operational knowledge more modular and easier to reuse across future BMO-facing repos and runtimes.
+This skill layer makes that operational knowledge more modular and easier to reuse in future repos or agent-facing runtime systems.
+
+For operator rollout and external skill recommendations, start with:
+
+- `docs/SKILLS_INSTALL.md`
+- `docs/SKILLS_RECOMMENDED.md`
+- `config/skills/bmo-baseline-pack.json`

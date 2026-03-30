@@ -87,6 +87,30 @@
         "openclaw skills check"
       ],
       "default_action": "run"
+    },
+    "universal-intake": {
+      "actions": ["run"],
+      "triggers": [
+        "read this link",
+        "watch this video",
+        "analyze this file",
+        "summarize this url",
+        "extract keyframes",
+        "fetch any link"
+      ],
+      "default_action": "run"
+    },
+    "video-review": {
+      "actions": ["run"],
+      "triggers": [
+        "review this video",
+        "summarize youtube",
+        "analyze video content",
+        "extract video transcript",
+        "watch and react",
+        "video breakdown"
+      ],
+      "default_action": "run"
     }
   }
 }
