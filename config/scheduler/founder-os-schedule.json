@@ -1,0 +1,77 @@
+{
+  "version": 1,
+  "manifest_id": "bmo-founder-os-schedule",
+  "runStore": {
+    "taskDefinitions": "task_definitions",
+    "taskRuns": "task_runs",
+    "runLogs": "run_logs",
+    "runArtifacts": "run_artifacts",
+    "reviewQueue": "review_queue",
+    "costEvents": "cost_events",
+    "memoryVersions": "memory_versions",
+    "toolAuditLog": "tool_audit_log"
+  },
+  "executionRules": {
+    "idempotent": true,
+    "replayable": true,
+    "cancelable": true,
+    "visibleInDashboard": true,
+    "hiddenChatWorkDisallowed": true
+  },
+  "taskDefinitions": [
+    {
+      "id": "morning-brief",
+      "name": "Morning Brief",
+      "purpose": "Daily research and operator summary before interactive work begins.",
+      "ownerRole": "orchestrator",
+      "workflowId": "research-draft-human-approve",
+      "schedule": "0 8 * * *",
+      "outputs": ["brief", "review-item"]
+    },
+    {
+      "id": "midday-trend-scan",
+      "name": "Midday Trend Scan",
+      "purpose": "Watch product, community, and market signals for timely follow-up.",
+      "ownerRole": "trend-scout",
+      "workflowId": "trend-detect-content-brief",
+      "schedule": "0 12 * * *",
+      "outputs": ["signal-report", "content-brief"]
+    },
+    {
+      "id": "research-to-draft",
+      "name": "Research To Draft",
+      "purpose": "Convert approved research into human-reviewed drafts.",
+      "ownerRole": "writer",
+      "workflowId": "research-draft-human-approve",
+      "schedule": "0 14 * * 1-5",
+      "outputs": ["draft", "review-item"]
+    },
+    {
+      "id": "code-implement-review",
+      "name": "Code Implement Review",
+      "purpose": "Run bounded code task intake through implementation, review, and approval.",
+      "ownerRole": "dev",
+      "workflowId": "code-implement-review-approve-pr",
+      "schedule": "*/30 9-18 * * 1-5",
+      "outputs": ["patch-plan", "review-item", "artifact"]
+    },
+    {
+      "id": "bug-monitor-triage",
+      "name": "Bug Monitor Triage",
+      "purpose": "Turn runtime or product failures into reproducible triage packets.",
+      "ownerRole": "qa-monitor",
+      "workflowId": "bug-monitor-reproduce-triage",
+      "schedule": "*/15 * * * *",
+      "outputs": ["triage-report", "review-item"]
+    },
+    {
+      "id": "end-of-day-review",
+      "name": "End Of Day Review",
+      "purpose": "Summarize run health, blocked items, review backlog, and memory mutations.",
+      "ownerRole": "ops-assistant",
+      "workflowId": "research-draft-human-approve",
+      "schedule": "0 18 * * 1-5",
+      "outputs": ["status-summary", "review-item"]
+    }
+  ]
+}
