@@ -161,6 +161,23 @@
         "mission control panels"
       ],
       "default_action": "run"
+    },
+    "claw-code-harness": {
+      "actions": [
+        "install",
+        "manifest",
+        "summary",
+        "commands",
+        "tools"
+      ],
+      "triggers": [
+        "claw-code",
+        "claw code",
+        "harness manifest",
+        "tool inventory",
+        "command inventory"
+      ],
+      "default_action": "summary"
     }
   }
 }
