@@ -46,7 +46,8 @@ It is meant to make a focused workflow easier to execute correctly.
     - Agent automation routines for scheduled council meetings and maintenance tasks
   - `mission-control-enhancement/`
     - Enhanced mission control with agent heartbeats, local token usage, and skill execution logs
-
+  - `claw-code-harness/`
+    - repo-local wrapper around community `claw-code` manifest, command inventory, and tool inventory
 
 - `openclaw-agent-split/`
   - host-facing `main` plus sandboxed `bmo-tron` worker topology
