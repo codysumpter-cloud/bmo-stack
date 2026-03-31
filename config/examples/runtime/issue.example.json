@@ -1,0 +1,39 @@
+{
+  "issueId": "issue-runtime-20260330-001",
+  "companyId": "bmo-local",
+  "title": "Verify runtime readiness before public claim",
+  "summary": "Run a bounded readiness pass and keep the evidence attached to the issue.",
+  "status": "todo",
+  "priority": "high",
+  "owner": {
+    "kind": "agent",
+    "id": "BMO"
+  },
+  "goalRef": "launch-readiness",
+  "approvalState": "required",
+  "accessReport": {
+    "classification": "partial-access",
+    "summary": "Repo and local runtime surfaces were available, but no live external relay proof was attached.",
+    "accessibleInputs": [
+      {
+        "kind": "repo-file",
+        "ref": "docs/MISSION_CONTROL.md",
+        "accessMode": "direct"
+      }
+    ],
+    "blockedInputs": [
+      {
+        "kind": "api-resource",
+        "ref": "agentmail-live-relay",
+        "reason": "not-found",
+        "detail": "No live relay verification was attached to this issue example."
+      }
+    ],
+    "fallbacksUsed": [
+      "manual-operator-note"
+    ],
+    "assistantMayClaimFullAnalysis": false
+  },
+  "createdAt": "2026-03-30T20:00:00Z",
+  "updatedAt": "2026-03-30T20:00:00Z"
+}

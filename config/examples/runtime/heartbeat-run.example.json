@@ -1,0 +1,26 @@
+{
+  "heartbeatRunId": "heartbeat-runtime-20260330-001",
+  "issueId": "issue-runtime-20260330-001",
+  "trigger": "manual-invoke",
+  "status": "queued",
+  "workerProfile": "safe-readonly",
+  "runLedgerRef": "ledger-runtime-20260330-001",
+  "accessReport": {
+    "classification": "metadata-only",
+    "summary": "This example heartbeat uses local metadata only.",
+    "accessibleInputs": [
+      {
+        "kind": "repo-file",
+        "ref": "config/examples/runtime/issue.example.json",
+        "accessMode": "direct"
+      }
+    ],
+    "blockedInputs": [],
+    "fallbacksUsed": [
+      "metadata"
+    ],
+    "assistantMayClaimFullAnalysis": false
+  },
+  "startedAt": "2026-03-30T20:05:00Z",
+  "updatedAt": "2026-03-30T20:05:00Z"
+}
