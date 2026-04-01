@@ -14,9 +14,15 @@ REQUIRED_HEADINGS = [
     "## Rollback plan",
 ]
 
+
 def fail(message: str) -> int:
     print(f"ERROR: {message}", file=sys.stderr)
     return 1
+
+
+def info(message: str) -> None:
+    print(f"INFO: {message}")
+
 
 def extract_plan_path(pr_body: str) -> str | None:
     pattern = re.compile(r"Plan:\s*`([^`]+)`|Plan:\s*([^\s]+)")
@@ -25,8 +31,24 @@ def extract_plan_path(pr_body: str) -> str | None:
         return None
     return match.group(1) or match.group(2)
 
+
 def main() -> int:
+    event_name = os.environ.get("GITHUB_EVENT_NAME", "").strip()
+    event_action = os.environ.get("GITHUB_EVENT_ACTION", "").strip()
     pr_body = os.environ.get("PR_BODY", "")
+
+    if event_name and event_name != "pull_request":
+        info(f"skipping task readiness outside pull_request events: {event_name}")
+        return 0
+
+    if event_action == "closed":
+        info("skipping task readiness for closed pull_request event")
+        return 0
+
+    if not pr_body.strip():
+        info("skipping task readiness because pull request body is empty or unavailable")
+        return 0
+
     if "## Task contract" not in pr_body:
         return fail("pull request body is missing the '## Task contract' block")
 
@@ -51,6 +73,7 @@ def main() -> int:
 
     print("task readiness contract satisfied")
     return 0
+
 
 if __name__ == "__main__":
     raise SystemExit(main())

@@ -2,6 +2,11 @@ name: task-readiness
 
 on:
   pull_request:
+    types:
+      - opened
+      - edited
+      - synchronize
+      - reopened
 
 permissions:
   contents: read
@@ -21,5 +26,7 @@ jobs:
       - name: Validate task readiness
         env:
           PR_BODY: ${{ github.event.pull_request.body }}
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          GITHUB_EVENT_ACTION: ${{ github.event.action }}
         run: |
           python3 scripts/check_task_readiness.py
