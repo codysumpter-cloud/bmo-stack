@@ -404,19 +404,27 @@ def build_workers_from_local_state(cfg: dict[str, Any]) -> tuple[list[dict[str, 
 
 
 def fetch_gateway_control_shell_status() -> tuple[bool, str | None]:
-    request = Request(OPENCLAW_GATEWAY_CONTROL_STATUS_URL, headers={"accept": "text/html"})
+    env = build_openclaw_env()
     try:
-        with urlopen(request, timeout=5) as response:
-            body = response.read(2048).decode("utf-8", errors="replace")
-            status_code = int(getattr(response, "status", 200) or 200)
-            if status_code == 200 and ("OpenClaw Control" in body or "<html" in body.lower()):
-                return True, None
-            return False, f"unexpected gateway shell response (HTTP {status_code})"
-    except HTTPError as exc:
-        return False, f"HTTP {exc.code}"
-    except (URLError, TimeoutError) as exc:
-        return False, str(exc)
+        result = subprocess.run(
+            ["/usr/local/bin/openclaw", "gateway", "status"],
+            capture_output=True,
+            text=True,
+            timeout=10,
+            check=False,
+            env=env,
+        )
+    except FileNotFoundError as exc:
+        return False, f"openclaw command unavailable: {exc}"
+    except subprocess.TimeoutExpired:
+        return False, "gateway status timed out"
 
+    output = "\n".join(part.strip() for part in (result.stdout, result.stderr) if part and part.strip())
+    if "RPC probe: ok" in output:
+        return True, None
+    if result.returncode == 0 and not output:
+        return False, "empty gateway status output"
+    return False, output or f"gateway status exited {result.returncode}"
 
 
 def build_status_notes_from_config(cfg: dict[str, Any]) -> list[str]:
