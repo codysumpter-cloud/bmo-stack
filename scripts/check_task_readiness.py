@@ -49,18 +49,24 @@ def main() -> int:
         info("skipping task readiness because pull request body is empty or unavailable")
         return 0
 
-    if "## Task contract" not in pr_body:
+    pr_body = pr_body.replace("\r\n", "\n").replace("\r", "\n")
+
+    if "## Task contract" not in pr_body and "## task contract" not in pr_body.lower():
         return fail("pull request body is missing the '## Task contract' block")
 
     plan_ref = extract_plan_path(pr_body)
     if not plan_ref:
         return fail("pull request body is missing a plan reference")
 
-    plan_path = ROOT / plan_ref
-    if not plan_path.exists():
-        return fail(f"referenced plan file does not exist: {plan_ref}")
+    if plan_ref.strip().strip("`") == "PR_BODY":
+        plan_text = pr_body
+    else:
+        plan_path = ROOT / plan_ref
+        if not plan_path.exists():
+            return fail(f"referenced plan file does not exist: {plan_ref}")
+        plan_text = plan_path.read_text(encoding="utf-8")
+        plan_text = plan_text.replace("\r\n", "\n").replace("\r", "\n")
 
-    plan_text = plan_path.read_text(encoding="utf-8")
     for heading in REQUIRED_HEADINGS:
         if heading not in plan_text:
             return fail(f"plan is missing required section: {heading}")
