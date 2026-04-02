@@ -53,7 +53,7 @@
       "tools": ["docs", "voice-guide", "workflow-contracts"],
       "permissions": {"canPost": false, "canOpenPr": false, "canMutateMemory": true},
       "handoffs": {"success": ["growth-outreach", "ops-assistant"]},
-      "scheduleRefs": ["research-to-draft", "trend-to-brief"],
+      "scheduleRefs": ["research-to-draft", "midday-trend-scan"],
       "modelPolicy": "cheap-reasoner",
       "verification": {"required": true, "reviewQueue": "content"}
     },
@@ -123,7 +123,7 @@
       "tools": ["docs", "voice-guide", "community-context"],
       "permissions": {"canPost": false, "canOpenPr": false, "canMutateMemory": true},
       "handoffs": {"success": ["ops-assistant", "orchestrator"]},
-      "scheduleRefs": ["research-to-draft", "trend-to-brief"],
+      "scheduleRefs": ["research-to-draft", "midday-trend-scan"],
       "modelPolicy": "cheap-reasoner",
       "verification": {"required": true, "reviewQueue": "content"}
     },
