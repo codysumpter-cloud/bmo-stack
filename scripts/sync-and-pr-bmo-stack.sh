@@ -9,6 +9,7 @@ Automates sync + branch + commit + push + PR for bmo-stack upgrade artifacts.
 Environment fallbacks:
 - BMO_STACK_REPO_DIR
 - BMO_STACK_REPO_URL
+- BMO_STACK_BASE_BRANCH
 USAGE
 }
 
@@ -18,7 +19,7 @@ cd "$ROOT_DIR"
 TARGET_DIR="${BMO_STACK_REPO_DIR:-$ROOT_DIR}"
 REPO_URL="${BMO_STACK_REPO_URL:-}"
 BRANCH="feat/runtime-upgrade-sync-$(date -u +%Y%m%d-%H%M%S)"
-BASE="main"
+BASE="${BMO_STACK_BASE_BRANCH:-}"
 DRY_RUN=0
 
 while [[ $# -gt 0 ]]; do
@@ -42,12 +43,36 @@ if [[ ! -d "$TARGET_DIR/.git" ]]; then
   git clone "$REPO_URL" "$TARGET_DIR"
 fi
 
+pushd "$TARGET_DIR" >/dev/null
+
+if [[ -z "$BASE" ]]; then
+  BASE="$(git symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null | sed 's#^origin/##')"
+fi
+
+if [[ -z "$BASE" ]]; then
+  CURRENT_BRANCH="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || true)"
+  if [[ -n "$CURRENT_BRANCH" && "$CURRENT_BRANCH" != "HEAD" ]]; then
+    BASE="$CURRENT_BRANCH"
+  fi
+fi
+
+if [[ -z "$BASE" ]]; then
+  if git show-ref --verify --quiet refs/heads/master || git show-ref --verify --quiet refs/remotes/origin/master; then
+    BASE="master"
+  else
+    BASE="main"
+  fi
+fi
+
 if ((DRY_RUN)); then
+  popd >/dev/null
   echo "[dry-run] would sync artifacts into $TARGET_DIR"
   bash "$ROOT_DIR/scripts/sync-upgrade-artifacts.sh" --target "$TARGET_DIR" --dry-run
   echo "[dry-run] would create branch $BRANCH from $BASE"
   exit 0
 fi
+
+popd >/dev/null
 
 bash "$ROOT_DIR/scripts/sync-upgrade-artifacts.sh" --target "$TARGET_DIR"
 
