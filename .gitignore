@@ -2,3 +2,6 @@
 context/continuity/live-status.json
 workflows/bmo-continuity.json
 workflows/bmo-workspace-sync.json
+
+# Durable runtime local state
+data/runtime_jobs.json

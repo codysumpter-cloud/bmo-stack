@@ -131,3 +131,51 @@ The biggest remaining unfinished surfaces are:
 - public-web chat ownership in `prismtek-site`
 - deeper live runtime validation against `openclaw`
 - ongoing drift control between docs, scripts, and runtime behavior
+
+## Runtime Self-Upgrade Workflow
+
+Operator-facing runtime upgrade artifacts:
+
+- `CLAUDE.md` (Agent Upgrade Policy)
+- `.claude/settings.json` (secret-read denylist + post-edit/session hooks)
+- `.claude/agents/runtime-upgrader.md`
+- `.claude/agents/runtime-verifier.md`
+- `docs/upgrade-plan.md`
+- `docs/upgrade-results.md`
+- `docs/rollback.md`
+- `docs/MISSION_CONTROL_BMO_STACK_SYNC.md`
+
+Key scripts:
+
+- `bash scripts/agent-post-edit-checks.sh`
+- `bash scripts/persist-runtime-report.sh`
+- `bash scripts/sync-upgrade-artifacts.sh --target /path/to/repo`
+- `bash scripts/sync-and-pr-bmo-stack.sh --dry-run`
+
+## Durable Task + Resume Runtime
+
+Use these repo-local commands to survive long prompts and timeouts:
+
+- Initialize store:
+  - `python3 scripts/durable_task_runtime.py init`
+- Enqueue work:
+  - `python3 scripts/durable_task_runtime.py enqueue --source telegram --chat-id <id> --message-id <id> --event-id <id> --text "..."`
+- Process with lease/checkpoints:
+  - `python3 scripts/durable_task_runtime.py run-next --source telegram --lease-seconds 120 --max-steps 2`
+- Manual resume:
+  - `python3 scripts/durable_task_runtime.py resume --chat-id <id>`
+- Status:
+  - `python3 scripts/durable_task_runtime.py status --chat-id <id>`
+- Cancel:
+  - `python3 scripts/durable_task_runtime.py cancel --chat-id <id>`
+
+Telegram adapter point:
+
+- `python3 scripts/telegram_durable_adapter.py --update-json /path/to/update.json`
+
+See architecture/docs:
+
+- `docs/agent-resume-architecture.md`
+- `docs/agent-reliability-plan.md`
+- `docs/agent-reliability-results.md`
+- `docs/agent-reliability-rollback.md`
