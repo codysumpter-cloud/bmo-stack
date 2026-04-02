@@ -1,22 +1,32 @@
 # Task State
 
-Last updated: 2026-04-02 13:39 UTC
+Last updated: 2026-04-02 13:49 UTC
 
 ## Current status
 
-- Description: Port and adapt runtime self-upgrade system from prismtek-site into bmo-stack with safe verification, sync helpers, and rollback docs.
+- Description: Add durable task + checkpoint + resume reliability system for long prompts and Telegram timeout recovery.
 - Active repo: `/workspace/bmo-stack`
-- Branch: `feat/runtime-self-upgrade-hardening`
-- Last successful step: executed verification commands, appended runtime results, committed changes (`aff308e`), and prepared PR draft via make_pr tool.
-- Next intended step: push branch and open PR once remote/auth is available.
+- Branch: `feat/durable-task-resume`
+- Last successful step: implemented durable runtime, Telegram adapter, resumable policy updates, and passed reliability verification checks.
+- Next intended step: commit durable reliability changes and open PR.
 - Verification complete: true
 - Manual steps remaining:
-  - `git remote add origin <repo_url>` (if missing)
-  - `git push -u origin feat/runtime-self-upgrade-hardening`
-  - open PR with prepared title/body
+  - commit local reliability changes
+  - push branch once remote/auth is available
+  - open PR with summary and validation output
 - Safe to resume: true
 
 ## Recent checkpoints
+
+- 2026-04-02 13:49 UTC
+  - Repo: `/workspace/bmo-stack`
+  - Branch: `feat/durable-task-resume`
+  - Files touched: durable runtime scripts, adapter, selftest, docs, policy files, Makefile, README
+  - Last successful step: long-prompt normalization + checkpoint/resume + timeout recovery flows validated
+  - Next intended step: commit and publish PR
+  - Verification complete: true
+  - Manual steps remaining: commit + remote push/PR
+  - Safe to resume: true
 
 - 2026-04-02 13:39 UTC
   - Repo: `/workspace/bmo-stack`

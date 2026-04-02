@@ -20,6 +20,9 @@ Purpose: safely improve runtime, stack wiring, tooling, memory workflows, and CI
 - Never lower secret handling, permission boundaries, or approval requirements.
 - Never change deploy credentials/publishing/approval policy without explicit human approval.
 - If evidence is missing, stop and surface a blocker with exact missing proof.
+- Prefer resumable execution paths with checkpoint + working-summary state.
+- Before long/risky operations, write a checkpoint that includes objective, constraints, completed work, and exact next step.
+- When prior checkpoint state exists, continue from it instead of replaying full raw history.
 
 ## Required output checklist
 

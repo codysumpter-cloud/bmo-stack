@@ -33,6 +33,11 @@
     "preferredWorkers": [
       "runtime-upgrader",
       "runtime-verifier"
-    ]
+    ],
+    "resumableWork": {
+      "enabled": true,
+      "checkpointCommand": "python3 scripts/durable_task_runtime.py run-next",
+      "manualResumeCommand": "python3 scripts/durable_task_runtime.py resume --chat-id <chat_id>"
+    }
   }
 }

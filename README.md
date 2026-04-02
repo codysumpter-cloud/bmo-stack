@@ -151,3 +151,31 @@ Key scripts:
 - `bash scripts/persist-runtime-report.sh`
 - `bash scripts/sync-upgrade-artifacts.sh --target /path/to/repo`
 - `bash scripts/sync-and-pr-bmo-stack.sh --dry-run`
+
+## Durable Task + Resume Runtime
+
+Use these repo-local commands to survive long prompts and timeouts:
+
+- Initialize store:
+  - `python3 scripts/durable_task_runtime.py init`
+- Enqueue work:
+  - `python3 scripts/durable_task_runtime.py enqueue --source telegram --chat-id <id> --message-id <id> --event-id <id> --text "..."`
+- Process with lease/checkpoints:
+  - `python3 scripts/durable_task_runtime.py run-next --source telegram --lease-seconds 120 --max-steps 2`
+- Manual resume:
+  - `python3 scripts/durable_task_runtime.py resume --chat-id <id>`
+- Status:
+  - `python3 scripts/durable_task_runtime.py status --chat-id <id>`
+- Cancel:
+  - `python3 scripts/durable_task_runtime.py cancel --chat-id <id>`
+
+Telegram adapter point:
+
+- `python3 scripts/telegram_durable_adapter.py --update-json /path/to/update.json`
+
+See architecture/docs:
+
+- `docs/agent-resume-architecture.md`
+- `docs/agent-reliability-plan.md`
+- `docs/agent-reliability-results.md`
+- `docs/agent-reliability-rollback.md`

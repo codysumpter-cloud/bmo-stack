@@ -1,11 +1,11 @@
 # Work In Progress
 
-Last updated: 2026-04-02 13:39 UTC
+Last updated: 2026-04-02 13:49 UTC
 
 ## Current focus
 
-- Active mission: runtime self-upgrade port is implemented and verified; awaiting remote push/PR publish.
-- Why now: requested end-to-end runtime upgrade safety loop, verifier workflow, and cross-repo sync automation.
+- Active mission: durable task reliability layer (normalize + checkpoint + resume + timeout recovery) is implemented and verified.
+- Why now: requested long-prompt and timeout resilience across Codex/VS Code/custom agent runtimes.
 - Owner paths in play:
   - `CLAUDE.md`
   - `.claude/settings.json`
@@ -20,17 +20,24 @@ Last updated: 2026-04-02 13:39 UTC
   - `docs/rollback.md`
   - `docs/MISSION_CONTROL_BMO_STACK_SYNC.md`
   - `README.md`
+  - `scripts/durable_task_runtime.py`
+  - `scripts/telegram_durable_adapter.py`
+  - `scripts/durable-task-selftest.sh`
+  - `docs/agent-resume-architecture.md`
+  - `docs/agent-reliability-plan.md`
+  - `docs/agent-reliability-results.md`
+  - `docs/agent-reliability-rollback.md`
 
 ## Current work packet
 
-- publish committed branch to remote once `origin` is configured
-- open PR using prepared title/body
+- commit durable reliability changes
+- push/open PR when remote tooling is available
 
 ## Next milestone
 
-- push branch + publish PR when Git remote/auth is available
+- land durable reliability PR
 
 ## Risks and watchouts
 
-- donor commits could not be fetched without GitHub auth; preserve intent and document compatibility assumptions
-- current repo has no `origin` remote and no `gh` CLI in this environment
+- this repo has no `origin` remote and no `gh` CLI in this environment
+- Telegram adapter is repo-local contract point; live OpenClaw wiring remains in owner repo

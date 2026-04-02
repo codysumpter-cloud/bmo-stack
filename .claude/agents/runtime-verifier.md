@@ -26,3 +26,5 @@ Do not mark complete unless:
 - checks were run with exact commands captured
 - failures are either fixed or explicitly accepted with rationale
 - rollback is exact and runnable
+- resumability was validated (manual resume + auto resume path)
+- normalized prompt + rolling summary + checkpoint state were persisted and reused

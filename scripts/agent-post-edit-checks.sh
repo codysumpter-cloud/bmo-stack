@@ -33,6 +33,10 @@ else
   echo "[skip] repo-native verifier not found"
 fi
 
+if [[ -x scripts/durable-task-selftest.sh ]]; then
+  run_step "durable task selftest" bash scripts/durable-task-selftest.sh
+fi
+
 # 2) Node: check -> test -> build
 if [[ -f package.json ]]; then
   if command -v npm >/dev/null 2>&1; then

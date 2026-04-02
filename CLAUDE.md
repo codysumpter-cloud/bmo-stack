@@ -30,3 +30,13 @@ When performing runtime/stack upgrades in `bmo-stack`, agents must follow this p
 
 8. **Use the `runtime-verifier` worker before completion**
    - Completion requires verifier evidence per `.claude/agents/runtime-verifier.md`.
+
+## Durable Task Reliability Policy
+
+- Always prefer resumable work over restart-from-scratch execution.
+- Always checkpoint before risky or long-running steps.
+- Always resume from checkpoint when valid state exists.
+- Always maintain a rolling working summary and normalized prompt state.
+- Never replay unnecessary raw context if checkpoint + summary are sufficient.
+- Never drop a task after timeout/crash when recovery is possible.
+- Always expose and preserve a simple manual resume path (`/resume` or runtime resume command).
