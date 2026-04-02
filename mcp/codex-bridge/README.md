@@ -45,14 +45,14 @@ mcp/codex-bridge/
 2. Install the bridge dependencies:
 
    ```bash
-   cd /absolute/path/to/bmo-stack/mcp/codex-bridge
+   cd -- /absolute/path/to/bmo-stack/mcp/codex-bridge || exit 1
    npm install
    ```
 
 3. Install Codex CLI:
 
    ```bash
-   npm install -g @openai/codex
+   npm install --global @openai/codex
    ```
 
 4. Authenticate Codex CLI:
