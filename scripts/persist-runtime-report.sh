@@ -29,6 +29,6 @@ NEXT_UPGRADE="${BMO_RUNTIME_NEXT_UPGRADE:-Expand repo-native verifier coverage f
   echo "- verification: $VERIFICATION"
   echo "- open risks: $OPEN_RISKS"
   echo "- next recommended upgrade: $NEXT_UPGRADE"
-} >> "$REPORT_FILE"
+} >>"$REPORT_FILE"
 
 echo "Appended runtime session report to $REPORT_FILE"
