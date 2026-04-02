@@ -30,6 +30,11 @@ if [ -d "$ROOT_DIR/config/skills" ]; then
   rsync -a "$ROOT_DIR/config/skills/" "$HOST_WORKSPACE/config/skills/"
 fi
 
+if [ -d "$ROOT_DIR/skills" ]; then
+  mkdir -p "$HOST_WORKSPACE/skills"
+  rsync -a --delete "$ROOT_DIR/skills/" "$HOST_WORKSPACE/skills/"
+fi
+
 rsync -a --delete "$HOST_WORKSPACE/" "$WORKER_WORKSPACE/"
 rm -f "$WORKER_WORKSPACE/memory.md" "$WORKER_WORKSPACE/MEMORY.md"
 

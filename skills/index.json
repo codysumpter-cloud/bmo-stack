@@ -194,6 +194,27 @@
         "free coding model"
       ],
       "default_action": "dispatch"
+    },
+    "telegram-coding-dispatch": {
+      "actions": [
+        "doctor",
+        "brief",
+        "dispatch",
+        "status",
+        "result"
+      ],
+      "triggers": [
+        "fix this",
+        "make this work",
+        "build this",
+        "can you code this",
+        "do the coding part",
+        "from telegram",
+        "from my phone",
+        "i do not know how to prompt this",
+        "turn this into a proper prompt"
+      ],
+      "default_action": "dispatch"
     }
   }
 }

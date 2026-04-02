@@ -50,6 +50,8 @@ It is meant to make a focused workflow easier to execute correctly.
     - repo-local wrapper around community `claw-code` manifest, command inventory, and tool inventory
   - `omx-nim-coding/`
     - Mission Control-facing OMX + Codex CLI + claw-code dispatch path using NVIDIA NIM free endpoints
+  - `telegram-coding-dispatch/`
+    - Telegram-friendly coding brief normalization and safe backend dispatch for vague phone-style requests
 
 - `openclaw-agent-split/`
   - host-facing `main` plus sandboxed `bmo-tron` worker topology

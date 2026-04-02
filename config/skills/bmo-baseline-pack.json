@@ -17,6 +17,10 @@
       "why": "Confirm Telegram is bound to the host-facing main agent instead of the worker."
     },
     {
+      "name": "telegram-coding-dispatch",
+      "why": "Turn vague phone-style Telegram coding requests into a structured brief and a safe coding run."
+    },
+    {
       "name": "skills-access-diagnosis",
       "why": "Diagnose missing, stuck, or invisible skills before adding more capability."
     },
