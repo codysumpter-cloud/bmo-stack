@@ -1,0 +1,9 @@
+BMO Stack
+Copyright 2026 Cody Sumpter
+
+This product is licensed under the Apache License, Version 2.0.
+See the LICENSE file for the full license text.
+
+This repository includes BMO operating contracts, council definitions, operator
+workflows, runtime runbooks, and integration glue. Third-party provenance and
+license posture are documented in THIRD_PARTY_NOTICES.md and docs/LICENSE_MATRIX.md.

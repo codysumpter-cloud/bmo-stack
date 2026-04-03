@@ -2,12 +2,16 @@
 
 This repository includes or tracks components from other projects.
 
+`bmo-stack` itself is licensed under Apache-2.0. This file records the external
+license and provenance posture that still matters when features or patterns are
+carried across repos.
+
 ## Current tracked components
 
 - `vendor/nemoclaw` — source: `codysumpter-cloud/nemoclaw` — license: Apache-2.0 — role: worker sandbox framework
 - `codysumpter-cloud/omni-bmo` — license: MIT — role: embodied runtime feature source
 - `codysumpter-cloud/PrismBot` — license: AGPL-3.0 — role: app and operator surface source
-- `codysumpter-cloud/prismtek-site` — no top-level license file was found during the initial audit
+- `codysumpter-cloud/prismtek-site` — Apache-2.0 — role: public-web and site-backed API source
 - `codysumpter-cloud/Prismtek.dev` — no top-level license file was found during the initial audit
 - `moorew/be-more-hailo` — license: MIT — role: reference and possible fork source
 

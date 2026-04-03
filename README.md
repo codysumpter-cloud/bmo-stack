@@ -1,27 +1,32 @@
 # BMO Stack
 
-`bmo-stack` is the operator, policy, and integration repo for BMO.
+`bmo-stack` is the operator, policy, and integration repository for BMO.
 
-It is not the only runtime owner path in the larger system:
+It is the canonical source for BMO startup context, council contracts, operator workflows, runtime
+runbooks, workspace sync, and cross-repo integration glue. It does not pretend to own every live
+surface in the broader system.
 
-- `bmo-stack` owns operator workflows, startup context, GitHub automation, council contracts, and local/Desktop integration glue.
-- `openclaw` owns the live Telegram runtime and delivery behavior.
-- `prismtek-site` owns the public-web `prismtek.dev` chat surface.
+## System boundaries
 
-This repo should stay honest about those boundaries.
+- `bmo-stack`: operator workflows, startup context, council policy, GitHub automation, and local
+  integration glue
+- `openclaw`: live Telegram/runtime delivery behavior
+- `prismtek-site`: public-web `prismtek.dev` surface and site-backed APIs
 
-## Architecture
+This repo stays explicit about those ownership lines so operator claims remain honest.
 
-- Host OpenClaw handles Telegram-facing runtime behavior.
-- OpenShell and NemoClaw provide disposable worker sandboxes.
-- `bmo-stack` provides the canonical BMO operating environment, context, routines, and operator tooling.
-- Council roles are documented under `context/council/` and machine-readable in `config/council/spawn-manifest.json`.
-- GitHub automation contracts live under `config/github/automation-contract.json`.
-- BMO routine packs live under `config/routines/bmo-core-routines.json`.
+## What this repo owns
 
-## Startup Surface
+- the BMO operating contract in `AGENTS.md`, `soul.md`, `memory.md`, and `routines.md`
+- council role definitions in `context/council/` and `config/council/`
+- operator plans, runbooks, continuity, and decision records in `context/`
+- workspace sync, runtime helpers, and maintenance scripts in `scripts/`
+- reusable operator skills in `skills/`
+- cross-repo donor, licensing, and integration documentation
 
-Read these first when operating BMO from this repo:
+## Quick start
+
+Read these first:
 
 1. `AGENTS.md`
 2. `soul.md`
@@ -31,151 +36,72 @@ Read these first when operating BMO from this repo:
 6. `context/RUNBOOK.md`
 7. `TASK_STATE.md`
 8. `WORK_IN_PROGRESS.md`
-9. `skills/README.md`
-10. `context/skills/SKILLS.md`
 
-## Important Paths
+Run the core validation path:
 
-- BMO startup and continuity:
-  - `AGENTS.md`
-  - `soul.md`
-  - `memory.md`
-  - `routines.md`
-  - `TASK_STATE.md`
-  - `WORK_IN_PROGRESS.md`
-- Deeper context:
-  - `context/identity/`
-  - `context/RUNBOOK.md`
-  - `context/BACKLOG.md`
-  - `memory/`
-- Operator skills:
-  - `skills/`
-  - `context/skills/`
-- Worker and runtime helpers:
-  - `scripts/configure-openclaw-agents.sh`
-  - `scripts/sync-openclaw-workspaces.sh`
-  - `scripts/bmo-workspace-sync.py`
-  - `scripts/bmo-worker-status`
-  - `scripts/bmo-context-reseed`
-  - `scripts/bmo-project-snapshot.sh`
+```bash
+make doctor
+make runtime-doctor
+make workspace-sync
+make worker-status
+```
 
-## Core Commands
+Useful follow-up commands:
 
-Bootstrap and health:
+```bash
+make doctor-plus
+make health-check
+make sync-context
+make project-snapshot
+make site-route-report
+make site-parity-report
+```
 
-- `make doctor`
-- `make doctor-plus`
-- `make health-check`
-- `make recover-session`
+## Repository map
 
-Context and workspace:
+- `context/`: plans, council docs, continuity, site notes, and operating documents
+- `config/`: machine-readable council, GitHub, routine, and operator manifests
+- `scripts/`: runtime doctor, sync, bootstrap, recovery, and reporting helpers
+- `skills/`: repo-owned operator skill packs
+- `memory/`: persistent notes and decision trails
+- `docs/`: architecture, integration, upgrade, and licensing references
 
-- `make sync-context`
-- `make sync-context-host-to-repo`
-- `make sync-context-repo-to-host`
-- `make context-reseed`
-- `make workspace-sync`
-- `make project-snapshot`
+## Runtime posture
 
-Worker lifecycle:
+This repo is intentionally local-first and operator-visible.
 
-- `make worker-create`
-- `make worker-upload-config`
-- `make worker-connect`
-- `make worker-status`
-- `make worker-ready`
+- Host OpenClaw handles Telegram-facing runtime behavior.
+- OpenShell and NemoClaw provide disposable worker sandboxes.
+- `bmo-stack` provides the canonical operating environment, policy surface, and integration glue.
 
-Runtime helpers:
-
-- `make runtime-doctor`
-- `make runtime-router ARGS="your task"`
-- `make runtime-launch-dry`
-- `make runtime-cloud-dry`
-
-Site and migration helpers:
-
-- `make site-caretaker`
-- `make site-route-report`
-- `make site-work-report`
-- `make site-parity-report`
-
-## What Is Manual
-
-These steps still require operator action:
+Manual operator steps still exist:
 
 1. Install host prerequisites such as Docker, OpenClaw, OpenShell, and any local model/runtime dependencies.
-2. Configure `.env`, host secrets, and any runtime auth needed outside this repo.
+2. Configure `.env`, secrets, and runtime auth outside this repo.
 3. Merge and deploy `openclaw` changes when Telegram runtime behavior changes.
-4. Merge and deploy `prismtek-site` changes when public-web chat behavior changes.
-5. Restart or repoint the live runtime after source changes when required by the owner path.
+4. Merge and deploy `prismtek-site` changes when public-web behavior changes.
+5. Restart or repoint live runtime owners when their deployment path requires it.
 
-## Source-of-Truth Rules
+## Source-of-truth rules
 
-- Do not patch `vendor/nemoclaw` first when the real owner path is `openclaw` or another upstream repo.
-- Do not claim Telegram runtime fixes from `bmo-stack` alone unless the relevant `openclaw` code was changed and validated.
+- Do not claim Telegram runtime fixes from `bmo-stack` alone unless the relevant `openclaw` path was changed and validated.
 - Do not claim `prismtek.dev` web-chat fixes from `bmo-stack` alone unless the relevant `prismtek-site` path was changed and validated.
-- Prefer machine-checkable contracts and validators over doc-only promises.
+- Do not patch vendored or donor paths first when the real owner is upstream.
+- Prefer machine-checkable manifests, validators, and runbooks over doc-only promises.
 
-## Current Status
+## Licensing and provenance
 
-The repo already includes:
+This repository is licensed under the Apache License 2.0.
 
-- a BMO startup operating system with root entrypoints
-- council spawn and GitHub automation contracts
-- workspace sync and launchd helpers
-- skill discovery and skill validation
-- donor carryover guidance from `PrismBot` and `omni-bmo`
+- See [LICENSE](./LICENSE) for the license text.
+- See [NOTICE](./NOTICE) for repository notice information.
+- See [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md) for tracked third-party provenance.
+- See [docs/LICENSE_MATRIX.md](./docs/LICENSE_MATRIX.md) for the current licensing posture across related repos.
 
-The biggest remaining unfinished surfaces are:
+## Related references
 
-- public-web chat ownership in `prismtek-site`
-- deeper live runtime validation against `openclaw`
-- ongoing drift control between docs, scripts, and runtime behavior
-
-## Runtime Self-Upgrade Workflow
-
-Operator-facing runtime upgrade artifacts:
-
-- `CLAUDE.md` (Agent Upgrade Policy)
-- `.claude/settings.json` (secret-read denylist + post-edit/session hooks)
-- `.claude/agents/runtime-upgrader.md`
-- `.claude/agents/runtime-verifier.md`
-- `docs/upgrade-plan.md`
-- `docs/upgrade-results.md`
-- `docs/rollback.md`
+- `docs/UNIFIED_OPERATOR_APP.md`
+- `docs/ENTERPRISE_APP_FACTORY_BRIDGE.md`
+- `docs/PRIVATE_APP_REPO_INTEGRATION.md`
+- `docs/BMO_NATIVE_RUNTIME.md`
 - `docs/MISSION_CONTROL_BMO_STACK_SYNC.md`
-
-Key scripts:
-
-- `bash scripts/agent-post-edit-checks.sh`
-- `bash scripts/persist-runtime-report.sh`
-- `bash scripts/sync-upgrade-artifacts.sh --target /path/to/repo`
-- `bash scripts/sync-and-pr-bmo-stack.sh --dry-run`
-
-## Durable Task + Resume Runtime
-
-Use these repo-local commands to survive long prompts and timeouts:
-
-- Initialize store:
-  - `python3 scripts/durable_task_runtime.py init`
-- Enqueue work:
-  - `python3 scripts/durable_task_runtime.py enqueue --source telegram --chat-id <id> --message-id <id> --event-id <id> --text "..."`
-- Process with lease/checkpoints:
-  - `python3 scripts/durable_task_runtime.py run-next --source telegram --lease-seconds 120 --max-steps 2`
-- Manual resume:
-  - `python3 scripts/durable_task_runtime.py resume --chat-id <id>`
-- Status:
-  - `python3 scripts/durable_task_runtime.py status --chat-id <id>`
-- Cancel:
-  - `python3 scripts/durable_task_runtime.py cancel --chat-id <id>`
-
-Telegram adapter point:
-
-- `python3 scripts/telegram_durable_adapter.py --update-json /path/to/update.json`
-
-See architecture/docs:
-
-- `docs/agent-resume-architecture.md`
-- `docs/agent-reliability-plan.md`
-- `docs/agent-reliability-results.md`
-- `docs/agent-reliability-rollback.md`
