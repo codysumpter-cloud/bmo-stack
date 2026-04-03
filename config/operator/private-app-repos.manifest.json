@@ -12,7 +12,11 @@
       "donorSources": [
         "packages/app-factory/index.ts",
         "apps/web/src/App.tsx",
-        "apps/api/server.ts"
+        "apps/web/src/firebase.ts",
+        "apps/api/server.ts",
+        "firebase-applet-config.json",
+        "firebase-blueprint.json",
+        "firestore.rules"
       ],
       "primarySurfaces": [
         "Dashboard",
@@ -94,6 +98,20 @@
         "launch-sandbox",
         "delete-workspace"
       ],
+      "backendServices": [
+        "google-auth-and-id-tokens",
+        "firestore-template-catalog",
+        "firestore-workspaces",
+        "sandbox-session-records",
+        "system-log-collection"
+      ],
+      "blueprintEntities": [
+        "User",
+        "Workspace",
+        "AppTemplate",
+        "SandboxSession",
+        "SystemLog"
+      ],
       "apiSurfaces": [
         "/api/factory/templates",
         "/api/factory/models",
@@ -113,7 +131,8 @@
       "guardrails": [
         "Do not treat localhost Express endpoints as production truth.",
         "Do not replace prismtek-site with the donor monorepo.",
-        "Treat donor API shapes as planning metadata unless explicitly implemented in canonical runtime repos."
+        "Treat donor API shapes as planning metadata unless explicitly implemented in canonical runtime repos.",
+        "Do not silently adopt donor Firebase assumptions as canonical stack persistence."
       ]
     },
     {

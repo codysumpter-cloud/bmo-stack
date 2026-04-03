@@ -19,6 +19,10 @@ Current donor sources:
 - `packages/app-factory/index.ts`
 - `apps/web/src/App.tsx`
 - `apps/api/server.ts`
+- `apps/web/src/firebase.ts`
+- `firebase-applet-config.json`
+- `firebase-blueprint.json`
+- `firestore.rules`
 
 Imported concepts:
 
@@ -42,6 +46,18 @@ Imported concepts:
   - sandbox
   - billing
   - admin
+- backend service posture:
+  - Google auth and ID-token sign-in
+  - Firestore-backed template catalog
+  - Firestore-backed workspace records
+  - Firestore-backed sandbox session records
+  - Firestore-backed system logs
+- backend blueprint entities:
+  - `User`
+  - `Workspace`
+  - `AppTemplate`
+  - `SandboxSession`
+  - `SystemLog`
 - workspace lifecycle ideas:
   - create workspace
   - generate to workspace
@@ -122,6 +138,8 @@ Imported concepts:
   - app-factory templates
   - model-routing catalog
   - operator IA tabs
+  - backend service donor concepts
+  - Firebase blueprint entities
   - workspace lifecycle concepts
   - prototype catalog data
 - use Prism Agent to expose:

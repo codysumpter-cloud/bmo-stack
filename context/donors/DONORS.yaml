@@ -79,6 +79,7 @@ repos:
         - app factory template catalog
         - app factory model catalog
         - browser operator IA and panel concepts
+        - backend auth and Firestore service concepts
         - workspace lifecycle and sync posture
         - sandbox session UX language
         - admin and billing lane concepts

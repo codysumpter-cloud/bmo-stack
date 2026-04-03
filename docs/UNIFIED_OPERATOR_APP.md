@@ -16,11 +16,12 @@ The shared operator surface should expose the same capability groups across repo
 1. Prompt intake and plan shaping
 2. Council review and verification
 3. Template and model selection
-4. Workspace lifecycle, artifacts, and handoff
-5. Repo visibility, files, and docs shortcuts
-6. Guarded local command execution
-7. Runtime validation and recovery
-8. Companion UX, account awareness, and resilience cues
+4. Backend auth and data-plane planning
+5. Workspace lifecycle, artifacts, and handoff
+6. Repo visibility, files, and docs shortcuts
+7. Guarded local command execution
+8. Runtime validation and recovery
+9. Companion UX, account awareness, and resilience cues
 
 ## Ownership split
 
@@ -31,6 +32,7 @@ Builder Studio and Enterprise App Factory own:
 - prompt intake
 - structured draft or spec review
 - template and model selection
+- backend auth and data model planning
 - workspace inventory and sync posture
 - bounded review surfaces
 - artifact visibility

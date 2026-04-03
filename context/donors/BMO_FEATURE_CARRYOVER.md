@@ -48,6 +48,7 @@ This file tracks the highest-value features BMO should preserve from the donor l
   - `docs/UNIFIED_OPERATOR_APP.md`
   - `docs/ENTERPRISE_APP_FACTORY_BRIDGE.md`
   - model hub, workspace sync, sandbox, and admin lane concepts
+  - Firebase-backed auth, template/workspace persistence, and backend blueprint concepts
 
 ### From BMO-app
 
