@@ -53,7 +53,7 @@ Target outcomes:
 ## Priority 4 — Improve public credibility
 
 ### Add top-level LICENSE
-The repo still needs a real top-level license file.
+Complete. The repo root now carries Apache-2.0 `LICENSE` and `NOTICE` files.
 
 ### Add screenshots or diagrams
 Show:
@@ -63,7 +63,7 @@ Show:
 - local model selection behavior
 
 ### Add a clean quickstart section
-The first screen of the repo should answer:
+Complete. The README now answers:
 - what this is
 - what runs where
 - how to install it in one command

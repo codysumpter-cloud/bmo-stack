@@ -87,9 +87,9 @@ The public repo now includes:
 
 A few things are still transitional:
 - some older council files still need to be rewritten in place to match the new canon
-- the main README still needs to be aligned with the new one-shot install flow
+- the main README is aligned with the one-shot install flow, but deeper docs still need periodic drift checks
 - local model selection exists, but not every runtime path consumes the selected profile yet
-- the repository still needs a top-level license decision and file
+- licensing is now explicit at the repo root, but third-party provenance still needs to stay disciplined
 
 ## Recommended mental model
 

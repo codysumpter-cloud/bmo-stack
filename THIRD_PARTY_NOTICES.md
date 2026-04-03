@@ -1,5 +1,8 @@
 # Third-Party Notices
 
+`bmo-stack` itself is licensed under Apache-2.0. This file tracks notable
+third-party, donor, or vendored inputs that may carry additional obligations.
+
 This repository includes or tracks components from other projects.
 
 ## Current tracked components
@@ -16,3 +19,4 @@ This repository includes or tracks components from other projects.
 - Keep original license files and notices.
 - Record provenance for every imported module.
 - Document local modifications to upstream-derived code.
+- Do not assume the repo-level Apache-2.0 license overrides third-party license terms.

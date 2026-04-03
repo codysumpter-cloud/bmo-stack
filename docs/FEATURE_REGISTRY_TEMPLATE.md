@@ -16,7 +16,7 @@ Use this registry to track every feature that should land in `bmo-stack`.
 | Vision hooks | `omni-bmo` and `be-more-hailo` | camera / vision code | MIT | `services/vision` | modular import | `pi-local`, `pi-hailo` | planned | separate local vs Hailo backends |
 | Hailo profile | `be-more-hailo` | core, web UI, setup | MIT | `profiles/pi-hailo` | fork + documented adaptation | `pi-hailo` | planned | preserve attribution and upstream link |
 | Timers / media / game loops | `be-more-hailo` | runtime features | MIT | `services/timers-media` | modular import | `pi-hailo`, `pi-local` | planned | implement behind shared contracts |
-| Council runtime | `bmo-stack` | `context/council` | no top-level repo license yet | `packages/council-runtime` | native | all | in progress | add explicit platform license first |
+| Council runtime | `bmo-stack` | `context/council` | Apache-2.0 | `packages/council-runtime` | native | all | in progress | preserve donor provenance for any imported runtime logic |
 
 ## Delivery mode definitions
 

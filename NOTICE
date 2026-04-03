@@ -1,0 +1,12 @@
+BMO Stack
+Copyright 2026 Cody Sumpter
+
+This product includes software, documentation, and integration guidance
+developed for the BMO platform.
+
+This repository is licensed under the Apache License, Version 2.0.
+
+Third-party components, vendored code, and donor references may carry their own
+license terms and attribution requirements. See `THIRD_PARTY_NOTICES.md` and any
+upstream license files preserved with imported material.
+

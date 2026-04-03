@@ -1,83 +1,169 @@
 # BMO Stack
 
-`bmo-stack` is the operator, policy, and integration repo for BMO.
+[![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](./LICENSE)
+[![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20WSL-111827.svg)](./docs/ONE_SHOT_INSTALL.md)
+[![Runtime](https://img.shields.io/badge/runtime-OpenClaw%20%2B%20OpenShell-0f766e.svg)](./docs/BMO_ON_MY_MACBOOK.md)
 
-It is not the only runtime owner path in the larger system:
+`bmo-stack` is the operator control plane for BMO.
 
-- `bmo-stack` owns operator workflows, startup context, GitHub automation, council contracts, and local/Desktop integration glue.
-- `openclaw` owns the live Telegram runtime and delivery behavior.
-- `prismtek-site` owns the public-web `prismtek.dev` chat surface.
+This repository is the source of truth for BMO's startup context, routines, council contracts, machine setup helpers, workspace sync, operational scripts, and integration glue across the broader Prismtek stack.
 
-This repo should stay honest about those boundaries.
+## What This Repo Owns
+
+- BMO startup context and continuity files
+- council definitions and runtime contracts
+- machine setup and operator automation scripts
+- workspace mirroring into `~/.openclaw/workspace`
+- local health, recovery, and launchd helpers
+- bridging docs and scripts for `openclaw`, `omni-bmo`, and Mission Control
+
+## What This Repo Does Not Own
+
+This repo is intentionally not the only runtime surface:
+
+- [`openclaw`](https://github.com/codysumpter-cloud/openclaw) owns the live host runtime and Telegram delivery behavior
+- [`prismtek-site`](https://github.com/codysumpter-cloud/prismtek-site) owns the public `prismtek.dev` web surface
+- donor repos such as `PrismBot` and `omni-bmo` remain references or optional bridges unless explicitly integrated here
+
+Keeping those boundaries clear is part of keeping the system truthful.
 
 ## Architecture
 
-- Host OpenClaw handles Telegram-facing runtime behavior.
-- OpenShell and NemoClaw provide disposable worker sandboxes.
-- `bmo-stack` provides the canonical BMO operating environment, context, routines, and operator tooling.
-- Council roles are documented under `context/council/` and machine-readable in `config/council/spawn-manifest.json`.
-- GitHub automation contracts live under `config/github/automation-contract.json`.
-- BMO routine packs live under `config/routines/bmo-core-routines.json`.
+```text
+operator
+  -> bmo-stack
+     -> startup context, routines, council contracts, health checks, launchd, workspace sync
+  -> openclaw
+     -> live gateway, Telegram delivery, session runtime, tool execution
+  -> openshell / NemoClaw
+     -> disposable worker sandboxes
+  -> prismtek-site
+     -> public web Mission Control and chat surfaces
+```
 
-## Startup Surface
+## Recommended Repo Layout
 
-Read these first when operating BMO from this repo:
+```text
+~/code/
+  bmo-stack/
+  openclaw/
+  omni-bmo/        # optional donor/runtime bridge
+  PrismBot/        # optional archived donor reference
+```
 
-1. `AGENTS.md`
-2. `soul.md`
-3. `memory.md`
-4. `routines.md`
-5. `context/identity/AGENTS.md`
-6. `context/RUNBOOK.md`
-7. `TASK_STATE.md`
-8. `WORK_IN_PROGRESS.md`
-9. `skills/README.md`
-10. `context/skills/SKILLS.md`
+Important mirrored paths:
 
-## Important Paths
+- `~/.openclaw/workspace/bmo-stack` is the OpenClaw workspace mirror of this repo
+- `~/bmo-context` is the host context mirror used by continuity and workspace sync
 
-- BMO startup and continuity:
-  - `AGENTS.md`
-  - `soul.md`
-  - `memory.md`
-  - `routines.md`
-  - `TASK_STATE.md`
-  - `WORK_IN_PROGRESS.md`
-- Deeper context:
-  - `context/identity/`
-  - `context/RUNBOOK.md`
-  - `context/BACKLOG.md`
-  - `memory/`
-- Operator skills:
-  - `skills/`
-  - `context/skills/`
-- Worker and runtime helpers:
-  - `scripts/configure-openclaw-agents.sh`
-  - `scripts/sync-openclaw-workspaces.sh`
-  - `scripts/bmo-workspace-sync.py`
-  - `scripts/bmo-worker-status`
-  - `scripts/bmo-context-reseed`
-  - `scripts/bmo-project-snapshot.sh`
+## Quick Start
 
-## Core Commands
+### One-shot install
 
-Bootstrap and health:
+macOS, Linux, or WSL:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/codysumpter-cloud/bmo-stack/master/scripts/install-oneclick.sh | bash
+```
+
+Windows PowerShell:
+
+```powershell
+powershell -ExecutionPolicy Bypass -Command "& ([scriptblock]::Create((Invoke-WebRequest -UseBasicParsing https://raw.githubusercontent.com/codysumpter-cloud/bmo-stack/master/scripts/install-oneclick.ps1).Content))"
+```
+
+See [docs/ONE_SHOT_INSTALL.md](./docs/ONE_SHOT_INSTALL.md) for the full machine-aware install flow and local model profile selection rules.
+
+### Manual setup
+
+1. Clone this repo into `~/code/bmo-stack`.
+2. Install core host tools:
+   - `git`
+   - `python3`
+   - `docker` and `docker compose`
+   - `openclaw`
+   - `openshell`
+3. Create or review environment files as needed:
+   - [`config/bmo-runtime.env.example`](./config/bmo-runtime.env.example)
+   - [`config/omni-bmo.env.example`](./config/omni-bmo.env.example)
+   - [`config/omni-core.env.example`](./config/omni-core.env.example)
+4. Run the baseline health checks:
+
+```bash
+make doctor-plus
+make health-check
+make runtime-doctor
+```
+
+5. If you are running the local Omni bridge:
+
+```bash
+make omni-doctor
+make omni-launch
+```
+
+## Daily Operator Flow
+
+From this repo:
+
+```bash
+make doctor-plus
+make health-check
+make runtime-doctor
+make worker-status
+make workspace-sync
+```
+
+If you need to refresh all local repos:
+
+```bash
+make update-all
+```
+
+If BMO is unhealthy:
+
+```bash
+make recover-bmo
+```
+
+## Launchd and Workspace Sync
+
+To keep the OpenClaw workspace mirror current on macOS:
+
+```bash
+make launchd-install
+launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/cloud.codysumpter.bmo-workspace-sync.plist
+launchctl kickstart -k gui/$(id -u)/cloud.codysumpter.bmo-workspace-sync
+```
+
+The workspace sync job keeps `~/.openclaw/workspace/bmo-stack` aligned with this repo and mirrors context into `~/bmo-context`.
+
+Related docs:
+
+- [docs/BMO_ON_MY_MACBOOK.md](./docs/BMO_ON_MY_MACBOOK.md)
+- [context/RUNBOOK.md](./context/RUNBOOK.md)
+- [docs/MISSION_CONTROL_BMO_STACK_SYNC.md](./docs/MISSION_CONTROL_BMO_STACK_SYNC.md)
+
+## Key Commands
+
+### Health and recovery
 
 - `make doctor`
 - `make doctor-plus`
 - `make health-check`
+- `make recover-bmo`
 - `make recover-session`
 
-Context and workspace:
+### Context and continuity
 
 - `make sync-context`
-- `make sync-context-host-to-repo`
-- `make sync-context-repo-to-host`
 - `make context-reseed`
 - `make workspace-sync`
 - `make project-snapshot`
+- `make continuity-report`
+- `make continuity-publish`
 
-Worker lifecycle:
+### Worker lifecycle
 
 - `make worker-create`
 - `make worker-upload-config`
@@ -85,97 +171,93 @@ Worker lifecycle:
 - `make worker-status`
 - `make worker-ready`
 
-Runtime helpers:
+### Runtime helpers
 
 - `make runtime-doctor`
+- `make runtime-profile-dev`
+- `make runtime-profile-snappy`
+- `make runtime-profile-robust`
 - `make runtime-router ARGS="your task"`
 - `make runtime-launch-dry`
 - `make runtime-cloud-dry`
 
-Site and migration helpers:
+### Omni bridge
 
-- `make site-caretaker`
-- `make site-route-report`
-- `make site-work-report`
-- `make site-parity-report`
+- `make omni-sync`
+- `make omni-doctor`
+- `make omni-launch`
 
-## What Is Manual
+### Durable Telegram task runtime
 
-These steps still require operator action:
+- `make durable-init`
+- `make durable-run-next ARGS="--source telegram"`
+- `make durable-status`
+- `make durable-resume`
+- `make durable-cancel`
 
-1. Install host prerequisites such as Docker, OpenClaw, OpenShell, and any local model/runtime dependencies.
-2. Configure `.env`, host secrets, and any runtime auth needed outside this repo.
-3. Merge and deploy `openclaw` changes when Telegram runtime behavior changes.
-4. Merge and deploy `prismtek-site` changes when public-web chat behavior changes.
-5. Restart or repoint the live runtime after source changes when required by the owner path.
+## Repository Guide
 
-## Source-of-Truth Rules
+### Root operator files
 
-- Do not patch `vendor/nemoclaw` first when the real owner path is `openclaw` or another upstream repo.
-- Do not claim Telegram runtime fixes from `bmo-stack` alone unless the relevant `openclaw` code was changed and validated.
-- Do not claim `prismtek.dev` web-chat fixes from `bmo-stack` alone unless the relevant `prismtek-site` path was changed and validated.
-- Prefer machine-checkable contracts and validators over doc-only promises.
+- [`AGENTS.md`](./AGENTS.md)
+- [`soul.md`](./soul.md)
+- [`memory.md`](./memory.md)
+- [`routines.md`](./routines.md)
+- [`TASK_STATE.md`](./TASK_STATE.md)
+- [`WORK_IN_PROGRESS.md`](./WORK_IN_PROGRESS.md)
 
-## Current Status
+### Canonical context
 
-The repo already includes:
+- [`context/RUNBOOK.md`](./context/RUNBOOK.md)
+- [`context/SYSTEMMAP.md`](./context/SYSTEMMAP.md)
+- [`context/BACKLOG.md`](./context/BACKLOG.md)
+- [`context/council/`](./context/council)
+- [`context/runtime/`](./context/runtime)
 
-- a BMO startup operating system with root entrypoints
-- council spawn and GitHub automation contracts
-- workspace sync and launchd helpers
-- skill discovery and skill validation
-- donor carryover guidance from `PrismBot` and `omni-bmo`
+### Skills and automation
 
-The biggest remaining unfinished surfaces are:
+- [`skills/`](./skills)
+- [`context/skills/`](./context/skills)
+- [`scripts/`](./scripts)
+- [`config/`](./config)
 
-- public-web chat ownership in `prismtek-site`
-- deeper live runtime validation against `openclaw`
-- ongoing drift control between docs, scripts, and runtime behavior
+### Deeper planning and policy
 
-## Runtime Self-Upgrade Workflow
+- [`docs/SYSTEM_OVERVIEW.md`](./docs/SYSTEM_OVERVIEW.md)
+- [`docs/agent-reliability-plan.md`](./docs/agent-reliability-plan.md)
+- [`docs/OMNI_BMO_INTEGRATION.md`](./docs/OMNI_BMO_INTEGRATION.md)
+- [`docs/LICENSE_MATRIX.md`](./docs/LICENSE_MATRIX.md)
 
-Operator-facing runtime upgrade artifacts:
+## Source-of-truth Rules
 
-- `CLAUDE.md` (Agent Upgrade Policy)
-- `.claude/settings.json` (secret-read denylist + post-edit/session hooks)
-- `.claude/agents/runtime-upgrader.md`
-- `.claude/agents/runtime-verifier.md`
-- `docs/upgrade-plan.md`
-- `docs/upgrade-results.md`
-- `docs/rollback.md`
-- `docs/MISSION_CONTROL_BMO_STACK_SYNC.md`
+- Keep operator and policy logic BMO-first in this repo.
+- Keep concrete Telegram runtime delivery fixes in `openclaw`.
+- Keep public website behavior and Mission Control presentation fixes in `prismtek-site`.
+- Treat donor repos as references until provenance, boundaries, and license obligations are explicit.
+- Prefer machine-checkable contracts, manifests, and validators over doc-only promises.
 
-Key scripts:
+## Licensing
 
-- `bash scripts/agent-post-edit-checks.sh`
-- `bash scripts/persist-runtime-report.sh`
-- `bash scripts/sync-upgrade-artifacts.sh --target /path/to/repo`
-- `bash scripts/sync-and-pr-bmo-stack.sh --dry-run`
+This repository is licensed under the Apache License, Version 2.0.
 
-## Durable Task + Resume Runtime
+- License text: [LICENSE](./LICENSE)
+- Repository notice file: [NOTICE](./NOTICE)
+- Third-party attribution: [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md)
 
-Use these repo-local commands to survive long prompts and timeouts:
+Important: the Apache-2.0 license at the repo root does not erase third-party obligations. Vendored or imported components retain their own upstream license requirements, and provenance must stay documented.
 
-- Initialize store:
-  - `python3 scripts/durable_task_runtime.py init`
-- Enqueue work:
-  - `python3 scripts/durable_task_runtime.py enqueue --source telegram --chat-id <id> --message-id <id> --event-id <id> --text "..."`
-- Process with lease/checkpoints:
-  - `python3 scripts/durable_task_runtime.py run-next --source telegram --lease-seconds 120 --max-steps 2`
-- Manual resume:
-  - `python3 scripts/durable_task_runtime.py resume --chat-id <id>`
-- Status:
-  - `python3 scripts/durable_task_runtime.py status --chat-id <id>`
-- Cancel:
-  - `python3 scripts/durable_task_runtime.py cancel --chat-id <id>`
+## Contributing
 
-Telegram adapter point:
+Before opening a PR or claiming a change is complete:
 
-- `python3 scripts/telegram_durable_adapter.py --update-json /path/to/update.json`
+1. Read [`AGENTS.md`](./AGENTS.md) and [`context/RUNBOOK.md`](./context/RUNBOOK.md).
+2. Verify the real owner path for the change.
+3. Run the relevant existing checks for the files you touched.
+4. Update checkpoints when the task is long-running or interruptible.
+5. Keep runtime claims matched to real verification output.
 
-See architecture/docs:
+## Related Repositories
 
-- `docs/agent-resume-architecture.md`
-- `docs/agent-reliability-plan.md`
-- `docs/agent-reliability-results.md`
-- `docs/agent-reliability-rollback.md`
+- [`codysumpter-cloud/openclaw`](https://github.com/codysumpter-cloud/openclaw)
+- [`codysumpter-cloud/prismtek-site`](https://github.com/codysumpter-cloud/prismtek-site)
+- [`codysumpter-cloud/omni-bmo`](https://github.com/codysumpter-cloud/omni-bmo)
