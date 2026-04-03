@@ -6,11 +6,11 @@ This document records the currently observed license posture of repositories fee
 
 | Repository | Current role | Observed license state | Notes |
 |---|---|---:|---|
-| `codysumpter-cloud/bmo-stack` | Platform/runtime spine | **No top-level license file found** | Must be fixed before serious consolidation or outside contributions |
+| `codysumpter-cloud/bmo-stack` | Platform/runtime spine | Apache-2.0 | Root `LICENSE` and `NOTICE` added; preserve third-party provenance records |
 | `codysumpter-cloud/nemoclaw` | OpenShell / NemoClaw vendor fork | Apache-2.0 | Safe to vendor/fork with notice preservation |
 | `codysumpter-cloud/omni-bmo` | Embodied BMO / Pi runtime | MIT | Permissive, but preserve attribution and copyright notice |
 | `codysumpter-cloud/PrismBot` | Product/workspace/apps/core | AGPL-3.0 | Strong copyleft; combining code directly into platform changes downstream obligations |
-| `codysumpter-cloud/prismtek-site` | Private site export | **No top-level license file found** | Treat as all-rights-reserved unless/until licensed |
+| `codysumpter-cloud/prismtek-site` | Public site and site-backed APIs | Apache-2.0 | Root `LICENSE` and `NOTICE` added in the repo refresh |
 | `codysumpter-cloud/Prismtek.dev` | Public site repo | **No top-level license file found** | Treat as all-rights-reserved unless/until licensed |
 | `moorew/be-more-hailo` | External upstream reference | MIT | Preserve attribution; fork cleanly if adopting code |
 
@@ -67,17 +67,16 @@ Implications:
 - avoid copying AGPL source into permissive/core packages unless the target is intentionally AGPL too
 - more packaging discipline required, but cleaner for enterprise sales conversations
 
-## What must happen immediately
+## What still matters immediately
 
-1. Add a real license to `bmo-stack`.
-2. Add a real license to `prismtek-site` if it is intended to be reused or contributed to.
+1. Preserve third-party notices and provenance whenever donor or upstream code moves into `bmo-stack`.
+2. Keep `prismtek-site` and `bmo-stack` license posture aligned with their root `LICENSE` and `NOTICE` files.
 3. Add a real license to `Prismtek.dev` if it is intended to be reused or contributed to.
-4. Add third-party notices to `bmo-stack` for vendored/forked code.
-5. Record provenance for every migrated feature.
+4. Record provenance for every migrated feature.
 
-## Suggested default until final decision
+## Suggested default now
 
-Until a final licensing decision is made:
-- treat `bmo-stack` as **not yet safe for broad redistribution**
+Until a broader portfolio-wide licensing review is complete:
+- treat `bmo-stack` and `prismtek-site` as Apache-2.0 codebases with explicit provenance obligations
 - do not copy AGPL code from `PrismBot` into `bmo-stack`
 - only integrate by documented interface or by explicit relicensing decision
