@@ -1,9 +1,11 @@
 version: 1
-lastReviewed: 2026-03-27
+lastReviewed: 2026-04-03
 
 notes: |
   `bmo-stack` evolved directly out of `PrismBot` and `omni-bmo`.
   Treat those two repos as the primary donor sources when auditing missing features.
+  `prismtek.dev_mega-app` and `BMO-app` are now active private donor repos for browser operator
+  surfaces and companion UX ideas.
 
 repos:
   - name: bmo-stack
@@ -68,3 +70,42 @@ repos:
         - treating PrismBot runtime layout as the canonical BMO runtime
     notes: |
       Mine this repo for product patterns and operator ergonomics, not for direct stack structure.
+
+  - name: prismtek.dev_mega-app
+    role: private_operator_surface_donor
+    status: active
+    importPolicy:
+      allowed:
+        - app factory template catalog
+        - app factory model catalog
+        - browser operator IA and panel concepts
+        - workspace lifecycle and sync posture
+        - sandbox session UX language
+        - admin and billing lane concepts
+        - imported prototype metadata
+      forbidden:
+        - replacing the live prismtek.dev site architecture wholesale
+        - treating localhost Express assumptions as production truth
+        - importing the whole monorepo shape into bmo-stack as canonical runtime
+    notes: |
+      Mine this repo for Enterprise App Factory concepts, app catalog metadata, and browser-first
+      operator surface ideas. Treat it as a private donor, not the live deploy source of truth.
+
+  - name: BMO-app
+    role: private_companion_experience_donor
+    status: active
+    importPolicy:
+      allowed:
+        - BMO companion UX patterns
+        - creature and Prismo world concepts
+        - local-first provider fallback ideas
+        - account and persona interaction concepts
+        - network posture and graceful degradation cues
+        - companion command patterns
+      forbidden:
+        - importing Firebase assumptions as canonical stack storage
+        - replacing OpenClaw runtime ownership with this app
+        - treating AI Studio scaffolding as production architecture
+    notes: |
+      Mine this repo for BMO character experience, Tengu creature concepts, Kairos world ideas,
+      and multi-provider chat ergonomics.
