@@ -6,6 +6,7 @@ import json
 import os
 import shutil
 import subprocess
+from datetime import datetime, timezone
 from pathlib import Path
 
 DEFAULT_REPO_URL = str(Path.home() / "code" / "bmo-stack")
@@ -75,6 +76,21 @@ def normalize_repo_url(repo_url: str) -> str:
     return repo_url
 
 
+def ahead_behind_counts(path: Path, branch: str) -> tuple[int, int]:
+    if not branch:
+        return (0, 0)
+    result = run(["git", "rev-list", "--left-right", "--count", f"HEAD...origin/{branch}"], cwd=path)
+    if result["returncode"] != 0:
+        return (0, 0)
+    raw = str(result["stdout"]).strip().split()
+    if len(raw) != 2:
+        return (0, 0)
+    try:
+        return (int(raw[0]), int(raw[1]))
+    except ValueError:
+        return (0, 0)
+
+
 def is_local_git_repo(repo_url: str) -> bool:
     candidate = Path(repo_url).expanduser()
     return candidate.exists() and (candidate / ".git").exists()
@@ -95,6 +111,36 @@ def make_note_step(cmd: list[str], cwd: Path, stdout: str) -> dict[str, object]:
         "stdout": stdout,
         "stderr": "",
     }
+
+
+def backup_workspace_state(path: Path, branch: str, *, tracked_changes: bool, ahead: int, behind: int) -> Path:
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    backup_dir = Path.home() / ".openclaw" / "backups" / "workspace-sync" / f"{path.name}-{stamp}"
+    backup_dir.mkdir(parents=True, exist_ok=True)
+
+    origin_ref = f"origin/{branch}" if branch else "origin/HEAD"
+    metadata = {
+        "path": str(path),
+        "branch": branch,
+        "origin_ref": origin_ref,
+        "tracked_changes": tracked_changes,
+        "ahead": ahead,
+        "behind": behind,
+    }
+    (backup_dir / "metadata.json").write_text(json.dumps(metadata, indent=2) + "\n", encoding="utf-8")
+
+    status = run(["git", "status", "--short", "--branch"], cwd=path)
+    (backup_dir / "status.txt").write_text(str(status["stdout"]) + str(status["stderr"]), encoding="utf-8")
+
+    branch_log = run(["git", "log", "--oneline", "--decorate", "--left-right", f"{origin_ref}...HEAD"], cwd=path)
+    (backup_dir / "branch-log.txt").write_text(str(branch_log["stdout"]) + str(branch_log["stderr"]), encoding="utf-8")
+
+    diff = run(["git", "diff", "--binary", f"{origin_ref}...HEAD"], cwd=path)
+    (backup_dir / "tracked-diff.patch").write_text(str(diff["stdout"]) + str(diff["stderr"]), encoding="utf-8")
+
+    untracked = run(["git", "ls-files", "--others", "--exclude-standard"], cwd=path)
+    (backup_dir / "untracked.txt").write_text(str(untracked["stdout"]) + str(untracked["stderr"]), encoding="utf-8")
+    return backup_dir
 
 
 def ensure_origin(path: Path, repo_url: str) -> list[dict[str, object]]:
@@ -136,6 +182,51 @@ def ensure_repo(path: Path, repo_url: str, preferred_branch: str | None = None) 
     steps.append(run(["git", "fetch", "--all", "--prune"], cwd=path))
     default_branch = preferred_branch or read_default_branch(path)
     steps.extend(ensure_default_branch(path, default_branch))
+    if default_branch:
+        steps.append(run(["git", "pull", "--ff-only", "origin", default_branch], cwd=path))
+    else:
+        steps.append(run(["git", "pull", "--ff-only"], cwd=path))
+    return steps
+
+
+def ensure_workspace_repo(path: Path, repo_url: str, preferred_branch: str | None = None) -> list[dict[str, object]]:
+    steps: list[dict[str, object]] = []
+    repo_url = normalize_repo_url(repo_url)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    if not path.exists():
+        steps.append(run(["git", "clone", repo_url, str(path)]))
+    if not path.exists():
+        return steps
+
+    steps.extend(ensure_origin(path, repo_url))
+    steps.append(run(["git", "fetch", "--all", "--prune"], cwd=path))
+    default_branch = preferred_branch or read_default_branch(path)
+    steps.extend(ensure_default_branch(path, default_branch))
+
+    ahead, behind = ahead_behind_counts(path, default_branch)
+    tracked_changes = has_tracked_changes(path)
+    if tracked_changes or ahead or behind:
+        backup_dir = backup_workspace_state(path, default_branch, tracked_changes=tracked_changes, ahead=ahead, behind=behind)
+        reason_bits = []
+        if tracked_changes:
+            reason_bits.append("tracked changes")
+        if ahead:
+            reason_bits.append(f"ahead {ahead}")
+        if behind:
+            reason_bits.append(f"behind {behind}")
+        steps.append(
+            make_note_step(
+                ["backup-workspace-state", str(path)],
+                path,
+                f"Backed up workspace drift ({', '.join(reason_bits)}) to {backup_dir}\n",
+            )
+        )
+        if default_branch:
+            steps.append(run(["git", "reset", "--hard", f"origin/{default_branch}"], cwd=path))
+        else:
+            steps.append(run(["git", "reset", "--hard", "HEAD"], cwd=path))
+        return steps
+
     if default_branch:
         steps.append(run(["git", "pull", "--ff-only", "origin", default_branch], cwd=path))
     else:
@@ -303,10 +394,10 @@ def main() -> None:
         "steps": [],
     }
     payload["steps"].extend(tag_steps("bmo-stack-source", maybe_refresh_source_repo(args.repo_url, preferred_branch="master")))
-    payload["steps"].extend(tag_steps("bmo-stack", ensure_repo(workspace_dir, args.repo_url, preferred_branch="master")))
+    payload["steps"].extend(tag_steps("bmo-stack", ensure_workspace_repo(workspace_dir, args.repo_url, preferred_branch="master")))
     if not args.skip_site_workspace_sync and args.site_repo_url:
         payload["steps"].extend(tag_steps("prismtek-site-source", maybe_refresh_source_repo(args.site_repo_url, preferred_branch="main")))
-        payload["steps"].extend(tag_steps("prismtek-site", ensure_repo(site_workspace_dir, args.site_repo_url, preferred_branch="main")))
+        payload["steps"].extend(tag_steps("prismtek-site", ensure_workspace_repo(site_workspace_dir, args.site_repo_url, preferred_branch="main")))
     payload["steps"].extend(tag_steps("continuity", maybe_refresh_continuity(workspace_dir, args.continuity_surface, continuity_output, args.publish_continuity)))
     payload["steps"].extend(tag_steps("continuity", mirror_continuity_snapshot(workspace_dir, continuity_output)))
     payload["steps"].extend(tag_steps("context", sync_context(workspace_dir, host_context, args.delete_context, excludes)))
