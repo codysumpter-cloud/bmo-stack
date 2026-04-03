@@ -1,0 +1,188 @@
+{
+  "version": 2,
+  "lastReviewed": "2026-04-03",
+  "sourceOfTruth": "docs/PRIVATE_APP_REPO_INTEGRATION.md",
+  "repos": [
+    {
+      "id": "prismtek-dev-mega-app",
+      "repo": "codysumpter-cloud/prismtek.dev_mega-app",
+      "visibility": "private",
+      "role": "operator-surface-and-app-factory-donor",
+      "defaultBranch": "main",
+      "donorSources": [
+        "packages/app-factory/index.ts",
+        "apps/web/src/App.tsx",
+        "apps/api/server.ts"
+      ],
+      "primarySurfaces": [
+        "Dashboard",
+        "Workspaces",
+        "Model Hub",
+        "App Factory",
+        "Sandbox",
+        "Billing",
+        "Admin"
+      ],
+      "importedTemplates": [
+        {
+          "id": "bmo-stack-full",
+          "name": "BMO Stack Full",
+          "description": "Complete BMO Stack deployment with agent framework and local model support.",
+          "repoUrl": "https://github.com/codysumpter-cloud/bmo-stack",
+          "supportedModels": [
+            "gemma4-e2b",
+            "gemma4-2b",
+            "gemma4-7b",
+            "gemma4-27b",
+            "nemotron3-120b",
+            "nemotron3-8b"
+          ]
+        },
+        {
+          "id": "prismtek-site-pro",
+          "name": "Prismtek Site Pro",
+          "description": "Advanced site template based on the Prismtek-site repository.",
+          "repoUrl": "https://github.com/prismtek-dev/prismtek-site",
+          "supportedModels": [
+            "gemma4-7b",
+            "gemma4-27b"
+          ]
+        },
+        {
+          "id": "bmo-agent",
+          "name": "BMO Agent",
+          "description": "AI agent framework with wake-word support and character customization.",
+          "repoUrl": "https://github.com/codysumpter-cloud/omni-bmo"
+        },
+        {
+          "id": "openclaw-harness",
+          "name": "OpenClaw Harness",
+          "description": "High-performance harness for Claude-style agents.",
+          "repoUrl": "https://github.com/ultraworkers/claw-code"
+        }
+      ],
+      "factoryModels": [
+        "gemma4-e2b",
+        "gemma4-2b",
+        "gemma4-7b",
+        "gemma4-27b",
+        "nemotron3-120b",
+        "nemotron3-8b"
+      ],
+      "prototypeCatalog": [
+        "ai-edge-gallery",
+        "cosmic-flow",
+        "function-call-kitchen",
+        "gemini-runner",
+        "gemini-slingshot",
+        "image-to-voxel-art",
+        "infinite-heroes",
+        "infogenius",
+        "lumina-festival",
+        "massive-multiplayer-laser-tag",
+        "multiplayer-neon-snake",
+        "svg-generator",
+        "synthwave-space",
+        "type-motion",
+        "voxel-toy-box",
+        "voxel-toy-box-2"
+      ],
+      "workspaceLifecycle": [
+        "create-workspace",
+        "generate-to-workspace",
+        "sync-workspace",
+        "launch-sandbox",
+        "delete-workspace"
+      ],
+      "apiSurfaces": [
+        "/api/factory/templates",
+        "/api/factory/models",
+        "/api/factory/generate",
+        "/api/factory/jobs/:id",
+        "/api/workspaces",
+        "/api/workspaces/:id/sync",
+        "/api/sandbox/launch",
+        "/api/sandbox/sessions",
+        "/api/admin/stats",
+        "/api/admin/logs"
+      ],
+      "integrationTargets": [
+        "prismtek-site:/builder-studio/",
+        "bmo-stack:operator docs and manifests"
+      ],
+      "guardrails": [
+        "Do not treat localhost Express endpoints as production truth.",
+        "Do not replace prismtek-site with the donor monorepo.",
+        "Treat donor API shapes as planning metadata unless explicitly implemented in canonical runtime repos."
+      ]
+    },
+    {
+      "id": "bmo-app",
+      "repo": "codysumpter-cloud/BMO-app",
+      "visibility": "private",
+      "role": "companion-and-worldbuilding-donor",
+      "defaultBranch": "main",
+      "donorSources": [
+        "src/components/BMO.tsx",
+        "src/components/BMOScreen.tsx",
+        "src/components/PrismosWorld.tsx",
+        "src/components/PixelAgent.tsx",
+        "src/types.ts",
+        "src/lib/llmService.ts",
+        "src/firebase.ts"
+      ],
+      "primarySurfaces": [
+        "BMO companion",
+        "Prismo's World",
+        "Pixel creatures"
+      ],
+      "companionModes": [
+        "face",
+        "chat",
+        "tasks",
+        "code",
+        "agent",
+        "prismo"
+      ],
+      "creatureTypes": [
+        "tengu",
+        "robot",
+        "cat",
+        "slime",
+        "capybara"
+      ],
+      "runtimeSignals": [
+        "network-status",
+        "provider-fallback",
+        "google-profile-sync",
+        "error-boundary"
+      ],
+      "commandConcepts": [
+        "/buddy stats",
+        "/buddy train"
+      ],
+      "worldSystems": [
+        "kairos-global-state",
+        "battles",
+        "trades",
+        "rankings",
+        "explore"
+      ],
+      "providerLadder": [
+        "local",
+        "nvidia",
+        "gemini",
+        "openai"
+      ],
+      "integrationTargets": [
+        "prismtek-site:/prism-agent/",
+        "bmo-stack:donor and operator docs"
+      ],
+      "guardrails": [
+        "Do not adopt Firebase schema as the canonical stack persistence model.",
+        "Do not let donor chat routing override OpenClaw runtime ownership.",
+        "Treat donor companion UX as a product donor, not as a hidden replacement runtime."
+      ]
+    }
+  ]
+}

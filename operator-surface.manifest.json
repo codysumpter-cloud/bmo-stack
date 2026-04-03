@@ -16,10 +16,16 @@
       "description": "Run bounded review and keep approval visible before action."
     },
     {
-      "id": "generation-handoff",
-      "name": "Generation, artifacts, and handoff",
+      "id": "template-model-selection",
+      "name": "Template and model selection",
+      "owner": "web",
+      "description": "Expose donor template catalogs, model hubs, and route-shaping choices before generation."
+    },
+    {
+      "id": "workspace-handoff",
+      "name": "Workspace lifecycle, artifacts, and handoff",
       "owner": "shared",
-      "description": "Expose the same handoff story and generated outputs across browser and workstation surfaces."
+      "description": "Expose the same workspace, sync, sandbox, and generated-output story across browser and workstation surfaces."
     },
     {
       "id": "repo-docs",
@@ -32,6 +38,12 @@
       "name": "Validation and runtime recovery",
       "owner": "local",
       "description": "Make guarded execution and runtime checks explicit and operator-visible."
+    },
+    {
+      "id": "companion-resilience",
+      "name": "Companion UX and resilience cues",
+      "owner": "shared",
+      "description": "Carry companion modes, Kairos world-state, and graceful degraded-state cues across the public and local surfaces."
     }
   ],
   "documentShortcuts": [
@@ -46,6 +58,12 @@
       "name": "Enterprise Factory Bridge",
       "path": "docs/ENTERPRISE_APP_FACTORY_BRIDGE.md",
       "description": "How browser planning surfaces hand off to the local workstation."
+    },
+    {
+      "id": "private-app-repo-integration",
+      "name": "Private App Repo Integration",
+      "path": "docs/PRIVATE_APP_REPO_INTEGRATION.md",
+      "description": "How prismtek.dev_mega-app and BMO-app map into Builder Studio, Prism Agent, and BMO."
     }
   ],
   "validationActions": [
