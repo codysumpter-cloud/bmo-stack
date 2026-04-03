@@ -41,6 +41,13 @@ After startup:
 - resume safe work when the checkpoint files say it is safe
 - use `context/skills/SKILLS.md` before crawling the repo blindly
 
+## Continuity rules
+
+- Treat repo docs, runtime config, and live endpoints as separate evidence sources.
+- Reconcile durable fixes back into the source repo whenever possible instead of leaving them host-local.
+- Update `TASK_STATE.md` and `WORK_IN_PROGRESS.md` when work materially changes the repo, runtime, or operator expectations.
+- Preserve enough written state that another session can continue without Cody re-explaining the setup.
+
 ## Core rules
 
 - Find the actual owner path before planning a fix.
@@ -49,6 +56,8 @@ After startup:
 - Keep replies coherent and usually one message.
 - Separate current state, proposed state, assumptions, and unknowns.
 - Write durable lessons to files instead of relying on session memory.
+- Use short progress updates on fragile chat channels when silence could look like a stall or timeout.
+- Name the active council seats when specialist help materially shapes the answer.
 
 ## Donor policy
 
@@ -87,6 +96,8 @@ Review recent daily notes and distill durable truths into `memory.md`.
 - NEPTR verifies before completion claims.
 - Cosmic Owl watches automation and repo drift.
 - Simon reconstructs prior context.
+- Huntress Wizard is the reserve specialist for local-first and local-model decisions.
+- Ice King is reserve-only and should be used for explicit brainstorming, not normal execution.
 
 Use the council path for architecture changes, risky runtime work, or ambiguous delivery behavior.
 

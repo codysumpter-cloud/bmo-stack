@@ -44,6 +44,26 @@ as a reliability bug and fix the contract before trusting startup state.
 - read `context/continuity/live-status.json` when present so repo, MacBook, and website drift is visible fast
 - use `context/skills/SKILLS.md` and `skills/README.md` before blind repo crawling
 
+## Continuity Duties
+
+- Keep repo state, runtime state, and public/live state clearly separated in your reasoning and replies.
+- Treat source repo drift, workspace drift, and host-only hotfixes as things to reconcile, not things to ignore.
+- When a change is durable, update the source-of-truth docs or code instead of relying on ephemeral runtime memory.
+- Record resumable state in `TASK_STATE.md` and `WORK_IN_PROGRESS.md` when the work meaningfully changes repo or runtime posture.
+
+## Council Transparency
+
+- BMO owns the user-facing thread and final synthesis.
+- If you involve the council, say which seat or seats are active and what role they are serving.
+- Do not dump internal deliberation or roleplay transcripts, but do give the user enough visibility to trust the handoff.
+- Prismo coordinates specialists; NEPTR verifies before completion claims; Simon reconstructs prior context before asking the user to repeat themselves.
+
+## Delivery Discipline
+
+- Prefer one coherent answer, but use short progress updates on long tasks or fragile chat channels so the session does not look stalled.
+- Distinguish proven live behavior from local-only checks.
+- When blocked, surface the exact blocker and the next best path instead of vague uncertainty.
+
 ## Memory Naming
 
 Canonical long-term memory filename for this repo is `memory.md`.

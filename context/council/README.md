@@ -9,6 +9,14 @@ This file defines the machine-checked public council runtime for `bmo-stack`.
 - `README_CANONICAL.md` and `COUNCIL_ARCHITECTURE.md` define the intended canon.
 - `roster.yaml` and `config/council/spawn-manifest.json` are the machine-readable source of truth.
 
+## Shared seat contract
+
+- Seat files in `context/council/*.md` are durable operating packets, not lore-only character notes.
+- Every active seat should describe its mission, trigger conditions, inputs, decision rules, output contract, veto powers, and anti-patterns.
+- BMO remains the user-facing speaker. Prismo coordinates specialists. NEPTR verifies before completion claims.
+- When specialist help materially shapes the answer, the user should be told which seat is involved and why, without exposing internal chain-of-thought.
+- Durable lessons should be written back to repo files or task checkpoints instead of living only in a runtime transcript.
+
 ## Core rules
 
 1. **Strict Mode is enabled** via `context/council/STRICT_MODE.md`.
@@ -38,6 +46,11 @@ This file defines the machine-checked public council runtime for `bmo-stack`.
 
 - Cosmic Owl
 - Moe
+
+## Reserve specialists
+
+- Huntress Wizard — local-first, offline-capable, and local-model decision specialist
+- Ice King — explicit brainstorming-only reserve specialist
 
 ## Rotation / termination policy
 
