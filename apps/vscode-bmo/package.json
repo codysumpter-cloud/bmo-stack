@@ -1,0 +1,80 @@
+{
+  "name": "vscode-bmo",
+  "displayName": "BMO for VS Code",
+  "description": "A thin VS Code chat shell for OpenClaw.",
+  "version": "0.0.1",
+  "publisher": "prismtek",
+  "private": true,
+  "engines": {
+    "vscode": "^1.95.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:bmo.openChat",
+    "onCommand:bmo.askAboutSelection",
+    "onCommand:bmo.askAboutCurrentFile"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "bmo.openChat",
+        "title": "BMO: Open Chat"
+      },
+      {
+        "command": "bmo.askAboutSelection",
+        "title": "BMO: Ask About Selection"
+      },
+      {
+        "command": "bmo.askAboutCurrentFile",
+        "title": "BMO: Ask About Current File"
+      }
+    ],
+    "configuration": {
+      "title": "BMO",
+      "properties": {
+        "bmo.openclaw.baseUrl": {
+          "type": "string",
+          "default": "http://127.0.0.1:18789/v1",
+          "description": "Base URL for OpenClaw's OpenAI-compatible endpoint."
+        },
+        "bmo.openclaw.token": {
+          "type": "string",
+          "default": "",
+          "description": "Gateway bearer token for the local OpenClaw HTTP API."
+        },
+        "bmo.openclaw.model": {
+          "type": "string",
+          "default": "openclaw/default",
+          "description": "OpenClaw agent-target model id to call."
+        },
+        "bmo.openclaw.user": {
+          "type": "string",
+          "default": "vscode-bmo",
+          "description": "Stable OpenClaw user/session identifier for this VS Code client."
+        },
+        "bmo.openclaw.includeWorkspacePath": {
+          "type": "boolean",
+          "default": true,
+          "description": "Include current workspace path in the prompt context."
+        },
+        "bmo.chat.maxFileChars": {
+          "type": "number",
+          "default": 12000,
+          "description": "Maximum characters of file/selection context to include."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/vscode": "^1.95.0",
+    "typescript": "^5.8.3"
+  }
+}
