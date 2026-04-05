@@ -37,7 +37,7 @@ exports.activate = activate;
 exports.deactivate = deactivate;
 const vscode = __importStar(require("vscode"));
 function activate(context) {
-    const panel = new BmoChatPanel(context);
+    const panel = new BmoChatPanel();
     context.subscriptions.push(vscode.commands.registerCommand('bmo.openChat', async () => {
         await panel.show();
     }), vscode.commands.registerCommand('bmo.askAboutSelection', async () => {
@@ -56,28 +56,27 @@ function activate(context) {
             return;
         }
         panel.seedComposer(seed);
+    }), vscode.commands.registerCommand('bmo.rewriteSelection', async () => {
+        await rewriteSelection();
     }));
 }
 function deactivate() { }
 class BmoChatPanel {
     panel;
-    context;
     messages = [
         {
             role: 'assistant',
-            content: 'BMO is ready. Ask something, or use “Ask About Selection” / “Ask About Current File”.'
+            content: 'BMO is ready. Ask something, or use Ask About Selection / Ask About Current File / Rewrite Selection.'
         }
     ];
-    constructor(context) {
-        this.context = context;
-    }
+    busy = false;
     async show() {
         if (!this.panel) {
             this.panel = vscode.window.createWebviewPanel('bmoChat', 'BMO Chat', vscode.ViewColumn.Beside, {
                 enableScripts: true,
                 retainContextWhenHidden: true
             });
-            this.panel.webview.html = this.getHtml(this.panel.webview);
+            this.panel.webview.html = this.getHtml();
             this.panel.webview.onDidReceiveMessage(async (event) => {
                 if (event?.type === 'send') {
                     await this.handleSend(String(event.text ?? ''));
@@ -95,28 +94,44 @@ class BmoChatPanel {
     }
     async handleSend(rawText) {
         const text = rawText.trim();
-        if (!text)
+        if (!text || this.busy)
             return;
+        this.busy = true;
         this.messages.push({ role: 'user', content: text });
-        this.pushState();
+        this.messages.push({ role: 'assistant', content: '' });
+        const assistantIndex = this.messages.length - 1;
+        this.pushState('BMO is thinking...');
         try {
-            const response = await callOpenClaw(this.messages);
-            this.messages.push({ role: 'assistant', content: response });
+            await callOpenClawStream(this.messages.slice(0, -1), (delta) => {
+                this.messages[assistantIndex].content += delta;
+                this.pushState('Streaming reply...');
+            });
+            if (!this.messages[assistantIndex].content.trim()) {
+                this.messages[assistantIndex].content = 'No assistant message returned.';
+            }
+            this.pushState();
         }
         catch (error) {
             const message = error instanceof Error ? error.message : String(error);
-            this.messages.push({
-                role: 'assistant',
-                content: `Couldn’t reach OpenClaw. ${message}\n\n` +
-                    `Check: (1) the gateway is running, (2) chat completions are enabled, and (3) bmo.openclaw.token is set.`
-            });
+            this.messages[assistantIndex].content =
+                `Couldn’t reach OpenClaw. ${message}\n\n` +
+                    `Check: (1) the gateway is running, (2) chat completions are enabled, and (3) bmo.openclaw.token is set.`;
+            this.pushState();
         }
-        this.pushState();
+        finally {
+            this.busy = false;
+            this.pushState();
+        }
     }
-    pushState() {
-        this.panel?.webview.postMessage({ type: 'messages', messages: this.messages });
+    pushState(status) {
+        this.panel?.webview.postMessage({
+            type: 'state',
+            messages: this.messages,
+            busy: this.busy,
+            status: status ?? (this.busy ? 'Working...' : 'Ready')
+        });
     }
-    getHtml(webview) {
+    getHtml() {
         const nonce = String(Date.now());
         return `<!doctype html>
 <html>
@@ -133,8 +148,11 @@ class BmoChatPanel {
     .assistant { background: color-mix(in srgb, var(--vscode-button-background) 12%, transparent); }
     .composer { border-top: 1px solid var(--vscode-panel-border); padding: 12px; display: grid; gap: 8px; }
     textarea { width: 100%; min-height: 110px; resize: vertical; box-sizing: border-box; border-radius: 8px; padding: 10px; border: 1px solid var(--vscode-input-border, transparent); background: var(--vscode-input-background); color: var(--vscode-input-foreground); }
-    button { justify-self: end; border: 0; border-radius: 6px; padding: 8px 12px; cursor: pointer; background: var(--vscode-button-background); color: var(--vscode-button-foreground); }
+    .actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    button { border: 0; border-radius: 6px; padding: 8px 12px; cursor: pointer; background: var(--vscode-button-background); color: var(--vscode-button-foreground); }
+    button[disabled] { opacity: 0.6; cursor: default; }
     .hint { font-size: 12px; opacity: 0.75; }
+    .status { font-size: 12px; opacity: 0.75; }
   </style>
 </head>
 <body>
@@ -143,7 +161,10 @@ class BmoChatPanel {
     <div class="composer">
       <div class="hint">Thin local shell over OpenClaw. Configure base URL + token in VS Code settings.</div>
       <textarea id="input" placeholder="Ask BMO about this project..."></textarea>
-      <button id="send">Send</button>
+      <div class="actions">
+        <div id="status" class="status">Ready</div>
+        <button id="send">Send</button>
+      </div>
     </div>
   </div>
   <script nonce="${nonce}">
@@ -151,6 +172,7 @@ class BmoChatPanel {
     const messagesEl = document.getElementById('messages');
     const inputEl = document.getElementById('input');
     const sendEl = document.getElementById('send');
+    const statusEl = document.getElementById('status');
 
     function render(messages) {
       messagesEl.innerHTML = '';
@@ -165,7 +187,7 @@ class BmoChatPanel {
 
     sendEl.addEventListener('click', () => {
       const text = inputEl.value;
-      if (!text.trim()) return;
+      if (!text.trim() || sendEl.disabled) return;
       vscode.postMessage({ type: 'send', text });
       inputEl.value = '';
       inputEl.focus();
@@ -179,7 +201,11 @@ class BmoChatPanel {
 
     window.addEventListener('message', (event) => {
       const msg = event.data;
-      if (msg.type === 'messages') render(msg.messages || []);
+      if (msg.type === 'state') {
+        render(msg.messages || []);
+        sendEl.disabled = !!msg.busy;
+        statusEl.textContent = msg.status || 'Ready';
+      }
       if (msg.type === 'seed') {
         inputEl.value = msg.text || '';
         inputEl.focus();
@@ -190,6 +216,62 @@ class BmoChatPanel {
 </html>`;
     }
 }
+async function callOpenClawStream(history, onDelta) {
+    const config = vscode.workspace.getConfiguration('bmo');
+    const baseUrl = String(config.get('openclaw.baseUrl') ?? 'http://127.0.0.1:18789/v1').replace(/\/$/, '');
+    const token = String(config.get('openclaw.token') ?? '').trim();
+    const model = String(config.get('openclaw.model') ?? 'openclaw/default');
+    const user = String(config.get('openclaw.user') ?? 'vscode-bmo');
+    const includeWorkspacePath = Boolean(config.get('openclaw.includeWorkspacePath') ?? true);
+    if (!token)
+        throw new Error('Missing bmo.openclaw.token.');
+    const messages = withEditorContext(history, includeWorkspacePath);
+    const response = await fetch(`${baseUrl}/chat/completions`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+            model,
+            user,
+            messages,
+            stream: true
+        })
+    });
+    if (!response.ok) {
+        const body = await response.text();
+        throw new Error(`HTTP ${response.status}: ${body.slice(0, 400)}`);
+    }
+    const reader = response.body?.getReader();
+    if (!reader)
+        throw new Error('Streaming response body unavailable.');
+    const decoder = new TextDecoder();
+    let buffer = '';
+    while (true) {
+        const { value, done } = await reader.read();
+        if (done)
+            break;
+        buffer += decoder.decode(value, { stream: true });
+        const parts = buffer.split('\n\n');
+        buffer = parts.pop() ?? '';
+        for (const part of parts) {
+            const lines = part
+                .split('\n')
+                .map((line) => line.trim())
+                .filter((line) => line.startsWith('data:'));
+            for (const line of lines) {
+                const payload = line.slice(5).trim();
+                if (!payload || payload === '[DONE]')
+                    continue;
+                const parsed = JSON.parse(payload);
+                const delta = extractStreamContent(parsed);
+                if (delta)
+                    onDelta(delta);
+            }
+        }
+    }
+}
 async function callOpenClaw(history) {
     const config = vscode.workspace.getConfiguration('bmo');
     const baseUrl = String(config.get('openclaw.baseUrl') ?? 'http://127.0.0.1:18789/v1').replace(/\/$/, '');
@@ -197,32 +279,18 @@ async function callOpenClaw(history) {
     const model = String(config.get('openclaw.model') ?? 'openclaw/default');
     const user = String(config.get('openclaw.user') ?? 'vscode-bmo');
     const includeWorkspacePath = Boolean(config.get('openclaw.includeWorkspacePath') ?? true);
-    if (!token) {
+    if (!token)
         throw new Error('Missing bmo.openclaw.token.');
-    }
-    const messages = [...history];
-    const contextBits = [];
-    const folder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
-    const editor = vscode.window.activeTextEditor;
-    if (includeWorkspacePath && folder) {
-        contextBits.push(`Workspace: ${folder}`);
-    }
-    if (editor) {
-        contextBits.push(`Active file: ${editor.document.uri.fsPath}`);
-    }
-    if (contextBits.length > 0) {
-        messages.unshift({ role: 'system', content: contextBits.join('\n') });
-    }
     const response = await fetch(`${baseUrl}/chat/completions`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
+            Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({
             model,
             user,
-            messages,
+            messages: withEditorContext(history, includeWorkspacePath),
             stream: false
         })
     });
@@ -239,13 +307,36 @@ async function callOpenClaw(history) {
     }
     return content;
 }
+function withEditorContext(history, includeWorkspacePath) {
+    const messages = [...history];
+    const contextBits = [];
+    const folder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+    const editor = vscode.window.activeTextEditor;
+    if (includeWorkspacePath && folder) {
+        contextBits.push(`Workspace: ${folder}`);
+    }
+    if (editor) {
+        contextBits.push(`Active file: ${editor.document.uri.fsPath}`);
+    }
+    if (contextBits.length > 0) {
+        messages.unshift({ role: 'system', content: contextBits.join('\n') });
+    }
+    return messages;
+}
 function extractContent(json) {
     const content = json.choices?.[0]?.message?.content;
     if (typeof content === 'string')
         return content;
-    if (Array.isArray(content)) {
+    if (Array.isArray(content))
         return content.map((part) => part.text ?? '').join('').trim();
-    }
+    return '';
+}
+function extractStreamContent(json) {
+    const content = json.choices?.[0]?.delta?.content;
+    if (typeof content === 'string')
+        return content;
+    if (Array.isArray(content))
+        return content.map((part) => part.text ?? '').join('');
     return '';
 }
 function buildSelectionPrompt() {
@@ -258,8 +349,7 @@ function buildSelectionPrompt() {
     const text = editor.document.getText(selection);
     const file = editor.document.uri.fsPath;
     const language = editor.document.languageId;
-    return `Please help with this selected code from ${file}.\n\n\
-\`\`\`${language}\n${text}\n\`\`\``;
+    return `Please help with this selected code from ${file}.\n\n\`\`\`${language}\n${text}\n\`\`\``;
 }
 async function buildCurrentFilePrompt() {
     const editor = vscode.window.activeTextEditor;
@@ -272,7 +362,74 @@ async function buildCurrentFilePrompt() {
     const raw = editor.document.getText();
     const text = raw.length > maxChars ? `${raw.slice(0, maxChars)}\n\n[truncated]` : raw;
     const relative = vscode.workspace.asRelativePath(file);
-    return `Please help with this file: ${relative}\n\n\
-\`\`\`${language}\n${text}\n\`\`\``;
+    return `Please help with this file: ${relative}\n\n\`\`\`${language}\n${text}\n\`\`\``;
+}
+async function rewriteSelection() {
+    const editor = vscode.window.activeTextEditor;
+    if (!editor) {
+        void vscode.window.showInformationMessage('No active editor found.');
+        return;
+    }
+    const selection = editor.selection;
+    if (selection.isEmpty) {
+        void vscode.window.showInformationMessage('Select some code first.');
+        return;
+    }
+    const instruction = await vscode.window.showInputBox({
+        prompt: 'How should BMO rewrite this selection?',
+        placeHolder: 'Example: simplify this, keep behavior the same, and add clearer names'
+    });
+    if (!instruction?.trim())
+        return;
+    const document = editor.document;
+    const selectedText = document.getText(selection);
+    const language = document.languageId;
+    const relative = vscode.workspace.asRelativePath(document.uri);
+    try {
+        await vscode.window.withProgress({
+            location: vscode.ProgressLocation.Notification,
+            title: 'BMO rewriting selection',
+            cancellable: false
+        }, async () => {
+            const prompt = [
+                `Rewrite the following selected code from ${relative}.`,
+                `Instruction: ${instruction.trim()}`,
+                '',
+                'Return only the rewritten code in a single fenced code block. No explanation.',
+                '',
+                `\`\`\`${language}`,
+                selectedText,
+                '\`\`\`'
+            ].join('\n');
+            const reply = await callOpenClaw([{ role: 'user', content: prompt }]);
+            const replacement = extractReplacement(reply).trimEnd();
+            if (!replacement) {
+                throw new Error('Model returned no replacement text.');
+            }
+            await showSnippetDiff(selectedText, replacement, language);
+            const choice = await vscode.window.showInformationMessage('Apply BMO rewrite to the selected code?', { modal: true }, 'Apply', 'Cancel');
+            if (choice !== 'Apply')
+                return;
+            await editor.edit((editBuilder) => {
+                editBuilder.replace(selection, replacement);
+            });
+            void vscode.window.showInformationMessage('Selection rewritten.');
+        });
+    }
+    catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        void vscode.window.showErrorMessage(`BMO rewrite failed: ${message}`);
+    }
+}
+async function showSnippetDiff(original, replacement, language) {
+    const left = await vscode.workspace.openTextDocument({ content: original, language });
+    const right = await vscode.workspace.openTextDocument({ content: replacement, language });
+    await vscode.commands.executeCommand('vscode.diff', left.uri, right.uri, 'BMO Rewrite Preview');
+}
+function extractReplacement(reply) {
+    const fenced = reply.match(/```[a-zA-Z0-9_-]*\n([\s\S]*?)```/);
+    if (fenced?.[1])
+        return fenced[1];
+    return reply.trim();
 }
 //# sourceMappingURL=extension.js.map

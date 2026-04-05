@@ -4,10 +4,12 @@ Thin local VS Code shell over OpenClaw.
 
 ## What it does
 
-V1 includes:
+Current MVP includes:
 - Chat panel inside VS Code
+- Streaming replies from OpenClaw
 - Ask about current selection
 - Ask about current file
+- Rewrite selection with diff preview + apply confirmation
 - Calls OpenClaw through the local OpenAI-compatible `/v1/chat/completions` endpoint
 
 ## Requirements
@@ -54,21 +56,22 @@ npm run compile
 Then in VS Code:
 
 1. Open this folder
-2. Run `Developer: Reload Window` if needed
-3. Press `F5` to launch an Extension Development Host
-4. Run:
+2. Press `F5` to launch an Extension Development Host
+3. Run:
    - `BMO: Open Chat`
    - `BMO: Ask About Selection`
    - `BMO: Ask About Current File`
+   - `BMO: Rewrite Selection`
 
 ## Notes
 
-This is the thin-shell version on purpose.
+This is still the thin-shell version on purpose.
 
 It does **not** yet do:
-- structured patch apply
-- streaming tokens
+- whole-file structured patch apply
+- tool/event streaming beyond text streaming
 - background task log views
 - sandbox/session controls in the UI
+- inline code actions inside the editor
 
 Those can be added next without throwing away this scaffold.

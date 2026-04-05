@@ -14,7 +14,8 @@
   "activationEvents": [
     "onCommand:bmo.openChat",
     "onCommand:bmo.askAboutSelection",
-    "onCommand:bmo.askAboutCurrentFile"
+    "onCommand:bmo.askAboutCurrentFile",
+    "onCommand:bmo.rewriteSelection"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -30,6 +31,10 @@
       {
         "command": "bmo.askAboutCurrentFile",
         "title": "BMO: Ask About Current File"
+      },
+      {
+        "command": "bmo.rewriteSelection",
+        "title": "BMO: Rewrite Selection"
       }
     ],
     "configuration": {
