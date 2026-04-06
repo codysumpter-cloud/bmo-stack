@@ -1,0 +1,28 @@
+name: OpenClawShell
+options:
+  bundleIdPrefix: com.prismtek
+configs:
+  Debug: debug
+  Release: release
+settings:
+  IPHONEOS_DEPLOYMENT_TARGET: 17.0
+  SWIFT_VERSION: 5.0
+targets:
+  OpenClawShell:
+    type: application
+    platform: iOS
+    sources:
+      - path: OpenClawShell
+        excludes:
+          - "**/.DS_Store"
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.prismtek.openclawshell
+        INFOPLIST_KEY_CFBundleDisplayName: OpenClawShell
+        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.productivity
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: true
+        INFOPLIST_KEY_UIFileSharingEnabled: true
+        INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace: true
+        INFOPLIST_KEY_NSDocumentsFolderUsageDescription: OpenClawShell stores imported workspace files here.
+        DEVELOPMENT_TEAM: ""
+    dependencies: []
