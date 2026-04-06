@@ -19,6 +19,34 @@ interface OpenClawChatResponse {
   error?: { message?: string };
 }
 
+// Agent and model configuration
+interface AgentConfig {
+  id: string;
+  name: string;
+  emoji: string;
+  model: string;
+}
+
+const AVAILABLE_AGENTS: AgentConfig[] = [
+  { id: 'main', name: 'BMO', emoji: '🤖', model: 'openai-codex/gpt-5.4' },
+  { id: 'bmo-tron', name: 'BMO Secure Worker', emoji: '🛡️', model: 'nvidia/openai/gpt-oss-120b' },
+  { id: 'prismo', name: 'Prismo', emoji: '🌀', model: 'openai-codex/gpt-5.4' },
+  { id: 'neptr', name: 'NEPTR', emoji: '🧪', model: 'ollama/gemma4:latest' },
+  { id: 'princess-bubblegum', name: 'Princess Bubblegum', emoji: '🧬', model: 'nvidia/meta/llama-3.3-70b-instruct' },
+  { id: 'finn', name: 'Finn', emoji: '🗡️', model: 'ollama/gemma4:e2b' },
+  { id: 'jake', name: 'Jake', emoji: '🟡', model: 'ollama/llama3.2:3b' },
+  { id: 'marceline', name: 'Marceline', emoji: '🎸', model: 'ollama/gemma4:e2b' },
+  { id: 'simon', name: 'Simon', emoji: '📚', model: 'ollama/gemma4:latest' },
+  { id: 'peppermint-butler', name: 'Peppermint Butler', emoji: '🕯️', model: 'nvidia/meta/llama-3.3-70b-instruct' },
+  { id: 'lady-rainicorn', name: 'Lady Rainicorn', emoji: '🌈', model: 'nvidia/openai/gpt-oss-120b' },
+  { id: 'lemongrab', name: 'Lemongrab', emoji: '🍋', model: 'ollama/omni-core:phase2' },
+  { id: 'flame-princess', name: 'Flame Princess', emoji: '🔥', model: 'ollama/omni-core:phase3' },
+  { id: 'huntress-wizard', name: 'Huntress Wizard', emoji: '🏹', model: 'ollama/omni-core:phase3' }
+];
+
+// Default agent
+let CURRENT_AGENT = AVAILABLE_AGENTS.find(agent => agent.id === 'main') || AVAILABLE_AGENTS[0];
+
 export function activate(context: vscode.ExtensionContext) {
   const panel = new BmoChatPanel();
 
