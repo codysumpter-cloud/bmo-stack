@@ -1,0 +1,70 @@
+{
+  "version": 1,
+  "presetSelection": {
+    "coding": "coder",
+    "founder-workflow": "founder",
+    "study": "student",
+    "creative-work": "creator",
+    "writing": "creator",
+    "research": "student"
+  },
+  "teamShapeRules": {
+    "one-main-assistant": {
+      "maxAgents": 1
+    },
+    "main-plus-reviewer": {
+      "maxAgents": 2,
+      "preferReviewerRole": true
+    },
+    "small-specialist-team": {
+      "maxAgents": 4
+    }
+  },
+  "autonomyRules": {
+    "explain-only": {
+      "defaultApprovalMode": "read-only"
+    },
+    "suggest-edits": {
+      "defaultApprovalMode": "confirm-before-edit"
+    },
+    "edit-with-confirmation": {
+      "defaultApprovalMode": "confirm-before-state-change"
+    },
+    "workflow-execution-with-approval": {
+      "defaultApprovalMode": "approval-gated-workflows"
+    }
+  },
+  "memoryRules": {
+    "session-only": {
+      "memoryProfile": "session-only"
+    },
+    "project-context": {
+      "memoryProfile": "project-context"
+    },
+    "long-term-preferences": {
+      "memoryProfile": "long-term-preferences"
+    }
+  },
+  "optimizationRules": {
+    "privacy": {
+      "modelPreference": "prefer-local",
+      "networkPolicy": "minimal"
+    },
+    "speed": {
+      "modelPreference": "prefer-fast-local",
+      "networkPolicy": "minimal"
+    },
+    "quality": {
+      "modelPreference": "prefer-best-available",
+      "networkPolicy": "optional"
+    },
+    "battery": {
+      "modelPreference": "prefer-efficient-local",
+      "networkPolicy": "minimal"
+    },
+    "depth": {
+      "modelPreference": "prefer-deep-context",
+      "networkPolicy": "optional"
+    }
+  }
+}
