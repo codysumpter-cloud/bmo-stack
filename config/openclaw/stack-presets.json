@@ -1,0 +1,97 @@
+{
+  "version": 1,
+  "presets": [
+    {
+      "id": "coder",
+      "label": "Coder",
+      "primaryGoals": ["coding"],
+      "defaultAgents": [
+        {
+          "id": "builder",
+          "name": "Builder",
+          "role": "implementation",
+          "allowedTools": ["workspace-files", "notes", "structured-workflows"],
+          "approvalMode": "confirm-before-edit"
+        },
+        {
+          "id": "reviewer",
+          "name": "Reviewer",
+          "role": "quality-review",
+          "allowedTools": ["workspace-files", "notes"],
+          "approvalMode": "read-only"
+        }
+      ],
+      "defaultWorkflows": ["explain-file", "refactor-file", "draft-feature-plan", "review-changes"],
+      "defaultMemoryProfile": "project-context"
+    },
+    {
+      "id": "founder",
+      "label": "Founder",
+      "primaryGoals": ["founder-workflow", "writing"],
+      "defaultAgents": [
+        {
+          "id": "operator",
+          "name": "Operator",
+          "role": "planning-and-execution",
+          "allowedTools": ["workspace-files", "notes", "structured-workflows"],
+          "approvalMode": "confirm-before-state-change"
+        },
+        {
+          "id": "writer",
+          "name": "Writer",
+          "role": "copy-and-docs",
+          "allowedTools": ["workspace-files", "notes"],
+          "approvalMode": "confirm-before-edit"
+        }
+      ],
+      "defaultWorkflows": ["summarize-project", "draft-announcement", "organize-notes", "turn-notes-into-plan"],
+      "defaultMemoryProfile": "long-term-preferences"
+    },
+    {
+      "id": "student",
+      "label": "Student",
+      "primaryGoals": ["study", "research"],
+      "defaultAgents": [
+        {
+          "id": "tutor",
+          "name": "Tutor",
+          "role": "explanation-and-practice",
+          "allowedTools": ["workspace-files", "notes"],
+          "approvalMode": "read-only"
+        },
+        {
+          "id": "study-planner",
+          "name": "Study Planner",
+          "role": "organization",
+          "allowedTools": ["notes", "structured-workflows"],
+          "approvalMode": "confirm-before-edit"
+        }
+      ],
+      "defaultWorkflows": ["explain-topic", "quiz-me", "summarize-notes", "build-study-plan"],
+      "defaultMemoryProfile": "project-context"
+    },
+    {
+      "id": "creator",
+      "label": "Creator",
+      "primaryGoals": ["creative-work", "writing"],
+      "defaultAgents": [
+        {
+          "id": "creative-director",
+          "name": "Creative Director",
+          "role": "ideation",
+          "allowedTools": ["workspace-files", "notes"],
+          "approvalMode": "read-only"
+        },
+        {
+          "id": "editor",
+          "name": "Editor",
+          "role": "rewrite-and-polish",
+          "allowedTools": ["workspace-files", "notes"],
+          "approvalMode": "confirm-before-edit"
+        }
+      ],
+      "defaultWorkflows": ["brainstorm-ideas", "rewrite-draft", "outline-piece", "summarize-feedback"],
+      "defaultMemoryProfile": "long-term-preferences"
+    }
+  ]
+}
