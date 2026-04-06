@@ -1,0 +1,16 @@
+{
+  "issue_number": 103,
+  "scope": "automation",
+  "checks": [
+    {
+      "name": "python3 scripts/github-autonomy-selftest.py .github/autonomy/plan.json",
+      "status": "passed",
+      "returncode": 0
+    },
+    {
+      "name": "make doctor || true",
+      "status": "passed",
+      "returncode": 0
+    }
+  ]
+}
