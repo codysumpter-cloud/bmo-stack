@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "product": "openclaw-local-stack-builder",
+  "runtimePosture": {
+    "mode": "fixed-runtime",
+    "localFirst": true,
+    "safeExpansion": "config-and-template-driven"
+  },
+  "generatedOutputs": [
+    "stackProfile",
+    "agentRoster",
+    "workflowPack",
+    "memoryProfile",
+    "permissionProfile",
+    "modelPreferenceProfile"
+  ],
+  "presetFamilies": [
+    "coder",
+    "founder",
+    "student",
+    "creator",
+    "researcher",
+    "life-os"
+  ],
+  "questionnaireOrder": [
+    "primary_goal",
+    "user_type",
+    "team_shape",
+    "autonomy_level",
+    "memory_posture",
+    "tool_posture",
+    "optimization_priority"
+  ],
+  "defaultValueStrategy": {
+    "modelSelection": "prefer_local_when_possible",
+    "memoryScope": "minimal_then_expand",
+    "approvalMode": "confirm_before_state_change"
+  }
+}
