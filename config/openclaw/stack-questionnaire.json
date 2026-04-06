@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "questions": [
+    {
+      "id": "primary_goal",
+      "prompt": "What do you want this system to help with most?",
+      "type": "single-select",
+      "options": ["coding", "writing", "study", "research", "founder-workflow", "personal-organization", "creative-work"]
+    },
+    {
+      "id": "user_type",
+      "prompt": "Which description fits you best right now?",
+      "type": "single-select",
+      "options": ["developer", "student", "founder", "creator", "researcher", "operator"]
+    },
+    {
+      "id": "team_shape",
+      "prompt": "What kind of assistant team do you want?",
+      "type": "single-select",
+      "options": ["one-main-assistant", "main-plus-reviewer", "small-specialist-team"]
+    },
+    {
+      "id": "autonomy_level",
+      "prompt": "How autonomous should it be?",
+      "type": "single-select",
+      "options": ["explain-only", "suggest-edits", "edit-with-confirmation", "workflow-execution-with-approval"]
+    },
+    {
+      "id": "memory_posture",
+      "prompt": "What should it remember?",
+      "type": "single-select",
+      "options": ["session-only", "project-context", "long-term-preferences"]
+    },
+    {
+      "id": "tool_posture",
+      "prompt": "What should it be allowed to work with?",
+      "type": "single-select",
+      "options": ["files-only", "files-and-notes", "structured-workflows", "advanced-stack"]
+    },
+    {
+      "id": "optimization_priority",
+      "prompt": "What matters most?",
+      "type": "single-select",
+      "options": ["privacy", "speed", "quality", "battery", "depth"]
+    }
+  ]
+}
