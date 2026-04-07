@@ -1,6 +1,6 @@
 # Task State
 
-Last updated: 2026-04-07 11:11 UTC
+Last updated: 2026-04-07 11:13 UTC
 
 ## Current status
 
@@ -8,14 +8,25 @@ Last updated: 2026-04-07 11:11 UTC
 - Active repo: `/Users/prismtek/code/bmo-stack`
 - Branch: `fix/openclaw-shell-ios-local-build`
 - Last successful step: added native stack-builder models and store, split the oversized shell into feature folders, regenerated the Xcode project, and passed a simulator `xcodebuild` using repo-local DerivedData.
-- Next intended step: commit and push the stack-builder foundation checkpoint after updating repo docs and verifying branch state.
+- Next intended step: push commit `9bcf242` to `origin/fix/openclaw-shell-ios-local-build` once network/DNS access to GitHub is restored, then continue the next stack-aware runtime integration slice.
 - Verification complete: true
 - Manual steps remaining:
+  - restore network/DNS access so `git push origin fix/openclaw-shell-ios-local-build` can reach GitHub
   - set a real Apple Development team and unique bundle identifier in Xcode before installing on a physical iPhone
   - enable Developer Mode on the iPhone before direct device install
 - Safe to resume: true
 
 ## Recent checkpoints
+
+- 2026-04-07 11:13 UTC
+  - Repo: `/Users/prismtek/code/bmo-stack`
+  - Branch: `fix/openclaw-shell-ios-local-build`
+  - Files touched: checkpoint files only
+  - Last successful step: committed the stack-builder foundation as `9bcf242` and re-ran the simulator build successfully on the committed tree
+  - Next intended step: retry `git push origin fix/openclaw-shell-ios-local-build` once GitHub DNS resolution works again
+  - Verification complete: true
+  - Manual steps remaining: network/DNS recovery for GitHub push, then physical-device signing setup
+  - Safe to resume: true
 
 - 2026-04-07 11:11 UTC
   - Repo: `/Users/prismtek/code/bmo-stack`
