@@ -18,11 +18,6 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.prismtek.openclawshell
-        INFOPLIST_KEY_CFBundleDisplayName: OpenClawShell
-        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.productivity
-        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: true
-        INFOPLIST_KEY_UIFileSharingEnabled: true
-        INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace: true
-        INFOPLIST_KEY_NSDocumentsFolderUsageDescription: OpenClawShell stores imported workspace files here.
+        INFOPLIST_FILE: OpenClawShell/Info.plist
         DEVELOPMENT_TEAM: ""
     dependencies: []

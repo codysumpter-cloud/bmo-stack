@@ -1,0 +1,11 @@
+/Users/prismtek/.openclaw/workspace/bmo-stack/OpenClawShell/AppModels.swift
+/Users/prismtek/.openclaw/workspace/bmo-stack/OpenClawShell/ContentView.swift
+/Users/prismtek/.openclaw/workspace/bmo-stack/OpenClawShell/Features/Home/DashboardView.swift
+/Users/prismtek/.openclaw/workspace/bmo-stack/OpenClawShell/Views/EditorWebView.swift
+/Users/prismtek/.openclaw/workspace/bmo-stack/OpenClawShell/Features/Onboarding/OnboardingFlowView.swift
+/Users/prismtek/.openclaw/workspace/bmo-stack/OpenClawShell/OpenClawShellApp.swift
+/Users/prismtek/.openclaw/workspace/bmo-stack/OpenClawShell/RuntimeServices.swift
+/Users/prismtek/.openclaw/workspace/bmo-stack/OpenClawShell/Services/StackCompiler.swift
+/Users/prismtek/.openclaw/workspace/bmo-stack/OpenClawShell/Features/Preview/StackPreviewView.swift
+/Users/prismtek/.openclaw/workspace/bmo-stack/OpenClawShell/Stores/StackStore.swift
+/Users/prismtek/.openclaw/workspace/bmo-stack/OpenClawShell/Models/UserStack.swift

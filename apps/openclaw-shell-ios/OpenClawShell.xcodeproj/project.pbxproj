@@ -1,0 +1,414 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		01F2830FC2D63CAC80B36579 /* RuntimeServices.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B45E5A1CB65D57709CC505E /* RuntimeServices.swift */; };
+		024997D964EB6E8736F07041 /* UserStack.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE735D0ADA54E358081E82C6 /* UserStack.swift */; };
+		19DDEE5CAF22497C84EAF861 /* AppModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79046A703F7B4BEFB5834F89 /* AppModels.swift */; };
+		1F5502980B93C5E2B37B4921 /* OpenClawShellApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E96E40A71CED99FD3F6A0759 /* OpenClawShellApp.swift */; };
+		3355AF2D205ECAC22573EA1F /* StackCompiler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 723DB8D52B87CACCF39234D0 /* StackCompiler.swift */; };
+		3EA97D4780E20CDC1D44FAED /* StackStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 966CEE92A044B767565944B5 /* StackStore.swift */; };
+		3FDCC47FB39364DD5B2DBFC0 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D988CC84A56AFD4D8B9E6925 /* DashboardView.swift */; };
+		5C02296969A68A373142614F /* EditorWebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 973F1922F3A673A7CFF7F507 /* EditorWebView.swift */; };
+		B67DB333BDC4077D609CC7EB /* editor.html in Resources */ = {isa = PBXBuildFile; fileRef = 17C4904A389737EB85C950EC /* editor.html */; };
+		BB1799FE0521C6455E2F6A18 /* StackPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCEC7E703FB1313EBFB9922B /* StackPreviewView.swift */; };
+		C29690A1CEED52EE60853A5E /* OnboardingFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B7743382A102DB2C6A80009 /* OnboardingFlowView.swift */; };
+		EE717CF6DEACE2476898F9EB /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1792E8A287242AAEE6509EB4 /* ContentView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		0093370759528636238E507B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		1792E8A287242AAEE6509EB4 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		17C4904A389737EB85C950EC /* editor.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = editor.html; sourceTree = "<group>"; };
+		2B45E5A1CB65D57709CC505E /* RuntimeServices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuntimeServices.swift; sourceTree = "<group>"; };
+		4B7743382A102DB2C6A80009 /* OnboardingFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingFlowView.swift; sourceTree = "<group>"; };
+		723DB8D52B87CACCF39234D0 /* StackCompiler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StackCompiler.swift; sourceTree = "<group>"; };
+		79046A703F7B4BEFB5834F89 /* AppModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModels.swift; sourceTree = "<group>"; };
+		966CEE92A044B767565944B5 /* StackStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StackStore.swift; sourceTree = "<group>"; };
+		973F1922F3A673A7CFF7F507 /* EditorWebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorWebView.swift; sourceTree = "<group>"; };
+		BE735D0ADA54E358081E82C6 /* UserStack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserStack.swift; sourceTree = "<group>"; };
+		D988CC84A56AFD4D8B9E6925 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
+		E96E40A71CED99FD3F6A0759 /* OpenClawShellApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenClawShellApp.swift; sourceTree = "<group>"; };
+		FCEC7E703FB1313EBFB9922B /* StackPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StackPreviewView.swift; sourceTree = "<group>"; };
+		FDE6EFA988361614074A340F /* OpenClawShell.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = OpenClawShell.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		030DDA0E0DAD0DD2347BCB3E /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				FDE6EFA988361614074A340F /* OpenClawShell.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		16080459B99F980DAC0135C5 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				723DB8D52B87CACCF39234D0 /* StackCompiler.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		25000CB8F89F00D772B811FE /* Features */ = {
+			isa = PBXGroup;
+			children = (
+				37A13CA917C0D5E7EB71786B /* Home */,
+				95EC7F2126E7A40D0FB0ED08 /* Onboarding */,
+				70505D4DDDDB05B1C6942C83 /* Preview */,
+			);
+			path = Features;
+			sourceTree = "<group>";
+		};
+		37A13CA917C0D5E7EB71786B /* Home */ = {
+			isa = PBXGroup;
+			children = (
+				D988CC84A56AFD4D8B9E6925 /* DashboardView.swift */,
+			);
+			path = Home;
+			sourceTree = "<group>";
+		};
+		40AF52E63D6ED9CCA7030995 /* Stores */ = {
+			isa = PBXGroup;
+			children = (
+				966CEE92A044B767565944B5 /* StackStore.swift */,
+			);
+			path = Stores;
+			sourceTree = "<group>";
+		};
+		4A50738C4F342DDCD2E5126D /* OpenClawShell */ = {
+			isa = PBXGroup;
+			children = (
+				79046A703F7B4BEFB5834F89 /* AppModels.swift */,
+				1792E8A287242AAEE6509EB4 /* ContentView.swift */,
+				0093370759528636238E507B /* Info.plist */,
+				E96E40A71CED99FD3F6A0759 /* OpenClawShellApp.swift */,
+				2B45E5A1CB65D57709CC505E /* RuntimeServices.swift */,
+				CFEE133B5775F01C1A6CAEFA /* Assets */,
+				25000CB8F89F00D772B811FE /* Features */,
+				53E60B6E1F112EDC5D705886 /* Models */,
+				16080459B99F980DAC0135C5 /* Services */,
+				40AF52E63D6ED9CCA7030995 /* Stores */,
+				B37BE0E527E8120BB25B0E96 /* Views */,
+			);
+			path = OpenClawShell;
+			sourceTree = "<group>";
+		};
+		53E60B6E1F112EDC5D705886 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				BE735D0ADA54E358081E82C6 /* UserStack.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		70505D4DDDDB05B1C6942C83 /* Preview */ = {
+			isa = PBXGroup;
+			children = (
+				FCEC7E703FB1313EBFB9922B /* StackPreviewView.swift */,
+			);
+			path = Preview;
+			sourceTree = "<group>";
+		};
+		95EC7F2126E7A40D0FB0ED08 /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				4B7743382A102DB2C6A80009 /* OnboardingFlowView.swift */,
+			);
+			path = Onboarding;
+			sourceTree = "<group>";
+		};
+		AF35712F1563859B0109E291 = {
+			isa = PBXGroup;
+			children = (
+				4A50738C4F342DDCD2E5126D /* OpenClawShell */,
+				030DDA0E0DAD0DD2347BCB3E /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		B37BE0E527E8120BB25B0E96 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				973F1922F3A673A7CFF7F507 /* EditorWebView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		CFEE133B5775F01C1A6CAEFA /* Assets */ = {
+			isa = PBXGroup;
+			children = (
+				17C4904A389737EB85C950EC /* editor.html */,
+			);
+			path = Assets;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		96722BD56F5F9D4F46872B64 /* OpenClawShell */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 52913C4AA68822ECFE716080 /* Build configuration list for PBXNativeTarget "OpenClawShell" */;
+			buildPhases = (
+				743F356B42CB94555CDCE460 /* Sources */,
+				FBCC6D31E0E23607C2C1B8A8 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = OpenClawShell;
+			packageProductDependencies = (
+			);
+			productName = OpenClawShell;
+			productReference = FDE6EFA988361614074A340F /* OpenClawShell.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		9A6B016CD44C9C82AED2B6A2 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					96722BD56F5F9D4F46872B64 = {
+						DevelopmentTeam = "";
+					};
+				};
+			};
+			buildConfigurationList = C8E62747ED554171D09BB6CB /* Build configuration list for PBXProject "OpenClawShell" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = AF35712F1563859B0109E291;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 030DDA0E0DAD0DD2347BCB3E /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				96722BD56F5F9D4F46872B64 /* OpenClawShell */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		FBCC6D31E0E23607C2C1B8A8 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B67DB333BDC4077D609CC7EB /* editor.html in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		743F356B42CB94555CDCE460 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				19DDEE5CAF22497C84EAF861 /* AppModels.swift in Sources */,
+				EE717CF6DEACE2476898F9EB /* ContentView.swift in Sources */,
+				3FDCC47FB39364DD5B2DBFC0 /* DashboardView.swift in Sources */,
+				5C02296969A68A373142614F /* EditorWebView.swift in Sources */,
+				C29690A1CEED52EE60853A5E /* OnboardingFlowView.swift in Sources */,
+				1F5502980B93C5E2B37B4921 /* OpenClawShellApp.swift in Sources */,
+				01F2830FC2D63CAC80B36579 /* RuntimeServices.swift in Sources */,
+				3355AF2D205ECAC22573EA1F /* StackCompiler.swift in Sources */,
+				BB1799FE0521C6455E2F6A18 /* StackPreviewView.swift in Sources */,
+				3EA97D4780E20CDC1D44FAED /* StackStore.swift in Sources */,
+				024997D964EB6E8736F07041 /* UserStack.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		55E9943DE7C8921CDA934A05 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		5D870CCF96C242319EC63714 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = "";
+				INFOPLIST_FILE = OpenClawShell/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.prismtek.openclawshell;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		8C5AE029D0A4A28EFCFE0632 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = "";
+				INFOPLIST_FILE = OpenClawShell/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.prismtek.openclawshell;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		8E579CE4E3C86A65534898BB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		52913C4AA68822ECFE716080 /* Build configuration list for PBXNativeTarget "OpenClawShell" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5D870CCF96C242319EC63714 /* Debug */,
+				8C5AE029D0A4A28EFCFE0632 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		C8E62747ED554171D09BB6CB /* Build configuration list for PBXProject "OpenClawShell" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8E579CE4E3C86A65534898BB /* Debug */,
+				55E9943DE7C8921CDA934A05 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 9A6B016CD44C9C82AED2B6A2 /* Project object */;
+}

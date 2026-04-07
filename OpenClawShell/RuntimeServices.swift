@@ -139,8 +139,7 @@ final class MLCBridgeEngine: LocalLLMEngine {
         #else
         let filenames = fileContexts.map(\.filename).joined(separator: ", ")
         let selected = runtimeConfig?.modelID ?? "none"
-        let attachedFiles = filenames.isEmpty ? "none" : filenames
-        return "Stub engine reply.\n\nSelected model: \(selected)\nBackend: \(backendDisplayName)\nPrompt: \(prompt)\n\nAttached files: \(attachedFiles)\nHistory messages: \(chatHistory.count)\n\nAdd MLCSwift locally in Xcode and package your model libraries with MLC to get real on-device inference."
+        return "Stub engine reply.\n\nSelected model: \(selected)\nBackend: \(backendDisplayName)\nPrompt: \(prompt)\n\nAttached files: \(filenames.isEmpty ? \"none\" : filenames)\nHistory messages: \(chatHistory.count)\n\nAdd MLCSwift locally in Xcode and package your model libraries with MLC to get real on-device inference."
         #endif
     }
 

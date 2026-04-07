@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-04-07T19:12:21.362381",
+  "data": [
+    {
+      "model": "none",
+      "tokens_per_second": 0,
+      "total_tokens_today": 0,
+      "last_used": null,
+      "status": "no_models_installed"
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "timestamp": "2026-04-07T19:12:21.340730",
+  "data": [
+    {
+      "agent": "agent-automation",
+      "routine": "2026-04-07_09-00-00",
+      "last_seen": "2026-04-07T09:00:00.256915",
+      "age_minutes": 612.4,
+      "status": "recent",
+      "details": "Routine executed agent_checkin_2026-04-07_09-00-00.json"
+    },
+    {
+      "agent": "agent-automation-scheduler",
+      "routine": "scheduled-routines",
+      "last_seen": "2026-04-07T09:00:00.257327",
+      "age_minutes": 612.4,
+      "status": "active",
+      "details": "Agent automation scheduler active"
+    },
+    {
+      "agent": "system",
+      "routine": "host-system",
+      "last_seen": "2026-04-07T19:12:21.340730",
+      "age_minutes": 0,
+      "status": "active",
+      "details": "Host system operational"
+    }
+  ]
+}
