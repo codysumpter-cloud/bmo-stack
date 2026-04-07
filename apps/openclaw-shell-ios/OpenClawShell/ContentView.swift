@@ -4,6 +4,9 @@ import UniformTypeIdentifiers
 struct ContentView: View {
     var body: some View {
         TabView {
+            ControlTabView()
+                .tabItem { Label("Control", systemImage: "switch.2") }
+
             ModelsTabView()
                 .tabItem { Label("Models", systemImage: "square.and.arrow.down") }
 
@@ -15,6 +18,62 @@ struct ContentView: View {
 
             EditorTabView()
                 .tabItem { Label("Editor", systemImage: "chevron.left.forwardslash.chevron.right") }
+        }
+    }
+}
+
+private struct ControlTabView: View {
+    @EnvironmentObject private var appState: AppState
+
+    var body: some View {
+        NavigationStack {
+            List {
+                Section("Runtime posture") {
+                    LabeledContent("Backend", value: appState.backendDisplayName)
+                    LabeledContent("Status", value: appState.runtimeStatus)
+                    if let selectedModel = appState.selectedInstalledModel {
+                        LabeledContent("Selected model", value: selectedModel.modelID.isEmpty ? selectedModel.localFilename : selectedModel.modelID)
+                    } else {
+                        LabeledContent("Selected model", value: "None")
+                    }
+                    Text(appState.operatorSummary)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+
+                Section("Local-first defaults") {
+                    Text(appState.localFirstSummary)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                    Text("Prepared local model imports are preferred. Direct model downloads are a deliberate networked path.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+
+                Section("Workspace") {
+                    Text(appState.workspaceStatusSummary)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                    LabeledContent("Stored files", value: "\(appState.workspaceStore.files.count)")
+                    LabeledContent("Installed models", value: "\(appState.modelStore.installedModels.count)")
+                    LabeledContent("Saved model sources", value: "\(appState.modelStore.remoteModels.count)")
+                }
+
+                Section("Operator actions") {
+                    Button("Clear conversation", role: .destructive) {
+                        appState.chatStore.clear()
+                    }
+                    Button("Deselect active model") {
+                        Task { await appState.setSelectedInstalledModel(filename: nil) }
+                    }
+                    .disabled(appState.selectedInstalledModel == nil)
+                    Button("Clear selected file attachments") {
+                        appState.chatStore.selectedFileIDs.removeAll()
+                    }
+                    .disabled(appState.chatStore.selectedFileIDs.isEmpty)
+                }
+            }
+            .navigationTitle("Control")
         }
     }
 }
@@ -36,9 +95,14 @@ private struct ModelsTabView: View {
                 }
 
                 Section("Prepared model import") {
-                    Text("Import a prepared model folder or artifact from Files when you already packaged it on your Mac.")
+                    Text("Import a prepared model folder or artifact from Files when you already packaged it on your Mac. This is the preferred local-first path.")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
+                    if appState.usesStubRuntime {
+                        Text("The current build is still using the stub runtime, so imports mainly prepare storage and selection metadata until MLCSwift is wired in.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
                     Button("Import prepared model") {
                         isModelImporterPresented = true
                     }
@@ -46,6 +110,9 @@ private struct ModelsTabView: View {
                 }
 
                 Section("Add model source") {
+                    Text("A saved model source is a convenience for later downloads. It is a networked path, not the default local-first path.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
                     TextField("Display name", text: $modelName)
                     TextField("Direct download URL", text: $modelURL)
                         .textInputAutocapitalization(.never)
@@ -238,8 +305,17 @@ private struct ChatTabView: View {
                 .listStyle(.plain)
 
                 VStack(spacing: 12) {
+                    if appState.usesStubRuntime || appState.selectedInstalledModel == nil {
+                        ContentUnavailableView(
+                            "Runtime needs attention",
+                            systemImage: appState.usesStubRuntime ? "cpu" : "exclamationmark.triangle",
+                            description: Text(appState.operatorSummary)
+                        )
+                        .frame(maxWidth: .infinity)
+                    }
+
                     HStack {
-                        TextField("Ask your local model", text: $prompt, axis: .vertical)
+                        TextField(appState.usesStubRuntime ? "Try the shell UI (stub runtime active)" : "Ask your local model", text: $prompt, axis: .vertical)
                             .textFieldStyle(.roundedBorder)
                             .lineLimit(1...5)
 
@@ -255,13 +331,18 @@ private struct ChatTabView: View {
                             }
                         }
                         .buttonStyle(.borderedProminent)
-                        .disabled(appState.chatStore.isGenerating || prompt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                        .disabled(appState.chatStore.isGenerating || prompt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || (!appState.usesStubRuntime && appState.selectedInstalledModel == nil))
                     }
 
                     HStack {
                         Text(appState.runtimeStatus)
                             .font(.caption)
                             .foregroundStyle(.secondary)
+                        if !appState.chatStore.selectedFileIDs.isEmpty {
+                            Text("• \(appState.chatStore.selectedFileIDs.count) file context")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
                         Spacer()
                         Button("Clear") {
                             appState.chatStore.clear()

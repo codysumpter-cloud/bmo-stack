@@ -28,8 +28,12 @@ enum Paths {
         fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
     }
 
+    static var legacyWorkspaceDirectory: URL {
+        documentsDirectory.appendingPathComponent(workspaceFolderName, isDirectory: true)
+    }
+
     static var workspaceDirectory: URL {
-        let folder = documentsDirectory.appendingPathComponent(workspaceFolderName, isDirectory: true)
+        let folder = applicationSupportDirectory.appendingPathComponent(workspaceFolderName, isDirectory: true)
         ensureDirectoryExists(folder)
         return folder
     }
@@ -80,6 +84,7 @@ final class DownloadCenter {
 protocol LocalLLMEngine {
     var backendDisplayName: String { get }
     var isRuntimeReady: Bool { get }
+    var requiresModelSelection: Bool { get }
 
     func bootstrap() async throws
     func configureRuntime(_ config: EngineRuntimeConfig?) async throws
@@ -98,6 +103,14 @@ final class MLCBridgeEngine: LocalLLMEngine {
     }
 
     var isRuntimeReady: Bool { runtimeConfig != nil }
+
+    var requiresModelSelection: Bool {
+        #if canImport(MLCSwift)
+        true
+        #else
+        false
+        #endif
+    }
 
     func bootstrap() async throws {}
 
@@ -139,7 +152,8 @@ final class MLCBridgeEngine: LocalLLMEngine {
         #else
         let filenames = fileContexts.map(\.filename).joined(separator: ", ")
         let selected = runtimeConfig?.modelID ?? "none"
-        return "Stub engine reply.\n\nSelected model: \(selected)\nBackend: \(backendDisplayName)\nPrompt: \(prompt)\n\nAttached files: \(filenames.isEmpty ? \"none\" : filenames)\nHistory messages: \(chatHistory.count)\n\nAdd MLCSwift locally in Xcode and package your model libraries with MLC to get real on-device inference."
+        let attachedFiles = filenames.isEmpty ? "none" : filenames
+        return "Stub engine reply.\n\nSelected model: \(selected)\nBackend: \(backendDisplayName)\nPrompt: \(prompt)\n\nAttached files: \(attachedFiles)\nHistory messages: \(chatHistory.count)\n\nAdd MLCSwift locally in Xcode and package your model libraries with MLC to get real on-device inference."
         #endif
     }
 
@@ -196,7 +210,14 @@ final class ModelCatalogStore: ObservableObject {
     func addRemoteModel(displayName: String, sourceURL: String, modelID: String, modelLib: String) {
         let trimmedName = displayName.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedURL = sourceURL.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmedName.isEmpty, !trimmedURL.isEmpty else { return }
+        guard !trimmedName.isEmpty, !trimmedURL.isEmpty else {
+            errorMessage = "Enter both a display name and a model URL."
+            return
+        }
+        guard let parsedURL = URL(string: trimmedURL), let scheme = parsedURL.scheme?.lowercased(), ["https", "http"].contains(scheme) else {
+            errorMessage = "Model source URLs must be valid http or https links."
+            return
+        }
 
         remoteModels.insert(
             RemoteModel(
@@ -337,11 +358,45 @@ final class WorkspaceStore: ObservableObject {
     @Published var errorMessage: String?
 
     func load() {
+        migrateLegacyWorkspaceIfNeeded()
+
         let urls = (try? FileManager.default.contentsOfDirectory(at: Paths.workspaceDirectory, includingPropertiesForKeys: nil, options: [.skipsHiddenFiles])) ?? []
         files = urls.map { WorkspaceFile(filename: $0.lastPathComponent, localURL: $0) }
             .sorted { $0.filename.localizedCaseInsensitiveCompare($1.filename) == .orderedAscending }
         if let selected = selectedFile {
             selectedFile = files.first(where: { $0.localURL == selected.localURL })
+        }
+    }
+
+    private func migrateLegacyWorkspaceIfNeeded() {
+        let fileManager = FileManager.default
+        let legacyDirectory = Paths.legacyWorkspaceDirectory
+        let targetDirectory = Paths.workspaceDirectory
+
+        guard legacyDirectory != targetDirectory else { return }
+
+        var legacyIsDirectory: ObjCBool = false
+        guard fileManager.fileExists(atPath: legacyDirectory.path, isDirectory: &legacyIsDirectory), legacyIsDirectory.boolValue else {
+            return
+        }
+
+        let legacyURLs = (try? fileManager.contentsOfDirectory(at: legacyDirectory, includingPropertiesForKeys: nil, options: [.skipsHiddenFiles])) ?? []
+        guard !legacyURLs.isEmpty else { return }
+
+        let targetURLs = (try? fileManager.contentsOfDirectory(at: targetDirectory, includingPropertiesForKeys: nil, options: [.skipsHiddenFiles])) ?? []
+        guard targetURLs.isEmpty else { return }
+
+        for sourceURL in legacyURLs {
+            let destinationURL = targetDirectory.appendingPathComponent(sourceURL.lastPathComponent)
+            do {
+                if fileManager.fileExists(atPath: destinationURL.path) {
+                    continue
+                }
+                try fileManager.copyItem(at: sourceURL, to: destinationURL)
+            } catch {
+                errorMessage = "Failed to migrate existing workspace files into app storage: \(error.localizedDescription)"
+                return
+            }
         }
     }
 
@@ -446,6 +501,45 @@ final class AppState: ObservableObject {
     @Published var runtimePreferences = RuntimePreferencesStore()
     @Published var runtimeStatus = "Not configured"
 
+    var selectedInstalledModel: InstalledModel? {
+        guard let filename = runtimePreferences.selection.selectedInstalledFilename else { return nil }
+        return modelStore.installedModels.first(where: { $0.localFilename == filename })
+    }
+
+    var usesStubRuntime: Bool {
+        backendDisplayName == "Stub runtime"
+    }
+
+    var operatorSummary: String {
+        if usesStubRuntime {
+            return "Demo-safe shell: UI, storage, and editing are real, but model inference is still stubbed until MLCSwift is wired in."
+        }
+        if let model = selectedInstalledModel {
+            return "On-device runtime selected: \(model.modelID.isEmpty ? model.localFilename : model.modelID)."
+        }
+        if engine.requiresModelSelection {
+            return "On-device runtime is available, but no packaged model is selected yet."
+        }
+        return "Runtime ready."
+    }
+
+    var localFirstSummary: String {
+        var parts = ["Files, chat history, and model metadata stay inside the app container by default."]
+        if modelStore.remoteModels.isEmpty {
+            parts.append("No remote model sources are configured.")
+        } else {
+            parts.append("Remote model URLs are configured for convenience, but prepared local imports remain the safer path.")
+        }
+        return parts.joined(separator: " ")
+    }
+
+    var workspaceStatusSummary: String {
+        let fileCount = workspaceStore.files.count
+        let selectedCount = chatStore.selectedFileIDs.count
+        let messageCount = chatStore.messages.count
+        return "\(fileCount) workspace file\(fileCount == 1 ? \"\" : \"s\"), \(selectedCount) attached to chat, \(messageCount) chat message\(messageCount == 1 ? \"\" : \"s\")."
+    }
+
     private let engine: LocalLLMEngine
 
     init(engine: LocalLLMEngine) {
@@ -482,6 +576,12 @@ final class AppState: ObservableObject {
     func send(prompt: String) async {
         let cleaned = prompt.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !cleaned.isEmpty else { return }
+
+        if engine.requiresModelSelection, selectedInstalledModel == nil {
+            chatStore.errorMessage = "Select an installed model in Models before sending chat prompts."
+            runtimeStatus = "Model required"
+            return
+        }
 
         chatStore.messages.append(ChatMessage(role: .user, content: cleaned))
         chatStore.persist()
