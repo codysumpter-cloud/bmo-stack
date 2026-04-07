@@ -8,7 +8,7 @@ This subtree is the fast path for testing an OpenClaw-style iPhone app from Xcod
 
 - `Models` tab for saving curated model sources and downloading model weights into app storage
 - `Chat` tab with local history, file-context selection, and an engine boundary
-- `Files` tab for persistent workspace imports
+- `Files` tab for persistent workspace imports stored inside app-scoped storage
 - `Editor` tab with a bundled web-backed editor shell you can later replace with Monaco
 - `MLCBridgeEngine` that is **compile-safe without MLC** and **ready to wire** once you add the local `MLCSwift` package and packaged libraries
 
@@ -29,6 +29,12 @@ Once you prepare MLC on your Mac, you can switch to real on-device inference by:
 brew install xcodegen
 cd apps/openclaw-shell-ios
 xcodegen generate
+xcodebuild -project OpenClawShell.xcodeproj \
+  -scheme OpenClawShell \
+  -sdk iphonesimulator \
+  -destination 'generic/platform=iOS Simulator' \
+  -derivedDataPath .build/DerivedData \
+  build
 open OpenClawShell.xcodeproj
 ```
 
@@ -37,6 +43,12 @@ Then in Xcode:
 1. pick your Apple ID team
 2. set a unique bundle identifier
 3. run on your iPhone
+
+## Security defaults
+
+- imported workspace files are copied into app-scoped Application Support storage
+- broad Files app sharing is disabled by default
+- model downloads and chat state stay inside the app container unless you explicitly share exported files
 
 ## MLC bridge notes
 

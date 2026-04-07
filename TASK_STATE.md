@@ -1,22 +1,31 @@
 # Task State
 
-Last updated: 2026-04-02 13:49 UTC
+Last updated: 2026-04-07 10:39 UTC
 
 ## Current status
 
-- Description: Add durable task + checkpoint + resume reliability system for long prompts and Telegram timeout recovery.
-- Active repo: `/workspace/bmo-stack`
-- Branch: `feat/durable-task-resume`
-- Last successful step: implemented durable runtime, Telegram adapter, resumable policy updates, and passed reliability verification checks.
-- Next intended step: commit durable reliability changes and open PR.
+- Description: Harden `apps/openclaw-shell-ios` for safer local storage defaults and clean local simulator builds.
+- Active repo: `/Users/prismtek/code/bmo-stack`
+- Branch: `fix/openclaw-shell-ios-local-build`
+- Last successful step: added explicit iOS app plist, tightened file-access defaults, moved workspace storage to app support, regenerated the Xcode project, and passed a simulator `xcodebuild` using repo-local DerivedData.
+- Next intended step: commit the iOS hardening changes, verify the branch is clean, and push only if the post-commit state stays green.
 - Verification complete: true
 - Manual steps remaining:
-  - commit local reliability changes
-  - push branch once remote/auth is available
-  - open PR with summary and validation output
+  - set a real Apple Development team and unique bundle identifier in Xcode before installing on a physical iPhone
+  - enable Developer Mode on the iPhone before direct device install
 - Safe to resume: true
 
 ## Recent checkpoints
+
+- 2026-04-07 10:39 UTC
+  - Repo: `/Users/prismtek/code/bmo-stack`
+  - Branch: `fix/openclaw-shell-ios-local-build`
+  - Files touched: `apps/openclaw-shell-ios/project.yml`, `apps/openclaw-shell-ios/OpenClawShell/Info.plist`, `apps/openclaw-shell-ios/OpenClawShell/RuntimeServices.swift`, `apps/openclaw-shell-ios/.gitignore`, `apps/openclaw-shell-ios/README.md`
+  - Last successful step: `xcodegen generate` plus `xcodebuild -project apps/openclaw-shell-ios/OpenClawShell.xcodeproj -scheme OpenClawShell -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' -derivedDataPath /Users/prismtek/code/bmo-stack/apps/openclaw-shell-ios/.build/DerivedData build` succeeded
+  - Next intended step: commit and push if the branch is clean after commit
+  - Verification complete: true
+  - Manual steps remaining: Apple team/bundle id selection and Developer Mode for direct iPhone install
+  - Safe to resume: true
 
 - 2026-04-02 13:49 UTC
   - Repo: `/workspace/bmo-stack`

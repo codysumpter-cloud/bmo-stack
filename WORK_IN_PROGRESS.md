@@ -1,43 +1,28 @@
 # Work In Progress
 
-Last updated: 2026-04-02 13:49 UTC
+Last updated: 2026-04-07 10:39 UTC
 
 ## Current focus
 
-- Active mission: durable task reliability layer (normalize + checkpoint + resume + timeout recovery) is implemented and verified.
-- Why now: requested long-prompt and timeout resilience across Codex/VS Code/custom agent runtimes.
+- Active mission: harden and validate `apps/openclaw-shell-ios` for local iPhone testing.
+- Why now: the iOS shell needed a real `Info.plist`, safer storage defaults, and a repeatable simulator build path.
 - Owner paths in play:
-  - `CLAUDE.md`
-  - `.claude/settings.json`
-  - `.claude/agents/runtime-upgrader.md`
-  - `.claude/agents/runtime-verifier.md`
-  - `scripts/agent-post-edit-checks.sh`
-  - `scripts/persist-runtime-report.sh`
-  - `scripts/sync-upgrade-artifacts.sh`
-  - `scripts/sync-and-pr-bmo-stack.sh`
-  - `docs/upgrade-plan.md`
-  - `docs/upgrade-results.md`
-  - `docs/rollback.md`
-  - `docs/MISSION_CONTROL_BMO_STACK_SYNC.md`
-  - `README.md`
-  - `scripts/durable_task_runtime.py`
-  - `scripts/telegram_durable_adapter.py`
-  - `scripts/durable-task-selftest.sh`
-  - `docs/agent-resume-architecture.md`
-  - `docs/agent-reliability-plan.md`
-  - `docs/agent-reliability-results.md`
-  - `docs/agent-reliability-rollback.md`
+  - `apps/openclaw-shell-ios/project.yml`
+  - `apps/openclaw-shell-ios/OpenClawShell/Info.plist`
+  - `apps/openclaw-shell-ios/OpenClawShell/RuntimeServices.swift`
+  - `apps/openclaw-shell-ios/.gitignore`
+  - `apps/openclaw-shell-ios/README.md`
 
 ## Current work packet
 
-- commit durable reliability changes
-- push/open PR when remote tooling is available
+- commit the iOS hardening/build fixes
+- push if the post-commit branch is clean and the green simulator build still holds
 
 ## Next milestone
 
-- land durable reliability PR
+- land the iOS local-build hardening change
 
 ## Risks and watchouts
 
-- this repo has no `origin` remote and no `gh` CLI in this environment
-- Telegram adapter is repo-local contract point; live OpenClaw wiring remains in owner repo
+- generated Xcode project and DerivedData should stay untracked; `xcodegen` remains the source of truth
+- direct device install still requires an Apple team, unique bundle id, and Developer Mode on the iPhone

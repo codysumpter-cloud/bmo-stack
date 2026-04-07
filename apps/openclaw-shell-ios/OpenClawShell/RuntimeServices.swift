@@ -24,12 +24,8 @@ enum Paths {
         return folder
     }
 
-    static var documentsDirectory: URL {
-        fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
-    }
-
     static var workspaceDirectory: URL {
-        let folder = documentsDirectory.appendingPathComponent(workspaceFolderName, isDirectory: true)
+        let folder = applicationSupportDirectory.appendingPathComponent(workspaceFolderName, isDirectory: true)
         ensureDirectoryExists(folder)
         return folder
     }
@@ -139,7 +135,8 @@ final class MLCBridgeEngine: LocalLLMEngine {
         #else
         let filenames = fileContexts.map(\.filename).joined(separator: ", ")
         let selected = runtimeConfig?.modelID ?? "none"
-        return "Stub engine reply.\n\nSelected model: \(selected)\nBackend: \(backendDisplayName)\nPrompt: \(prompt)\n\nAttached files: \(filenames.isEmpty ? \"none\" : filenames)\nHistory messages: \(chatHistory.count)\n\nAdd MLCSwift locally in Xcode and package your model libraries with MLC to get real on-device inference."
+        let attachedFiles = filenames.isEmpty ? "none" : filenames
+        return "Stub engine reply.\n\nSelected model: \(selected)\nBackend: \(backendDisplayName)\nPrompt: \(prompt)\n\nAttached files: \(attachedFiles)\nHistory messages: \(chatHistory.count)\n\nAdd MLCSwift locally in Xcode and package your model libraries with MLC to get real on-device inference."
         #endif
     }
 
