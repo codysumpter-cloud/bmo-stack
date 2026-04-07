@@ -6,8 +6,9 @@ This subtree is the fast path for testing an OpenClaw-style iPhone app from Xcod
 
 ## What is in here
 
+- `Home` tab with native stack onboarding, compilation, dashboard state, and stack preview
 - `Models` tab for saving curated model sources and downloading model weights into app storage
-- `Chat` tab with local history, file-context selection, and an engine boundary
+- `Chat` tab with local history, file-context selection, stack-aware prompts, and an engine boundary
 - `Files` tab for persistent workspace imports stored inside app-scoped storage
 - `Editor` tab with a bundled web-backed editor shell you can later replace with Monaco
 - `MLCBridgeEngine` that is **compile-safe without MLC** and **ready to wire** once you add the local `MLCSwift` package and packaged libraries
@@ -62,11 +63,12 @@ The app expects:
 
 ## Product gap snapshot
 
-Current shape: a credible local iPhone shell scaffold.
+Current shape: a credible local iPhone stack-builder foundation.
 
 What is already real:
 
-- app-scoped storage for files, state, and model artifacts
+- app-scoped storage for files, state, model artifacts, and compiled stack definitions
+- native onboarding flow that compiles a local-first stack definition into a home dashboard and preview
 - file import and local editing
 - chat history and model selection state
 - compile-safe runtime boundary that can later switch from stub to on-device inference
@@ -75,9 +77,9 @@ What still makes it feel like a test harness instead of the real product:
 
 - runtime posture is easy to misunderstand unless you inspect the code
 - the distinction between local prepared imports and network downloads needs to stay visible in the UI
-- there is no richer operator surface yet for approvals, logs, recovery, or task supervision
+- there is still no richer operator surface yet for approvals, logs, recovery, or task supervision
 - file handling is still single-device and flat, without stronger workspace semantics
-- the app does not yet expose a durable mobile equivalent of the Windows workstation's "control shell"
+- the stack compiler is deterministic and local-first, but still opinionated scaffolding rather than a full runtime-integrated product brain
 
 ## Prioritized roadmap
 
@@ -100,11 +102,11 @@ What still makes it feel like a test harness instead of the real product:
 
 ## Changes made in this pass
 
-- added a `Control` tab so the app now has a first-class operator posture surface
-- surfaced selected model, backend/runtime state, workspace counts, and local-first storage posture in-app
-- made the UI explicitly distinguish prepared local imports from networked model-source downloads
-- blocked real-runtime chat sends when no model is selected, instead of silently failing later
-- tightened remote model source validation to valid `http`/`https` URLs
+- replaced the old control-first shell with a `Home` source-of-truth flow for stack onboarding, compilation, dashboard state, and stack preview
+- added a native stack-builder domain model plus local persistence for onboarding answers and compiled stack state
+- split the oversized tab UI into `Features/Home`, `Features/Chat`, `Features/Files`, `Features/Models`, and `Features/Editor`
+- wired the compiled stack into chat context, files guidance, model posture, and starter prompts so the app feels stack-aware instead of generic
+- kept the simulator build green with `xcodegen` plus `xcodebuild` against repo-local DerivedData
 
 ## Honest limits
 

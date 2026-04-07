@@ -1,14 +1,14 @@
 # Task State
 
-Last updated: 2026-04-07 10:39 UTC
+Last updated: 2026-04-07 11:11 UTC
 
 ## Current status
 
-- Description: Harden `apps/openclaw-shell-ios` for safer local storage defaults and clean local simulator builds.
+- Description: Advance `apps/openclaw-shell-ios` from a shell scaffold into a native stack-builder foundation with local onboarding, persistence, dashboard, and preview surfaces.
 - Active repo: `/Users/prismtek/code/bmo-stack`
 - Branch: `fix/openclaw-shell-ios-local-build`
-- Last successful step: added explicit iOS app plist, tightened file-access defaults, moved workspace storage to app support, regenerated the Xcode project, and passed a simulator `xcodebuild` using repo-local DerivedData.
-- Next intended step: commit the iOS hardening changes, verify the branch is clean, and push only if the post-commit state stays green.
+- Last successful step: added native stack-builder models and store, split the oversized shell into feature folders, regenerated the Xcode project, and passed a simulator `xcodebuild` using repo-local DerivedData.
+- Next intended step: commit and push the stack-builder foundation checkpoint after updating repo docs and verifying branch state.
 - Verification complete: true
 - Manual steps remaining:
   - set a real Apple Development team and unique bundle identifier in Xcode before installing on a physical iPhone
@@ -16,6 +16,16 @@ Last updated: 2026-04-07 10:39 UTC
 - Safe to resume: true
 
 ## Recent checkpoints
+
+- 2026-04-07 11:11 UTC
+  - Repo: `/Users/prismtek/code/bmo-stack`
+  - Branch: `fix/openclaw-shell-ios-local-build`
+  - Files touched: `apps/openclaw-shell-ios/OpenClawShell/ContentView.swift`, `apps/openclaw-shell-ios/OpenClawShell/RuntimeServices.swift`, `apps/openclaw-shell-ios/OpenClawShell/Models/StackBuilderModels.swift`, `apps/openclaw-shell-ios/OpenClawShell/Stores/StackBuilderStore.swift`, `apps/openclaw-shell-ios/OpenClawShell/Features/Home/HomeView.swift`, `apps/openclaw-shell-ios/OpenClawShell/Features/Chat/ChatView.swift`, `apps/openclaw-shell-ios/OpenClawShell/Features/Files/FilesView.swift`, `apps/openclaw-shell-ios/OpenClawShell/Features/Models/ModelsView.swift`, `apps/openclaw-shell-ios/OpenClawShell/Features/Editor/EditorView.swift`, `apps/openclaw-shell-ios/README.md`
+  - Last successful step: `xcodegen generate` plus `xcodebuild -project apps/openclaw-shell-ios/OpenClawShell.xcodeproj -scheme OpenClawShell -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' -derivedDataPath /Users/prismtek/code/bmo-stack/apps/openclaw-shell-ios/.build/DerivedData build` succeeded after landing the stack-builder foundation
+  - Next intended step: commit, push, and continue the next stack-aware runtime integration slice on the same PR branch
+  - Verification complete: true
+  - Manual steps remaining: Apple team/bundle id selection and Developer Mode for direct iPhone install
+  - Safe to resume: true
 
 - 2026-04-07 10:39 UTC
   - Repo: `/Users/prismtek/code/bmo-stack`
