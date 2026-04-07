@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct OpenClawShellApp: App {
+struct BeMoreAgentApp: App {
     @StateObject private var appState = AppState(engine: MLCBridgeEngine())
 
     var body: some Scene {

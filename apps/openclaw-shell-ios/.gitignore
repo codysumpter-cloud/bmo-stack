@@ -2,6 +2,7 @@
 /.build
 /Packages
 /OpenClawShell.xcodeproj
+/BeMoreAgent.xcodeproj
 xcuserdata/
 DerivedData/
 .swiftpm/configuration/registries.json

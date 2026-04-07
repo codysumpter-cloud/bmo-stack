@@ -1,4 +1,4 @@
-name: OpenClawShell
+name: BeMoreAgent
 options:
   bundleIdPrefix: com.prismtek
 configs:
@@ -6,9 +6,9 @@ configs:
   Release: release
 settings:
   IPHONEOS_DEPLOYMENT_TARGET: 17.0
-  SWIFT_VERSION: 5.0
+  SWIFT_VERSION: "5.9"
 targets:
-  OpenClawShell:
+  BeMoreAgent:
     type: application
     platform: iOS
     sources:
@@ -17,7 +17,8 @@ targets:
           - "**/.DS_Store"
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.prismtek.openclawshell
+        PRODUCT_BUNDLE_IDENTIFIER: com.prismtek.bemoreagent
         INFOPLIST_FILE: OpenClawShell/Info.plist
         DEVELOPMENT_TEAM: ""
+        PRODUCT_NAME: BeMoreAgent
     dependencies: []

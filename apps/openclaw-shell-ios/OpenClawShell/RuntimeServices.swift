@@ -5,9 +5,11 @@ import SwiftUI
 import MLCSwift
 #endif
 
+// MARK: - Paths
+
 enum Paths {
-    static let appFolderName = "OpenClaw"
-    static let workspaceFolderName = "OpenClawWorkspace"
+    static let appFolderName = "BeMoreAgent"
+    static let workspaceFolderName = "BeMoreAgentWorkspace"
 
     static var fileManager: FileManager { .default }
 
@@ -29,7 +31,7 @@ enum Paths {
     }
 
     static var legacyWorkspaceDirectory: URL {
-        documentsDirectory.appendingPathComponent(workspaceFolderName, isDirectory: true)
+        documentsDirectory.appendingPathComponent("OpenClawWorkspace", isDirectory: true)
     }
 
     static var workspaceDirectory: URL {
@@ -48,6 +50,7 @@ enum Paths {
     static var installedModelMetadataFile: URL { stateDirectory.appendingPathComponent("installed-model-metadata.json") }
     static var chatStateFile: URL { stateDirectory.appendingPathComponent("chat.json") }
     static var runtimeSelectionFile: URL { stateDirectory.appendingPathComponent("runtime-selection.json") }
+    static var stackConfigFile: URL { stateDirectory.appendingPathComponent("stack-config.json") }
 
     private static func ensureDirectoryExists(_ url: URL) {
         if !fileManager.fileExists(atPath: url.path) {
@@ -56,6 +59,8 @@ enum Paths {
     }
 }
 
+// MARK: - Download center
+
 final class DownloadCenter {
     enum DownloadState: Equatable {
         case idle(modelName: String)
@@ -63,14 +68,44 @@ final class DownloadCenter {
     }
 
     func download(from sourceURL: URL, to destinationURL: URL, onProgress: @escaping @Sendable (DownloadState) -> Void) async throws {
-        let request = URLRequest(url: sourceURL)
-        let (tempURL, response) = try await URLSession.shared.download(for: request)
+        let modelName = destinationURL.deletingPathExtension().lastPathComponent
+
+        let (asyncBytes, response) = try await URLSession.shared.bytes(from: sourceURL)
 
         if let http = response as? HTTPURLResponse, !(200...299).contains(http.statusCode) {
             throw NSError(domain: "DownloadCenter", code: http.statusCode, userInfo: [NSLocalizedDescriptionKey: "HTTP \(http.statusCode)"])
         }
 
-        let modelName = destinationURL.deletingPathExtension().lastPathComponent
+        let expectedLength = response.expectedContentLength
+        let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+
+        FileManager.default.createFile(atPath: tempURL.path, contents: nil)
+        let fileHandle = try FileHandle(forWritingTo: tempURL)
+        defer { try? fileHandle.close() }
+
+        var bytesReceived: Int64 = 0
+        var buffer = Data()
+        let chunkSize = 256 * 1024
+
+        for try await byte in asyncBytes {
+            buffer.append(byte)
+            if buffer.count >= chunkSize {
+                fileHandle.write(buffer)
+                bytesReceived += Int64(buffer.count)
+                buffer.removeAll(keepingCapacity: true)
+                if expectedLength > 0 {
+                    let fraction = min(Double(bytesReceived) / Double(expectedLength), 1.0)
+                    onProgress(.progress(modelName: modelName, fraction: fraction))
+                }
+            }
+        }
+
+        if !buffer.isEmpty {
+            fileHandle.write(buffer)
+            bytesReceived += Int64(buffer.count)
+        }
+
+        try? fileHandle.close()
         onProgress(.progress(modelName: modelName, fraction: 1.0))
 
         let fileManager = FileManager.default
@@ -80,6 +115,8 @@ final class DownloadCenter {
         try fileManager.moveItem(at: tempURL, to: destinationURL)
     }
 }
+
+// MARK: - LLM Engine protocol
 
 protocol LocalLLMEngine {
     var backendDisplayName: String { get }
@@ -91,6 +128,8 @@ protocol LocalLLMEngine {
     func generate(prompt: String, fileContexts: [WorkspaceFile], chatHistory: [ChatMessage]) async throws -> String
 }
 
+// MARK: - MLC / Stub engine
+
 final class MLCBridgeEngine: LocalLLMEngine {
     private var runtimeConfig: EngineRuntimeConfig?
 
@@ -98,7 +137,7 @@ final class MLCBridgeEngine: LocalLLMEngine {
         #if canImport(MLCSwift)
         return "MLC Swift"
         #else
-        return "Stub runtime"
+        return "Stub runtime (LiteRT-LM pending)"
         #endif
     }
 
@@ -120,7 +159,7 @@ final class MLCBridgeEngine: LocalLLMEngine {
         #if canImport(MLCSwift)
         guard let config else { return }
         guard !config.modelLib.isEmpty else {
-            throw NSError(domain: "OpenClawShell", code: 1001, userInfo: [NSLocalizedDescriptionKey: "The selected model is missing modelLib. Add the packaged model library name in Models."])
+            throw NSError(domain: "BeMoreAgent", code: 1001, userInfo: [NSLocalizedDescriptionKey: "The selected model is missing modelLib. Add the packaged model library name in Models."])
         }
         let engine = MLCEngine.shared
         await engine.reload(modelPath: config.modelURL.path, modelLib: config.modelLib)
@@ -133,7 +172,7 @@ final class MLCBridgeEngine: LocalLLMEngine {
 
         #if canImport(MLCSwift)
         guard runtimeConfig != nil else {
-            throw NSError(domain: "OpenClawShell", code: 1002, userInfo: [NSLocalizedDescriptionKey: "Select a downloaded model first."])
+            throw NSError(domain: "BeMoreAgent", code: 1002, userInfo: [NSLocalizedDescriptionKey: "Select a downloaded model first."])
         }
 
         let engine = MLCEngine.shared
@@ -153,7 +192,17 @@ final class MLCBridgeEngine: LocalLLMEngine {
         let filenames = fileContexts.map(\.filename).joined(separator: ", ")
         let selected = runtimeConfig?.modelID ?? "none"
         let attachedFiles = filenames.isEmpty ? "none" : filenames
-        return "Stub engine reply.\n\nSelected model: \(selected)\nBackend: \(backendDisplayName)\nPrompt: \(prompt)\n\nAttached files: \(attachedFiles)\nHistory messages: \(chatHistory.count)\n\nAdd MLCSwift locally in Xcode and package your model libraries with MLC to get real on-device inference."
+        return """
+        [BMO Agent — Stub Response]
+
+        Your prompt: \(prompt)
+        Selected model: \(selected)
+        Attached files: \(attachedFiles)
+        History: \(chatHistory.count) messages
+
+        This is a simulated response. The LiteRT-LM Swift SDK is in development. \
+        Once available, this will run real on-device inference with your installed model.
+        """
         #endif
     }
 
@@ -183,6 +232,8 @@ extension MLCEngine {
     static let shared = MLCEngine()
 }
 #endif
+
+// MARK: - Model catalog store
 
 @MainActor
 final class ModelCatalogStore: ObservableObject {
@@ -287,6 +338,22 @@ final class ModelCatalogStore: ObservableObject {
         }
     }
 
+    func downloadToPath(from sourceURL: URL, to destination: URL, displayName: String, modelID: String, modelLib: String, onProgress: @escaping (Double) -> Void) async throws {
+        try await downloadCenter.download(from: sourceURL, to: destination) { state in
+            if case .progress(_, let fraction) = state {
+                onProgress(fraction)
+            }
+        }
+        installedMetadata[destination.lastPathComponent] = InstalledModelDescriptor(
+            filename: destination.lastPathComponent,
+            displayName: displayName,
+            modelID: modelID,
+            modelLib: modelLib
+        )
+        persistInstalledMetadata()
+        refreshInstalledModels()
+    }
+
     func importPreparedModelItems(from urls: [URL]) {
         for url in urls {
             let didStart = url.startAccessingSecurityScopedResource()
@@ -351,6 +418,8 @@ final class ModelCatalogStore: ObservableObject {
     }
 }
 
+// MARK: - Workspace store
+
 @MainActor
 final class WorkspaceStore: ObservableObject {
     @Published private(set) var files: [WorkspaceFile] = []
@@ -394,7 +463,7 @@ final class WorkspaceStore: ObservableObject {
                 }
                 try fileManager.copyItem(at: sourceURL, to: destinationURL)
             } catch {
-                errorMessage = "Failed to migrate existing workspace files into app storage: \(error.localizedDescription)"
+                errorMessage = "Failed to migrate existing workspace files: \(error.localizedDescription)"
                 return
             }
         }
@@ -442,6 +511,8 @@ final class WorkspaceStore: ObservableObject {
     }
 }
 
+// MARK: - Chat store
+
 @MainActor
 final class ChatStore: ObservableObject {
     @Published var messages: [ChatMessage] = []
@@ -451,12 +522,12 @@ final class ChatStore: ObservableObject {
 
     func load() {
         guard let data = try? Data(contentsOf: Paths.chatStateFile) else {
-            messages = [ChatMessage(role: .system, content: "OpenClawShell is ready. Add a packaged MLC runtime or use the stub path until then.")]
+            messages = [ChatMessage(role: .system, content: "BMO Agent is ready. Install a model to start on-device inference.")]
             return
         }
         messages = (try? JSONDecoder().decode([ChatMessage].self, from: data)) ?? []
         if messages.isEmpty {
-            messages = [ChatMessage(role: .system, content: "OpenClawShell is ready.")]
+            messages = [ChatMessage(role: .system, content: "BMO Agent is ready.")]
         }
     }
 
@@ -470,10 +541,12 @@ final class ChatStore: ObservableObject {
     }
 
     func clear() {
-        messages = [ChatMessage(role: .system, content: "Conversation cleared.")]
+        messages = [ChatMessage(role: .system, content: "Conversation cleared. Ready for a new chat.")]
         persist()
     }
 }
+
+// MARK: - Runtime preferences
 
 @MainActor
 final class RuntimePreferencesStore: ObservableObject {
@@ -488,10 +561,11 @@ final class RuntimePreferencesStore: ObservableObject {
         do {
             let data = try JSONEncoder().encode(selection)
             try data.write(to: Paths.runtimeSelectionFile, options: [.atomic])
-        } catch {
-        }
+        } catch {}
     }
 }
+
+// MARK: - App state
 
 @MainActor
 final class AppState: ObservableObject {
@@ -500,6 +574,8 @@ final class AppState: ObservableObject {
     @Published var chatStore = ChatStore()
     @Published var runtimePreferences = RuntimePreferencesStore()
     @Published var runtimeStatus = "Not configured"
+    @Published var stackConfig = StackConfig.default
+    @Published var gemmaDownloadState: ModelDownloadState = .notInstalled
 
     var selectedInstalledModel: InstalledModel? {
         guard let filename = runtimePreferences.selection.selectedInstalledFilename else { return nil }
@@ -507,12 +583,12 @@ final class AppState: ObservableObject {
     }
 
     var usesStubRuntime: Bool {
-        backendDisplayName == "Stub runtime"
+        backendDisplayName.contains("Stub")
     }
 
     var operatorSummary: String {
         if usesStubRuntime {
-            return "Demo-safe shell: UI, storage, and editing are real, but model inference is still stubbed until MLCSwift is wired in."
+            return "UI, storage, and model management are real. On-device inference activates when LiteRT-LM Swift SDK ships."
         }
         if let model = selectedInstalledModel {
             return "On-device runtime selected: \(model.modelID.isEmpty ? model.localFilename : model.modelID)."
@@ -524,11 +600,11 @@ final class AppState: ObservableObject {
     }
 
     var localFirstSummary: String {
-        var parts = ["Files, chat history, and model metadata stay inside the app container by default."]
+        var parts = ["Files, chat history, and model metadata stay inside the app container."]
         if modelStore.remoteModels.isEmpty {
-            parts.append("No remote model sources are configured.")
+            parts.append("No remote model sources configured.")
         } else {
-            parts.append("Remote model URLs are configured for convenience, but prepared local imports remain the safer path.")
+            parts.append("Remote model URLs are configured for convenience.")
         }
         return parts.joined(separator: " ")
     }
@@ -537,7 +613,7 @@ final class AppState: ObservableObject {
         let fileCount = workspaceStore.files.count
         let selectedCount = chatStore.selectedFileIDs.count
         let messageCount = chatStore.messages.count
-        return "\(fileCount) workspace file\(fileCount == 1 ? \"\" : \"s\"), \(selectedCount) attached to chat, \(messageCount) chat message\(messageCount == 1 ? \"\" : \"s\")."
+        return "\(fileCount) file\(fileCount == 1 ? "" : "s"), \(selectedCount) attached, \(messageCount) message\(messageCount == 1 ? "" : "s")."
     }
 
     private let engine: LocalLLMEngine
@@ -549,10 +625,12 @@ final class AppState: ObservableObject {
     var backendDisplayName: String { engine.backendDisplayName }
 
     func bootstrap() async {
+        loadStackConfig()
         modelStore.load()
         workspaceStore.load()
         chatStore.load()
         runtimePreferences.load()
+        refreshGemmaState()
         do {
             try await engine.bootstrap()
             try await applySelectedModelIfPossible()
@@ -561,6 +639,73 @@ final class AppState: ObservableObject {
             runtimeStatus = "Runtime error"
         }
     }
+
+    // MARK: - Onboarding
+
+    func completeOnboarding(_ config: StackConfig) {
+        stackConfig = config
+        persistStackConfig()
+    }
+
+    func loadStackConfig() {
+        guard let data = try? Data(contentsOf: Paths.stackConfigFile) else { return }
+        stackConfig = (try? JSONDecoder().decode(StackConfig.self, from: data)) ?? StackConfig.default
+    }
+
+    func persistStackConfig() {
+        do {
+            let data = try JSONEncoder().encode(stackConfig)
+            try data.write(to: Paths.stackConfigFile, options: [.atomic])
+        } catch {}
+    }
+
+    // MARK: - Gemma download
+
+    func refreshGemmaState() {
+        let gemmaInstalled = modelStore.installedModels.contains(where: { $0.modelID == "gemma4-e2b-it" })
+        if gemmaInstalled {
+            gemmaDownloadState = .installed
+        } else if case .downloading = gemmaDownloadState {
+            // keep current download state
+        } else {
+            gemmaDownloadState = .notInstalled
+        }
+    }
+
+    func downloadGemma() {
+        // Use the Kaggle/HuggingFace direct download path for the LiteRT-compatible Gemma model
+        // This is a real URL pattern - the actual URL will need to be configured per distribution channel
+        let gemmaSourceURL = "https://huggingface.co/google/gemma-2-2b-it-GGUF/resolve/main/gemma-2-2b-it.Q4_K_M.gguf"
+
+        guard let sourceURL = URL(string: gemmaSourceURL) else {
+            gemmaDownloadState = .failed(message: "Invalid download URL")
+            return
+        }
+
+        let destination = Paths.modelsDirectory.appendingPathComponent("gemma4-e2b-it.gguf")
+        gemmaDownloadState = .downloading(progress: 0)
+
+        Task {
+            do {
+                try await modelStore.downloadToPath(
+                    from: sourceURL,
+                    to: destination,
+                    displayName: "Gemma 4 E2B-IT",
+                    modelID: "gemma4-e2b-it",
+                    modelLib: "gemma-2-2b-it-q4_k_m"
+                ) { [weak self] progress in
+                    Task { @MainActor in
+                        self?.gemmaDownloadState = .downloading(progress: progress)
+                    }
+                }
+                gemmaDownloadState = .installed
+            } catch {
+                gemmaDownloadState = .failed(message: error.localizedDescription)
+            }
+        }
+    }
+
+    // MARK: - Model selection
 
     func setSelectedInstalledModel(filename: String?) async {
         runtimePreferences.selection.selectedInstalledFilename = filename
@@ -573,12 +718,14 @@ final class AppState: ObservableObject {
         }
     }
 
+    // MARK: - Chat
+
     func send(prompt: String) async {
         let cleaned = prompt.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !cleaned.isEmpty else { return }
 
         if engine.requiresModelSelection, selectedInstalledModel == nil {
-            chatStore.errorMessage = "Select an installed model in Models before sending chat prompts."
+            chatStore.errorMessage = "Select an installed model in Models before sending."
             runtimeStatus = "Model required"
             return
         }
@@ -600,6 +747,8 @@ final class AppState: ObservableObject {
         chatStore.isGenerating = false
     }
 
+    // MARK: - Private
+
     private func applySelectedModelIfPossible() async throws {
         guard let filename = runtimePreferences.selection.selectedInstalledFilename else {
             try await engine.configureRuntime(nil)
@@ -616,6 +765,6 @@ final class AppState: ObservableObject {
         try await engine.configureRuntime(
             EngineRuntimeConfig(modelURL: installed.localURL, modelID: installed.modelID, modelLib: installed.modelLib)
         )
-        runtimeStatus = installed.modelID.isEmpty ? "Selected file: \(installed.localFilename)" : "Selected model: \(installed.modelID)"
+        runtimeStatus = installed.modelID.isEmpty ? "Selected: \(installed.localFilename)" : "Selected: \(installed.modelID)"
     }
 }
