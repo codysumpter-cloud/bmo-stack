@@ -1,5 +1,7 @@
 import Foundation
 
+// MARK: - Chat
+
 struct ChatMessage: Identifiable, Codable, Hashable {
     enum Role: String, Codable {
         case user
@@ -19,6 +21,8 @@ struct ChatMessage: Identifiable, Codable, Hashable {
         self.createdAt = createdAt
     }
 }
+
+// MARK: - Workspace
 
 struct WorkspaceFile: Identifiable, Codable, Hashable {
     let id: UUID
@@ -42,6 +46,8 @@ struct WorkspaceFile: Identifiable, Codable, Hashable {
         return known.contains(ext)
     }
 }
+
+// MARK: - Models
 
 struct RemoteModel: Identifiable, Codable, Hashable {
     let id: UUID
@@ -125,4 +131,74 @@ struct EngineRuntimeConfig: Sendable {
     let modelURL: URL
     let modelID: String
     let modelLib: String
+}
+
+// MARK: - Onboarding / Stack
+
+struct StackConfig: Codable {
+    var stackName: String
+    var goal: String
+    var role: String
+    var autonomyLevel: Int // 1-5
+    var memoryEnabled: Bool
+    var toolsEnabled: Bool
+    var optimizationMode: String // "speed", "quality", "balanced"
+    var isOnboardingComplete: Bool
+
+    static let `default` = StackConfig(
+        stackName: "Life Command",
+        goal: "",
+        role: "",
+        autonomyLevel: 3,
+        memoryEnabled: true,
+        toolsEnabled: true,
+        optimizationMode: "balanced",
+        isOnboardingComplete: false
+    )
+}
+
+// MARK: - Model download state
+
+enum ModelDownloadState: Equatable {
+    case notInstalled
+    case downloading(progress: Double)
+    case installed
+    case failed(message: String)
+
+    static func == (lhs: ModelDownloadState, rhs: ModelDownloadState) -> Bool {
+        switch (lhs, rhs) {
+        case (.notInstalled, .notInstalled): return true
+        case (.installed, .installed): return true
+        case let (.downloading(a), .downloading(b)): return a == b
+        case let (.failed(a), .failed(b)): return a == b
+        default: return false
+        }
+    }
+}
+
+// MARK: - Known model catalog
+
+struct KnownModel: Identifiable {
+    let id = UUID()
+    let name: String
+    let modelID: String
+    let family: String
+    let parameterCount: String
+    let description: String
+    let downloadSizeGB: Double
+    let requiresDownload: Bool
+    let runtimeBackend: String
+
+    static let gemma4E2B = KnownModel(
+        name: "Gemma 4 E2B-IT",
+        modelID: "gemma4-e2b-it",
+        family: "Gemma",
+        parameterCount: "2B",
+        description: "Google's efficient 2B instruction-tuned model. Optimized for on-device use with LiteRT.",
+        downloadSizeGB: 1.4,
+        requiresDownload: true,
+        runtimeBackend: "LiteRT-LM"
+    )
+
+    static let catalog: [KnownModel] = [gemma4E2B]
 }
