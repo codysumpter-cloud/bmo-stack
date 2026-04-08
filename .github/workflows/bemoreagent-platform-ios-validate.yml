@@ -1,0 +1,40 @@
+name: BeMoreAgent Platform iOS validation
+
+on:
+  pull_request:
+    paths:
+      - 'apps/bemoreagent-platform-ios/**'
+      - '.github/workflows/bemoreagent-platform-ios-validate.yml'
+  push:
+    branches:
+      - master
+    paths:
+      - 'apps/bemoreagent-platform-ios/**'
+      - '.github/workflows/bemoreagent-platform-ios-validate.yml'
+
+jobs:
+  build-ios:
+    name: Generate and build BeMoreAgent Platform
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: apps/bemoreagent-platform-ios
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate project
+        run: xcodegen generate
+
+      - name: Build for iOS Simulator
+        run: |
+          xcodebuild \
+            -project BeMoreAgentPlatform.xcodeproj \
+            -scheme BeMoreAgentPlatform \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath .build/DerivedData \
+            build
