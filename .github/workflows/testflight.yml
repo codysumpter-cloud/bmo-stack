@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    runs-on: macos-14
+    runs-on: [self-hosted, macos]
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -14,7 +14,9 @@ jobs:
           fetch-depth: 0
 
       - name: Set up Xcode
-        run: sudo xcode-select -s /Applications/Xcode.app
+        run: |
+          xcode-select -s /Applications/Xcode.app
+          xcodebuild -version
 
       - name: Install XcodeGen
         run: brew install xcodegen
