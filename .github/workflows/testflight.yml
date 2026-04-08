@@ -1,0 +1,167 @@
+name: Build & Upload BeMoreAgent to TestFlight
+
+on:
+  pull_request:
+    paths:
+      - 'apps/openclaw-shell-ios/**'
+      - '.github/workflows/testflight.yml'
+  push:
+    branches:
+      - master
+    paths:
+      - 'apps/openclaw-shell-ios/**'
+      - '.github/workflows/testflight.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: testflight-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-and-upload:
+    name: Archive BeMoreAgent and upload on master
+    runs-on: macos-15
+    permissions:
+      contents: read
+    defaults:
+      run:
+        shell: bash
+        working-directory: apps/openclaw-shell-ios
+    env:
+      APP_SCHEME: BeMoreAgent
+      APP_PROJECT: BeMoreAgent.xcodeproj
+      DEFAULT_BUNDLE_ID: com.prismtek.bemoreagent
+      ARCHIVE_PATH: ${{ runner.temp }}/BeMoreAgent.xcarchive
+      EXPORT_PATH: ${{ runner.temp }}/BeMoreAgentExport
+      EXPORT_OPTIONS_PLIST: ${{ runner.temp }}/exportOptions-testflight.plist
+      ASC_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+      ASC_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
+      ASC_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_API_KEY_BASE64 }}
+      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      APP_BUNDLE_ID: ${{ secrets.APP_BUNDLE_ID }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Validate required secrets
+        run: |
+          missing=()
+          [[ -z "$ASC_KEY_ID" ]] && missing+=("APP_STORE_CONNECT_API_KEY_ID")
+          [[ -z "$ASC_ISSUER_ID" ]] && missing+=("APP_STORE_CONNECT_API_ISSUER_ID")
+          [[ -z "$ASC_KEY_BASE64" ]] && missing+=("APP_STORE_CONNECT_API_KEY_BASE64")
+          [[ -z "$APPLE_TEAM_ID" ]] && missing+=("APPLE_TEAM_ID")
+
+          if [ ${#missing[@]} -gt 0 ]; then
+            printf 'Missing required GitHub Actions secrets:\n' >&2
+            printf ' - %s\n' "${missing[@]}" >&2
+            exit 1
+          fi
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate project
+        run: xcodegen generate
+
+      - name: Prepare App Store Connect API key
+        run: |
+          python3 - <<'PY'
+          import base64
+          import os
+          import pathlib
+
+          key_id = os.environ['ASC_KEY_ID']
+          key_data = base64.b64decode(os.environ['ASC_KEY_BASE64'])
+          private_key_dir = pathlib.Path(os.environ['RUNNER_TEMP']) / 'private_keys'
+          private_key_dir.mkdir(parents=True, exist_ok=True)
+          key_path = private_key_dir / f'AuthKey_{key_id}.p8'
+          key_path.write_bytes(key_data)
+
+          github_env = pathlib.Path(os.environ['GITHUB_ENV'])
+          with github_env.open('a', encoding='utf-8') as fh:
+              fh.write(f'ASC_KEY_PATH={key_path}\n')
+              fh.write(f'API_PRIVATE_KEYS_DIR={private_key_dir}\n')
+          PY
+          chmod 600 "$RUNNER_TEMP/private_keys/AuthKey_${ASC_KEY_ID}.p8"
+
+      - name: Archive app
+        run: |
+          EFFECTIVE_BUNDLE_ID="${APP_BUNDLE_ID:-$DEFAULT_BUNDLE_ID}"
+
+          xcodebuild \
+            -project "$APP_PROJECT" \
+            -scheme "$APP_SCHEME" \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath "$ARCHIVE_PATH" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$ASC_KEY_PATH" \
+            -authenticationKeyID "$ASC_KEY_ID" \
+            -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
+            DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
+            CODE_SIGN_STYLE=Automatic \
+            PRODUCT_BUNDLE_IDENTIFIER="$EFFECTIVE_BUNDLE_ID" \
+            clean archive
+
+      - name: Write export options
+        run: |
+          cat > "$EXPORT_OPTIONS_PLIST" <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>destination</key>
+            <string>export</string>
+            <key>method</key>
+            <string>app-store-connect</string>
+            <key>signingStyle</key>
+            <string>automatic</string>
+            <key>stripSwiftSymbols</key>
+            <true/>
+            <key>teamID</key>
+            <string>${APPLE_TEAM_ID}</string>
+            <key>uploadSymbols</key>
+            <true/>
+          </dict>
+          </plist>
+          EOF
+
+      - name: Export IPA
+        run: |
+          xcodebuild -exportArchive \
+            -archivePath "$ARCHIVE_PATH" \
+            -exportPath "$EXPORT_PATH" \
+            -exportOptionsPlist "$EXPORT_OPTIONS_PLIST" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$ASC_KEY_PATH" \
+            -authenticationKeyID "$ASC_KEY_ID" \
+            -authenticationKeyIssuerID "$ASC_ISSUER_ID"
+
+      - name: Locate IPA
+        run: |
+          IPA_PATH="$(find "$EXPORT_PATH" -maxdepth 1 -name '*.ipa' | head -n 1)"
+          if [ -z "$IPA_PATH" ]; then
+            echo "No IPA found in $EXPORT_PATH" >&2
+            exit 1
+          fi
+          echo "IPA_PATH=$IPA_PATH" >> "$GITHUB_ENV"
+
+      - name: Upload IPA to TestFlight
+        if: github.event_name != 'pull_request'
+        run: |
+          xcrun altool \
+            --upload-app \
+            --type ios \
+            --file "$IPA_PATH" \
+            --apiKey "$ASC_KEY_ID" \
+            --apiIssuer "$ASC_ISSUER_ID"
+
+      - name: Upload archive and export artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bemoreagent-testflight-export
+          path: |
+            ${{ runner.temp }}/BeMoreAgent.xcarchive
+            ${{ runner.temp }}/BeMoreAgentExport
+          if-no-files-found: warn
