@@ -12,11 +12,13 @@
 	<string>1</string>
 	<key>LSApplicationCategoryType</key>
 	<string>public.app-category.productivity</string>
-	<key>UIFileSharingEnabled</key>
-	<true/>
 	<key>LSSupportsOpeningDocumentsInPlace</key>
 	<true/>
 	<key>NSDocumentsFolderUsageDescription</key>
 	<string>OpenClawShell stores imported workspace files here.</string>
+	<key>UIFileSharingEnabled</key>
+	<true/>
+    <key>CFBundleExecutable</key>
+    <string>$(EXECUTABLE_NAME)</string>
 </dict>
 </plist>

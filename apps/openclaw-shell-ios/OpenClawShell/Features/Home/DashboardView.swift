@@ -171,7 +171,7 @@ struct TabBarButton: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 6)
-        .background(isSelected ? .primary.opacity(0.1) : .clear)
+        .background(isSelected ? Color.primary.opacity(0.1) : Color.clear)
         .cornerRadius(4)
         .onTapGesture(perform: action)
     }
