@@ -16,11 +16,16 @@ jobs:
       - name: Set up Xcode
         run: sudo xcode-select -s /Applications/Xcode.app
 
-      - name: Verify iOS project path
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
         working-directory: apps/openclaw-shell-ios
         run: |
           pwd
           ls -la
+          test -f project.yml
+          xcodegen generate
           test -d BeMoreAgent.xcodeproj
           test -f exportOptions-testflight.plist
 
