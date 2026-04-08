@@ -17,8 +17,9 @@ targets:
           - "**/.DS_Store"
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.prismtek.bemoreagent
+        PRODUCT_BUNDLE_IDENTIFIER: com.prismtek.beMoreAgent
         INFOPLIST_FILE: OpenClawShell/Info.plist
-        DEVELOPMENT_TEAM: ""
+        DEVELOPMENT_TEAM: DY9FHPRZA9
+        CODE_SIGN_STYLE: Automatic
         PRODUCT_NAME: BeMoreAgent
     dependencies: []
