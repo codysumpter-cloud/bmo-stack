@@ -51,6 +51,32 @@ xcodebuild -project BeMoreAgent.xcodeproj \
 4. Upload to App Store Connect.
 5. Add internal testers in TestFlight.
 
+## GitHub Actions setup for future PRs and releases
+
+Two workflows matter:
+
+- `.github/workflows/bemoreagent-ios-validate.yml` builds the app on pull requests and pushes
+- `.github/workflows/testflight.yml` archives and uploads to TestFlight on `master`
+
+Required GitHub repo configuration:
+
+### Repository variable
+
+- `BEMOREAGENT_IOS_RUNS_ON` → JSON array of runner labels for the self-hosted Mac runner
+  - example: `["self-hosted","macOS"]`
+
+### Repository secrets
+
+- `APPSTORE_CONNECT_API_KEY` → contents of the `.p8` private key
+- `APPSTORE_CONNECT_KEY_ID` → App Store Connect API key ID
+- `APPSTORE_CONNECT_ISSUER_ID` → App Store Connect issuer ID
+
+Notes:
+
+- GitHub-hosted macOS runners may be too old for this project, so these workflows are pinned to the self-hosted Mac path by default.
+- The API key must be a team App Store Connect key with enough access to sign/export/upload builds.
+- Keep `.p8` files local only, never commit them.
+
 ## Honest limits
 
 This repo is now set up for native Xcode handoff, onboarding demos, model/file management, and local state. The remaining Mac-only work is:

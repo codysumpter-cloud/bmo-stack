@@ -11,20 +11,37 @@ on:
     paths:
       - 'apps/openclaw-shell-ios/**'
       - '.github/workflows/bemoreagent-ios-validate.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: bemoreagent-ios-validate-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build-ios:
     name: Generate and build BeMoreAgent
-    runs-on: macos-latest
+    runs-on: ${{ fromJSON(vars.BEMOREAGENT_IOS_RUNS_ON != '' && vars.BEMOREAGENT_IOS_RUNS_ON || '["self-hosted","macOS"]') }}
     defaults:
       run:
         working-directory: apps/openclaw-shell-ios
+    env:
+      DEVELOPER_DIR: /Applications/Xcode.app/Contents/Developer
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Install XcodeGen
-        run: brew install xcodegen
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode.app
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      - name: Install XcodeGen if needed
+        run: |
+          if ! command -v xcodegen >/dev/null 2>&1; then
+            brew install xcodegen
+          fi
+          xcodegen --version
 
       - name: Generate project
         run: xcodegen generate
