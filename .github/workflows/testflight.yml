@@ -15,8 +15,8 @@ jobs:
 
       - name: Set up Xcode
         run: |
-          xcode-select -s /Applications/Xcode.app
-          xcodebuild -version
+          echo "DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer" >> "$GITHUB_ENV"
+          /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild -version
 
       - name: Install XcodeGen
         run: brew install xcodegen
