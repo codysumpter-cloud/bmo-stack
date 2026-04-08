@@ -1,0 +1,48 @@
+name: Build & TestFlight
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  build:
+    runs-on: macos-14
+    defaults:
+      run:
+        working-directory: apps/openclaw-shell-ios
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Xcode
+        run: sudo xcode-select -s /Applications/Xcode.app
+
+      - name: Build & archive
+        run: |
+          xcodebuild -project BeMoreAgent.xcodeproj \
+            -scheme BeMoreAgent \
+            -configuration Release \
+            -archivePath ${{ github.workspace }}/apps/openclaw-shell-ios/BeMoreAgent.xcarchive \
+            clean archive \
+            -allowProvisioningUpdates
+
+      - name: Export IPA
+        run: |
+          xcodebuild -exportArchive \
+            -archivePath ${{ github.workspace }}/apps/openclaw-shell-ios/BeMoreAgent.xcarchive \
+            -exportPath ${{ github.workspace }}/apps/openclaw-shell-ios/export \
+            -exportOptionsPlist ${{ github.workspace }}/apps/openclaw-shell-ios/exportOptions-testflight.plist \
+            -allowProvisioningUpdates
+
+      - name: Upload to TestFlight
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APP_SPECIFIC_PASSWORD: ${{ secrets.APP_SPECIFIC_PASSWORD }}
+        run: |
+          xcrun altool \
+            --upload-package ${{ github.workspace }}/apps/openclaw-shell-ios/export/BeMoreAgent.ipa \
+            -t ios \
+            -u "$APPLE_ID" \
+            -p "$APP_SPECIFIC_PASSWORD"
