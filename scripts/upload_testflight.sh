@@ -17,7 +17,7 @@ fi
 
 # Decode the API key to a temporary file
 TMP_KEY=$(mktemp /tmp/AppStoreConnectKey.XXXXXX.p8)
-printf "%s" "$APP_STORE_CONNECT_API_KEY" | base64 --decode > "$TMP_KEY"
+printf "%s" "$APP_STORE_CONNECT_API_KEY" | base64 --decode >"$TMP_KEY"
 
 xcrun altool --upload-app -f "$IPA_PATH" \
   --type ios \
