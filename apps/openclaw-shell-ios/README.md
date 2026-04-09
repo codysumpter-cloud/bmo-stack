@@ -29,14 +29,16 @@ Once you prepare MLC on your Mac, you can switch to real on-device inference by:
 brew install xcodegen
 cd apps/openclaw-shell-ios
 xcodegen generate
-xcodebuild -project OpenClawShell.xcodeproj \
-  -scheme OpenClawShell \
+xcodebuild -project BeMoreAgent.xcodeproj \
+  -scheme BeMoreAgent \
   -sdk iphonesimulator \
   -destination 'generic/platform=iOS Simulator' \
   -derivedDataPath .build/DerivedData \
   build
-open OpenClawShell.xcodeproj
+open BeMoreAgent.xcodeproj
 ```
+
+Admin release/runbook notes live in [`ADMIN_TESTFLIGHT_RUNBOOK.md`](./ADMIN_TESTFLIGHT_RUNBOOK.md).
 
 Then in Xcode:
 

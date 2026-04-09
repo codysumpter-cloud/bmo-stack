@@ -2,15 +2,9 @@ name: BeMoreAgent iOS validation
 
 on:
   pull_request:
-    paths:
-      - 'apps/openclaw-shell-ios/**'
-      - '.github/workflows/bemoreagent-ios-validate.yml'
   push:
     branches:
       - master
-    paths:
-      - 'apps/openclaw-shell-ios/**'
-      - '.github/workflows/bemoreagent-ios-validate.yml'
   workflow_dispatch:
 
 concurrency:
@@ -43,6 +37,12 @@ jobs:
           fi
           xcodegen --version
 
+      - name: Show app version and build
+        run: |
+          VERSION=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' OpenClawShell/Info.plist)
+          BUILD=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' OpenClawShell/Info.plist)
+          echo "Building BeMoreAgent $VERSION ($BUILD)"
+
       - name: Generate project
         run: xcodegen generate
 
@@ -55,3 +55,16 @@ jobs:
             -destination 'generic/platform=iOS Simulator' \
             -derivedDataPath .build/DerivedData \
             build
+
+      - name: Publish validation summary
+        if: always()
+        run: |
+          VERSION=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' OpenClawShell/Info.plist)
+          BUILD=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' OpenClawShell/Info.plist)
+          {
+            echo '## BeMoreAgent iOS validation'
+            echo ''
+            echo "- Version: $VERSION ($BUILD)"
+            echo '- Project generated from apps/openclaw-shell-ios/project.yml'
+            echo '- Destination: generic/platform=iOS Simulator'
+          } >> "$GITHUB_STEP_SUMMARY"
