@@ -26,6 +26,5 @@ targets:
         INFOPLIST_FILE: OpenClawShell/Info.plist
         DEVELOPMENT_TEAM: DY9FHPRZA9
         CODE_SIGN_STYLE: Automatic
-        CODE_SIGN_IDENTITY: Apple Distribution
         PRODUCT_NAME: BeMoreAgent
     dependencies: []
