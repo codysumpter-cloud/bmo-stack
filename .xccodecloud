@@ -1,0 +1,22 @@
+{
+  "name": "BeMoreAgent CI",
+  "scheme": "BeMoreAgent",
+  "branch": "master",
+  "trigger": "push",
+  "actions": [
+    {
+      "type": "build",
+      "configuration": "Release",
+      "destination": "generic/platform=iOS"
+    },
+    {
+      "type": "test",
+      "configuration": "Debug",
+      "destination": "generic/platform=iOS Simulator"
+    },
+    {
+      "type": "archive",
+      "output": "BeMoreAgent.xcarchive"
+    }
+  ]
+}

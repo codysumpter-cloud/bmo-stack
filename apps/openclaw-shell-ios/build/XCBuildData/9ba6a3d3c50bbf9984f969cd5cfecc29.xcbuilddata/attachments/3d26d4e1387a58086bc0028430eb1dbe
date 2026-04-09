@@ -1,0 +1,119 @@
+{
+  "" : {
+    "diagnostics" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/OpenClawShell-primary.dia",
+    "emit-module-dependencies" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/OpenClawShell-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/OpenClawShell-primary-emit-module.dia",
+    "pch" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/OpenClawShell-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/OpenClawShell-primary.swiftdeps"
+  },
+  "/Users/prismtek/.openclaw/workspace/bmo-stack/OpenClawShell/AppModels.swift" : {
+    "const-values" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/AppModels.swiftconstvalues",
+    "dependencies" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/AppModels.d",
+    "diagnostics" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/AppModels.dia",
+    "index-unit-output-path" : "/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/AppModels.o",
+    "llvm-bc" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/AppModels.bc",
+    "object" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/AppModels.o",
+    "swift-dependencies" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/AppModels.swiftdeps",
+    "swiftmodule" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/AppModels~partial.swiftmodule"
+  },
+  "/Users/prismtek/.openclaw/workspace/bmo-stack/OpenClawShell/ContentView.swift" : {
+    "const-values" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/ContentView.swiftconstvalues",
+    "dependencies" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/ContentView.d",
+    "diagnostics" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/ContentView.dia",
+    "index-unit-output-path" : "/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/ContentView.o",
+    "llvm-bc" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/ContentView.bc",
+    "object" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/ContentView.o",
+    "swift-dependencies" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/ContentView.swiftdeps",
+    "swiftmodule" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/ContentView~partial.swiftmodule"
+  },
+  "/Users/prismtek/.openclaw/workspace/bmo-stack/OpenClawShell/Features/Home/DashboardView.swift" : {
+    "const-values" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/DashboardView.swiftconstvalues",
+    "dependencies" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/DashboardView.d",
+    "diagnostics" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/DashboardView.dia",
+    "index-unit-output-path" : "/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/DashboardView.o",
+    "llvm-bc" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/DashboardView.bc",
+    "object" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/DashboardView.o",
+    "swift-dependencies" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/DashboardView.swiftdeps",
+    "swiftmodule" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/DashboardView~partial.swiftmodule"
+  },
+  "/Users/prismtek/.openclaw/workspace/bmo-stack/OpenClawShell/Features/Onboarding/OnboardingFlowView.swift" : {
+    "const-values" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/OnboardingFlowView.swiftconstvalues",
+    "dependencies" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/OnboardingFlowView.d",
+    "diagnostics" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/OnboardingFlowView.dia",
+    "index-unit-output-path" : "/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/OnboardingFlowView.o",
+    "llvm-bc" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/OnboardingFlowView.bc",
+    "object" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/OnboardingFlowView.o",
+    "swift-dependencies" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/OnboardingFlowView.swiftdeps",
+    "swiftmodule" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/OnboardingFlowView~partial.swiftmodule"
+  },
+  "/Users/prismtek/.openclaw/workspace/bmo-stack/OpenClawShell/Features/Preview/StackPreviewView.swift" : {
+    "const-values" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/StackPreviewView.swiftconstvalues",
+    "dependencies" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/StackPreviewView.d",
+    "diagnostics" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/StackPreviewView.dia",
+    "index-unit-output-path" : "/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/StackPreviewView.o",
+    "llvm-bc" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/StackPreviewView.bc",
+    "object" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/StackPreviewView.o",
+    "swift-dependencies" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/StackPreviewView.swiftdeps",
+    "swiftmodule" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/StackPreviewView~partial.swiftmodule"
+  },
+  "/Users/prismtek/.openclaw/workspace/bmo-stack/OpenClawShell/Models/UserStack.swift" : {
+    "const-values" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/UserStack.swiftconstvalues",
+    "dependencies" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/UserStack.d",
+    "diagnostics" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/UserStack.dia",
+    "index-unit-output-path" : "/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/UserStack.o",
+    "llvm-bc" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/UserStack.bc",
+    "object" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/UserStack.o",
+    "swift-dependencies" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/UserStack.swiftdeps",
+    "swiftmodule" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/UserStack~partial.swiftmodule"
+  },
+  "/Users/prismtek/.openclaw/workspace/bmo-stack/OpenClawShell/OpenClawShellApp.swift" : {
+    "const-values" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/OpenClawShellApp.swiftconstvalues",
+    "dependencies" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/OpenClawShellApp.d",
+    "diagnostics" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/OpenClawShellApp.dia",
+    "index-unit-output-path" : "/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/OpenClawShellApp.o",
+    "llvm-bc" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/OpenClawShellApp.bc",
+    "object" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/OpenClawShellApp.o",
+    "swift-dependencies" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/OpenClawShellApp.swiftdeps",
+    "swiftmodule" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/OpenClawShellApp~partial.swiftmodule"
+  },
+  "/Users/prismtek/.openclaw/workspace/bmo-stack/OpenClawShell/RuntimeServices.swift" : {
+    "const-values" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/RuntimeServices.swiftconstvalues",
+    "dependencies" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/RuntimeServices.d",
+    "diagnostics" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/RuntimeServices.dia",
+    "index-unit-output-path" : "/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/RuntimeServices.o",
+    "llvm-bc" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/RuntimeServices.bc",
+    "object" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/RuntimeServices.o",
+    "swift-dependencies" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/RuntimeServices.swiftdeps",
+    "swiftmodule" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/RuntimeServices~partial.swiftmodule"
+  },
+  "/Users/prismtek/.openclaw/workspace/bmo-stack/OpenClawShell/Services/StackCompiler.swift" : {
+    "const-values" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/StackCompiler.swiftconstvalues",
+    "dependencies" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/StackCompiler.d",
+    "diagnostics" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/StackCompiler.dia",
+    "index-unit-output-path" : "/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/StackCompiler.o",
+    "llvm-bc" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/StackCompiler.bc",
+    "object" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/StackCompiler.o",
+    "swift-dependencies" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/StackCompiler.swiftdeps",
+    "swiftmodule" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/StackCompiler~partial.swiftmodule"
+  },
+  "/Users/prismtek/.openclaw/workspace/bmo-stack/OpenClawShell/Stores/StackStore.swift" : {
+    "const-values" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/StackStore.swiftconstvalues",
+    "dependencies" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/StackStore.d",
+    "diagnostics" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/StackStore.dia",
+    "index-unit-output-path" : "/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/StackStore.o",
+    "llvm-bc" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/StackStore.bc",
+    "object" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/StackStore.o",
+    "swift-dependencies" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/StackStore.swiftdeps",
+    "swiftmodule" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/StackStore~partial.swiftmodule"
+  },
+  "/Users/prismtek/.openclaw/workspace/bmo-stack/OpenClawShell/Views/EditorWebView.swift" : {
+    "const-values" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/EditorWebView.swiftconstvalues",
+    "dependencies" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/EditorWebView.d",
+    "diagnostics" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/EditorWebView.dia",
+    "index-unit-output-path" : "/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/EditorWebView.o",
+    "llvm-bc" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/EditorWebView.bc",
+    "object" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/EditorWebView.o",
+    "swift-dependencies" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/EditorWebView.swiftdeps",
+    "swiftmodule" : "/Users/prismtek/.openclaw/workspace/bmo-stack/apps/openclaw-shell-ios/build/OpenClawShell.build/Debug-iphoneos/OpenClawShell.build/Objects-normal/arm64/EditorWebView~partial.swiftmodule"
+  }
+}
