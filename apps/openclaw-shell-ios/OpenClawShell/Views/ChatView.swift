@@ -118,17 +118,9 @@ struct ChatView: View {
         VStack(spacing: 8) {
             if appState.selectedProviderAccount != nil || appState.selectedInstalledModel != nil || appState.usesStubRuntime {
                 HStack(spacing: 6) {
-<<<<<<< HEAD
-                    Image(systemName: appState.selectedProviderAccount != nil ? "link.circle.fill" : appState.usesStubRuntime ? "sparkles.rectangle.stack" : "cpu")
+Image(systemName: appState.selectedProviderAccount != nil ? "link.circle.fill" : appState.usesStubRuntime ? "sparkles.rectangle.stack" : "cpu")
                         .font(.caption)
                     Text(statusLine)
-=======
-                    Image(systemName: appState.usesStubRuntime ? "sparkles.rectangle.stack" : "exclamationmark.triangle")
-                        .font(.caption)
-                    Text(appState.usesStubRuntime
-                        ? "Stub preview mode — chat works with simulated replies until real inference is available."
-                        : "No model selected")
->>>>>>> c041510 (Enable chat preview in BeMoreAgent stub runtime)
                         .font(.caption)
                 }
                 .foregroundColor(appState.selectedProviderAccount != nil || appState.selectedInstalledModel != nil ? BMOTheme.textSecondary : BMOTheme.warning)

@@ -1,0 +1,53 @@
+{
+  "timestamp": "2026-04-09T07:20:00.065882",
+  "data": [
+    {
+      "agent": "agent-automation",
+      "routine": "2026-04-08_09-00-00",
+      "last_seen": "2026-04-08T09:00:00.211181",
+      "age_minutes": 1340.0,
+      "status": "recent",
+      "details": "Routine executed agent_checkin_2026-04-08_09-00-00.json"
+    },
+    {
+      "agent": "agent-automation",
+      "routine": "2026-04-07_20-09-53",
+      "last_seen": "2026-04-07T20:09:53.166506",
+      "age_minutes": 2110.1,
+      "status": "stale",
+      "details": "Routine executed agent_checkin_2026-04-07_20-09-53.json"
+    },
+    {
+      "agent": "agent-automation",
+      "routine": "2026-04-07_09-00-00",
+      "last_seen": "2026-04-07T09:00:00.256915",
+      "age_minutes": 2780.0,
+      "status": "stale",
+      "details": "Routine executed agent_checkin_2026-04-07_09-00-00.json"
+    },
+    {
+      "agent": "agent-automation-scheduler",
+      "routine": "scheduled-routines",
+      "last_seen": "2026-04-08T09:00:00.211624",
+      "age_minutes": 1340.0,
+      "status": "active",
+      "details": "Agent automation scheduler active"
+    },
+    {
+      "agent": "daily-briefing",
+      "routine": "morning-evening-routine",
+      "last_seen": "2026-04-07T20:09:17.313776",
+      "age_minutes": 2110.7,
+      "status": "inactive",
+      "details": "Daily briefing system active"
+    },
+    {
+      "agent": "system",
+      "routine": "host-system",
+      "last_seen": "2026-04-09T07:20:00.065882",
+      "age_minutes": 0,
+      "status": "active",
+      "details": "Host system operational"
+    }
+  ]
+}

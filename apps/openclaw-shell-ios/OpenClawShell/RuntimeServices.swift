@@ -994,6 +994,12 @@ final class AppState: ObservableObject {
         return account.isEnabled ? account : nil
     }
 
+    var selectedProviderAccount: ProviderAccount? {
+        guard let provider = runtimePreferences.selection.selectedProvider else { return nil }
+        let account = providerStore.account(for: provider)
+        return account.isEnabled ? account : nil
+    }
+
     var operatorSummary: String {
         if let account = selectedProviderAccount {
             return "Cloud chat ready via \(account.provider.displayName) using \(account.modelSlug)."
@@ -1237,15 +1243,10 @@ final class AppState: ObservableObject {
         let cleaned = prompt.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !cleaned.isEmpty else { return }
 
-<<<<<<< HEAD
         if selectedProviderAccount == nil && engine.requiresModelSelection && selectedInstalledModel == nil {
             chatStore.errorMessage = "Link a provider in Settings or select an installed model in Models before sending."
             runtimeStatus = "Model or provider required"
             return
-=======
-        if usesStubRuntime {
-            runtimeStatus = "Stub preview"
->>>>>>> c041510 (Enable chat preview in BeMoreAgent stub runtime)
         }
 
         if selectedProviderAccount == nil && usesStubRuntime {
