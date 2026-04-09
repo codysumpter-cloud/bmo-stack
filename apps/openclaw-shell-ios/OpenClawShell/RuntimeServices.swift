@@ -967,6 +967,7 @@ final class RuntimePreferencesStore: ObservableObject {
 
 @MainActor
 final class AppState: ObservableObject {
+    // MARK: Stored properties – declared before the initializer so they are in scope
     @Published var modelStore = ModelCatalogStore()
     @Published var workspaceStore = WorkspaceStore()
     @Published var chatStore = ChatStore()
@@ -979,6 +980,10 @@ final class AppState: ObservableObject {
     @Published var providerModelLoading = Set<ProviderKind>()
     @Published var providerModelErrors: [ProviderKind: String] = [:]
 
+    // MARK: Initializer – now placed after property declarations
+    init(engine: LocalLLMEngine) {
+        self.engine = engine
+    }
     var selectedInstalledModel: InstalledModel? {
         guard let filename = runtimePreferences.selection.selectedInstalledFilename else { return nil }
         return modelStore.installedModels.first(where: { $0.localFilename == filename })
