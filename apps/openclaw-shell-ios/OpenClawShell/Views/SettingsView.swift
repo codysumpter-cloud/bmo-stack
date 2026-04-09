@@ -31,6 +31,12 @@ struct SettingsView: View {
                     settingsRow(title: "Backend", value: appState.backendDisplayName)
                     settingsRow(title: "Status", value: appState.runtimeStatus)
                     settingsRow(title: "Active route", value: activeRouteLabel)
+                    if appState.usesStubRuntime {
+                        Text("This build does not include real on-device inference yet. Local model downloads are storage-only for now, so use a linked cloud provider for real chat.")
+                            .font(.caption)
+                            .foregroundColor(BMOTheme.warning)
+                            .listRowBackground(BMOTheme.backgroundCard)
+                    }
                 }
 
                 Section("Linked Accounts") {
