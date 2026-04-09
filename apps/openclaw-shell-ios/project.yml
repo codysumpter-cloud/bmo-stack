@@ -15,6 +15,7 @@ targets:
       - path: OpenClawShell
         excludes:
           - "**/.DS_Store"
+      - path: OpenClawShell/Views/RepoSurfaceDetailView.swift
     resources:
       - path: ADMIN_TESTFLIGHT_RUNBOOK.md
       - path: ../../docs/MISSION_CONTROL.md

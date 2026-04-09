@@ -244,6 +244,29 @@ struct EngineRuntimeConfig: Sendable {
 
 // MARK: - Onboarding / Stack
 
+enum StackDeploymentMode: String, Codable, CaseIterable, Hashable, Identifiable {
+    case pairToExistingGateway
+    case bootstrapSelfHosted
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .pairToExistingGateway: return "Pair to an existing Gateway"
+        case .bootstrapSelfHosted: return "Set up a self-hosted OpenClaw stack"
+        }
+    }
+
+    var subtitle: String {
+        switch self {
+        case .pairToExistingGateway:
+            return "Connect this iPhone to a Gateway you already run elsewhere."
+        case .bootstrapSelfHosted:
+            return "Use onboarding answers to generate the exact stack profile, Gateway target, and next setup steps for a self-hosted deployment."
+        }
+    }
+}
+
 struct StackConfig: Codable {
     var stackName: String
     var goal: String
@@ -252,6 +275,14 @@ struct StackConfig: Codable {
     var memoryEnabled: Bool
     var toolsEnabled: Bool
     var optimizationMode: String // "speed", "quality", "balanced"
+    var deploymentMode: StackDeploymentMode
+    var operatorName: String
+    var gatewayURL: String
+    var adminDomain: String
+    var installNodeOnThisPhone: Bool
+    var installDesktopNode: Bool
+    var enableNotifications: Bool
+    var setupChecklist: [String]
     var isOnboardingComplete: Bool
 
     static let `default` = StackConfig(
@@ -262,6 +293,14 @@ struct StackConfig: Codable {
         memoryEnabled: true,
         toolsEnabled: true,
         optimizationMode: "balanced",
+        deploymentMode: .bootstrapSelfHosted,
+        operatorName: "",
+        gatewayURL: "https://prismtek.dev",
+        adminDomain: "prismtek.dev",
+        installNodeOnThisPhone: true,
+        installDesktopNode: true,
+        enableNotifications: true,
+        setupChecklist: [],
         isOnboardingComplete: false
     )
 }
