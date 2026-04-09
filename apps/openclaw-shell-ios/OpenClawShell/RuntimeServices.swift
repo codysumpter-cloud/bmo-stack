@@ -985,7 +985,7 @@ final class AppState: ObservableObject {
     }
 
     var usesStubRuntime: Bool {
-        backendDisplayName.contains("Stub")
+        engine.backendDisplayName.contains("Stub")
     }
 
     var selectedProviderAccount: ProviderAccount? {
@@ -1034,7 +1034,12 @@ final class AppState: ObservableObject {
         self.engine = engine
     }
 
-    var backendDisplayName: String { engine.backendDisplayName }
+    var backendDisplayName: String {
+        if let account = selectedProviderAccount {
+            return "Cloud routing via \(account.provider.displayName)"
+        }
+        return engine.backendDisplayName
+    }
 
     func bootstrap() async {
         loadStackConfig()
@@ -1237,6 +1242,12 @@ final class AppState: ObservableObject {
             return
         }
 
+        if selectedProviderAccount == nil && usesStubRuntime {
+            chatStore.errorMessage = "This build does not include the on-device runtime yet. Link a cloud provider for real chat."
+            runtimeStatus = "Local runtime unavailable"
+            return
+        }
+
         chatStore.messages.append(ChatMessage(role: .user, content: cleaned))
         chatStore.persist()
         chatStore.isGenerating = true
@@ -1249,7 +1260,7 @@ final class AppState: ObservableObject {
                 runtimeStatus = "Cloud: \(account.provider.displayName)"
                 reply = try await cloudExecutionService.send(
                     account: account,
-                    messages: buildCloudMessages(prompt: cleaned, attachedFiles: attachedFiles)
+                    messages: buildCloudMessages(attachedFiles: attachedFiles)
                 )
             } else {
                 if usesStubRuntime { runtimeStatus = "Stub preview" }
@@ -1282,7 +1293,7 @@ final class AppState: ObservableObject {
         }
     }
 
-    private func buildCloudMessages(prompt: String, attachedFiles: [WorkspaceFile]) -> [CloudExecutionMessage] {
+    private func buildCloudMessages(attachedFiles: [WorkspaceFile]) -> [CloudExecutionMessage] {
         var messages: [CloudExecutionMessage] = [
             CloudExecutionMessage(role: .system, content: "You are BeMoreAgent, a practical assistant inside the iOS app. Be concise, helpful, and use any attached file context when relevant.")
         ]
@@ -1304,7 +1315,6 @@ final class AppState: ObservableObject {
             messages.append(CloudExecutionMessage(role: role, content: message.content))
         }
 
-        messages.append(CloudExecutionMessage(role: .user, content: prompt))
         return messages
     }
 

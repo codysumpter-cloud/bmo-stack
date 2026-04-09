@@ -160,7 +160,7 @@ struct ChatView: View {
     private var canSend: Bool {
         !appState.chatStore.isGenerating &&
         !prompt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
-        (appState.selectedProviderAccount != nil || appState.usesStubRuntime || appState.selectedInstalledModel != nil)
+        (appState.selectedProviderAccount != nil || (appState.selectedInstalledModel != nil && !appState.usesStubRuntime))
     }
 
     private var statusLine: String {
@@ -168,9 +168,9 @@ struct ChatView: View {
             return "Cloud chat via \(account.provider.displayName) • \(account.modelSlug)"
         }
         if let model = appState.selectedInstalledModel {
-            return "On-device model • \(model.displayName)"
+            return appState.usesStubRuntime ? "Local model selected, runtime not included in this build" : "On-device model • \(model.displayName)"
         }
-        return "Stub preview mode"
+        return "Link a cloud provider to chat in this build"
     }
 }
 
