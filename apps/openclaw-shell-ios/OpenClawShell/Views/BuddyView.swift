@@ -374,6 +374,42 @@ final class BuddyProfileStore: ObservableObject {
         persist()
     }
 
+    func renameBuddy(_ target: GeneratedBuddy, to newName: String) {
+        guard var state else { return }
+        let cleaned = newName.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !cleaned.isEmpty else { return }
+
+        func renamed(_ buddy: GeneratedBuddy) -> GeneratedBuddy {
+            var updated = buddy
+            updated.name = cleaned
+            return updated
+        }
+
+        if state.activeBuddy.id == target.id {
+            state.activeBuddy = renamed(state.activeBuddy)
+        }
+
+        state.collection = dedupe(state.collection.map { buddy in
+            buddy.id == target.id ? renamed(buddy) : buddy
+        })
+        state.tradeOffers = state.tradeOffers.map { buddy in
+            buddy.id == target.id ? renamed(buddy) : buddy
+        }
+        self.state = state
+        persist()
+    }
+
+    func makeActiveBuddy(_ target: GeneratedBuddy) {
+        guard var state else { return }
+        guard state.activeBuddy.id != target.id else { return }
+        guard let selected = state.collection.first(where: { $0.id == target.id }) else { return }
+
+        state.activeBuddy = selected
+        state.collection = dedupe([selected] + state.collection)
+        self.state = state
+        persist()
+    }
+
     private func mutateActiveBuddy(_ mutation: (inout GeneratedBuddy) -> Void) {
         guard var state else { return }
         var buddy = state.activeBuddy
@@ -426,6 +462,8 @@ final class BuddyProfileStore: ObservableObject {
 struct BuddyView: View {
     @EnvironmentObject private var appState: AppState
     @StateObject private var store = BuddyProfileStore()
+    @State private var renameTarget: GeneratedBuddy?
+    @State private var renameDraft = ""
 
     private var profileID: String {
         BuddyGenerator.profileSignature(for: appState.stackConfig)
@@ -464,6 +502,27 @@ struct BuddyView: View {
             .toolbarBackground(.visible, for: .navigationBar)
             .task(id: profileID) {
                 store.load(for: appState.stackConfig)
+            }
+            .sheet(item: $renameTarget) { buddy in
+                NavigationStack {
+                    Form {
+                        Section("Buddy Name") {
+                            TextField("Name", text: $renameDraft)
+                        }
+                    }
+                    .navigationTitle("Rename Buddy")
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) {
+                            Button("Cancel") { renameTarget = nil }
+                        }
+                        ToolbarItem(placement: .confirmationAction) {
+                            Button("Save") {
+                                store.renameBuddy(buddy, to: renameDraft)
+                                renameTarget = nil
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -504,6 +563,12 @@ struct BuddyView: View {
                 statPill("Focus", value: buddy.stats.focus)
                 statPill("Care", value: buddy.stats.care)
             }
+
+            Button("Rename buddy") {
+                renameDraft = buddy.name
+                renameTarget = buddy
+            }
+            .buttonStyle(.bordered)
         }
         .bmoCard()
     }
@@ -702,6 +767,24 @@ struct BuddyView: View {
                         }
 
                         Spacer()
+
+                        VStack(alignment: .trailing, spacing: 8) {
+                            if store.activeBuddy?.id == buddy.id {
+                                StatusBadge(label: "Active", color: BMOTheme.accent)
+                            } else {
+                                Button("Make Active") {
+                                    store.makeActiveBuddy(buddy)
+                                }
+                                .buttonStyle(.bordered)
+                            }
+
+                            Button("Rename") {
+                                renameDraft = buddy.name
+                                renameTarget = buddy
+                            }
+                            .font(.caption)
+                            .foregroundColor(BMOTheme.accent)
+                        }
                     }
                 }
             }

@@ -4,6 +4,7 @@ struct SettingsView: View {
     @EnvironmentObject private var appState: AppState
     @Environment(\.dismiss) private var dismiss
     @State private var editingProvider: ProviderKind?
+    @State private var showingTabManager = false
 
     var body: some View {
         NavigationStack {
@@ -31,16 +32,23 @@ struct SettingsView: View {
                     settingsRow(title: "Backend", value: appState.backendDisplayName)
                     settingsRow(title: "Status", value: appState.runtimeStatus)
                     settingsRow(title: "Active route", value: activeRouteLabel)
-                    if appState.usesStubRuntime {
-                        Text("This build does not include real on-device inference yet. Local model downloads are storage-only for now, so use a linked cloud provider for real chat.")
-                            .font(.caption)
-                            .foregroundColor(BMOTheme.warning)
-                            .listRowBackground(BMOTheme.backgroundCard)
-                    }
+                    Text("Choose the live local or cloud route in Models. Settings is for maintenance and configuration.")
+                        .font(.caption)
+                        .foregroundColor(appState.usesStubRuntime ? BMOTheme.warning : BMOTheme.textSecondary)
+                        .listRowBackground(BMOTheme.backgroundCard)
                 }
 
-                Section("Linked Accounts") {
-                    Text("Link your own NVIDIA, Google AI Studio, OpenAI, Hugging Face, or Ollama endpoint, then pick which one chat should use.")
+                Section("Product Shell") {
+                    settingsRow(title: "Visible tabs", value: "\(appState.orderedVisibleTabs.count)")
+                    Button("Manage Tabs") {
+                        showingTabManager = true
+                    }
+                    .foregroundColor(BMOTheme.accent)
+                    .listRowBackground(BMOTheme.backgroundCard)
+                }
+
+                Section("Provider Maintenance") {
+                    Text("Link your own NVIDIA, Google AI Studio, OpenAI, Hugging Face, or Ollama endpoint here. Route selection now lives in Models.")
                         .font(.caption)
                         .foregroundColor(BMOTheme.textSecondary)
                         .listRowBackground(BMOTheme.backgroundCard)
@@ -69,6 +77,10 @@ struct SettingsView: View {
                 ProviderEditorSheet(provider: provider)
                     .environmentObject(appState)
             }
+            .sheet(isPresented: $showingTabManager) {
+                TabManagementSheet()
+                    .environmentObject(appState)
+            }
             .alert("Provider error", isPresented: Binding(get: {
                 appState.providerStore.lastError != nil
             }, set: { _ in
@@ -79,7 +91,6 @@ struct SettingsView: View {
                 Text(appState.providerStore.lastError ?? "Unknown error")
             }
         }
-        .preferredColorScheme(.dark)
     }
 
     private var activeRouteLabel: String {
@@ -158,11 +169,6 @@ struct SettingsView: View {
                     }
                     .buttonStyle(.bordered)
 
-                    Button(isActive ? "Using now" : "Use for chat") {
-                        appState.setSelectedProvider(provider)
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .disabled(isActive)
                 }
             }
         }
@@ -182,6 +188,56 @@ struct SettingsView: View {
                 .foregroundColor(BMOTheme.textPrimary)
         }
         .listRowBackground(BMOTheme.backgroundCard)
+    }
+}
+
+private struct TabManagementSheet: View {
+    @EnvironmentObject private var appState: AppState
+    @Environment(\.dismiss) private var dismiss
+    @State private var editMode: EditMode = .active
+
+    var body: some View {
+        NavigationStack {
+            List {
+                Section("Visible tabs") {
+                    ForEach(appState.orderedVisibleTabs) { tab in
+                        Text(tab.title)
+                            .foregroundColor(BMOTheme.textPrimary)
+                            .listRowBackground(BMOTheme.backgroundCard)
+                    }
+                    .onMove(perform: appState.moveTabs)
+                }
+
+                Section("Visibility") {
+                    ForEach(AppTab.allCases) { tab in
+                        Toggle(isOn: Binding(
+                            get: { appState.orderedVisibleTabs.contains(tab) },
+                            set: { appState.setTabVisibility(tab, isVisible: $0) }
+                        )) {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(tab.title)
+                                if !tab.allowsHiding {
+                                    Text("Control stays visible so shell management never disappears.")
+                                        .font(.caption2)
+                                        .foregroundColor(BMOTheme.textTertiary)
+                                }
+                            }
+                        }
+                        .disabled(!tab.allowsHiding)
+                        .listRowBackground(BMOTheme.backgroundCard)
+                    }
+                }
+            }
+            .environment(\.editMode, $editMode)
+            .scrollContentBackground(.hidden)
+            .background(BMOTheme.backgroundPrimary)
+            .navigationTitle("Manage Tabs")
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { dismiss() }
+                }
+            }
+        }
     }
 }
 

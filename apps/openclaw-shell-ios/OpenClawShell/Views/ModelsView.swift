@@ -10,9 +10,11 @@ struct ModelsView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: BMOTheme.spacingMD) {
+                    activeRouteCard
                     recommendedModelCard
                     runtimeInfoCard
                     installedModelsSection
+                    cloudRoutesSection
                     savedSourcesSection
                 }
                 .padding(.horizontal, BMOTheme.spacingMD)
@@ -72,6 +74,30 @@ struct ModelsView: View {
                 Text(appState.modelStore.errorMessage ?? "Unknown error")
             }
         }
+    }
+
+    private var activeRouteCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("Active Route")
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                    .foregroundColor(BMOTheme.textSecondary)
+                Spacer()
+                StatusBadge(label: appState.activeRouteModeLabel, color: appState.selectedProviderAccount != nil ? BMOTheme.success : (appState.selectedInstalledModel != nil ? BMOTheme.accent : BMOTheme.warning))
+            }
+
+            Text(appState.activeRouteTitle)
+                .font(.headline)
+                .foregroundColor(BMOTheme.textPrimary)
+            Text(appState.activeRouteDetail)
+                .font(.caption)
+                .foregroundColor(BMOTheme.textSecondary)
+            Text(appState.routeHealthSummary)
+                .font(.caption)
+                .foregroundColor((appState.selectedProviderAccount != nil || appState.canUseSelectedLocalModel) ? BMOTheme.textTertiary : BMOTheme.warning)
+        }
+        .bmoCard()
     }
 
     // MARK: - Recommended model
@@ -335,6 +361,72 @@ struct ModelsView: View {
         .bmoCard()
     }
 
+    private var cloudRoutesSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Cloud Routes")
+                .font(.subheadline)
+                .fontWeight(.semibold)
+                .foregroundColor(BMOTheme.textSecondary)
+
+            Text("Choose the active cloud route here. Use Settings for provider editing and maintenance.")
+                .font(.caption)
+                .foregroundColor(BMOTheme.textTertiary)
+
+            ForEach(ProviderKind.allCases) { provider in
+                providerRouteRow(provider)
+            }
+        }
+    }
+
+    private func providerRouteRow(_ provider: ProviderKind) -> some View {
+        let account = appState.providerStore.account(for: provider)
+        let isActive = appState.runtimePreferences.selection.selectedProvider == provider
+        let models = appState.availableModels(for: provider)
+
+        return VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(provider.displayName)
+                        .foregroundColor(BMOTheme.textPrimary)
+                    Text(account.isEnabled ? account.baseURL : provider.accountHint)
+                        .font(.caption)
+                        .foregroundColor(BMOTheme.textSecondary)
+                        .lineLimit(2)
+                }
+                Spacer()
+                Text(isActive ? "Active" : account.isEnabled ? "Ready" : "Not linked")
+                    .font(.caption)
+                    .foregroundColor(isActive ? BMOTheme.accent : account.isEnabled ? BMOTheme.success : BMOTheme.warning)
+            }
+
+            if account.isEnabled {
+                Picker("Model", selection: Binding(
+                    get: { appState.providerStore.account(for: provider).modelSlug },
+                    set: { appState.updateProviderModel(provider, modelSlug: $0) }
+                )) {
+                    ForEach(models) { model in
+                        Text(model.displayName).tag(model.slug)
+                    }
+                }
+                .pickerStyle(.menu)
+
+                HStack {
+                    Button(isActive ? "Using now" : "Make active") {
+                        appState.setSelectedProvider(provider)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .disabled(isActive)
+
+                    Button("Test route") {
+                        Task { await appState.verifyProviderConnection(provider) }
+                    }
+                    .buttonStyle(.bordered)
+                }
+            }
+        }
+        .bmoCard()
+    }
+
     // MARK: - Saved sources
 
     private var savedSourcesSection: some View {
@@ -464,7 +556,6 @@ struct AddModelSourceSheet: View {
                 }
             }
         }
-        .preferredColorScheme(.dark)
     }
 
     private func fieldGroup(_ label: String, text: Binding<String>, placeholder: String, keyboard: UIKeyboardType = .default) -> some View {
