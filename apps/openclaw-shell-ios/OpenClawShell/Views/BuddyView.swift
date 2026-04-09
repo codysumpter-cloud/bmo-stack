@@ -501,7 +501,13 @@ struct BuddyView: View {
             .toolbarBackground(BMOTheme.backgroundPrimary, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
             .task(id: profileID) {
+                appState.buddyProfileStore = store
                 store.load(for: appState.stackConfig)
+            }
+            .onDisappear {
+                if appState.buddyProfileStore === store {
+                    appState.buddyProfileStore = nil
+                }
             }
             .sheet(item: $renameTarget) { buddy in
                 NavigationStack {

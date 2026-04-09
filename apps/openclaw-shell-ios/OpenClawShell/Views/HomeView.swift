@@ -11,7 +11,7 @@ struct HomeView: View {
             ScrollView {
                 VStack(spacing: BMOTheme.spacingMD) {
                     headerSection
-                    primaryAgentCard
+                    stackProfileCard
                     statusCardsRow
                     quickActionsSection
                     runtimeStatusCard
@@ -65,8 +65,8 @@ struct HomeView: View {
                         .font(.system(size: 24, weight: .bold))
                         .foregroundColor(BMOTheme.textPrimary)
                     StatusBadge(
-                        label: appState.gemmaDownloadState == .installed ? "Active" : "Setup Required",
-                        color: appState.gemmaDownloadState == .installed ? BMOTheme.success : BMOTheme.warning
+                        label: shellStatusLabel,
+                        color: shellStatusColor
                     )
                 }
                 Spacer()
@@ -75,23 +75,23 @@ struct HomeView: View {
         .padding(.top, BMOTheme.spacingSM)
     }
 
-    private var primaryAgentCard: some View {
+    private var stackProfileCard: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack(spacing: 12) {
                 ZStack {
                     Circle()
                         .fill(BMOTheme.accent.opacity(0.15))
                         .frame(width: 52, height: 52)
-                    Image(systemName: "cpu")
+                    Image(systemName: "server.rack")
                         .font(.title2)
                         .foregroundColor(BMOTheme.accent)
                 }
 
                 VStack(alignment: .leading, spacing: 3) {
-                    Text("BMO Agent")
+                    Text(appState.stackConfig.deploymentMode == .bootstrapSelfHosted ? "Self-hosted OpenClaw stack" : "Gateway pairing shell")
                         .font(.headline)
                         .foregroundColor(BMOTheme.textPrimary)
-                    Text("Primary Agent")
+                    Text(appState.operatorDisplayName)
                         .font(.caption)
                         .foregroundColor(BMOTheme.textTertiary)
                 }
@@ -99,26 +99,21 @@ struct HomeView: View {
                 Spacer()
 
                 StatusBadge(
-                    label: agentStatus,
-                    color: agentStatusColor
+                    label: appState.activeRouteModeLabel,
+                    color: appState.selectedProviderAccount != nil ? BMOTheme.success : (appState.selectedInstalledModel != nil ? BMOTheme.accent : BMOTheme.warning)
                 )
+            }
+
+            VStack(alignment: .leading, spacing: 8) {
+                infoLine(title: "Gateway", value: appState.stackConfig.gatewayURL)
+                infoLine(title: "Goal", value: appState.stackConfig.goal)
+                infoLine(title: "Role", value: appState.stackConfig.role)
             }
 
             HStack(spacing: BMOTheme.spacingSM) {
                 infoChip(icon: "brain", label: appState.stackConfig.memoryEnabled ? "Memory on" : "Memory off")
-                infoChip(icon: "gauge.open.with.lines.needle.33percent", label: "Autonomy \(appState.stackConfig.autonomyLevel)/5")
+                infoChip(icon: "app.badge", label: appState.stackConfig.enableNotifications ? "Notifications on" : "Notifications off")
                 infoChip(icon: "dial.low", label: appState.stackConfig.optimizationMode.capitalized)
-            }
-
-            if appState.gemmaDownloadState != .installed {
-                HStack(spacing: 8) {
-                    Image(systemName: "exclamationmark.triangle")
-                        .font(.caption)
-                        .foregroundColor(BMOTheme.warning)
-                    Text("Model not installed. Go to Models to set up.")
-                        .font(.caption)
-                        .foregroundColor(BMOTheme.warning)
-                }
             }
         }
         .bmoCard()
@@ -128,7 +123,7 @@ struct HomeView: View {
         HStack(spacing: 12) {
             statusCard(icon: "message", count: "\(appState.chatStore.messages.count)", label: "Messages")
             statusCard(icon: "folder", count: "\(appState.workspaceStore.files.count)", label: "Files")
-            statusCard(icon: "square.and.arrow.down", count: "\(appState.modelStore.installedModels.count)", label: "Models")
+            statusCard(icon: "checklist", count: "\(appState.stackConfig.setupChecklist.count)", label: "Checklist")
         }
     }
 
@@ -166,6 +161,7 @@ struct HomeView: View {
                     appState.modelStore.refreshInstalledModels()
                     appState.workspaceStore.load()
                     appState.refreshGemmaState()
+                    appState.refreshRuntimeSummary()
                 }
             }
         }
@@ -191,7 +187,7 @@ struct HomeView: View {
     private var runtimeStatusCard: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text("Runtime")
+                Text("Shell readiness")
                     .font(.subheadline)
                     .fontWeight(.semibold)
                     .foregroundColor(BMOTheme.textSecondary)
@@ -210,45 +206,52 @@ struct HomeView: View {
                     .foregroundColor(BMOTheme.textPrimary)
             }
 
+            Text(appState.operatorSummary)
+                .font(.caption)
+                .foregroundColor(BMOTheme.textSecondary)
+
             if appState.usesStubRuntime {
-                Text("This build is using the stub runtime, so chat works in preview mode with simulated replies. Real on-device inference activates once the runtime bridge is wired in.")
+                Text("This build still reports a stub local runtime. The shell now says that plainly instead of pretending the self-hosted stack is fully live.")
                     .font(.caption)
-                    .foregroundColor(BMOTheme.textTertiary)
+                    .foregroundColor(BMOTheme.warning)
             }
 
-            Text("Cloud providers are not part of this local-first shell target. Use the BeMoreAgent Platform target for remote-model workflows.")
-                .font(.caption)
-                .foregroundColor(BMOTheme.textTertiary)
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Setup checklist")
+                    .font(.caption)
+                    .foregroundColor(BMOTheme.textTertiary)
+                ForEach(appState.stackConfig.setupChecklist.prefix(3), id: \.self) { item in
+                    Text("• \(item)")
+                        .font(.caption)
+                        .foregroundColor(BMOTheme.textSecondary)
+                }
+            }
         }
         .bmoCard()
     }
 
-    private var agentStatus: String {
-        if appState.gemmaDownloadState == .installed && !appState.usesStubRuntime {
-            return "Running"
-        } else if appState.gemmaDownloadState == .installed {
-            return "Model Ready"
-        } else {
-            return "Setup Needed"
+    private var shellStatusLabel: String {
+        if appState.selectedProviderAccount != nil || appState.canUseSelectedLocalModel {
+            return "Live Route"
         }
+        return appState.stackConfig.isOnboardingComplete ? "Profile Ready" : "Setup Required"
     }
 
-    private var agentStatusColor: Color {
-        if appState.gemmaDownloadState == .installed && !appState.usesStubRuntime {
+    private var shellStatusColor: Color {
+        if appState.selectedProviderAccount != nil || appState.canUseSelectedLocalModel {
             return BMOTheme.success
-        } else if appState.gemmaDownloadState == .installed {
-            return BMOTheme.accent
-        } else {
-            return BMOTheme.warning
         }
+        return appState.stackConfig.isOnboardingComplete ? BMOTheme.accent : BMOTheme.warning
     }
 
     private var runtimeStatusColor: Color {
         switch appState.runtimeStatus {
         case _ where appState.runtimeStatus.localizedCaseInsensitiveContains("error"):
             return BMOTheme.error
-        case _ where appState.runtimeStatus.localizedCaseInsensitiveContains("selected"):
+        case _ where appState.runtimeStatus.localizedCaseInsensitiveContains("cloud") || appState.runtimeStatus.localizedCaseInsensitiveContains("selected"):
             return BMOTheme.success
+        case _ where appState.runtimeStatus.localizedCaseInsensitiveContains("profiled"):
+            return BMOTheme.accent
         default:
             return BMOTheme.warning
         }
@@ -266,5 +269,18 @@ struct HomeView: View {
         .padding(.vertical, 4)
         .background(BMOTheme.backgroundSecondary)
         .clipShape(Capsule())
+    }
+
+    private func infoLine(title: String, value: String) -> some View {
+        HStack(alignment: .top) {
+            Text(title)
+                .font(.caption)
+                .foregroundColor(BMOTheme.textTertiary)
+            Spacer()
+            Text(value)
+                .font(.caption)
+                .multilineTextAlignment(.trailing)
+                .foregroundColor(BMOTheme.textPrimary)
+        }
     }
 }

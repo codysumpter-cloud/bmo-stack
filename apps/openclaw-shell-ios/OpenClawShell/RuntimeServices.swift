@@ -1080,24 +1080,28 @@ final class AppState: ObservableObject {
 
     var operatorDisplayName: String {
         let preferred = userPreferencesStore.preferences.preferredName.trimmingCharacters(in: .whitespacesAndNewlines)
-        return preferred.isEmpty ? stackConfig.stackName : preferred
+        if !preferred.isEmpty { return preferred }
+        let configured = stackConfig.operatorName.trimmingCharacters(in: .whitespacesAndNewlines)
+        return configured.isEmpty ? stackConfig.stackName : configured
     }
 
     var activeRouteModeLabel: String {
-        if selectedProviderAccount != nil { return "Cloud" }
-        if selectedInstalledModel != nil { return usesStubRuntime ? "Local selected" : "Local" }
-        return "No route"
+        if selectedProviderAccount != nil { return "Gateway cloud route" }
+        if selectedInstalledModel != nil { return usesStubRuntime ? "Local selected" : "On-device route" }
+        return stackConfig.deploymentMode == .bootstrapSelfHosted ? "Stack profile only" : "Awaiting pairing"
     }
 
     var operatorSummary: String {
         if let account = selectedProviderAccount {
-            return "Cloud chat ready via \(account.provider.displayName) using \(account.modelSlug)."
+            return "OpenClaw shell is routed through \(account.provider.displayName) using \(account.modelSlug)."
         } else if let model = selectedInstalledModel {
-            return "On-device runtime selected: \(model.modelID.isEmpty ? model.localFilename : model.modelID)."
+            return "Selected runtime target: \(model.modelID.isEmpty ? model.localFilename : model.modelID)."
         } else if usesStubRuntime {
-            return "Link a cloud provider or install a local model to enable real chat."
+            return stackConfig.deploymentMode == .bootstrapSelfHosted
+                ? "Stack profile is configured, but real chat still depends on a linked provider or a working on-device runtime bridge."
+                : "Pair the app to a real Gateway or link a provider before claiming the shell is ready."
         } else if engine.requiresModelSelection {
-            return "On-device runtime is available, but no packaged model is selected yet."
+            return "Runtime bridge is present, but no packaged model is selected yet."
         } else {
             return "Runtime ready."
         }
@@ -1122,12 +1126,12 @@ final class AppState: ObservableObject {
 
     var activeRouteTitle: String {
         if let account = selectedProviderAccount {
-            return "\(account.provider.displayName) cloud route"
+            return "\(account.provider.displayName) route"
         }
         if let model = selectedInstalledModel {
             return model.displayName
         }
-        return "No active route"
+        return stackConfig.deploymentMode == .bootstrapSelfHosted ? "Stack profile prepared" : "No active route"
     }
 
     var activeRouteDetail: String {
@@ -1137,24 +1141,28 @@ final class AppState: ObservableObject {
         if let model = selectedInstalledModel {
             return model.modelID.isEmpty ? model.localFilename : model.modelID
         }
-        return "Select a local or cloud route in Models."
+        return "Gateway target: \(stackConfig.gatewayURL). Select a live route in Models before using chat as if the stack is online."
     }
 
     var routeHealthSummary: String {
         if selectedProviderAccount != nil {
-            return "Cloud route ready for real chat."
+            return "Live provider route ready for real chat."
         }
         if let model = selectedInstalledModel {
             return usesStubRuntime
-                ? "\(model.displayName) is selected, but local inference is unavailable in this build."
+                ? "\(model.displayName) is selected, but local inference is still unavailable in this build."
                 : "On-device route ready."
         }
-        return usesStubRuntime ? "No live route selected. Link a provider for real chat." : "No route selected yet."
+        return usesStubRuntime
+            ? "Stack profile saved, but no live chat route is ready yet."
+            : "No route selected yet."
     }
 
     var persistenceSummary: String {
-        "Files, chat history, provider metadata, buddy state, and tab preferences persist locally inside the app container."
+        "Files, chat history, provider metadata, buddy state, onboarding stack profile, and tab preferences persist locally inside the app container."
     }
+
+    weak var buddyProfileStore: BuddyProfileStore?
 
     private let engine: LocalLLMEngine
     private let cloudExecutionService = CloudExecutionService()
@@ -1195,12 +1203,21 @@ final class AppState: ObservableObject {
 
     func completeOnboarding(_ config: StackConfig) {
         stackConfig = config
+        if !config.operatorName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+           userPreferencesStore.preferences.preferredName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            userPreferencesStore.updatePreferredName(config.operatorName)
+        }
         persistStackConfig()
+        buddyProfileStore?.load(for: config)
+        refreshRuntimeSummary()
     }
 
     func loadStackConfig() {
         guard let data = try? Data(contentsOf: Paths.stackConfigFile) else { return }
         stackConfig = (try? JSONDecoder().decode(StackConfig.self, from: data)) ?? StackConfig.default
+        if stackConfig.setupChecklist.isEmpty && stackConfig.isOnboardingComplete {
+            stackConfig.setupChecklist = generatedSetupChecklist(for: stackConfig)
+        }
     }
 
     func persistStackConfig() {
@@ -1456,7 +1473,7 @@ final class AppState: ObservableObject {
         } else if let model = selectedInstalledModel {
             runtimeStatus = model.modelID.isEmpty ? "Selected: \(model.localFilename)" : "Selected: \(model.modelID)"
         } else if usesStubRuntime {
-            runtimeStatus = "Link provider or select model"
+            runtimeStatus = stackConfig.isOnboardingComplete ? "Stack profiled, live route still needed" : "Onboarding required"
         } else {
             runtimeStatus = "No model selected"
         }
@@ -1485,6 +1502,27 @@ final class AppState: ObservableObject {
         }
 
         return messages
+    }
+
+    private func generatedSetupChecklist(for config: StackConfig) -> [String] {
+        var items: [String] = []
+        if config.deploymentMode == .bootstrapSelfHosted {
+            items.append("Provision or verify an OpenClaw Gateway at \(config.gatewayURL).")
+            items.append("Set gateway.remote.url and pairing/public URL values to match \(config.adminDomain).")
+        } else {
+            items.append("Pair this app to the existing Gateway at \(config.gatewayURL).")
+        }
+        if config.installNodeOnThisPhone {
+            items.append("Treat this iPhone as a node surface and grant notification or device permissions as needed.")
+        }
+        if config.installDesktopNode {
+            items.append("Keep a desktop or server node online so the shell has a real self-hosted stack to connect to.")
+        }
+        if config.toolsEnabled {
+            items.append("Enable only the tools the operator actually wants exposed through the stack.")
+        }
+        items.append("Verify local runtime readiness honestly before presenting the stack as fully operational.")
+        return items
     }
 
     private func applySelectedModelIfPossible() async throws {

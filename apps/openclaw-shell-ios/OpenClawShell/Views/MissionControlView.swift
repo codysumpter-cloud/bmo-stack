@@ -8,6 +8,7 @@ struct MissionControlView: View {
             ScrollView {
                 VStack(spacing: BMOTheme.spacingMD) {
                     headerCard
+                    stackContractCard
                     routeCard
                     metricsCard
                     providerCard
@@ -37,7 +38,7 @@ struct MissionControlView: View {
                     Text(appState.operatorDisplayName)
                         .font(.system(size: 28, weight: .bold))
                         .foregroundColor(BMOTheme.textPrimary)
-                    Text("BeMoreAgent mobile operator shell")
+                    Text("OpenClaw mobile operator shell")
                         .font(.subheadline)
                         .foregroundColor(BMOTheme.textSecondary)
                 }
@@ -48,6 +49,23 @@ struct MissionControlView: View {
             Text(appState.operatorSummary)
                 .font(.subheadline)
                 .foregroundColor(BMOTheme.textSecondary)
+        }
+        .bmoCard()
+    }
+
+    private var stackContractCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Stack contract")
+                .font(.subheadline)
+                .fontWeight(.semibold)
+                .foregroundColor(BMOTheme.textSecondary)
+
+            detailRow("Mode", value: appState.stackConfig.deploymentMode.title)
+            detailRow("Gateway", value: appState.stackConfig.gatewayURL)
+            detailRow("Role", value: appState.stackConfig.role)
+            detailRow("Goal", value: appState.stackConfig.goal)
+            detailRow("Node on iPhone", value: appState.stackConfig.installNodeOnThisPhone ? "Expected" : "Not expected")
+            detailRow("Desktop/server node", value: appState.stackConfig.installDesktopNode ? "Expected" : "Optional")
         }
         .bmoCard()
     }
@@ -106,7 +124,7 @@ struct MissionControlView: View {
             Text(appState.orderedVisibleTabs.map(\.title).joined(separator: " • "))
                 .font(.subheadline)
                 .foregroundColor(BMOTheme.textPrimary)
-            Text("Manage tab order and visibility in Settings. Control remains available as the stable landing surface.")
+            Text("Manage tab order in Settings. Mission Control stays the stable landing surface for stack health and route truth.")
                 .font(.caption)
                 .foregroundColor(BMOTheme.textTertiary)
         }
