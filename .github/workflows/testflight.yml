@@ -20,14 +20,20 @@ jobs:
         working-directory: apps/openclaw-shell-ios
     env:
       DEVELOPER_DIR: /Applications/Xcode.app/Contents/Developer
+      ASC_API_KEY: ${{ secrets.APPSTORE_CONNECT_API_KEY }}
+      ASC_KEY_ID: ${{ secrets.APPSTORE_CONNECT_KEY_ID }}
+      ASC_ISSUER_ID: ${{ secrets.APPSTORE_CONNECT_ISSUER_ID }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          submodules: true
 
       - name: Show Xcode version
-        run: xcodebuild -version
+        run: |
+          xcodebuild -version
+          sw_vers
 
       - name: Install XcodeGen if needed
         run: |
@@ -36,6 +42,21 @@ jobs:
           fi
           xcodegen --version
 
+      - name: Validate App Store Connect secrets
+        run: |
+          test -n "$ASC_API_KEY"
+          test -n "$ASC_KEY_ID"
+          test -n "$ASC_ISSUER_ID"
+
+      - name: Write App Store Connect API key
+        run: |
+          umask 077
+          if printf '%s' "$ASC_API_KEY" | grep -q 'BEGIN PRIVATE KEY'; then
+            printf '%s' "$ASC_API_KEY" > "$RUNNER_TEMP/AuthKey.p8"
+          else
+            printf '%s' "$ASC_API_KEY" | base64 --decode > "$RUNNER_TEMP/AuthKey.p8"
+          fi
+
       - name: Generate Xcode project
         run: |
           test -f project.yml
@@ -43,38 +64,37 @@ jobs:
           test -d BeMoreAgent.xcodeproj
           test -f exportOptions-upload.plist
 
-      - name: Build and archive
+      - name: Build and archive release
         run: |
           xcodebuild -project BeMoreAgent.xcodeproj \
             -scheme BeMoreAgent \
             -configuration Release \
-            -archivePath "$GITHUB_WORKSPACE/apps/openclaw-shell-ios/BeMoreAgent.xcarchive" \
+            -destination 'generic/platform=iOS' \
+            -archivePath "$RUNNER_TEMP/BeMoreAgent.xcarchive" \
             clean archive \
-            -allowProvisioningUpdates
-
-      - name: Write App Store Connect API key
-        env:
-          APPSTORE_CONNECT_API_KEY: ${{ secrets.APPSTORE_CONNECT_API_KEY }}
-        run: |
-          test -n "$APPSTORE_CONNECT_API_KEY"
-          umask 077
-          printf '%s' "$APPSTORE_CONNECT_API_KEY" > "$RUNNER_TEMP/AuthKey.p8"
-
-      - name: Export and upload to TestFlight
-        env:
-          APPSTORE_CONNECT_KEY_ID: ${{ secrets.APPSTORE_CONNECT_KEY_ID }}
-          APPSTORE_CONNECT_ISSUER_ID: ${{ secrets.APPSTORE_CONNECT_ISSUER_ID }}
-        run: |
-          test -n "$APPSTORE_CONNECT_KEY_ID"
-          test -n "$APPSTORE_CONNECT_ISSUER_ID"
-          xcodebuild -exportArchive \
-            -archivePath "$GITHUB_WORKSPACE/apps/openclaw-shell-ios/BeMoreAgent.xcarchive" \
-            -exportPath "$GITHUB_WORKSPACE/apps/openclaw-shell-ios/export" \
-            -exportOptionsPlist "$GITHUB_WORKSPACE/apps/openclaw-shell-ios/exportOptions-upload.plist" \
             -allowProvisioningUpdates \
             -authenticationKeyPath "$RUNNER_TEMP/AuthKey.p8" \
-            -authenticationKeyID "$APPSTORE_CONNECT_KEY_ID" \
-            -authenticationKeyIssuerID "$APPSTORE_CONNECT_ISSUER_ID"
+            -authenticationKeyID "$ASC_KEY_ID" \
+            -authenticationKeyIssuerID "$ASC_ISSUER_ID"
+
+      - name: Export and upload to TestFlight
+        run: |
+          xcodebuild -exportArchive \
+            -archivePath "$RUNNER_TEMP/BeMoreAgent.xcarchive" \
+            -exportPath "$RUNNER_TEMP/BeMoreAgent-export" \
+            -exportOptionsPlist exportOptions-upload.plist \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$RUNNER_TEMP/AuthKey.p8" \
+            -authenticationKeyID "$ASC_KEY_ID" \
+            -authenticationKeyIssuerID "$ASC_ISSUER_ID"
+
+      - name: Upload distribution logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bemoreagent-xcdistributionlogs
+          path: /var/folders/**/BeMoreAgent_*.xcdistributionlogs
+          if-no-files-found: ignore
 
       - name: Clean temporary signing files
         if: always()
