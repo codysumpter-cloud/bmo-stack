@@ -6,7 +6,12 @@ configs:
   Release: release
 settings:
   IPHONEOS_DEPLOYMENT_TARGET: 17.0
-  SWIFT_VERSION: "5.9"
+  SWIFT_VERSION: 5.0
+packages:
+  LiteRTLM:
+    url: https://github.com/google-ai-edge/LiteRT-LM.git
+    branch: main
+
 targets:
   BeMoreAgent:
     type: application
@@ -17,9 +22,9 @@ targets:
           - "**/.DS_Store"
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: BeMoreAgent
+        PRODUCT_BUNDLE_IDENTIFIER: com.prismtek.beMoreAgent
         INFOPLIST_FILE: OpenClawShell/Info.plist
         DEVELOPMENT_TEAM: DY9FHPRZA9
-        CODE_SIGN_STYLE: Automatic
-        PRODUCT_NAME: BeMoreAgent
-    dependencies: []
+    dependencies:
+      - LiteRTLM
+
