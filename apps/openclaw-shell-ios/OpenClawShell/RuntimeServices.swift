@@ -691,7 +691,7 @@ final class AppState: ObservableObject {
 
     var operatorSummary: String {
         if usesStubRuntime {
-            return "UI, storage, and model management are real. On-device inference activates when LiteRT-LM Swift SDK ships."
+            return "UI, storage, and model management are real. Chat runs in preview mode until the real on-device runtime is wired in."
         }
         if let model = selectedInstalledModel {
             return "On-device runtime selected: \(model.modelID.isEmpty ? model.localFilename : model.modelID)."
@@ -826,9 +826,7 @@ final class AppState: ObservableObject {
         guard !cleaned.isEmpty else { return }
 
         if usesStubRuntime {
-            chatStore.errorMessage = "Chat is disabled while the app is running in stub mode. Install the real runtime before sending prompts."
-            runtimeStatus = "Stub mode"
-            return
+            runtimeStatus = "Stub preview"
         }
 
         if engine.requiresModelSelection, selectedInstalledModel == nil {

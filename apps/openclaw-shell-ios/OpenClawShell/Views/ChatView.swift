@@ -118,10 +118,10 @@ struct ChatView: View {
         VStack(spacing: 8) {
             if appState.usesStubRuntime || appState.selectedInstalledModel == nil {
                 HStack(spacing: 6) {
-                    Image(systemName: appState.usesStubRuntime ? "slash.circle" : "exclamationmark.triangle")
+                    Image(systemName: appState.usesStubRuntime ? "sparkles.rectangle.stack" : "exclamationmark.triangle")
                         .font(.caption)
                     Text(appState.usesStubRuntime
-                        ? "Stub mode — chat sending is disabled until real inference is available."
+                        ? "Stub preview mode — chat works with simulated replies until real inference is available."
                         : "No model selected")
                         .font(.caption)
                 }
@@ -162,8 +162,7 @@ struct ChatView: View {
     private var canSend: Bool {
         !appState.chatStore.isGenerating &&
         !prompt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
-        !appState.usesStubRuntime &&
-        appState.selectedInstalledModel != nil
+        (appState.usesStubRuntime || appState.selectedInstalledModel != nil)
     }
 }
 
