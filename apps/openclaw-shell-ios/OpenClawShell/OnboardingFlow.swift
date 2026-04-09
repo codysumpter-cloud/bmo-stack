@@ -379,7 +379,6 @@ struct OnboardingFlow: View {
                 .bmoCard()
                 .padding(.horizontal, BMOTheme.spacingLG)
 
-<<<<<<< HEAD
                 VStack(alignment: .leading, spacing: 10) {
                     Text("Next steps the app expects")
                         .font(.headline)
@@ -388,8 +387,11 @@ struct OnboardingFlow: View {
                         Text("• \(item)")
                             .font(.subheadline)
                             .foregroundColor(BMOTheme.textSecondary)
-=======
-                // Agent summary
+                    }
+                }
+                .bmoCard()
+                .padding(.horizontal, BMOTheme.spacingLG)
+
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Primary Agent")
                         .font(.caption)
