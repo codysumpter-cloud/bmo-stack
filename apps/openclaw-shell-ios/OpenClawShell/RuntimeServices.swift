@@ -49,6 +49,7 @@ enum Paths {
     static var modelCatalogFile: URL { stateDirectory.appendingPathComponent("remote-models.json") }
     static var installedModelMetadataFile: URL { stateDirectory.appendingPathComponent("installed-model-metadata.json") }
     static var chatStateFile: URL { stateDirectory.appendingPathComponent("chat.json") }
+    static var providersFile: URL { stateDirectory.appendingPathComponent("providers.json") }
     static var runtimeSelectionFile: URL { stateDirectory.appendingPathComponent("runtime-selection.json") }
     static var stackConfigFile: URL { stateDirectory.appendingPathComponent("stack-config.json") }
 
@@ -649,6 +650,223 @@ final class ChatStore: ObservableObject {
     }
 }
 
+// MARK: - Provider accounts
+
+@MainActor
+final class ProviderStore: ObservableObject {
+    @Published var accounts: [ProviderAccount] = []
+    @Published var lastError: String?
+
+    func load() {
+        accounts = (try? JSONDecoder().decode([ProviderAccount].self, from: Data(contentsOf: Paths.providersFile))) ?? []
+    }
+
+    func account(for provider: ProviderKind) -> ProviderAccount {
+        accounts.first(where: { $0.provider == provider }) ?? .blank(for: provider)
+    }
+
+    func upsert(_ account: ProviderAccount) {
+        if let index = accounts.firstIndex(where: { $0.provider == account.provider }) {
+            accounts[index] = account
+        } else {
+            accounts.append(account)
+        }
+        persist()
+    }
+
+    func validate(_ provider: ProviderKind) {
+        var current = account(for: provider)
+        switch provider {
+        case .ollama:
+            guard !current.baseURL.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+                lastError = "Add an Ollama server URL first."
+                return
+            }
+        default:
+            guard !current.apiKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+                lastError = "Add credentials for \(provider.displayName) first."
+                return
+            }
+        }
+        current.isEnabled = true
+        current.lastValidatedAt = .now
+        upsert(current)
+    }
+
+    func remove(_ provider: ProviderKind) {
+        accounts.removeAll { $0.provider == provider }
+        persist()
+    }
+
+    func enabledProviders() -> [ProviderAccount] {
+        accounts.filter(\.isEnabled)
+    }
+
+    private func persist() {
+        do {
+            let data = try JSONEncoder().encode(accounts)
+            try data.write(to: Paths.providersFile, options: [.atomic])
+        } catch {
+            lastError = error.localizedDescription
+        }
+    }
+}
+
+struct CloudExecutionMessage: Hashable {
+    enum Role: String {
+        case system
+        case user
+        case assistant
+        case model
+    }
+
+    var role: Role
+    var content: String
+}
+
+enum CloudExecutionServiceError: Error {
+    case invalidBaseURL
+    case invalidResponse
+    case upstreamFailure(String)
+}
+
+struct ProviderTransport {
+    static func normalizeBaseURL(for provider: ProviderKind, rawValue: String) -> String {
+        let trimmed = rawValue.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmed.isEmpty { return provider.defaultBaseURL }
+        if provider == .huggingFace, trimmed.contains("api-inference.huggingface.co") {
+            return "https://router.huggingface.co/v1"
+        }
+        return trimmed
+    }
+}
+
+actor CloudExecutionService {
+    func send(account: ProviderAccount, messages: [CloudExecutionMessage], temperature: Double? = nil, maxOutputTokens: Int? = nil) async throws -> String {
+        var request = try makeRequest(account: account, messages: messages, temperature: temperature, maxOutputTokens: maxOutputTokens)
+        let (data, response) = try await URLSession.shared.data(for: request)
+        let statusCode = (response as? HTTPURLResponse)?.statusCode ?? 0
+        let preview = String(data: data.prefix(6000), encoding: .utf8) ?? ""
+
+        guard (200...299).contains(statusCode) else {
+            throw CloudExecutionServiceError.upstreamFailure(preview.isEmpty ? "Request failed with status \(statusCode)." : preview)
+        }
+
+        return try parse(provider: account.provider, data: data)
+    }
+
+    private func makeRequest(account: ProviderAccount, messages: [CloudExecutionMessage], temperature: Double?, maxOutputTokens: Int?) throws -> URLRequest {
+        let normalizedBase = ProviderTransport.normalizeBaseURL(for: account.provider, rawValue: account.baseURL)
+        guard let url = requestURL(provider: account.provider, baseURL: normalizedBase, model: account.modelSlug) else {
+            throw CloudExecutionServiceError.invalidBaseURL
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        switch account.provider {
+        case .google:
+            if !account.apiKey.isEmpty { request.setValue(account.apiKey, forHTTPHeaderField: "x-goog-api-key") }
+        case .ollama:
+            if normalizedBase.contains("ollama.com"), !account.apiKey.isEmpty {
+                request.setValue("Bearer \(account.apiKey)", forHTTPHeaderField: "Authorization")
+            }
+        default:
+            if !account.apiKey.isEmpty { request.setValue("Bearer \(account.apiKey)", forHTTPHeaderField: "Authorization") }
+        }
+
+        request.httpBody = try requestBody(provider: account.provider, model: account.modelSlug, messages: messages, temperature: temperature, maxOutputTokens: maxOutputTokens)
+        return request
+    }
+
+    private func requestURL(provider: ProviderKind, baseURL: String, model: String) -> URL? {
+        let root = baseURL.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+        switch provider {
+        case .nvidia, .openAI, .huggingFace:
+            return URL(string: root + "/chat/completions")
+        case .ollama:
+            return URL(string: (root.hasSuffix("/api") ? root : root + "/api") + "/chat")
+        case .google:
+            return URL(string: root + "/v1beta/models/\(model):generateContent")
+        }
+    }
+
+    private func requestBody(provider: ProviderKind, model: String, messages: [CloudExecutionMessage], temperature: Double?, maxOutputTokens: Int?) throws -> Data {
+        let json: Any
+        switch provider {
+        case .google:
+            let contents = messages.map { message in
+                ["role": message.role == .assistant ? "model" : message.role.rawValue, "parts": [["text": message.content]]] as [String : Any]
+            }
+            var body: [String: Any] = ["contents": contents]
+            var config: [String: Any] = [:]
+            if let temperature { config["temperature"] = temperature }
+            if let maxOutputTokens { config["maxOutputTokens"] = maxOutputTokens }
+            if !config.isEmpty { body["generationConfig"] = config }
+            json = body
+        case .ollama:
+            var body: [String: Any] = [
+                "model": model,
+                "messages": messages.map { ["role": $0.role == .model ? "assistant" : $0.role.rawValue, "content": $0.content] },
+                "stream": false
+            ]
+            if let temperature { body["options"] = ["temperature": temperature] }
+            json = body
+        default:
+            var body: [String: Any] = [
+                "model": model,
+                "messages": messages.map { ["role": $0.role == .model ? "assistant" : $0.role.rawValue, "content": $0.content] },
+                "stream": false
+            ]
+            if let temperature { body["temperature"] = temperature }
+            if let maxOutputTokens { body["max_tokens"] = maxOutputTokens }
+            json = body
+        }
+        return try JSONSerialization.data(withJSONObject: json)
+    }
+
+    private func parse(provider: ProviderKind, data: Data) throws -> String {
+        guard let object = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            throw CloudExecutionServiceError.invalidResponse
+        }
+
+        let text: String?
+        switch provider {
+        case .google:
+            if let candidates = object["candidates"] as? [[String: Any]],
+               let first = candidates.first,
+               let content = first["content"] as? [String: Any],
+               let parts = content["parts"] as? [[String: Any]] {
+                text = parts.compactMap { $0["text"] as? String }.joined(separator: "\n")
+            } else {
+                text = nil
+            }
+        case .ollama:
+            if let message = object["message"] as? [String: Any],
+               let content = message["content"] as? String {
+                text = content
+            } else {
+                text = nil
+            }
+        default:
+            if let choices = object["choices"] as? [[String: Any]],
+               let first = choices.first,
+               let message = first["message"] as? [String: Any],
+               let content = message["content"] as? String {
+                text = content
+            } else {
+                text = nil
+            }
+        }
+
+        guard let text, !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            throw CloudExecutionServiceError.invalidResponse
+        }
+        return text
+    }
+}
+
 // MARK: - Runtime preferences
 
 @MainActor
@@ -675,6 +893,7 @@ final class AppState: ObservableObject {
     @Published var modelStore = ModelCatalogStore()
     @Published var workspaceStore = WorkspaceStore()
     @Published var chatStore = ChatStore()
+    @Published var providerStore = ProviderStore()
     @Published var runtimePreferences = RuntimePreferencesStore()
     @Published var runtimeStatus = "Not configured"
     @Published var stackConfig = StackConfig.default
@@ -689,12 +908,21 @@ final class AppState: ObservableObject {
         backendDisplayName.contains("Stub")
     }
 
+    var selectedProviderAccount: ProviderAccount? {
+        guard let provider = runtimePreferences.selection.selectedProvider else { return nil }
+        let account = providerStore.account(for: provider)
+        return account.isEnabled ? account : nil
+    }
+
     var operatorSummary: String {
-        if usesStubRuntime {
-            return "UI, storage, and model management are real. Chat runs in preview mode until the real on-device runtime is wired in."
+        if let account = selectedProviderAccount {
+            return "Cloud chat ready via \(account.provider.displayName) using \(account.modelSlug)."
         }
         if let model = selectedInstalledModel {
             return "On-device runtime selected: \(model.modelID.isEmpty ? model.localFilename : model.modelID)."
+        }
+        if usesStubRuntime {
+            return "Link a cloud provider or install a local model to enable real chat."
         }
         if engine.requiresModelSelection {
             return "On-device runtime is available, but no packaged model is selected yet."
@@ -720,6 +948,7 @@ final class AppState: ObservableObject {
     }
 
     private let engine: LocalLLMEngine
+    private let cloudExecutionService = CloudExecutionService()
 
     init(engine: LocalLLMEngine) {
         self.engine = engine
@@ -732,8 +961,10 @@ final class AppState: ObservableObject {
         modelStore.load()
         workspaceStore.load()
         chatStore.load()
+        providerStore.load()
         runtimePreferences.load()
         refreshGemmaState()
+        refreshRuntimeSummary()
         do {
             try await engine.bootstrap()
             try await applySelectedModelIfPossible()
@@ -810,6 +1041,9 @@ final class AppState: ObservableObject {
 
     func setSelectedInstalledModel(filename: String?) async {
         runtimePreferences.selection.selectedInstalledFilename = filename
+        if filename != nil {
+            runtimePreferences.selection.selectedProvider = nil
+        }
         runtimePreferences.persist()
         do {
             try await applySelectedModelIfPossible()
@@ -817,6 +1051,16 @@ final class AppState: ObservableObject {
             chatStore.errorMessage = error.localizedDescription
             runtimeStatus = "Runtime error"
         }
+        refreshRuntimeSummary()
+    }
+
+    func setSelectedProvider(_ provider: ProviderKind?) {
+        runtimePreferences.selection.selectedProvider = provider
+        if provider != nil {
+            runtimePreferences.selection.selectedInstalledFilename = nil
+        }
+        runtimePreferences.persist()
+        refreshRuntimeSummary()
     }
 
     // MARK: - Chat
@@ -825,13 +1069,9 @@ final class AppState: ObservableObject {
         let cleaned = prompt.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !cleaned.isEmpty else { return }
 
-        if usesStubRuntime {
-            runtimeStatus = "Stub preview"
-        }
-
-        if engine.requiresModelSelection, selectedInstalledModel == nil {
-            chatStore.errorMessage = "Select an installed model in Models before sending."
-            runtimeStatus = "Model required"
+        if selectedProviderAccount == nil && engine.requiresModelSelection && selectedInstalledModel == nil {
+            chatStore.errorMessage = "Link a provider in Settings or select an installed model in Models before sending."
+            runtimeStatus = "Model or provider required"
             return
         }
 
@@ -842,17 +1082,69 @@ final class AppState: ObservableObject {
         let attachedFiles = workspaceStore.files.filter { chatStore.selectedFileIDs.contains($0.id) }
 
         do {
-            let reply = try await engine.generate(prompt: cleaned, fileContexts: attachedFiles, chatHistory: chatStore.messages)
+            let reply: String
+            if let account = selectedProviderAccount {
+                runtimeStatus = "Cloud: \(account.provider.displayName)"
+                reply = try await cloudExecutionService.send(
+                    account: account,
+                    messages: buildCloudMessages(prompt: cleaned, attachedFiles: attachedFiles)
+                )
+            } else {
+                if usesStubRuntime { runtimeStatus = "Stub preview" }
+                reply = try await engine.generate(prompt: cleaned, fileContexts: attachedFiles, chatHistory: chatStore.messages)
+            }
             chatStore.messages.append(ChatMessage(role: .assistant, content: reply))
             chatStore.persist()
+        } catch CloudExecutionServiceError.upstreamFailure(let message) {
+            chatStore.errorMessage = message
         } catch {
             chatStore.errorMessage = error.localizedDescription
         }
+
+        refreshRuntimeSummary()
 
         chatStore.isGenerating = false
     }
 
     // MARK: - Private
+
+    func refreshRuntimeSummary() {
+        if let account = selectedProviderAccount {
+            runtimeStatus = "Cloud: \(account.provider.displayName) • \(account.modelSlug)"
+        } else if let model = selectedInstalledModel {
+            runtimeStatus = model.modelID.isEmpty ? "Selected: \(model.localFilename)" : "Selected: \(model.modelID)"
+        } else if usesStubRuntime {
+            runtimeStatus = "Link provider or select model"
+        } else {
+            runtimeStatus = "No model selected"
+        }
+    }
+
+    private func buildCloudMessages(prompt: String, attachedFiles: [WorkspaceFile]) -> [CloudExecutionMessage] {
+        var messages: [CloudExecutionMessage] = [
+            CloudExecutionMessage(role: .system, content: "You are BeMoreAgent, a practical assistant inside the iOS app. Be concise, helpful, and use any attached file context when relevant.")
+        ]
+
+        if !attachedFiles.isEmpty {
+            let rendered = attachedFiles.map { file -> String in
+                let text = (try? String(contentsOf: file.localURL, encoding: .utf8)) ?? "[binary or unreadable file]"
+                return "FILE: \(file.filename)\n\(text.prefix(8000))"
+            }.joined(separator: "\n\n")
+            messages.append(CloudExecutionMessage(role: .system, content: rendered))
+        }
+
+        for message in chatStore.messages.suffix(12) {
+            let role: CloudExecutionMessage.Role = switch message.role {
+            case .user: .user
+            case .assistant: .assistant
+            case .system: .system
+            }
+            messages.append(CloudExecutionMessage(role: role, content: message.content))
+        }
+
+        messages.append(CloudExecutionMessage(role: .user, content: prompt))
+        return messages
+    }
 
     private func applySelectedModelIfPossible() async throws {
         guard let filename = runtimePreferences.selection.selectedInstalledFilename else {

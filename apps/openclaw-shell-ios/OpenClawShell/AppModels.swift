@@ -123,8 +123,116 @@ struct InstalledModelDescriptor: Codable, Hashable {
     var modelLib: String
 }
 
+enum ProviderKind: String, Codable, CaseIterable, Identifiable {
+    case nvidia
+    case google
+    case openAI = "openai"
+    case huggingFace = "huggingface"
+    case ollama
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .nvidia: return "NVIDIA"
+        case .google: return "Google AI Studio"
+        case .openAI: return "OpenAI"
+        case .huggingFace: return "Hugging Face"
+        case .ollama: return "Ollama"
+        }
+    }
+
+    var defaultBaseURL: String {
+        switch self {
+        case .nvidia: return "https://integrate.api.nvidia.com/v1"
+        case .google: return "https://generativelanguage.googleapis.com"
+        case .openAI: return "https://api.openai.com/v1"
+        case .huggingFace: return "https://router.huggingface.co/v1"
+        case .ollama: return "http://localhost:11434"
+        }
+    }
+
+    var accountHint: String {
+        switch self {
+        case .nvidia: return "Paste a build.nvidia.com API key"
+        case .google: return "Paste a Google AI Studio API key"
+        case .openAI: return "Paste an OpenAI API key. ChatGPT OAuth can be added later with a real OAuth client flow."
+        case .huggingFace: return "Paste a Hugging Face token"
+        case .ollama: return "Set your Ollama server URL, optionally with a bearer token"
+        }
+    }
+}
+
+struct ProviderAccount: Identifiable, Codable, Hashable {
+    var id: UUID = UUID()
+    var provider: ProviderKind
+    var label: String
+    var apiKey: String
+    var baseURL: String
+    var modelSlug: String
+    var isEnabled: Bool
+    var lastValidatedAt: Date?
+
+    static func blank(for provider: ProviderKind) -> ProviderAccount {
+        ProviderAccount(
+            provider: provider,
+            label: provider.displayName,
+            apiKey: "",
+            baseURL: provider.defaultBaseURL,
+            modelSlug: CloudModelCatalog.suggestedDefaultModel(for: provider),
+            isEnabled: false,
+            lastValidatedAt: nil
+        )
+    }
+}
+
+struct CloudModel: Identifiable, Hashable {
+    let id = UUID()
+    let provider: ProviderKind
+    let slug: String
+    let displayName: String
+    let notes: String
+}
+
+enum CloudModelCatalog {
+    static func models(for provider: ProviderKind) -> [CloudModel] {
+        switch provider {
+        case .nvidia:
+            return [
+                CloudModel(provider: .nvidia, slug: "meta/llama-3.3-70b-instruct", displayName: "Llama 3.3 70B Instruct", notes: "Good default on build.nvidia.com"),
+                CloudModel(provider: .nvidia, slug: "deepseek-ai/deepseek-r1", displayName: "DeepSeek R1", notes: "Reasoning-heavy option")
+            ]
+        case .google:
+            return [
+                CloudModel(provider: .google, slug: "gemini-2.5-pro", displayName: "Gemini 2.5 Pro", notes: "Best quality"),
+                CloudModel(provider: .google, slug: "gemini-2.5-flash", displayName: "Gemini 2.5 Flash", notes: "Fast and cheaper")
+            ]
+        case .openAI:
+            return [
+                CloudModel(provider: .openAI, slug: "gpt-4.1-mini", displayName: "GPT-4.1 mini", notes: "Fast default"),
+                CloudModel(provider: .openAI, slug: "gpt-4.1", displayName: "GPT-4.1", notes: "Higher quality")
+            ]
+        case .huggingFace:
+            return [
+                CloudModel(provider: .huggingFace, slug: "Qwen/Qwen2.5-Coder-32B-Instruct", displayName: "Qwen 2.5 Coder 32B", notes: "Strong coding model"),
+                CloudModel(provider: .huggingFace, slug: "meta-llama/Llama-3.1-8B-Instruct", displayName: "Llama 3.1 8B", notes: "General purpose")
+            ]
+        case .ollama:
+            return [
+                CloudModel(provider: .ollama, slug: "llama3.1:8b", displayName: "Llama 3.1 8B", notes: "Good local default"),
+                CloudModel(provider: .ollama, slug: "qwen2.5-coder:7b", displayName: "Qwen 2.5 Coder 7B", notes: "Coding-focused")
+            ]
+        }
+    }
+
+    static func suggestedDefaultModel(for provider: ProviderKind) -> String {
+        models(for: provider).first?.slug ?? ""
+    }
+}
+
 struct RuntimeSelection: Codable, Hashable {
     var selectedInstalledFilename: String?
+    var selectedProvider: ProviderKind?
 }
 
 struct EngineRuntimeConfig: Sendable {
@@ -197,7 +305,7 @@ struct KnownModel: Identifiable {
         description: "Curated small GGUF install for the BeMoreAgent shell. Direct downloads should use a public artifact or explain auth requirements clearly.",
         downloadSizeGB: 1.7,
         requiresDownload: true,
-        runtimeBackend: "LiteRT-LM"
+        runtimeBackend: "MLC"
     )
 
     static let catalog: [KnownModel] = [gemma4E2B]

@@ -10,7 +10,8 @@ extension AppState {
         chatStore.clear()
 
         runtimePreferences.selection.selectedInstalledFilename = nil
+        runtimePreferences.selection.selectedProvider = nil
         runtimePreferences.persist()
-        runtimeStatus = "Not configured"
+        refreshRuntimeSummary()
     }
 }
