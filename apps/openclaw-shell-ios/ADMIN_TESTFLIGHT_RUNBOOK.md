@@ -93,6 +93,22 @@ A release candidate is valid when all of the following are true:
 - the workflow summary shows the expected version/build pair,
 - there is no archive/export/upload failure in the run logs.
 
+## External beta readiness checklist
+
+A build is only considered external-tester ready when **both** the GitHub upload path and the Apple-side TestFlight configuration are complete. Verify all of the following in App Store Connect before announcing external beta availability:
+
+- the uploaded build appears in TestFlight for `BeMoreAgent`
+- Test Information is filled in
+- Beta App Description is present
+- Feedback Email is present
+- at least one Internal Testing group exists
+- at least one External Testing group exists
+- the new build is assigned to the intended External Testing group
+- any required Beta App Review is submitted, or Apple already approved the current metadata/build pairing
+- the build is not restricted to internal-only availability
+
+If any Apple-side item above is missing, report the exact blocker plainly instead of claiming the build is ready for external testers.
+
 ## Current LiteRT note
 
 As of 2026-04-09, LiteRT runtime work should be rebuilt as a fresh minimal PR from `master`. Do not merge PRs #203, #204, or #205 as a shortcut.
