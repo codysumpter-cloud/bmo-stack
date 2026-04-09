@@ -743,7 +743,7 @@ struct ProviderTransport {
 
 actor CloudExecutionService {
     func send(account: ProviderAccount, messages: [CloudExecutionMessage], temperature: Double? = nil, maxOutputTokens: Int? = nil) async throws -> String {
-        var request = try makeRequest(account: account, messages: messages, temperature: temperature, maxOutputTokens: maxOutputTokens)
+        let request = try makeRequest(account: account, messages: messages, temperature: temperature, maxOutputTokens: maxOutputTokens)
         let (data, response) = try await URLSession.shared.data(for: request)
         let statusCode = (response as? HTTPURLResponse)?.statusCode ?? 0
         let preview = String(data: data.prefix(6000), encoding: .utf8) ?? ""
@@ -755,6 +755,19 @@ actor CloudExecutionService {
         return try parse(provider: account.provider, data: data)
     }
 
+    func availableModels(account: ProviderAccount) async throws -> [CloudModel] {
+        let request = try makeModelsRequest(account: account)
+        let (data, response) = try await URLSession.shared.data(for: request)
+        let statusCode = (response as? HTTPURLResponse)?.statusCode ?? 0
+        let preview = String(data: data.prefix(6000), encoding: .utf8) ?? ""
+
+        guard (200...299).contains(statusCode) else {
+            throw CloudExecutionServiceError.upstreamFailure(preview.isEmpty ? "Model list failed with status \(statusCode)." : preview)
+        }
+
+        return try parseAvailableModels(provider: account.provider, data: data)
+    }
+
     private func makeRequest(account: ProviderAccount, messages: [CloudExecutionMessage], temperature: Double?, maxOutputTokens: Int?) throws -> URLRequest {
         let normalizedBase = ProviderTransport.normalizeBaseURL(for: account.provider, rawValue: account.baseURL)
         guard let url = requestURL(provider: account.provider, baseURL: normalizedBase, model: account.modelSlug) else {
@@ -764,7 +777,25 @@ actor CloudExecutionService {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        applyAuthHeaders(to: &request, account: account, normalizedBase: normalizedBase)
+        request.httpBody = try requestBody(provider: account.provider, model: account.modelSlug, messages: messages, temperature: temperature, maxOutputTokens: maxOutputTokens)
+        return request
+    }
 
+    private func makeModelsRequest(account: ProviderAccount) throws -> URLRequest {
+        let normalizedBase = ProviderTransport.normalizeBaseURL(for: account.provider, rawValue: account.baseURL)
+        guard let url = modelsURL(provider: account.provider, baseURL: normalizedBase) else {
+            throw CloudExecutionServiceError.invalidBaseURL
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        applyAuthHeaders(to: &request, account: account, normalizedBase: normalizedBase)
+        return request
+    }
+
+    private func applyAuthHeaders(to request: inout URLRequest, account: ProviderAccount, normalizedBase: String) {
         switch account.provider {
         case .google:
             if !account.apiKey.isEmpty { request.setValue(account.apiKey, forHTTPHeaderField: "x-goog-api-key") }
@@ -775,9 +806,6 @@ actor CloudExecutionService {
         default:
             if !account.apiKey.isEmpty { request.setValue("Bearer \(account.apiKey)", forHTTPHeaderField: "Authorization") }
         }
-
-        request.httpBody = try requestBody(provider: account.provider, model: account.modelSlug, messages: messages, temperature: temperature, maxOutputTokens: maxOutputTokens)
-        return request
     }
 
     private func requestURL(provider: ProviderKind, baseURL: String, model: String) -> URL? {
@@ -789,6 +817,18 @@ actor CloudExecutionService {
             return URL(string: (root.hasSuffix("/api") ? root : root + "/api") + "/chat")
         case .google:
             return URL(string: root + "/v1beta/models/\(model):generateContent")
+        }
+    }
+
+    private func modelsURL(provider: ProviderKind, baseURL: String) -> URL? {
+        let root = baseURL.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+        switch provider {
+        case .nvidia, .openAI, .huggingFace:
+            return URL(string: root + "/models")
+        case .ollama:
+            return URL(string: (root.hasSuffix("/api") ? root : root + "/api") + "/tags")
+        case .google:
+            return URL(string: root + "/v1beta/models")
         }
     }
 
@@ -824,6 +864,43 @@ actor CloudExecutionService {
             json = body
         }
         return try JSONSerialization.data(withJSONObject: json)
+    }
+
+    private func parseAvailableModels(provider: ProviderKind, data: Data) throws -> [CloudModel] {
+        let object = try JSONSerialization.jsonObject(with: data)
+
+        switch provider {
+        case .nvidia, .openAI, .huggingFace:
+            guard let root = object as? [String: Any], let entries = root["data"] as? [[String: Any]] else {
+                throw CloudExecutionServiceError.invalidResponse
+            }
+            return entries.compactMap { entry in
+                guard let slug = entry["id"] as? String, !slug.isEmpty else { return nil }
+                let displayName = (entry["name"] as? String) ?? slug
+                return CloudModel(provider: provider, slug: slug, displayName: displayName, notes: "Discovered from linked account")
+            }
+        case .google:
+            guard let root = object as? [String: Any], let entries = root["models"] as? [[String: Any]] else {
+                throw CloudExecutionServiceError.invalidResponse
+            }
+            return entries.compactMap { entry in
+                let methods = entry["supportedGenerationMethods"] as? [String] ?? []
+                guard methods.contains("generateContent") else { return nil }
+                guard let name = entry["name"] as? String, !name.isEmpty else { return nil }
+                let slug = name.replacingOccurrences(of: "models/", with: "")
+                let displayName = (entry["displayName"] as? String) ?? slug
+                return CloudModel(provider: provider, slug: slug, displayName: displayName, notes: "Discovered from linked account")
+            }
+        case .ollama:
+            guard let root = object as? [String: Any], let entries = root["models"] as? [[String: Any]] else {
+                throw CloudExecutionServiceError.invalidResponse
+            }
+            return entries.compactMap { entry in
+                guard let slug = entry["name"] as? String, !slug.isEmpty else { return nil }
+                let displayName = (entry["model"] as? String) ?? slug
+                return CloudModel(provider: provider, slug: slug, displayName: displayName, notes: "Discovered from linked account")
+            }
+        }
     }
 
     private func parse(provider: ProviderKind, data: Data) throws -> String {
@@ -898,6 +975,9 @@ final class AppState: ObservableObject {
     @Published var runtimeStatus = "Not configured"
     @Published var stackConfig = StackConfig.default
     @Published var gemmaDownloadState: ModelDownloadState = .notInstalled
+    @Published var providerModels: [ProviderKind: [CloudModel]] = [:]
+    @Published var providerModelLoading = Set<ProviderKind>()
+    @Published var providerModelErrors: [ProviderKind: String] = [:]
 
     var selectedInstalledModel: InstalledModel? {
         guard let filename = runtimePreferences.selection.selectedInstalledFilename else { return nil }
@@ -965,6 +1045,9 @@ final class AppState: ObservableObject {
         runtimePreferences.load()
         refreshGemmaState()
         refreshRuntimeSummary()
+        for account in providerStore.enabledProviders() {
+            Task { await refreshProviderModels(for: account.provider) }
+        }
         do {
             try await engine.bootstrap()
             try await applySelectedModelIfPossible()
@@ -1061,6 +1144,85 @@ final class AppState: ObservableObject {
         }
         runtimePreferences.persist()
         refreshRuntimeSummary()
+    }
+
+    func updateProviderModel(_ provider: ProviderKind, modelSlug: String) {
+        var account = providerStore.account(for: provider)
+        account.modelSlug = modelSlug.trimmingCharacters(in: .whitespacesAndNewlines)
+        providerStore.upsert(account)
+        if runtimePreferences.selection.selectedProvider == provider {
+            refreshRuntimeSummary()
+        }
+    }
+
+    func availableModels(for provider: ProviderKind) -> [CloudModel] {
+        let account = providerStore.account(for: provider)
+        var models = providerModels[provider] ?? CloudModelCatalog.models(for: provider)
+        if !account.modelSlug.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+           !models.contains(where: { $0.slug == account.modelSlug }) {
+            models.insert(CloudModel(provider: provider, slug: account.modelSlug, displayName: account.modelSlug, notes: "Current selection"), at: 0)
+        }
+        return models
+    }
+
+    func refreshProviderModels(for provider: ProviderKind, force: Bool = false) async {
+        let account = providerStore.account(for: provider)
+        guard account.isEnabled else {
+            providerModels[provider] = CloudModelCatalog.models(for: provider)
+            providerModelErrors[provider] = nil
+            return
+        }
+        if providerModelLoading.contains(provider) { return }
+        if !force, providerModels[provider] != nil { return }
+
+        providerModelLoading.insert(provider)
+        providerModelErrors[provider] = nil
+        defer { providerModelLoading.remove(provider) }
+
+        do {
+            let discovered = try await cloudExecutionService.availableModels(account: account)
+            let sorted = discovered.sorted { $0.displayName.localizedCaseInsensitiveCompare($1.displayName) == .orderedAscending }
+            providerModels[provider] = sorted.isEmpty ? CloudModelCatalog.models(for: provider) : sorted
+        } catch CloudExecutionServiceError.upstreamFailure(let message) {
+            providerModels[provider] = CloudModelCatalog.models(for: provider)
+            providerModelErrors[provider] = message
+        } catch {
+            providerModels[provider] = CloudModelCatalog.models(for: provider)
+            providerModelErrors[provider] = error.localizedDescription
+        }
+    }
+
+    func verifyProviderConnection(_ provider: ProviderKind) async {
+        let account = providerStore.account(for: provider)
+
+        guard account.isEnabled else {
+            chatStore.errorMessage = "Link and save \(provider.displayName) before testing the route."
+            return
+        }
+
+        do {
+            runtimeStatus = "Testing \(provider.displayName)..."
+            let reply = try await cloudExecutionService.send(
+                account: account,
+                messages: [
+                    CloudExecutionMessage(role: .system, content: "You are verifying a chat transport inside the BeMoreAgent iOS app. Reply with exactly: ROUTE_OK"),
+                    CloudExecutionMessage(role: .user, content: "Return ROUTE_OK")
+                ],
+                temperature: 0,
+                maxOutputTokens: 12
+            )
+            let cleaned = reply.trimmingCharacters(in: .whitespacesAndNewlines)
+            chatStore.messages.append(ChatMessage(role: .system, content: "\(provider.displayName) route check: \(cleaned)"))
+            chatStore.persist()
+            await refreshProviderModels(for: provider, force: true)
+            refreshRuntimeSummary()
+        } catch CloudExecutionServiceError.upstreamFailure(let message) {
+            chatStore.errorMessage = message
+            runtimeStatus = "\(provider.displayName) check failed"
+        } catch {
+            chatStore.errorMessage = error.localizedDescription
+            runtimeStatus = "\(provider.displayName) check failed"
+        }
     }
 
     // MARK: - Chat

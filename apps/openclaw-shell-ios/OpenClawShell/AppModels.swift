@@ -187,7 +187,7 @@ struct ProviderAccount: Identifiable, Codable, Hashable {
 }
 
 struct CloudModel: Identifiable, Hashable {
-    let id = UUID()
+    var id: String { "\(provider.rawValue):\(slug)" }
     let provider: ProviderKind
     let slug: String
     let displayName: String

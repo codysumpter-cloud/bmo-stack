@@ -89,6 +89,8 @@ struct SettingsView: View {
     private func providerRow(_ provider: ProviderKind) -> some View {
         let account = appState.providerStore.account(for: provider)
         let isActive = appState.runtimePreferences.selection.selectedProvider == provider
+        let models = appState.availableModels(for: provider)
+        let isLoadingModels = appState.providerModelLoading.contains(provider)
 
         return VStack(alignment: .leading, spacing: 10) {
             HStack {
@@ -105,10 +107,51 @@ struct SettingsView: View {
                     .foregroundColor(account.isEnabled ? BMOTheme.accent : BMOTheme.warning)
             }
 
+            if account.isEnabled {
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack {
+                        Text("Model")
+                            .foregroundColor(BMOTheme.textSecondary)
+                        Spacer()
+                        if isLoadingModels {
+                            ProgressView()
+                                .controlSize(.small)
+                        }
+                        Button {
+                            Task { await appState.refreshProviderModels(for: provider, force: true) }
+                        } label: {
+                            Image(systemName: "arrow.clockwise")
+                        }
+                        .buttonStyle(.borderless)
+                    }
+
+                    Picker("Model", selection: Binding(
+                        get: { appState.providerStore.account(for: provider).modelSlug },
+                        set: { appState.updateProviderModel(provider, modelSlug: $0) }
+                    )) {
+                        ForEach(models) { model in
+                            Text(model.displayName).tag(model.slug)
+                        }
+                    }
+                    .pickerStyle(.menu)
+
+                    if let error = appState.providerModelErrors[provider], !error.isEmpty {
+                        Text("Using fallback list, live fetch failed.")
+                            .font(.caption2)
+                            .foregroundColor(BMOTheme.warning)
+                    }
+                }
+            }
+
             HStack {
                 Button("Edit") { editingProvider = provider }
                     .buttonStyle(.bordered)
                 if account.isEnabled {
+                    Button("Test") {
+                        Task { await appState.verifyProviderConnection(provider) }
+                    }
+                    .buttonStyle(.bordered)
+
                     Button(isActive ? "Using now" : "Use for chat") {
                         appState.setSelectedProvider(provider)
                     }
@@ -118,6 +161,10 @@ struct SettingsView: View {
             }
         }
         .listRowBackground(BMOTheme.backgroundCard)
+        .task(id: account.isEnabled) {
+            guard account.isEnabled else { return }
+            await appState.refreshProviderModels(for: provider)
+        }
     }
 
     private func settingsRow(title: String, value: String) -> some View {
@@ -156,15 +203,25 @@ private struct ProviderEditorSheet: View {
                     TextField("Base URL", text: $account.baseURL)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
-                    TextField("Default model", text: $account.modelSlug)
+                    TextField("Model", text: $account.modelSlug)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
                 }
 
-                Section("Suggested models") {
-                    ForEach(CloudModelCatalog.models(for: provider)) { model in
-                        Button(model.displayName) {
-                            account.modelSlug = model.slug
+                if account.isEnabled || !appState.availableModels(for: provider).isEmpty {
+                    Section("Available models") {
+                        if appState.providerModelLoading.contains(provider) {
+                            ProgressView("Loading models…")
+                        }
+
+                        Picker("Available models", selection: $account.modelSlug) {
+                            ForEach(appState.availableModels(for: provider)) { model in
+                                Text(model.displayName).tag(model.slug)
+                            }
+                        }
+
+                        Button("Refresh model list") {
+                            Task { await appState.refreshProviderModels(for: provider, force: true) }
                         }
                     }
                 }
@@ -179,6 +236,9 @@ private struct ProviderEditorSheet: View {
             }
             .onAppear {
                 account = appState.providerStore.account(for: provider)
+                if account.isEnabled {
+                    Task { await appState.refreshProviderModels(for: provider) }
+                }
             }
             .navigationTitle(provider.displayName)
             .toolbar {
@@ -191,6 +251,7 @@ private struct ProviderEditorSheet: View {
                         appState.providerStore.validate(provider)
                         if appState.providerStore.account(for: provider).isEnabled {
                             appState.setSelectedProvider(provider)
+                            Task { await appState.refreshProviderModels(for: provider, force: true) }
                         }
                         dismiss()
                     }
