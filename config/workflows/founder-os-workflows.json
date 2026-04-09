@@ -47,6 +47,18 @@
         {"id": "triage", "role": "qa-monitor", "output": "triage-report"},
         {"id": "review", "role": "ops-assistant", "output": "review-item"}
       ]
+    },
+    {
+      "id": "security-review-findings-patch-approve",
+      "name": "Security review -> Findings -> Patch -> Human approve",
+      "stages": [
+        {"id": "intake", "role": "orchestrator", "output": "security-review-request"},
+        {"id": "analyze", "role": "security-analyst", "output": "risk-map"},
+        {"id": "triage", "role": "security-triage", "output": "finding-list"},
+        {"id": "patch", "role": "dev", "output": "patch-draft"},
+        {"id": "verify", "role": "qa-monitor", "output": "verification-report"},
+        {"id": "approval", "role": "orchestrator", "output": "pr-review-item"}
+      ]
     }
   ]
 }

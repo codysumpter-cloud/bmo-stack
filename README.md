@@ -104,4 +104,5 @@ This repository is licensed under the Apache License 2.0.
 - `docs/ENTERPRISE_APP_FACTORY_BRIDGE.md`
 - `docs/PRIVATE_APP_REPO_INTEGRATION.md`
 - `docs/BMO_NATIVE_RUNTIME.md`
+- `docs/BMO_MYTHOS_LITE.md`
 - `docs/MISSION_CONTROL_BMO_STACK_SYNC.md`

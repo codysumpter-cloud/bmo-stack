@@ -1,0 +1,113 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bmostack.dev/schemas/runtime/security-review-request.schema.json",
+  "title": "Security Review Request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "requestId",
+    "goal",
+    "target",
+    "scope",
+    "constraints",
+    "sandboxProfile",
+    "budget",
+    "requiredOutputs",
+    "approval",
+    "requestedBy"
+  ],
+  "properties": {
+    "requestId": {"type": "string", "minLength": 1},
+    "goal": {
+      "type": "string",
+      "enum": ["defensive-review", "triage-crash", "patch-finding"]
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "locator", "ownership"],
+      "properties": {
+        "kind": {"type": "string", "enum": ["repo", "directory", "archive", "binary", "crash-artifact"]},
+        "locator": {"type": "string", "minLength": 1},
+        "ref": {"type": "string"},
+        "ownership": {"type": "string", "enum": ["owned", "operator-approved", "external-lab"]}
+      }
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["paths", "languages"],
+      "properties": {
+        "paths": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+        "languages": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+        "excludePaths": {"type": "array", "items": {"type": "string", "minLength": 1}}
+      }
+    },
+    "constraints": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["allowedActions", "forbiddenActions", "network"],
+      "properties": {
+        "allowedActions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "enum": [
+              "read",
+              "build",
+              "test",
+              "static-scan",
+              "fuzz",
+              "triage",
+              "patch-draft",
+              "regression-test-draft"
+            ]
+          }
+        },
+        "forbiddenActions": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "network": {"type": "string", "enum": ["none", "package-mirror-only", "operator-approved"]}
+      }
+    },
+    "sandboxProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["isolation", "filesystem", "internet"],
+      "properties": {
+        "isolation": {"type": "string", "enum": ["worktree", "container", "vm"]},
+        "filesystem": {"type": "string", "enum": ["read-only-source", "writable-copy"]},
+        "internet": {"type": "boolean"}
+      }
+    },
+    "budget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["maxRuntimeMinutes", "maxLanes", "maxRetriesPerLane"],
+      "properties": {
+        "maxRuntimeMinutes": {"type": "integer", "minimum": 1, "maximum": 1440},
+        "maxLanes": {"type": "integer", "minimum": 1, "maximum": 12},
+        "maxRetriesPerLane": {"type": "integer", "minimum": 0, "maximum": 5}
+      }
+    },
+    "requiredOutputs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "enum": ["risk-map", "finding-list", "repro-notes", "patch-draft", "regression-tests", "review-summary"]
+      }
+    },
+    "approval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["prRequired", "mergeRequired", "disclosureRequired"],
+      "properties": {
+        "prRequired": {"type": "boolean"},
+        "mergeRequired": {"type": "boolean"},
+        "disclosureRequired": {"type": "boolean"}
+      }
+    },
+    "requestedBy": {"type": "string", "minLength": 1},
+    "notes": {"type": "array", "items": {"type": "string"}}
+  }
+}
