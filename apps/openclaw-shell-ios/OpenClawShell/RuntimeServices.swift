@@ -52,6 +52,10 @@ enum Paths {
     static var providersFile: URL { stateDirectory.appendingPathComponent("providers.json") }
     static var runtimeSelectionFile: URL { stateDirectory.appendingPathComponent("runtime-selection.json") }
     static var stackConfigFile: URL { stateDirectory.appendingPathComponent("stack-config.json") }
+    static var tabPreferencesFile: URL { stateDirectory.appendingPathComponent("tab-preferences.json") }
+    static var userPreferencesFile: URL { stateDirectory.appendingPathComponent("user-preferences.json") }
+    static var userProfileFile: URL { stateDirectory.appendingPathComponent("user-profile.md") }
+    static var soulProfileFile: URL { stateDirectory.appendingPathComponent("soul-profile.md") }
 
     private static func ensureDirectoryExists(_ url: URL) {
         if !fileManager.fileExists(atPath: url.path) {
@@ -963,6 +967,62 @@ final class RuntimePreferencesStore: ObservableObject {
     }
 }
 
+@MainActor
+final class TabPreferencesStore: ObservableObject {
+    @Published var preferences = ShellPreferences.default
+
+    func load() {
+        guard let data = try? Data(contentsOf: Paths.tabPreferencesFile) else { return }
+        preferences = ((try? JSONDecoder().decode(ShellPreferences.self, from: data)) ?? .default).normalized()
+    }
+
+    func persist() {
+        let normalized = preferences.normalized()
+        preferences = normalized
+        do {
+            let data = try JSONEncoder().encode(normalized)
+            try data.write(to: Paths.tabPreferencesFile, options: [.atomic])
+        } catch {}
+    }
+}
+
+@MainActor
+final class UserPreferencesStore: ObservableObject {
+    @Published var preferences = UserPreferences.default
+
+    func load() {
+        if let data = try? Data(contentsOf: Paths.userPreferencesFile),
+           let decoded = try? JSONDecoder().decode(UserPreferences.self, from: data) {
+            preferences = decoded
+        }
+        if let value = try? String(contentsOf: Paths.userProfileFile, encoding: .utf8) {
+            preferences.userProfileMarkdown = value
+        }
+        if let value = try? String(contentsOf: Paths.soulProfileFile, encoding: .utf8) {
+            preferences.soulProfileMarkdown = value
+        }
+    }
+
+    func updatePreferredName(_ value: String) {
+        preferences.preferredName = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        persist()
+    }
+
+    func updateTheme(_ theme: AppColorTheme) {
+        preferences.theme = theme
+        persist()
+    }
+
+    private func persist() {
+        do {
+            let data = try JSONEncoder().encode(preferences)
+            try data.write(to: Paths.userPreferencesFile, options: [.atomic])
+            try preferences.userProfileMarkdown.write(to: Paths.userProfileFile, atomically: true, encoding: .utf8)
+            try preferences.soulProfileMarkdown.write(to: Paths.soulProfileFile, atomically: true, encoding: .utf8)
+        } catch {}
+    }
+}
+
 // MARK: - App state
 
 @MainActor
@@ -973,6 +1033,8 @@ final class AppState: ObservableObject {
     @Published var chatStore = ChatStore()
     @Published var providerStore = ProviderStore()
     @Published var runtimePreferences = RuntimePreferencesStore()
+    @Published var tabPreferencesStore = TabPreferencesStore()
+    @Published var userPreferencesStore = UserPreferencesStore()
     @Published var runtimeStatus = "Not configured"
     @Published var stackConfig = StackConfig.default
     @Published var gemmaDownloadState: ModelDownloadState = .notInstalled
@@ -984,6 +1046,19 @@ final class AppState: ObservableObject {
     init(engine: LocalLLMEngine) {
         self.engine = engine
     }
+
+    var orderedVisibleTabs: [AppTab] {
+        tabPreferencesStore.preferences.visibleTabs
+    }
+
+    var selectedTab: AppTab {
+        get { tabPreferencesStore.preferences.selectedTab }
+        set {
+            tabPreferencesStore.preferences.selectedTab = newValue
+            tabPreferencesStore.persist()
+        }
+    }
+
     var selectedInstalledModel: InstalledModel? {
         guard let filename = runtimePreferences.selection.selectedInstalledFilename else { return nil }
         return modelStore.installedModels.first(where: { $0.localFilename == filename })
@@ -993,10 +1068,25 @@ final class AppState: ObservableObject {
         engine.backendDisplayName.contains("Stub")
     }
 
+    var canUseSelectedLocalModel: Bool {
+        selectedInstalledModel != nil && !usesStubRuntime
+    }
+
     var selectedProviderAccount: ProviderAccount? {
         guard let provider = runtimePreferences.selection.selectedProvider else { return nil }
         let account = providerStore.account(for: provider)
         return account.isEnabled ? account : nil
+    }
+
+    var operatorDisplayName: String {
+        let preferred = userPreferencesStore.preferences.preferredName.trimmingCharacters(in: .whitespacesAndNewlines)
+        return preferred.isEmpty ? stackConfig.stackName : preferred
+    }
+
+    var activeRouteModeLabel: String {
+        if selectedProviderAccount != nil { return "Cloud" }
+        if selectedInstalledModel != nil { return usesStubRuntime ? "Local selected" : "Local" }
+        return "No route"
     }
 
     var operatorSummary: String {
@@ -1030,6 +1120,42 @@ final class AppState: ObservableObject {
         return "\(fileCount) file\(fileCount == 1 ? "" : "s"), \(selectedCount) attached, \(messageCount) message\(messageCount == 1 ? "" : "s")."
     }
 
+    var activeRouteTitle: String {
+        if let account = selectedProviderAccount {
+            return "\(account.provider.displayName) cloud route"
+        }
+        if let model = selectedInstalledModel {
+            return model.displayName
+        }
+        return "No active route"
+    }
+
+    var activeRouteDetail: String {
+        if let account = selectedProviderAccount {
+            return "\(account.modelSlug) via \(account.baseURL)"
+        }
+        if let model = selectedInstalledModel {
+            return model.modelID.isEmpty ? model.localFilename : model.modelID
+        }
+        return "Select a local or cloud route in Models."
+    }
+
+    var routeHealthSummary: String {
+        if selectedProviderAccount != nil {
+            return "Cloud route ready for real chat."
+        }
+        if let model = selectedInstalledModel {
+            return usesStubRuntime
+                ? "\(model.displayName) is selected, but local inference is unavailable in this build."
+                : "On-device route ready."
+        }
+        return usesStubRuntime ? "No live route selected. Link a provider for real chat." : "No route selected yet."
+    }
+
+    var persistenceSummary: String {
+        "Files, chat history, provider metadata, buddy state, and tab preferences persist locally inside the app container."
+    }
+
     private let engine: LocalLLMEngine
     private let cloudExecutionService = CloudExecutionService()
 
@@ -1049,6 +1175,8 @@ final class AppState: ObservableObject {
         chatStore.load()
         providerStore.load()
         runtimePreferences.load()
+        tabPreferencesStore.load()
+        userPreferencesStore.load()
         refreshGemmaState()
         refreshRuntimeSummary()
         for account in providerStore.enabledProviders() {
@@ -1150,6 +1278,46 @@ final class AppState: ObservableObject {
         }
         runtimePreferences.persist()
         refreshRuntimeSummary()
+    }
+
+    func updatePreferredOperatorName(_ value: String) {
+        userPreferencesStore.updatePreferredName(value)
+    }
+
+    func updateTheme(_ theme: AppColorTheme) {
+        userPreferencesStore.updateTheme(theme)
+    }
+
+    func setTabVisibility(_ tab: AppTab, isVisible: Bool) {
+        guard tab.allowsHiding else { return }
+        if isVisible {
+            tabPreferencesStore.preferences.hiddenTabs.remove(tab)
+        } else {
+            tabPreferencesStore.preferences.hiddenTabs.insert(tab)
+        }
+        tabPreferencesStore.persist()
+        if !orderedVisibleTabs.contains(selectedTab) {
+            selectedTab = orderedVisibleTabs.first ?? .missionControl
+        }
+    }
+
+    func moveTabs(fromOffsets: IndexSet, toOffset: Int) {
+        var visibleTabs = orderedVisibleTabs
+        visibleTabs.move(fromOffsets: fromOffsets, toOffset: toOffset)
+        let hiddenTabs = tabPreferencesStore.preferences.orderedTabs.filter { tabPreferencesStore.preferences.hiddenTabs.contains($0) }
+        tabPreferencesStore.preferences.orderedTabs = visibleTabs + hiddenTabs
+        tabPreferencesStore.persist()
+    }
+
+    func removeProvider(_ provider: ProviderKind) {
+        providerStore.remove(provider)
+        providerModels[provider] = nil
+        providerModelErrors[provider] = nil
+        if runtimePreferences.selection.selectedProvider == provider {
+            runtimePreferences.selection.selectedProvider = nil
+            runtimePreferences.persist()
+            refreshRuntimeSummary()
+        }
     }
 
     func updateProviderModel(_ provider: ProviderKind, modelSlug: String) {

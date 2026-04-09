@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 
 // MARK: - Chat
 
@@ -309,4 +310,109 @@ struct KnownModel: Identifiable {
     )
 
     static let catalog: [KnownModel] = [gemma4E2B]
+}
+
+enum AppTab: String, Codable, CaseIterable, Hashable, Identifiable {
+    case missionControl
+    case models
+    case chat
+    case buddy
+    case files
+    case settings
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .missionControl: return "Control"
+        case .models: return "Models"
+        case .chat: return "Chat"
+        case .buddy: return "Buddy"
+        case .files: return "Files"
+        case .settings: return "Settings"
+        }
+    }
+
+    var systemImage: String {
+        switch self {
+        case .missionControl: return "switch.2"
+        case .models: return "cpu"
+        case .chat: return "message.fill"
+        case .buddy: return "person.2.fill"
+        case .files: return "folder.fill"
+        case .settings: return "gearshape.fill"
+        }
+    }
+
+    var allowsHiding: Bool {
+        self != .missionControl
+    }
+}
+
+struct ShellPreferences: Codable, Hashable {
+    var orderedTabs: [AppTab]
+    var hiddenTabs: Set<AppTab>
+    var selectedTab: AppTab
+
+    static let `default` = ShellPreferences(
+        orderedTabs: AppTab.allCases,
+        hiddenTabs: [],
+        selectedTab: .missionControl
+    )
+
+    func normalized() -> ShellPreferences {
+        var order = orderedTabs
+        for tab in AppTab.allCases where !order.contains(tab) {
+            order.append(tab)
+        }
+        order = order.filter { AppTab.allCases.contains($0) }
+
+        var hidden = hiddenTabs.filter { $0.allowsHiding && AppTab.allCases.contains($0) }
+        if order.filter({ !hidden.contains($0) }).isEmpty {
+            hidden.removeAll()
+        }
+
+        let selected = hidden.contains(selectedTab) ? order.first(where: { !hidden.contains($0) }) ?? .missionControl : selectedTab
+        return ShellPreferences(orderedTabs: order, hiddenTabs: hidden, selectedTab: selected)
+    }
+
+    var visibleTabs: [AppTab] {
+        let normalized = normalized()
+        return normalized.orderedTabs.filter { !normalized.hiddenTabs.contains($0) }
+    }
+}
+
+enum AppColorTheme: String, Codable, Hashable, CaseIterable, Identifiable {
+    case system
+    case dark
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .system: return "System"
+        case .dark: return "Dark"
+        }
+    }
+
+    var preferredColorScheme: ColorScheme? {
+        switch self {
+        case .system: return nil
+        case .dark: return .dark
+        }
+    }
+}
+
+struct UserPreferences: Codable, Hashable {
+    var preferredName: String
+    var theme: AppColorTheme
+    var userProfileMarkdown: String
+    var soulProfileMarkdown: String
+
+    static let `default` = UserPreferences(
+        preferredName: "",
+        theme: .dark,
+        userProfileMarkdown: "",
+        soulProfileMarkdown: ""
+    )
 }
