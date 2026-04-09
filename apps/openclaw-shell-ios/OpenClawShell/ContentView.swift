@@ -16,39 +16,20 @@ struct ContentView: View {
 }
 
 struct MainTabView: View {
-    @State private var selectedTab = 0
+    @EnvironmentObject private var appState: AppState
 
     var body: some View {
-        TabView(selection: $selectedTab) {
-            HomeView()
-                .tabItem {
-                    Label("Home", systemImage: "house.fill")
-                }
-                .tag(0)
-
-            ChatView()
-                .tabItem {
-                    Label("Chat", systemImage: "message.fill")
-                }
-                .tag(1)
-
-            BuddyView()
-                .tabItem {
-                    Label("Buddy", systemImage: "person.2.fill")
-                }
-                .tag(2)
-
-            FilesView()
-                .tabItem {
-                    Label("Files", systemImage: "folder.fill")
-                }
-                .tag(3)
-
-            ModelsView()
-                .tabItem {
-                    Label("Models", systemImage: "cpu")
-                }
-                .tag(4)
+        TabView(selection: Binding(
+            get: { appState.selectedTab },
+            set: { appState.selectedTab = $0 }
+        )) {
+            ForEach(appState.orderedVisibleTabs) { tab in
+                destination(for: tab)
+                    .tabItem {
+                        Label(tab.title, systemImage: tab.systemImage)
+                    }
+                    .tag(tab)
+            }
         }
         .tint(BMOTheme.accent)
         .onAppear {
@@ -57,6 +38,24 @@ struct MainTabView: View {
             tabBarAppearance.backgroundColor = UIColor(BMOTheme.backgroundSecondary)
             UITabBar.appearance().standardAppearance = tabBarAppearance
             UITabBar.appearance().scrollEdgeAppearance = tabBarAppearance
+        }
+    }
+
+    @ViewBuilder
+    private func destination(for tab: AppTab) -> some View {
+        switch tab {
+        case .missionControl:
+            MissionControlView()
+        case .models:
+            ModelsView()
+        case .chat:
+            ChatView()
+        case .buddy:
+            BuddyView()
+        case .files:
+            FilesView()
+        case .settings:
+            SettingsView()
         }
     }
 }
