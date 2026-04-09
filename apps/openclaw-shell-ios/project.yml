@@ -15,6 +15,10 @@ targets:
       - path: OpenClawShell
         excludes:
           - "**/.DS_Store"
+    resources:
+      - path: ADMIN_TESTFLIGHT_RUNBOOK.md
+      - path: ../../docs/MISSION_CONTROL.md
+      - path: ../../docs/POKEMON_CHAMPIONS_TEAM_BUILDER_BACKEND.md
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: BeMoreAgent

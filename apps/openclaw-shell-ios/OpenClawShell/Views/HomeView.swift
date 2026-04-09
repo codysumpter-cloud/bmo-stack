@@ -211,12 +211,12 @@ struct HomeView: View {
             }
 
             if appState.usesStubRuntime {
-                Text("This build is using the stub runtime, so chat works in preview mode with simulated replies. Real on-device inference activates once the runtime bridge is wired in.")
+                Text("This build is still using the stub local runtime. Use Models to link a cloud route for real chat today, or install a local model in preparation for the real on-device bridge.")
                     .font(.caption)
                     .foregroundColor(BMOTheme.textTertiary)
             }
 
-            Text("Cloud providers are not part of this local-first shell target. Use the BeMoreAgent Platform target for remote-model workflows.")
+            Text("Cloud providers can be linked in Settings and switched day-to-day in Models. Settings handles credentials; Models is the live route control surface.")
                 .font(.caption)
                 .foregroundColor(BMOTheme.textTertiary)
         }

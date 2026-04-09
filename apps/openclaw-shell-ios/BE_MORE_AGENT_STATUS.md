@@ -1,6 +1,6 @@
 # BeMoreAgent native iOS status
 
-This file summarizes the current native iOS app state after the BeMoreAgent onboarding merge.
+This file summarizes the current truthful state of the iOS shell on `master`.
 
 ## Current source of truth
 
@@ -8,25 +8,26 @@ The native app lives in:
 
 - `apps/openclaw-shell-ios`
 
-The merged native source already includes:
+Current shipped shell surfaces include:
 
-- BeMoreAgent branding in the app target and Info.plist
-- a first-run onboarding flow
-- onboarding persistence via local stack config storage
-- a BeMoreAgent home/dashboard surface
-- chat, files, and models tabs
-- a bundled app icon asset in the asset catalog
+- first-run onboarding with persisted stack config
+- Mission Control as the post-onboarding landing surface
+- Models as the route-control surface for local and cloud selection
+- Chat, Buddy, Files, and Settings tabs
+- persisted tab ordering and visibility
+- persisted buddy rename and active selection
+- bundled repo-backed surface briefs inside Mission Control
 
 ## Important current behavior
 
-On first launch, the app routes into onboarding until `stackConfig.isOnboardingComplete` becomes true.
+- First launch routes into onboarding until `stackConfig.isOnboardingComplete` becomes true.
+- Relaunch returns to the main tab shell after onboarding is complete.
+- The local runtime is still stubbed unless `MLCSwift` is actually present and wired.
+- Cloud routes can be configured in Settings and switched in Models.
 
-After onboarding completes, the app routes into the main tab shell.
-
-## Xcode quick start
+## Local build path
 
 ```bash
-brew install xcodegen
 cd apps/openclaw-shell-ios
 xcodegen generate
 xcodebuild -project BeMoreAgent.xcodeproj \
@@ -35,25 +36,24 @@ xcodebuild -project BeMoreAgent.xcodeproj \
   -destination 'generic/platform=iOS Simulator' \
   -derivedDataPath .build/DerivedData \
   build
-open BeMoreAgent.xcodeproj
 ```
 
-## Apple / TestFlight handoff
+## Release path
 
-The receiving admin still needs to:
-
-1. choose the correct Apple Developer team in Xcode
-2. set a bundle identifier owned by that team
-3. archive from Xcode Organizer
-4. upload to App Store Connect / TestFlight
+- `CFBundleVersion` is currently `13`.
+- TestFlight delivery is repo-managed through `.github/workflows/testflight.yml`.
+- The operator runbook for that path is `apps/openclaw-shell-ios/ADMIN_TESTFLIGHT_RUNBOOK.md`.
+- Xcode Cloud is not the required release path for this target right now.
 
 ## Honest limits
 
-The current source is onboarding-capable and Xcode-hand-off-ready, but it still uses a stub runtime for inference until the real on-device runtime bridge is wired in.
+- `OpenClawShellApp.swift` still boots `AppState(engine: MLCBridgeEngine())`.
+- `project.yml` still has `dependencies: []`.
+- When `MLCSwift` is not importable, the app still uses the stub local-runtime path and cannot claim
+  real on-device inference.
 
-## Recommended next native tasks
+## Next native work
 
-1. validate the BeMoreAgent project end-to-end in Xcode on a Mac
-2. archive and ship to TestFlight
-3. refine onboarding-generated stack defaults
-4. replace the stub runtime with the intended on-device runtime bridge
+1. keep the shell truth and docs aligned with what is actually shipped
+2. preserve simulator build + relaunch verification on every PR
+3. only land local-runtime work as a separate PR if it is real on-device inference, not a stub

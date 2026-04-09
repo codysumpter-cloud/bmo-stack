@@ -2,6 +2,7 @@ import SwiftUI
 
 struct MissionControlView: View {
     @EnvironmentObject private var appState: AppState
+    @State private var selectedSurface: RepoSurface?
 
     var body: some View {
         NavigationStack {
@@ -12,6 +13,7 @@ struct MissionControlView: View {
                     metricsCard
                     providerCard
                     shellCard
+                    stackSurfacesCard
                 }
                 .padding(.horizontal, BMOTheme.spacingMD)
                 .padding(.bottom, BMOTheme.spacingXL)
@@ -27,6 +29,9 @@ struct MissionControlView: View {
             }
             .toolbarBackground(BMOTheme.backgroundPrimary, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
+            .sheet(item: $selectedSurface) { surface in
+                RepoSurfaceDetailView(surface: surface)
+            }
         }
     }
 
@@ -109,6 +114,55 @@ struct MissionControlView: View {
             Text("Manage tab order and visibility in Settings. Control remains available as the stable landing surface.")
                 .font(.caption)
                 .foregroundColor(BMOTheme.textTertiary)
+        }
+        .bmoCard()
+    }
+
+    private var stackSurfacesCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("BMO Stack Surfaces")
+                .font(.subheadline)
+                .fontWeight(.semibold)
+                .foregroundColor(BMOTheme.textSecondary)
+
+            Text("These briefs are bundled from real repo docs so the iOS shell can expose meaningful stack surfaces without pretending to reimplement the whole desktop operator stack.")
+                .font(.caption)
+                .foregroundColor(BMOTheme.textTertiary)
+
+            ForEach(RepoSurface.allCases) { surface in
+                Button {
+                    selectedSurface = surface
+                } label: {
+                    HStack(alignment: .top, spacing: 12) {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text(surface.title)
+                                .font(.subheadline)
+                                .fontWeight(.semibold)
+                                .foregroundColor(BMOTheme.textPrimary)
+                            Text(surface.summary)
+                                .font(.caption)
+                                .multilineTextAlignment(.leading)
+                                .foregroundColor(BMOTheme.textSecondary)
+                            Text(surface.sourcePath)
+                                .font(.caption2)
+                                .foregroundColor(BMOTheme.textTertiary)
+                        }
+
+                        Spacer()
+
+                        VStack(alignment: .trailing, spacing: 8) {
+                            StatusBadge(label: surface.statusLabel, color: surface.statusColor)
+                            Text("Open brief")
+                                .font(.caption2)
+                                .foregroundColor(BMOTheme.accent)
+                        }
+                    }
+                    .padding(12)
+                    .background(BMOTheme.backgroundSecondary)
+                    .clipShape(RoundedRectangle(cornerRadius: BMOTheme.radiusMedium, style: .continuous))
+                }
+                .buttonStyle(.plain)
+            }
         }
         .bmoCard()
     }
