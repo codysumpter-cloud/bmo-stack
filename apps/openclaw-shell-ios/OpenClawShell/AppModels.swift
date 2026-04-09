@@ -129,6 +129,7 @@ enum ProviderKind: String, Codable, CaseIterable, Identifiable {
     case openAI = "openai"
     case huggingFace = "huggingface"
     case ollama
+    case liteRTLM = "liteRTLM"
 
     var id: String { rawValue }
 
@@ -139,6 +140,7 @@ enum ProviderKind: String, Codable, CaseIterable, Identifiable {
         case .openAI: return "OpenAI"
         case .huggingFace: return "Hugging Face"
         case .ollama: return "Ollama"
+        case .liteRTLM: return "LiteRT‑LM (Gemma 4)"
         }
     }
 
