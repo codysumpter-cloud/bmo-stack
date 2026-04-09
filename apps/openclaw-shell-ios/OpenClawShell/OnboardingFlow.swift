@@ -424,11 +424,14 @@ struct OnboardingFlow: View {
                             Text("BMO Agent")
                                 .font(.headline)
                                 .foregroundColor(BMOTheme.textPrimary)
-                            Text("On-device • gemma4-e2b-it")
+                            Text(primaryAgentSummary)
                                 .font(.caption)
                                 .foregroundColor(BMOTheme.textSecondary)
                         }
                     }
+                    Text(primaryAgentDetail)
+                        .font(.caption)
+                        .foregroundColor(BMOTheme.textTertiary)
                 }
                 .bmoCard()
                 .padding(.horizontal, BMOTheme.spacingLG)
@@ -446,6 +449,18 @@ struct OnboardingFlow: View {
     }
 
     // MARK: - Helpers
+
+    private var primaryAgentSummary: String {
+        appState.usesStubRuntime
+            ? "Local-first shell • route setup after launch"
+            : "On-device runtime available after model install"
+    }
+
+    private var primaryAgentDetail: String {
+        appState.usesStubRuntime
+            ? "This build still uses the stub local runtime. Launch into Mission Control, then use Models to link a cloud route or prepare a local model."
+            : "Finish onboarding, then use Models to select an installed on-device route."
+    }
 
     private func summaryRow(icon: String, label: String, value: String) -> some View {
         HStack {
