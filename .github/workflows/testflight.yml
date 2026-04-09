@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   build:
-    runs-on: ${{ fromJSON(vars.BEMOREAGENT_IOS_RUNS_ON != '' && vars.BEMOREAGENT_IOS_RUNS_ON || '["self-hosted","macOS"]') }}
+    runs-on: ${{ vars.BEMOREAGENT_IOS_RUNS_ON != '' && vars.BEMOREAGENT_IOS_RUNS_ON != '-' && fromJSON(vars.BEMOREAGENT_IOS_RUNS_ON) || fromJSON('["self-hosted","macOS"]') }}
     defaults:
       run:
         working-directory: apps/openclaw-shell-ios
