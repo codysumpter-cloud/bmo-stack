@@ -146,7 +146,7 @@ struct StackConfig: Codable {
     var isOnboardingComplete: Bool
 
     static let `default` = StackConfig(
-        stackName: "Life Command",
+        stackName: "BeMoreAgent",
         goal: "",
         role: "",
         autonomyLevel: 3,
@@ -194,8 +194,8 @@ struct KnownModel: Identifiable {
         modelID: "gemma4-e2b-it",
         family: "Gemma",
         parameterCount: "2B",
-        description: "Google's efficient 2B instruction-tuned model. Optimized for on-device use with LiteRT.",
-        downloadSizeGB: 1.4,
+        description: "Curated small GGUF install for the BeMoreAgent shell. Direct downloads should use a public artifact or explain auth requirements clearly.",
+        downloadSizeGB: 1.7,
         requiresDownload: true,
         runtimeBackend: "LiteRT-LM"
     )

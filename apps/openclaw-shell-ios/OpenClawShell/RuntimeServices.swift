@@ -73,7 +73,11 @@ final class DownloadCenter {
         let (asyncBytes, response) = try await URLSession.shared.bytes(from: sourceURL)
 
         if let http = response as? HTTPURLResponse, !(200...299).contains(http.statusCode) {
-            throw NSError(domain: "DownloadCenter", code: http.statusCode, userInfo: [NSLocalizedDescriptionKey: "HTTP \(http.statusCode)"])
+            throw NSError(
+                domain: "DownloadCenter",
+                code: http.statusCode,
+                userInfo: [NSLocalizedDescriptionKey: ModelSourceValidator.userFacingHTTPMessage(statusCode: http.statusCode, sourceURL: sourceURL)]
+            )
         }
 
         let expectedLength = response.expectedContentLength
@@ -113,6 +117,87 @@ final class DownloadCenter {
             try fileManager.removeItem(at: destinationURL)
         }
         try fileManager.moveItem(at: tempURL, to: destinationURL)
+    }
+}
+
+// MARK: - Source validation / messaging
+
+enum ModelSourceValidator {
+    private static let supportedFileExtensions: Set<String> = ["gguf", "task", "bin", "mlmodelc", "zip"]
+
+    static func validateDirectDownloadURL(_ url: URL) -> String? {
+        let ext = url.pathExtension.lowercased()
+
+        if url.host?.contains("huggingface.co") == true, !url.path.contains("/resolve/") {
+            return "Use a direct file link from Hugging Face that points to a downloadable artifact (for example a /resolve/main/...gguf URL), or import a prepared model."
+        }
+
+        if ext.isEmpty || !supportedFileExtensions.contains(ext) {
+            return "This source is not a supported direct-download artifact yet. Add a direct model file URL or import a prepared model."
+        }
+
+        return nil
+    }
+
+    static func userFacingHTTPMessage(statusCode: Int, sourceURL: URL) -> String {
+        switch statusCode {
+        case 401:
+            return "This source requires authentication before it can be downloaded. Add an authenticated source or import a prepared model."
+        case 403:
+            return "This source is forbidden or gated. Use a public direct-download artifact, an authenticated source, or import a prepared model."
+        case 404:
+            return "The model file could not be found at this URL. Update the source URL or import a prepared model."
+        default:
+            return "Download failed with HTTP \(statusCode). Verify the source URL and try again."
+        }
+    }
+
+    static func userFacingDownloadMessage(for error: Error) -> String {
+        let nsError = error as NSError
+        if nsError.domain == "DownloadCenter" {
+            return nsError.localizedDescription
+        }
+        return error.localizedDescription
+    }
+}
+
+enum ModelMetadataInference {
+    static func displayName(from filename: String) -> String {
+        let stem = filename
+            .replacingOccurrences(of: ".gguf", with: "", options: .caseInsensitive)
+            .replacingOccurrences(of: ".bin", with: "", options: .caseInsensitive)
+            .replacingOccurrences(of: ".task", with: "", options: .caseInsensitive)
+            .replacingOccurrences(of: ".zip", with: "", options: .caseInsensitive)
+            .replacingOccurrences(of: "_", with: " ")
+            .replacingOccurrences(of: "-", with: " ")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard !stem.isEmpty else { return filename }
+        return stem
+            .split(separator: " ")
+            .map { token in
+                let value = String(token)
+                if value.uppercased() == value {
+                    return value
+                }
+                return value.prefix(1).uppercased() + value.dropFirst()
+            }
+            .joined(separator: " ")
+    }
+
+    static func modelID(from filename: String) -> String {
+        filename
+            .replacingOccurrences(of: ".gguf", with: "", options: .caseInsensitive)
+            .replacingOccurrences(of: ".bin", with: "", options: .caseInsensitive)
+            .replacingOccurrences(of: ".task", with: "", options: .caseInsensitive)
+            .replacingOccurrences(of: ".zip", with: "", options: .caseInsensitive)
+            .replacingOccurrences(of: " ", with: "-")
+            .replacingOccurrences(of: "_", with: "-")
+            .lowercased()
+    }
+
+    static func modelLib(from filename: String) -> String {
+        modelID(from: filename).replacingOccurrences(of: "-", with: "_")
     }
 }
 
@@ -270,12 +355,20 @@ final class ModelCatalogStore: ObservableObject {
             return
         }
 
+        let inferredFilename = RemoteModel.suggestedFilename(from: trimmedURL, fallback: trimmedName)
+        let finalModelID = modelID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            ? ModelMetadataInference.modelID(from: inferredFilename)
+            : modelID.trimmingCharacters(in: .whitespacesAndNewlines)
+        let finalModelLib = modelLib.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            ? ModelMetadataInference.modelLib(from: inferredFilename)
+            : modelLib.trimmingCharacters(in: .whitespacesAndNewlines)
+
         remoteModels.insert(
             RemoteModel(
                 displayName: trimmedName,
                 sourceURL: trimmedURL,
-                modelID: modelID.trimmingCharacters(in: .whitespacesAndNewlines),
-                modelLib: modelLib.trimmingCharacters(in: .whitespacesAndNewlines)
+                modelID: finalModelID,
+                modelLib: finalModelLib
             ),
             at: 0
         )
@@ -292,13 +385,14 @@ final class ModelCatalogStore: ObservableObject {
         installedModels = urls.compactMap { url in
             guard let values = try? url.resourceValues(forKeys: [.fileSizeKey]) else { return nil }
             let metadata = installedMetadata[url.lastPathComponent]
+            let fallbackFilename = url.lastPathComponent
             return InstalledModel(
-                displayName: metadata?.displayName ?? url.deletingPathExtension().lastPathComponent,
-                localFilename: url.lastPathComponent,
+                displayName: metadata?.displayName ?? ModelMetadataInference.displayName(from: fallbackFilename),
+                localFilename: fallbackFilename,
                 localURL: url,
                 fileSizeBytes: Int64(values.fileSize ?? 0),
-                modelID: metadata?.modelID ?? "",
-                modelLib: metadata?.modelLib ?? ""
+                modelID: metadata?.modelID.isEmpty == false ? metadata!.modelID : ModelMetadataInference.modelID(from: fallbackFilename),
+                modelLib: metadata?.modelLib.isEmpty == false ? metadata!.modelLib : ModelMetadataInference.modelLib(from: fallbackFilename)
             )
         }
         .sorted { $0.addedAt > $1.addedAt }
@@ -307,6 +401,11 @@ final class ModelCatalogStore: ObservableObject {
     func download(_ model: RemoteModel) {
         guard let sourceURL = URL(string: model.sourceURL) else {
             errorMessage = "Invalid model URL."
+            return
+        }
+
+        if let validationMessage = ModelSourceValidator.validateDirectDownloadURL(sourceURL) {
+            errorMessage = validationMessage
             return
         }
 
@@ -322,8 +421,8 @@ final class ModelCatalogStore: ObservableObject {
                     self.installedMetadata[destination.lastPathComponent] = InstalledModelDescriptor(
                         filename: destination.lastPathComponent,
                         displayName: model.displayName,
-                        modelID: model.modelID,
-                        modelLib: model.modelLib
+                        modelID: model.modelID.isEmpty ? ModelMetadataInference.modelID(from: destination.lastPathComponent) : model.modelID,
+                        modelLib: model.modelLib.isEmpty ? ModelMetadataInference.modelLib(from: destination.lastPathComponent) : model.modelLib
                     )
                     self.persistInstalledMetadata()
                     self.activeDownload = nil
@@ -332,13 +431,17 @@ final class ModelCatalogStore: ObservableObject {
             } catch {
                 await MainActor.run {
                     self.activeDownload = nil
-                    self.errorMessage = error.localizedDescription
+                    self.errorMessage = ModelSourceValidator.userFacingDownloadMessage(for: error)
                 }
             }
         }
     }
 
     func downloadToPath(from sourceURL: URL, to destination: URL, displayName: String, modelID: String, modelLib: String, onProgress: @escaping (Double) -> Void) async throws {
+        if let validationMessage = ModelSourceValidator.validateDirectDownloadURL(sourceURL) {
+            throw NSError(domain: "DownloadCenter", code: 1000, userInfo: [NSLocalizedDescriptionKey: validationMessage])
+        }
+
         try await downloadCenter.download(from: sourceURL, to: destination) { state in
             if case .progress(_, let fraction) = state {
                 onProgress(fraction)
@@ -346,9 +449,9 @@ final class ModelCatalogStore: ObservableObject {
         }
         installedMetadata[destination.lastPathComponent] = InstalledModelDescriptor(
             filename: destination.lastPathComponent,
-            displayName: displayName,
-            modelID: modelID,
-            modelLib: modelLib
+            displayName: displayName.isEmpty ? ModelMetadataInference.displayName(from: destination.lastPathComponent) : displayName,
+            modelID: modelID.isEmpty ? ModelMetadataInference.modelID(from: destination.lastPathComponent) : modelID,
+            modelLib: modelLib.isEmpty ? ModelMetadataInference.modelLib(from: destination.lastPathComponent) : modelLib
         )
         persistInstalledMetadata()
         refreshInstalledModels()
@@ -367,9 +470,9 @@ final class ModelCatalogStore: ObservableObject {
                 try fileManager.copyItem(at: url, to: destination)
                 installedMetadata[destination.lastPathComponent] = InstalledModelDescriptor(
                     filename: destination.lastPathComponent,
-                    displayName: destination.deletingPathExtension().lastPathComponent,
-                    modelID: "",
-                    modelLib: ""
+                    displayName: ModelMetadataInference.displayName(from: destination.lastPathComponent),
+                    modelID: ModelMetadataInference.modelID(from: destination.lastPathComponent),
+                    modelLib: ModelMetadataInference.modelLib(from: destination.lastPathComponent)
                 )
             } catch {
                 errorMessage = error.localizedDescription
@@ -673,9 +776,7 @@ final class AppState: ObservableObject {
     }
 
     func downloadGemma() {
-        // Use the Kaggle/HuggingFace direct download path for the LiteRT-compatible Gemma model
-        // This is a real URL pattern - the actual URL will need to be configured per distribution channel
-        let gemmaSourceURL = "https://huggingface.co/google/gemma-2-2b-it-GGUF/resolve/main/gemma-2-2b-it.Q4_K_M.gguf"
+        let gemmaSourceURL = "https://huggingface.co/unsloth/gemma-2-it-GGUF/resolve/main/gemma-2-2b-it.q4_k_m.gguf"
 
         guard let sourceURL = URL(string: gemmaSourceURL) else {
             gemmaDownloadState = .failed(message: "Invalid download URL")
@@ -692,7 +793,7 @@ final class AppState: ObservableObject {
                     to: destination,
                     displayName: "Gemma 4 E2B-IT",
                     modelID: "gemma4-e2b-it",
-                    modelLib: "gemma-2-2b-it-q4_k_m"
+                    modelLib: "gemma_2_2b_it_q4_k_m"
                 ) { [weak self] progress in
                     Task { @MainActor in
                         self?.gemmaDownloadState = .downloading(progress: progress)
@@ -700,7 +801,7 @@ final class AppState: ObservableObject {
                 }
                 gemmaDownloadState = .installed
             } catch {
-                gemmaDownloadState = .failed(message: error.localizedDescription)
+                gemmaDownloadState = .failed(message: ModelSourceValidator.userFacingDownloadMessage(for: error))
             }
         }
     }
@@ -723,6 +824,12 @@ final class AppState: ObservableObject {
     func send(prompt: String) async {
         let cleaned = prompt.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !cleaned.isEmpty else { return }
+
+        if usesStubRuntime {
+            chatStore.errorMessage = "Chat is disabled while the app is running in stub mode. Install the real runtime before sending prompts."
+            runtimeStatus = "Stub mode"
+            return
+        }
 
         if engine.requiresModelSelection, selectedInstalledModel == nil {
             chatStore.errorMessage = "Select an installed model in Models before sending."
