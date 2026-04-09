@@ -74,6 +74,32 @@ jobs:
           test -d BeMoreAgent.xcodeproj
           test -f exportOptions-upload.plist
 
+      - name: Verify bundle identifier contract
+        run: |
+          python3 - <<'PY2'
+          import pathlib
+          import re
+          import sys
+
+          project = pathlib.Path('project.yml').read_text()
+          expected = 'BeMoreAgent'
+          match = re.search(r'PRODUCT_BUNDLE_IDENTIFIER:\s*([^\n]+)', project)
+          if not match:
+              print('Missing PRODUCT_BUNDLE_IDENTIFIER in project.yml', file=sys.stderr)
+              sys.exit(1)
+          actual = match.group(1).strip()
+          if actual != expected:
+              print(f'Bundle identifier drifted: expected {expected}, got {actual}', file=sys.stderr)
+              sys.exit(1)
+
+          info = pathlib.Path('OpenClawShell/Info.plist').read_text()
+          if '$(PRODUCT_BUNDLE_IDENTIFIER)' not in info:
+              print('Info.plist must inherit PRODUCT_BUNDLE_IDENTIFIER', file=sys.stderr)
+              sys.exit(1)
+
+          print(f'Bundle identifier verified: {actual}')
+          PY2
+
       - name: Build and archive release
         run: |
           xcodebuild -project BeMoreAgent.xcodeproj \
