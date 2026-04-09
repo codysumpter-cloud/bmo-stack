@@ -211,10 +211,14 @@ struct HomeView: View {
                 .foregroundColor(BMOTheme.textSecondary)
 
             if appState.usesStubRuntime {
-                Text("This build still reports a stub local runtime. The shell now says that plainly instead of pretending the self-hosted stack is fully live.")
+                Text("This build is still using the stub local runtime. The shell now says that plainly. Use Models to link a cloud route for real chat today, or install a local model in preparation for the real on-device bridge.")
                     .font(.caption)
                     .foregroundColor(BMOTheme.warning)
             }
+
+            Text("Cloud providers can be linked in Settings and switched day-to-day in Models. Settings handles credentials; Models is the live route control surface.")
+                .font(.caption)
+                .foregroundColor(BMOTheme.textTertiary)
 
             VStack(alignment: .leading, spacing: 6) {
                 Text("Setup checklist")

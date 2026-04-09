@@ -379,6 +379,7 @@ struct OnboardingFlow: View {
                 .bmoCard()
                 .padding(.horizontal, BMOTheme.spacingLG)
 
+<<<<<<< HEAD
                 VStack(alignment: .leading, spacing: 10) {
                     Text("Next steps the app expects")
                         .font(.headline)
@@ -387,7 +388,32 @@ struct OnboardingFlow: View {
                         Text("• \(item)")
                             .font(.subheadline)
                             .foregroundColor(BMOTheme.textSecondary)
+=======
+                // Agent summary
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Primary Agent")
+                        .font(.caption)
+                        .foregroundColor(BMOTheme.textTertiary)
+                    HStack(spacing: 12) {
+                        Circle()
+                            .fill(BMOTheme.accent)
+                            .frame(width: 40, height: 40)
+                            .overlay(
+                                Image(systemName: "cpu")
+                                    .foregroundColor(BMOTheme.backgroundPrimary)
+                            )
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("BMO Agent")
+                                .font(.headline)
+                                .foregroundColor(BMOTheme.textPrimary)
+                            Text(primaryAgentSummary)
+                                .font(.caption)
+                                .foregroundColor(BMOTheme.textSecondary)
+                        }
                     }
+                    Text(primaryAgentDetail)
+                        .font(.caption)
+                        .foregroundColor(BMOTheme.textTertiary)
                 }
                 .bmoCard()
                 .padding(.horizontal, BMOTheme.spacingLG)
@@ -425,6 +451,18 @@ struct OnboardingFlow: View {
                 .foregroundColor(BMOTheme.textPrimary)
         }
         .padding(.horizontal, BMOTheme.spacingLG)
+    }
+
+    private var primaryAgentSummary: String {
+        appState.usesStubRuntime
+            ? "Local-first shell • route setup after launch"
+            : "On-device runtime available after model install"
+    }
+
+    private var primaryAgentDetail: String {
+        appState.usesStubRuntime
+            ? "This build still uses the stub local runtime. Launch into Mission Control, then use Models to link a cloud route or prepare a local model."
+            : "Finish onboarding, then use Models to select an installed on-device route."
     }
 
     private func summaryRow(icon: String, label: String, value: String) -> some View {

@@ -1,135 +1,102 @@
 # iOS Product Surfaces
 
-This file captures the current product-surface cut for the iOS shell and separates what should be built now from what should be wrapped or deferred.
+This file is the current source of truth for what the BeMoreAgent iOS shell actually exposes from
+`bmo-stack`.
 
-## Build Now
+## Available inside iOS
 
 ### Mission Control
 
-Decision: build now.
-
-Reason:
-
-- iPhone needs a first-class operator surface, not just a model picker and settings form.
-- The shell already has durable local state for routing, files, chat, buddy state, and provider metadata.
-- Mission Control can use live local app state without pretending there is a completed local runtime.
-
-Current scope:
-
-- active route mode and target
-- runtime and persistence summary
+- current route mode, target, and health
+- live local state counts for files, messages, and installed models
 - provider linkage visibility
-- shell tab posture
-- operator naming and product-shell framing
+- tab posture summary
+- bundled BMO Stack surface briefs sourced from repo docs
 
-### Models as route control
+### Models
 
-Decision: build now.
-
-Reason:
-
-- route choice should live where local installs and cloud routes are already visible
-- cloud model selection cannot stay buried in Settings if the product is meant to feel operational
-
-Current scope:
-
-- active route card
+- installed local models
+- linked cloud providers
+- available cloud models per provider
+- active route summary
 - local model activation
-- cloud route activation
-- live model list refresh per provider
-- saved source management
+- cloud route activation and day-to-day model switching
+- saved model source URLs
 
-### Buddy collection controls
+### Buddy
 
-Decision: build now.
+- onboarding-derived buddy generation
+- rename
+- explicit make-active selection
+- local persistence for active buddy, collection, trades, and battle history
 
-Reason:
+### Product shell customization
 
-- rename and explicit make-active are core collection interactions, small in scope, and fully local
-- the state already persists in `buddy-system.json`
+- persisted tab visibility
+- persisted tab ordering
+- Settings-managed tab editor
+- relaunch-safe selected tab handling
 
-Current scope:
+### Repo-backed surface briefs
 
-- rename active or collected buddy
-- make any collected buddy active
-- persist collection and active-buddy changes
+- `docs/MISSION_CONTROL.md`
+- `apps/openclaw-shell-ios/ADMIN_TESTFLIGHT_RUNBOOK.md`
+- `docs/POKEMON_CHAMPIONS_TEAM_BUILDER_BACKEND.md`
 
-### Tab visibility and order
+These are wrapped as mobile briefs inside Mission Control so the app can expose real stack scope
+without pretending to ship full desktop parity or a full team-builder product.
 
-Decision: build now.
+## Wrapped
 
-Reason:
+### Mission Control contract
 
-- product shell needs lightweight operator customization without inventing a heavy IA system
-- tab state is simple to persist and low-risk
+Wrapped as a mobile operator summary plus bundled source brief.
 
-Current scope:
+Why:
 
-- persist hidden tabs
-- persist visible-tab order
-- keep Control always available
+- the iPhone shell can surface the current operating contract and operator posture
+- the phone should not claim to be the full desktop Mission Control service
 
-## Wrap
+### TestFlight admin path
 
-### OpenClaw dashboard
+Wrapped as an operational brief sourced from the repo runbook.
 
-Decision: wrap, not fully rebuild now.
+Why:
 
-Reason:
+- release proof and upload posture are now part of the real `bmo-stack` workflow
+- the app can expose the truth of the release path without trying to upload builds from the phone
 
-- there is value in a mobile dashboard posture, but the phone should not attempt to become the full desktop/workstation shell in one pass
-- the current Mission Control tab is the mobile wrapper around the operator-dashboard need
+### Pokemon Champions team builder backend spec
 
-Wrap strategy:
+Wrapped as a bundled brief sourced from the merged spec.
 
-- expose high-signal state summaries now
-- avoid deep desktop-style orchestration until the data model and runtime are stable
+Why:
 
-### Enterprise surfaces
+- PR `#206` already made it real repo scope
+- the iOS shell can acknowledge and surface the spec honestly without inventing a fake in-app
+  backend client or toy builder
 
-Decision: wrap selectively.
-
-Reason:
-
-- enterprise approvals, audit streams, org controls, and fleet-management views are valid future surfaces
-- they do not belong in the first clean iOS shell pass unless they map to a real mobile operator need and a real backend contract
-
-Wrap strategy:
-
-- keep Settings and Mission Control ready to host enterprise posture later
-- do not fake enterprise readiness with static panels
-
-## Defer
+## Deferred
 
 ### Full OpenClaw dashboard parity
 
-Decision: defer.
-
-Reason:
-
-- desktop-grade dashboards need more density, more workflow state, and likely backend support
-- the phone shell should stay legible and operationally honest
+Deferred because the current phone shell is still a summary/control surface, not the full desktop
+operator workstation.
 
 ### Enterprise administration suite
 
-Decision: defer.
+Deferred because real tenancy, approvals, auth, and audit plumbing are not present in this app
+target yet.
 
-Reason:
+### Real on-device local runtime
 
-- requires real auth, tenancy, policy, and audit plumbing
-- not appropriate to imply inside a local-first shell before those contracts exist
-
-### Pokemon Champions team builder
-
-Decision: defer.
-
-Reason:
-
-- adjacent and potentially useful as a future buddy/team surface, but not part of the core operator shell
-- should only ship when it has a clear product reason and does not blur the app's operator identity
+Deferred from PR A because the current shell still boots `MLCBridgeEngine()` with no target
+dependency and still falls back to the stub local-runtime path when `MLCSwift` is unavailable.
 
 ## Guidance
 
-- Build now when the surface is driven by real local state already present in the app.
-- Wrap when the surface is directionally correct but should stay summary-level on iPhone.
-- Defer when the surface implies backend, product, or workflow maturity that does not yet exist.
+- Use Mission Control for status, provenance, and repo-surface briefs.
+- Use Models for live route selection.
+- Use Settings for maintenance, credentials, and tab management.
+- Keep wrapped surfaces clearly labeled as wrapped.
+- Do not imply local on-device inference is available until PR B proves it on a device.

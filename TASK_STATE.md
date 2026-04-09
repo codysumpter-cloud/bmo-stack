@@ -1,19 +1,40 @@
 # Task State
 
-Last updated: 2026-04-07 10:39 UTC
+Last updated: 2026-04-09 19:33 UTC
 
 ## Current status
 
-- Description: Harden `apps/openclaw-shell-ios` for safer local storage defaults and clean local simulator builds.
-- Active repo: `/Users/prismtek/code/bmo-stack`
-- Branch: `fix/openclaw-shell-ios-local-build`
-- Last successful step: added explicit iOS app plist, tightened file-access defaults, moved workspace storage to app support, regenerated the Xcode project, and passed a simulator `xcodebuild` using repo-local DerivedData.
-- Next intended step: commit the iOS hardening changes, verify the branch is clean, and push only if the post-commit state stays green.
-- Verification complete: true
+- Description: Reconcile the real iOS shell state on current `master`, add a meaningful repo-backed BMO Stack surface inside the app, fix stale local-runtime/product copy, and refresh the iOS docs to match what actually ships.
+- Active repo: `/Users/taylor/development/bmo-stack`
+- Branch: `codex/ios-shell-surfaces-a`
+- Last successful step: rebased the work onto `origin/master` after confirming PR `#212` advanced the iOS target to build `13`, preserved the focused shell/doc changes, and kept the repo-managed TestFlight path intact.
+- Next intended step: rerun the required build plus simulator verification from the rebased branch, then publish the scoped PRs with truthful build/runtime status.
+- Verification complete: false
 - Manual steps remaining:
-  - set a real Apple Development team and unique bundle identifier in Xcode before installing on a physical iPhone
-  - enable Developer Mode on the iPhone before direct device install
+  - rerun the required local build after edits on top of `origin/master`
+  - verify relaunch persistence for onboarding, buddy state, and tab layout after the rebase
+  - determine whether PR B local runtime work is honestly feasible from current `master`
 - Safe to resume: true
+
+- 2026-04-09 19:13 UTC
+  - Repo: `/Users/taylor/development/bmo-stack`
+  - Branch: `codex/ios-shell-surfaces-a`
+  - Files touched: none yet on this branch
+  - Last successful step: access gate, baseline build, and baseline simulator verification passed on current `master`; current master already includes persisted tab management, buddy rename/active selection persistence, and Models route control.
+  - Next intended step: implement focused PR A deltas rather than re-creating already-landed work
+  - Verification complete: false
+  - Manual steps remaining: code/doc edits, rebuild, simulator verification, PR B feasibility call
+  - Safe to resume: true
+
+- 2026-04-09 19:33 UTC
+  - Repo: `/Users/taylor/development/bmo-stack`
+  - Branch: `codex/ios-shell-surfaces-a`
+  - Files touched: Mission Control shell/docs plus repo-backed surface view
+  - Last successful step: fetched `origin/master`, confirmed PR `#212` landed at `2026-04-09T18:53:22Z`, rebased onto build `13`, and restored the in-progress shell/doc changes cleanly
+  - Next intended step: rerun required build + simulator checks, then publish PR A and separate runtime-blocker PR B
+  - Verification complete: false
+  - Manual steps remaining: rebuild, final simulator verification, PR publication
+  - Safe to resume: true
 
 ## Recent checkpoints
 
