@@ -1,7 +1,10 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct HomeView: View {
     @EnvironmentObject private var appState: AppState
+    @State private var isSettingsPresented = false
+    @State private var isHomeFileImporterPresented = false
 
     var body: some View {
         NavigationStack {
@@ -26,7 +29,7 @@ struct HomeView: View {
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
-                        // Settings placeholder
+                        isSettingsPresented = true
                     } label: {
                         Image(systemName: "gearshape")
                             .foregroundColor(BMOTheme.textSecondary)
@@ -35,10 +38,24 @@ struct HomeView: View {
             }
             .toolbarBackground(BMOTheme.backgroundPrimary, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
+            .fileImporter(
+                isPresented: $isHomeFileImporterPresented,
+                allowedContentTypes: [.data, .plainText, .json, .sourceCode, .xml, .commaSeparatedText, .text],
+                allowsMultipleSelection: true
+            ) { result in
+                switch result {
+                case .success(let urls):
+                    appState.workspaceStore.importFiles(from: urls)
+                case .failure(let error):
+                    appState.workspaceStore.errorMessage = error.localizedDescription
+                }
+            }
+            .sheet(isPresented: $isSettingsPresented) {
+                SettingsView()
+                    .environmentObject(appState)
+            }
         }
     }
-
-    // MARK: - Header
 
     private var headerSection: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -57,8 +74,6 @@ struct HomeView: View {
         }
         .padding(.top, BMOTheme.spacingSM)
     }
-
-    // MARK: - Primary agent
 
     private var primaryAgentCard: some View {
         VStack(alignment: .leading, spacing: 14) {
@@ -109,25 +124,11 @@ struct HomeView: View {
         .bmoCard()
     }
 
-    // MARK: - Status cards
-
     private var statusCardsRow: some View {
         HStack(spacing: 12) {
-            statusCard(
-                icon: "message",
-                count: "\(appState.chatStore.messages.count)",
-                label: "Messages"
-            )
-            statusCard(
-                icon: "folder",
-                count: "\(appState.workspaceStore.files.count)",
-                label: "Files"
-            )
-            statusCard(
-                icon: "square.and.arrow.down",
-                count: "\(appState.modelStore.installedModels.count)",
-                label: "Models"
-            )
+            statusCard(icon: "message", count: "\(appState.chatStore.messages.count)", label: "Messages")
+            statusCard(icon: "folder", count: "\(appState.workspaceStore.files.count)", label: "Files")
+            statusCard(icon: "square.and.arrow.down", count: "\(appState.modelStore.installedModels.count)", label: "Models")
         }
     }
 
@@ -147,8 +148,6 @@ struct HomeView: View {
         .bmoCard()
     }
 
-    // MARK: - Quick actions
-
     private var quickActionsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Quick Actions")
@@ -161,11 +160,12 @@ struct HomeView: View {
                     appState.chatStore.clear()
                 }
                 quickAction(icon: "folder.badge.plus", label: "Import File") {
-                    // handled via Files tab
+                    isHomeFileImporterPresented = true
                 }
                 quickAction(icon: "arrow.clockwise", label: "Refresh") {
                     appState.modelStore.refreshInstalledModels()
                     appState.workspaceStore.load()
+                    appState.refreshGemmaState()
                 }
             }
         }
@@ -187,8 +187,6 @@ struct HomeView: View {
             .clipShape(RoundedRectangle(cornerRadius: BMOTheme.radiusMedium, style: .continuous))
         }
     }
-
-    // MARK: - Runtime
 
     private var runtimeStatusCard: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -213,15 +211,17 @@ struct HomeView: View {
             }
 
             if appState.usesStubRuntime {
-                Text("LiteRT-LM Swift SDK is in development. Model download and management are fully functional. On-device inference will activate when the SDK ships.")
+                Text("Chat is intentionally disabled in stub mode so simulated replies cannot be mistaken for real inference. Install a model now; real on-device inference activates when the runtime is available.")
                     .font(.caption)
                     .foregroundColor(BMOTheme.textTertiary)
             }
+
+            Text("Cloud providers are not part of this local-first shell target. Use the BeMoreAgent Platform target for remote-model workflows.")
+                .font(.caption)
+                .foregroundColor(BMOTheme.textTertiary)
         }
         .bmoCard()
     }
-
-    // MARK: - Computed
 
     private var agentStatus: String {
         if appState.gemmaDownloadState == .installed && !appState.usesStubRuntime {
@@ -245,9 +245,12 @@ struct HomeView: View {
 
     private var runtimeStatusColor: Color {
         switch appState.runtimeStatus {
-        case _ where appState.runtimeStatus.contains("error"): return BMOTheme.error
-        case _ where appState.runtimeStatus.contains("Selected"): return BMOTheme.success
-        default: return BMOTheme.warning
+        case _ where appState.runtimeStatus.localizedCaseInsensitiveContains("error"):
+            return BMOTheme.error
+        case _ where appState.runtimeStatus.localizedCaseInsensitiveContains("selected"):
+            return BMOTheme.success
+        default:
+            return BMOTheme.warning
         }
     }
 

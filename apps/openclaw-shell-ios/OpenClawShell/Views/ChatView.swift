@@ -8,7 +8,6 @@ struct ChatView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                // Messages
                 ScrollViewReader { proxy in
                     ScrollView {
                         LazyVStack(spacing: 12) {
@@ -46,12 +45,10 @@ struct ChatView: View {
                 Divider()
                     .overlay(BMOTheme.divider)
 
-                // File context chips
                 if !appState.workspaceStore.files.isEmpty {
                     fileChipsBar
                 }
 
-                // Input bar
                 inputBar
             }
             .background(BMOTheme.backgroundPrimary)
@@ -85,8 +82,6 @@ struct ChatView: View {
         }
     }
 
-    // MARK: - File chips
-
     private var fileChipsBar: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
@@ -119,16 +114,14 @@ struct ChatView: View {
         }
     }
 
-    // MARK: - Input
-
     private var inputBar: some View {
         VStack(spacing: 8) {
             if appState.usesStubRuntime || appState.selectedInstalledModel == nil {
                 HStack(spacing: 6) {
-                    Image(systemName: appState.usesStubRuntime ? "info.circle" : "exclamationmark.triangle")
+                    Image(systemName: appState.usesStubRuntime ? "slash.circle" : "exclamationmark.triangle")
                         .font(.caption)
                     Text(appState.usesStubRuntime
-                        ? "Stub runtime — responses are simulated"
+                        ? "Stub mode — chat sending is disabled until real inference is available."
                         : "No model selected")
                         .font(.caption)
                 }
@@ -169,11 +162,10 @@ struct ChatView: View {
     private var canSend: Bool {
         !appState.chatStore.isGenerating &&
         !prompt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
-        (appState.usesStubRuntime || appState.selectedInstalledModel != nil)
+        !appState.usesStubRuntime &&
+        appState.selectedInstalledModel != nil
     }
 }
-
-// MARK: - Message bubble
 
 private struct MessageBubble: View {
     let message: ChatMessage
