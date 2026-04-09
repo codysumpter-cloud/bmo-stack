@@ -116,7 +116,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: bemoreagent-xcdistributionlogs
-          path: /var/folders/**/BeMoreAgent_*.xcdistributionlogs
+          path: ${{ runner.temp }}/**/BeMoreAgent_*.xcdistributionlogs
           if-no-files-found: ignore
 
       - name: Clean temporary signing files
