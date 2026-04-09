@@ -57,6 +57,12 @@ jobs:
             printf '%s' "$ASC_API_KEY" | base64 --decode > "$RUNNER_TEMP/AuthKey.p8"
           fi
 
+      - name: Show app version and build
+        run: |
+          VERSION=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' OpenClawShell/Info.plist)
+          BUILD=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' OpenClawShell/Info.plist)
+          echo "Preparing BeMoreAgent $VERSION ($BUILD) for TestFlight"
+
       - name: Generate Xcode project
         run: |
           test -f project.yml
@@ -87,6 +93,23 @@ jobs:
             -authenticationKeyPath "$RUNNER_TEMP/AuthKey.p8" \
             -authenticationKeyID "$ASC_KEY_ID" \
             -authenticationKeyIssuerID "$ASC_ISSUER_ID"
+
+      - name: Publish TestFlight summary
+        if: success()
+        run: |
+          SOURCE_VERSION=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' OpenClawShell/Info.plist)
+          SOURCE_BUILD=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' OpenClawShell/Info.plist)
+          ARCHIVE_PLIST="$RUNNER_TEMP/BeMoreAgent.xcarchive/Products/Applications/BeMoreAgent.app/Info.plist"
+          ARCHIVE_VERSION=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$ARCHIVE_PLIST")
+          ARCHIVE_BUILD=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$ARCHIVE_PLIST")
+          {
+            echo '## TestFlight upload'
+            echo ''
+            echo "- Source version: $SOURCE_VERSION ($SOURCE_BUILD)"
+            echo "- Archived version: $ARCHIVE_VERSION ($ARCHIVE_BUILD)"
+            echo '- Upload step: xcodebuild -exportArchive completed successfully'
+            echo '- Admin runbook: apps/openclaw-shell-ios/ADMIN_TESTFLIGHT_RUNBOOK.md'
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload distribution logs on failure
         if: failure()
