@@ -74,14 +74,13 @@ Required GitHub repo configuration:
 Notes:
 
 - GitHub-hosted macOS runners may be too old for this project, so these workflows are pinned to the self-hosted Mac path by default.
-- The API key must be a team App Store Connect key with enough access to sign/export/upload builds.
+- The workflow writes the App Store Connect `.p8` key to a temporary file and uses Xcode's authentication-key flags, so it does not depend on an interactive Xcode account login.
+- The API key must be a team App Store Connect key with enough access to sign, export, and upload builds.
 - Keep `.p8` files local only, never commit them.
 
 ## Honest limits
 
-This repo is now set up for native Xcode handoff, onboarding demos, model/file management, and local state. The remaining Mac-only work is:
+This repo is now set up for native Xcode handoff, onboarding demos, model/file management, and repeatable TestFlight automation. The remaining Mac-only work is:
 
-- validating the Xcode build end to end
-- Apple signing
-- TestFlight upload
+- validating the Xcode build end to end when project structure changes
 - replacing the stub runtime with the real local inference backend

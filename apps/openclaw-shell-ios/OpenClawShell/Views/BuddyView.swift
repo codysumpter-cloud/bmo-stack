@@ -43,11 +43,7 @@ enum BuddyArchetype: String, CaseIterable, Codable, Hashable {
              / \\
             """
         case .cat:
-            return """
-            /\\_/\\
-           ( =.= )
-            (___)
-            """
+            return "/\\_/\\\n( =.= )\n (___)"
         case .slime:
             return """
              .-.
@@ -57,12 +53,7 @@ enum BuddyArchetype: String, CaseIterable, Codable, Hashable {
               `~~~'
             """
         case .capybara:
-            return """
-             ____
-            / __ \\
-           / /  \\_\\
-           \\_\\____/
-            """
+            return " ____\n/ __ \\\n/ /  \\_\\\n\\_\\____/"
         }
     }
 }

@@ -211,7 +211,7 @@ struct HomeView: View {
             }
 
             if appState.usesStubRuntime {
-                Text("Chat is intentionally disabled in stub mode so simulated replies cannot be mistaken for real inference. Install a model now; real on-device inference activates when the runtime is available.")
+                Text("This build is using the stub runtime, so chat works in preview mode with simulated replies. Real on-device inference activates once the runtime bridge is wired in.")
                     .font(.caption)
                     .foregroundColor(BMOTheme.textTertiary)
             }

@@ -32,17 +32,23 @@ struct MainTabView: View {
                 }
                 .tag(1)
 
+            BuddyView()
+                .tabItem {
+                    Label("Buddy", systemImage: "person.2.fill")
+                }
+                .tag(2)
+
             FilesView()
                 .tabItem {
                     Label("Files", systemImage: "folder.fill")
                 }
-                .tag(2)
+                .tag(3)
 
             ModelsView()
                 .tabItem {
                     Label("Models", systemImage: "cpu")
                 }
-                .tag(3)
+                .tag(4)
         }
         .tint(BMOTheme.accent)
         .onAppear {

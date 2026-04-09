@@ -116,16 +116,14 @@ struct ChatView: View {
 
     private var inputBar: some View {
         VStack(spacing: 8) {
-            if appState.usesStubRuntime || appState.selectedInstalledModel == nil {
+            if appState.selectedProviderAccount != nil || appState.selectedInstalledModel != nil || appState.usesStubRuntime {
                 HStack(spacing: 6) {
-                    Image(systemName: appState.usesStubRuntime ? "slash.circle" : "exclamationmark.triangle")
+                    Image(systemName: appState.selectedProviderAccount != nil ? "link.circle.fill" : appState.usesStubRuntime ? "sparkles.rectangle.stack" : "cpu")
                         .font(.caption)
-                    Text(appState.usesStubRuntime
-                        ? "Stub mode — chat sending is disabled until real inference is available."
-                        : "No model selected")
+                    Text(statusLine)
                         .font(.caption)
                 }
-                .foregroundColor(BMOTheme.warning)
+                .foregroundColor(appState.selectedProviderAccount != nil || appState.selectedInstalledModel != nil ? BMOTheme.textSecondary : BMOTheme.warning)
                 .padding(.horizontal, BMOTheme.spacingMD)
             }
 
@@ -162,8 +160,17 @@ struct ChatView: View {
     private var canSend: Bool {
         !appState.chatStore.isGenerating &&
         !prompt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
-        !appState.usesStubRuntime &&
-        appState.selectedInstalledModel != nil
+        (appState.selectedProviderAccount != nil || appState.usesStubRuntime || appState.selectedInstalledModel != nil)
+    }
+
+    private var statusLine: String {
+        if let account = appState.selectedProviderAccount {
+            return "Cloud chat via \(account.provider.displayName) • \(account.modelSlug)"
+        }
+        if let model = appState.selectedInstalledModel {
+            return "On-device model • \(model.displayName)"
+        }
+        return "Stub preview mode"
     }
 }
 
