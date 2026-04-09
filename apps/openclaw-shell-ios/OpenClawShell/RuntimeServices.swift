@@ -994,27 +994,18 @@ final class AppState: ObservableObject {
         return account.isEnabled ? account : nil
     }
 
-    var selectedProviderAccount: ProviderAccount? {
-        guard let provider = runtimePreferences.selection.selectedProvider else { return nil }
-        let account = providerStore.account(for: provider)
-        return account.isEnabled ? account : nil
-    }
-
     var operatorSummary: String {
         if let account = selectedProviderAccount {
             return "Cloud chat ready via \(account.provider.displayName) using \(account.modelSlug)."
-        }
-        }
-        if let model = selectedInstalledModel {
+        } else if let model = selectedInstalledModel {
             return "On-device runtime selected: \(model.modelID.isEmpty ? model.localFilename : model.modelID)."
-        }
-        if usesStubRuntime {
+        } else if usesStubRuntime {
             return "Link a cloud provider or install a local model to enable real chat."
-        }
-        if engine.requiresModelSelection {
+        } else if engine.requiresModelSelection {
             return "On-device runtime is available, but no packaged model is selected yet."
+        } else {
+            return "Runtime ready."
         }
-        return "Runtime ready."
     }
 
     var localFirstSummary: String {
@@ -1037,9 +1028,7 @@ final class AppState: ObservableObject {
     private let engine: LocalLLMEngine
     private let cloudExecutionService = CloudExecutionService()
 
-    init(engine: LocalLLMEngine) {
-        self.engine = engine
-    }
+
 
     var backendDisplayName: String {
         if let account = selectedProviderAccount {
