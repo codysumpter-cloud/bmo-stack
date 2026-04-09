@@ -967,6 +967,7 @@ final class RuntimePreferencesStore: ObservableObject {
 
 @MainActor
 final class AppState: ObservableObject {
+    // MARK: Stored properties – declared before the initializer so they are in scope
     @Published var modelStore = ModelCatalogStore()
     @Published var workspaceStore = WorkspaceStore()
     @Published var chatStore = ChatStore()
@@ -979,6 +980,10 @@ final class AppState: ObservableObject {
     @Published var providerModelLoading = Set<ProviderKind>()
     @Published var providerModelErrors: [ProviderKind: String] = [:]
 
+    // MARK: Initializer – now placed after property declarations
+    init(engine: LocalLLMEngine) {
+        self.engine = engine
+    }
     var selectedInstalledModel: InstalledModel? {
         guard let filename = runtimePreferences.selection.selectedInstalledFilename else { return nil }
         return modelStore.installedModels.first(where: { $0.localFilename == filename })
@@ -997,17 +1002,15 @@ final class AppState: ObservableObject {
     var operatorSummary: String {
         if let account = selectedProviderAccount {
             return "Cloud chat ready via \(account.provider.displayName) using \(account.modelSlug)."
-        }
-        if let model = selectedInstalledModel {
+        } else if let model = selectedInstalledModel {
             return "On-device runtime selected: \(model.modelID.isEmpty ? model.localFilename : model.modelID)."
-        }
-        if usesStubRuntime {
+        } else if usesStubRuntime {
             return "Link a cloud provider or install a local model to enable real chat."
-        }
-        if engine.requiresModelSelection {
+        } else if engine.requiresModelSelection {
             return "On-device runtime is available, but no packaged model is selected yet."
+        } else {
+            return "Runtime ready."
         }
-        return "Runtime ready."
     }
 
     var localFirstSummary: String {
@@ -1030,9 +1033,7 @@ final class AppState: ObservableObject {
     private let engine: LocalLLMEngine
     private let cloudExecutionService = CloudExecutionService()
 
-    init(engine: LocalLLMEngine) {
-        self.engine = engine
-    }
+
 
     var backendDisplayName: String {
         if let account = selectedProviderAccount {
