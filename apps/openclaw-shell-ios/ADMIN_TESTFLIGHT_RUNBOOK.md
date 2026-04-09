@@ -34,7 +34,8 @@ Current expected value:
 
 1. `apps/openclaw-shell-ios/project.yml` generates cleanly with `xcodegen generate`.
 2. `BeMoreAgent` builds for `generic/platform=iOS Simulator`.
-3. The PR body includes the required task contract:
+3. `apps/openclaw-shell-ios/project.yml` keeps `PRODUCT_BUNDLE_IDENTIFIER: BeMoreAgent` exactly. Do not change it to a reverse-DNS id unless the Apple identifier itself is changed first.
+4. The PR body includes the required task contract:
 
 ```md
 ## Task contract
@@ -43,8 +44,8 @@ Current expected value:
 - Rollback: yes
 ```
 
-4. The PR is mergeable and the relevant checks are green.
-5. `CFBundleVersion` is higher than the last uploaded build.
+5. The PR is mergeable and the relevant checks are green.
+6. `CFBundleVersion` is higher than the last uploaded build.
 
 ## How to ship the next build
 
