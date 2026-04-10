@@ -24,6 +24,8 @@ The shell persists local state under app-scoped Application Support, including:
 - buddy system state
 - operator preferences
 
+Bundle identity continuity matters for this state. See [`BUILD_14_CONTINUITY_NOTE.md`](./BUILD_14_CONTINUITY_NOTE.md) for why build 14 could look like a fresh install after the bundle identifier briefly changed.
+
 ## Runtime posture
 
 This subtree does not claim a completed on-device runtime. It builds without `MLCSwift` by falling back to a stub local engine boundary, and real local inference still depends on packaging and wiring an actual runtime.

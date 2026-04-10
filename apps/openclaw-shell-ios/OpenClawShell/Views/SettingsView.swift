@@ -98,9 +98,9 @@ struct SettingsView: View {
             return "\(account.provider.displayName) • \(account.modelSlug)"
         }
         if let model = appState.selectedInstalledModel {
-            return model.displayName
+            return appState.usesStubRuntime ? "\(model.displayName) • runtime unavailable" : model.displayName
         }
-        return "None"
+        return "Route not configured"
     }
 
     private func providerRow(_ provider: ProviderKind) -> some View {

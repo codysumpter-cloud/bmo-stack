@@ -5,7 +5,7 @@ configs:
   Debug: debug
   Release: release
 settings:
-  IPHONEOS_DEPLOYMENT_TARGET: 17.0
+  IPHONEOS_DEPLOYMENT_TARGET: 26.0
   SWIFT_VERSION: "5.9"
 targets:
   BeMoreAgent:
@@ -29,3 +29,16 @@ targets:
         CODE_SIGN_STYLE: Automatic
         PRODUCT_NAME: BeMoreAgent
     dependencies: []
+  BeMoreAgentTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: OpenClawShellTests
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: BeMoreAgentTests
+        GENERATE_INFOPLIST_FILE: YES
+        DEVELOPMENT_TEAM: DY9FHPRZA9
+        CODE_SIGN_STYLE: Automatic
+    dependencies:
+      - target: BeMoreAgent
