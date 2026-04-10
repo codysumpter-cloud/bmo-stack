@@ -151,6 +151,11 @@ final class AppStateRuntimeTests: XCTestCase {
 
         let soul = try runtime.readFile("soul.md")
         XCTAssertTrue(soul.contains("one agent, one workspace"))
+        let skillsMarkdown = try runtime.readFile("skills.md")
+        XCTAssertTrue(skillsMarkdown.contains("## Installed skills"))
+        XCTAssertTrue(skillsMarkdown.contains("## ClawHub starters"))
+        XCTAssertTrue(skillsMarkdown.contains("File Crafter"))
+        XCTAssertTrue(skillsMarkdown.contains("Chat should not treat old skill artifacts as active context"))
         XCTAssertTrue(runtime.skills.contains(where: { $0.id == BuiltInSkillRegistry.pokemonTeamBuilderID }))
     }
 
@@ -198,6 +203,7 @@ final class AppStateRuntimeTests: XCTestCase {
         runtime.bootstrap(config: .default, preferences: .default, routeSummary: "Route not configured")
 
         let template = try XCTUnwrap(ClawHubCatalog.templates.first)
+        XCTAssertGreaterThanOrEqual(ClawHubCatalog.templates.count, 8)
         let receipt = runtime.installClawHubSkill(template)
 
         XCTAssertEqual(receipt.status, .persisted)

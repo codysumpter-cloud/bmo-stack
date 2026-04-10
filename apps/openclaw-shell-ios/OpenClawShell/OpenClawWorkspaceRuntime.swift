@@ -277,6 +277,101 @@ enum ClawHubCatalog {
             - Save changes through workspace receipts.
             """,
             systemImage: "building.columns"
+        ),
+        ClawHubSkillTemplate(
+            id: "clawhub-file-crafter",
+            name: "File Crafter",
+            description: "Create, revise, export, and clean up workspace files through receipt-backed file actions.",
+            category: "Workspace",
+            tags: ["files", "authoring", "export"],
+            starterMarkdown: """
+            # File Crafter
+
+            ## Purpose
+            Help the agent turn user requests into durable files in the Files or `.openclaw` workspace surfaces.
+
+            ## Runtime contract
+            - Ask for a filename when the path is ambiguous.
+            - Write only through workspace receipts.
+            - Offer export/delete follow-ups only after the file exists.
+            """,
+            systemImage: "doc.badge.plus"
+        ),
+        ClawHubSkillTemplate(
+            id: "clawhub-memory-gardener",
+            name: "Memory Gardener",
+            description: "Review durable facts and preferences, then propose precise memory.md and state-store improvements.",
+            category: "Memory",
+            tags: ["memory", "facts", "preferences"],
+            starterMarkdown: """
+            # Memory Gardener
+
+            ## Purpose
+            Keep durable memory useful by pruning noisy facts and strengthening real operator preferences.
+
+            ## Runtime contract
+            - Separate durable facts from session notes.
+            - Preserve user-authored identity details.
+            - Persist changes only after the user or runtime confirms the edit.
+            """,
+            systemImage: "leaf.fill"
+        ),
+        ClawHubSkillTemplate(
+            id: "clawhub-model-route-doctor",
+            name: "Model Route Doctor",
+            description: "Diagnose cloud/local route configuration without pretending unavailable runtimes are online.",
+            category: "Runtime",
+            tags: ["models", "routing", "diagnostics"],
+            starterMarkdown: """
+            # Model Route Doctor
+
+            ## Purpose
+            Explain what model route is active, what is missing, and which runtime capabilities are currently available.
+
+            ## Runtime contract
+            - Report configured routes separately from working routes.
+            - Never imply local inference is live when only stub runtime is present.
+            - Suggest the smallest next action to restore capability.
+            """,
+            systemImage: "stethoscope"
+        ),
+        ClawHubSkillTemplate(
+            id: "clawhub-response-cleaner",
+            name: "Response Cleaner",
+            description: "Keep assistant answers concise, answer-first, and free of hidden reasoning unless explanation is requested.",
+            category: "Chat",
+            tags: ["chat", "answers", "reasoning"],
+            starterMarkdown: """
+            # Response Cleaner
+
+            ## Purpose
+            Help the agent answer the user's actual request without leaking scratchpad, hidden reasoning, or unrelated receipts.
+
+            ## Runtime contract
+            - Preserve the final answer.
+            - Remove thought-process scaffolding.
+            - Include rationale only when the user asks for explanation.
+            """,
+            systemImage: "text.bubble"
+        ),
+        ClawHubSkillTemplate(
+            id: "clawhub-battle-arena",
+            name: "Buddy Battle Arena",
+            description: "Create receipt-backed buddy battle records, outcomes, and training recommendations.",
+            category: "Buddy",
+            tags: ["buddy", "battle", "records"],
+            starterMarkdown: """
+            # Buddy Battle Arena
+
+            ## Purpose
+            Turn buddy battles into real persisted records instead of flavor text.
+
+            ## Runtime contract
+            - Read current buddy stats before battle.
+            - Persist the battle result, rewards, and next training plan.
+            - Mark uncertain simulator details as planned, not completed.
+            """,
+            systemImage: "shield.lefthalf.filled"
         )
     ]
 }
@@ -698,7 +793,20 @@ final class OpenClawWorkspaceRuntime: ObservableObject {
 
             Skills are registry-backed and can be extended through ClawHub installs or user-authored manifests.
 
-            \(skills.map { "- **\($0.name)** (`\($0.id)`): \($0.description)" }.joined(separator: "\n"))
+            ## Installed skills
+            \(skills.map { skill in
+                "- **\(skill.name)** (`\(skill.id)`): \(skill.description)\n  - Category: \(skill.category)\n  - Entrypoint: \(skill.entrypoint)\n  - Permissions: \(skill.permissions.joined(separator: ", "))"
+            }.joined(separator: "\n"))
+
+            ## ClawHub starters
+            \(ClawHubCatalog.templates.map { "- **\($0.name)** (`\($0.id)`): \($0.description)" }.joined(separator: "\n"))
+
+            ## Skill authoring rules
+            - New skills need a manifest in `registry/skills.json`.
+            - Skill instructions should live under `skills/<skill-id>/README.md`.
+            - A skill may propose edits, but persisted changes require workspace receipts.
+            - Skill output artifacts should stay under that skill's folder unless the user asks for a shared file.
+            - Chat should not treat old skill artifacts as active context unless the user attaches or references them.
             """
         ]
     }
