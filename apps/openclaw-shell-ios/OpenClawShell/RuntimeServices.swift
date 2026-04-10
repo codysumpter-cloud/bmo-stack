@@ -10,11 +10,13 @@ import MLCSwift
 enum Paths {
     static let appFolderName = "BeMoreAgent"
     static let workspaceFolderName = "BeMoreAgentWorkspace"
+    static var applicationSupportOverride: URL?
+    static var documentsOverride: URL?
 
     static var fileManager: FileManager { .default }
 
     static var applicationSupportDirectory: URL {
-        let base = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+        let base = applicationSupportOverride ?? fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
         let folder = base.appendingPathComponent(appFolderName, isDirectory: true)
         ensureDirectoryExists(folder)
         return folder
@@ -27,7 +29,7 @@ enum Paths {
     }
 
     static var documentsDirectory: URL {
-        fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        documentsOverride ?? fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
     }
 
     static var legacyWorkspaceDirectory: URL {
@@ -211,7 +213,9 @@ enum ModelMetadataInference {
 protocol LocalLLMEngine {
     var backendDisplayName: String { get }
     var isRuntimeReady: Bool { get }
+    var supportsLocalModels: Bool { get }
     var requiresModelSelection: Bool { get }
+    var runtimeRequirementMessage: String? { get }
 
     func bootstrap() async throws
     func configureRuntime(_ config: EngineRuntimeConfig?) async throws
@@ -233,12 +237,24 @@ final class MLCBridgeEngine: LocalLLMEngine {
 
     var isRuntimeReady: Bool { runtimeConfig != nil }
 
+    var supportsLocalModels: Bool {
+        #if canImport(MLCSwift)
+        return true
+        #else
+        return false
+        #endif
+    }
+
     var requiresModelSelection: Bool {
         #if canImport(MLCSwift)
         true
         #else
         false
         #endif
+    }
+
+    var runtimeRequirementMessage: String? {
+        supportsLocalModels ? nil : "This build does not include the on-device runtime package yet. Link a cloud provider for live chat."
     }
 
     func bootstrap() async throws {}
@@ -630,12 +646,12 @@ final class ChatStore: ObservableObject {
 
     func load() {
         guard let data = try? Data(contentsOf: Paths.chatStateFile) else {
-            messages = [ChatMessage(role: .system, content: "BMO Agent is ready. Install a model to start on-device inference.")]
+            messages = [ChatMessage(role: .system, content: "Route not configured. Link a cloud provider for live chat, or select a local model only after the on-device runtime is available.")]
             return
         }
         messages = (try? JSONDecoder().decode([ChatMessage].self, from: data)) ?? []
         if messages.isEmpty {
-            messages = [ChatMessage(role: .system, content: "BMO Agent is ready.")]
+            messages = [ChatMessage(role: .system, content: "Route not configured. Choose a live route in Models before chatting.")]
         }
     }
 
@@ -649,7 +665,7 @@ final class ChatStore: ObservableObject {
     }
 
     func clear() {
-        messages = [ChatMessage(role: .system, content: "Conversation cleared. Ready for a new chat.")]
+        messages = [ChatMessage(role: .system, content: "Conversation cleared. Route must still be configured before live chat.")]
         persist()
     }
 }
@@ -726,6 +742,30 @@ struct CloudExecutionMessage: Hashable {
 
     var role: Role
     var content: String
+}
+
+enum CloudPromptBuilder {
+    static func systemPrompt(config: StackConfig, operatorName: String, routeLabel: String) -> String {
+        let name = operatorName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let displayName = name.isEmpty ? "the operator" : name
+        let toolPosture = config.toolsEnabled
+            ? "The operator intends to use tool-capable OpenClaw routes when the Gateway exposes them."
+            : "The operator has not enabled tool-capable behavior for this stack profile."
+
+        return """
+        You are BeMoreAgent, the BMO-style operator agent for \(displayName)'s OpenClaw stack.
+
+        You are not confined to the iOS app. Do not frame yourself as app-only. Help with the full OpenClaw/operator context: planning, repo work, runtime diagnosis, provider setup, deployment reasoning, and stack operations.
+
+        Current route: \(routeLabel).
+        Stack name: \(config.stackName).
+        Gateway target: \(config.gatewayURL).
+        Admin/public domain: \(config.adminDomain).
+        \(toolPosture)
+
+        Be honest about capabilities. This direct cloud chat route can reason and use attached file context, but it does not by itself grant direct device control, shell execution, or OpenClaw Gateway tools. If an action requires the Gateway, desktop node, or a tool bridge, say exactly what route is needed instead of refusing as though the request is app-only.
+        """
+    }
 }
 
 enum CloudExecutionServiceError: Error {
@@ -1013,6 +1053,16 @@ final class UserPreferencesStore: ObservableObject {
         persist()
     }
 
+    func updateUserProfileMarkdown(_ value: String) {
+        preferences.userProfileMarkdown = value
+        persist()
+    }
+
+    func updateSoulProfileMarkdown(_ value: String) {
+        preferences.soulProfileMarkdown = value
+        persist()
+    }
+
     private func persist() {
         do {
             let data = try JSONEncoder().encode(preferences)
@@ -1065,7 +1115,7 @@ final class AppState: ObservableObject {
     }
 
     var usesStubRuntime: Bool {
-        engine.backendDisplayName.contains("Stub")
+        !engine.supportsLocalModels
     }
 
     var canUseSelectedLocalModel: Bool {
@@ -1086,15 +1136,18 @@ final class AppState: ObservableObject {
     }
 
     var activeRouteModeLabel: String {
-        if selectedProviderAccount != nil { return "Gateway cloud route" }
-        if selectedInstalledModel != nil { return usesStubRuntime ? "Local selected" : "On-device route" }
-        return stackConfig.deploymentMode == .bootstrapSelfHosted ? "Stack profile only" : "Awaiting pairing"
+        if selectedProviderAccount != nil { return "Direct cloud model route" }
+        if selectedInstalledModel != nil { return usesStubRuntime ? "Local runtime unavailable" : "On-device route" }
+        return "Route not configured"
     }
 
     var operatorSummary: String {
         if let account = selectedProviderAccount {
-            return "OpenClaw shell is routed through \(account.provider.displayName) using \(account.modelSlug)."
+            return "Chat is routed directly through \(account.provider.displayName) using \(account.modelSlug). Gateway tools still require a real OpenClaw bridge at \(stackConfig.gatewayURL)."
         } else if let model = selectedInstalledModel {
+            if usesStubRuntime {
+                return "\(model.displayName) is selected, but local inference is unavailable in this build."
+            }
             return "Selected runtime target: \(model.modelID.isEmpty ? model.localFilename : model.modelID)."
         } else if usesStubRuntime {
             return stackConfig.deploymentMode == .bootstrapSelfHosted
@@ -1131,7 +1184,7 @@ final class AppState: ObservableObject {
         if let model = selectedInstalledModel {
             return model.displayName
         }
-        return stackConfig.deploymentMode == .bootstrapSelfHosted ? "Stack profile prepared" : "No active route"
+        return "Route not configured"
     }
 
     var activeRouteDetail: String {
@@ -1139,14 +1192,15 @@ final class AppState: ObservableObject {
             return "\(account.modelSlug) via \(account.baseURL)"
         }
         if let model = selectedInstalledModel {
-            return model.modelID.isEmpty ? model.localFilename : model.modelID
+            let target = model.modelID.isEmpty ? model.localFilename : model.modelID
+            return usesStubRuntime ? "\(target) selected, but local inference is not live in this build." : target
         }
         return "Gateway target: \(stackConfig.gatewayURL). Select a live route in Models before using chat as if the stack is online."
     }
 
     var routeHealthSummary: String {
         if selectedProviderAccount != nil {
-            return "Live provider route ready for real chat."
+            return "Direct cloud chat is ready. OpenClaw tools require a Gateway/tool bridge."
         }
         if let model = selectedInstalledModel {
             return usesStubRuntime
@@ -1193,6 +1247,7 @@ final class AppState: ObservableObject {
         do {
             try await engine.bootstrap()
             try await applySelectedModelIfPossible()
+            refreshRuntimeSummary()
         } catch {
             chatStore.errorMessage = error.localizedDescription
             runtimeStatus = "Runtime error"
@@ -1396,7 +1451,7 @@ final class AppState: ObservableObject {
             let reply = try await cloudExecutionService.send(
                 account: account,
                 messages: [
-                    CloudExecutionMessage(role: .system, content: "You are verifying a chat transport inside the BeMoreAgent iOS app. Reply with exactly: ROUTE_OK"),
+                    CloudExecutionMessage(role: .system, content: "You are verifying BeMoreAgent's direct cloud chat route for an OpenClaw operator stack. Reply with exactly: ROUTE_OK"),
                     CloudExecutionMessage(role: .user, content: "Return ROUTE_OK")
                 ],
                 temperature: 0,
@@ -1471,17 +1526,29 @@ final class AppState: ObservableObject {
         if let account = selectedProviderAccount {
             runtimeStatus = "Cloud: \(account.provider.displayName) • \(account.modelSlug)"
         } else if let model = selectedInstalledModel {
-            runtimeStatus = model.modelID.isEmpty ? "Selected: \(model.localFilename)" : "Selected: \(model.modelID)"
+            if usesStubRuntime {
+                runtimeStatus = "Local model selected, runtime unavailable"
+            } else {
+                runtimeStatus = model.modelID.isEmpty ? "On-device: \(model.localFilename)" : "On-device: \(model.modelID)"
+            }
         } else if usesStubRuntime {
-            runtimeStatus = stackConfig.isOnboardingComplete ? "Stack profiled, live route still needed" : "Onboarding required"
+            runtimeStatus = stackConfig.isOnboardingComplete ? "Route not configured" : "Onboarding required"
         } else {
-            runtimeStatus = "No model selected"
+            runtimeStatus = "Route not configured"
         }
     }
 
     private func buildCloudMessages(attachedFiles: [WorkspaceFile]) -> [CloudExecutionMessage] {
+        let routeLabel = selectedProviderAccount.map { "\($0.provider.displayName) using \($0.modelSlug)" } ?? "No selected cloud provider"
         var messages: [CloudExecutionMessage] = [
-            CloudExecutionMessage(role: .system, content: "You are BeMoreAgent, a practical assistant inside the iOS app. Be concise, helpful, and use any attached file context when relevant.")
+            CloudExecutionMessage(
+                role: .system,
+                content: CloudPromptBuilder.systemPrompt(
+                    config: stackConfig,
+                    operatorName: operatorDisplayName,
+                    routeLabel: routeLabel
+                )
+            )
         ]
 
         if !attachedFiles.isEmpty {
@@ -1528,7 +1595,7 @@ final class AppState: ObservableObject {
     private func applySelectedModelIfPossible() async throws {
         guard let filename = runtimePreferences.selection.selectedInstalledFilename else {
             try await engine.configureRuntime(nil)
-            runtimeStatus = "No model selected"
+            runtimeStatus = "Route not configured"
             return
         }
 
@@ -1538,9 +1605,15 @@ final class AppState: ObservableObject {
             return
         }
 
+        guard engine.supportsLocalModels else {
+            try await engine.configureRuntime(nil)
+            runtimeStatus = "Local model selected, runtime unavailable"
+            return
+        }
+
         try await engine.configureRuntime(
             EngineRuntimeConfig(modelURL: installed.localURL, modelID: installed.modelID, modelLib: installed.modelLib)
         )
-        runtimeStatus = installed.modelID.isEmpty ? "Selected: \(installed.localFilename)" : "Selected: \(installed.modelID)"
+        runtimeStatus = installed.modelID.isEmpty ? "On-device: \(installed.localFilename)" : "On-device: \(installed.modelID)"
     }
 }

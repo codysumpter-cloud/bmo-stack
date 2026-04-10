@@ -368,7 +368,7 @@ struct ModelsView: View {
                 .fontWeight(.semibold)
                 .foregroundColor(BMOTheme.textSecondary)
 
-            Text("Choose the active cloud route here. Use Settings for provider editing and maintenance.")
+            Text("Choose the active direct cloud model route here. OpenClaw Gateway tools require a separate stack bridge.")
                 .font(.caption)
                 .foregroundColor(BMOTheme.textTertiary)
 

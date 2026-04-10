@@ -118,7 +118,7 @@ struct ChatView: View {
         VStack(spacing: 8) {
             if appState.selectedProviderAccount != nil || appState.selectedInstalledModel != nil || appState.usesStubRuntime {
                 HStack(spacing: 6) {
-Image(systemName: appState.selectedProviderAccount != nil ? "link.circle.fill" : appState.usesStubRuntime ? "sparkles.rectangle.stack" : "cpu")
+                    Image(systemName: appState.selectedProviderAccount != nil ? "link.circle.fill" : appState.usesStubRuntime ? "exclamationmark.triangle.fill" : "cpu")
                         .font(.caption)
                     Text(statusLine)
                         .font(.caption)
@@ -165,13 +165,12 @@ Image(systemName: appState.selectedProviderAccount != nil ? "link.circle.fill" :
 
     private var statusLine: String {
         if let account = appState.selectedProviderAccount {
-            return "Cloud chat via \(account.provider.displayName) • \(account.modelSlug)"
+            return "Direct cloud chat via \(account.provider.displayName) • \(account.modelSlug)"
         }
         if let model = appState.selectedInstalledModel {
             return appState.usesStubRuntime ? "Local model selected, runtime not included in this build" : "On-device model • \(model.displayName)"
         }
-        return "Link a cloud provider to chat in this build"
-
+        return "Route not configured. Link a cloud provider to chat in this build."
     }
 }
 

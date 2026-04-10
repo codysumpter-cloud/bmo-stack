@@ -19,16 +19,27 @@ jobs:
       run:
         working-directory: apps/openclaw-shell-ios
     env:
-      DEVELOPER_DIR: /Applications/Xcode.app/Contents/Developer
+      XCODE_DEVELOPER_DIR: ${{ vars.BEMOREAGENT_XCODE_DEVELOPER_DIR != '' && vars.BEMOREAGENT_XCODE_DEVELOPER_DIR || '/Applications/Xcode.app/Contents/Developer' }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
 
       - name: Select Xcode
-        run: sudo xcode-select -s /Applications/Xcode.app
+        run: |
+          xcode_app="${XCODE_DEVELOPER_DIR%/Contents/Developer}"
+          test -d "$xcode_app"
+          echo "DEVELOPER_DIR=$XCODE_DEVELOPER_DIR" >> "$GITHUB_ENV"
+          if command -v sudo >/dev/null 2>&1 && sudo -n true 2>/dev/null; then
+            sudo xcode-select -s "$xcode_app"
+          else
+            echo "Skipping xcode-select; using DEVELOPER_DIR=$XCODE_DEVELOPER_DIR"
+          fi
 
       - name: Show Xcode version
-        run: xcodebuild -version
+        run: |
+          xcodebuild -version
+          SDK_VERSION="$(xcrun --sdk iphonesimulator --show-sdk-version)"
+          echo "iPhoneSimulator SDK $SDK_VERSION"
 
       - name: Install XcodeGen if needed
         run: |

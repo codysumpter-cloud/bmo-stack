@@ -32,7 +32,7 @@ struct SettingsView: View {
                     settingsRow(title: "Backend", value: appState.backendDisplayName)
                     settingsRow(title: "Status", value: appState.runtimeStatus)
                     settingsRow(title: "Active route", value: activeRouteLabel)
-                    Text("Choose the live local or cloud route in Models. Settings is for maintenance and configuration.")
+                    Text("Choose the live local route or direct cloud model route in Models. Settings is for maintenance and configuration.")
                         .font(.caption)
                         .foregroundColor(appState.usesStubRuntime ? BMOTheme.warning : BMOTheme.textSecondary)
                         .listRowBackground(BMOTheme.backgroundCard)
@@ -98,9 +98,9 @@ struct SettingsView: View {
             return "\(account.provider.displayName) • \(account.modelSlug)"
         }
         if let model = appState.selectedInstalledModel {
-            return model.displayName
+            return appState.usesStubRuntime ? "\(model.displayName) • runtime unavailable" : model.displayName
         }
-        return "None"
+        return "Route not configured"
     }
 
     private func providerRow(_ provider: ProviderKind) -> some View {
