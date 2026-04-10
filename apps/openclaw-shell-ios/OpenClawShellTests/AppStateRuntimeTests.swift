@@ -119,6 +119,59 @@ final class AppStateRuntimeTests: XCTestCase {
         XCTAssertTrue(prompt.contains("does not by itself grant direct device control"))
         XCTAssertFalse(prompt.contains("only perform functions inside the app"))
     }
+
+    func testWorkspaceBootstrapCreatesCanonicalOpenClawArtifacts() throws {
+        let runtime = OpenClawWorkspaceRuntime()
+        var config = StackConfig.default
+        config.stackName = "OpenClaw"
+        config.role = "operator"
+        config.goal = "build a real workspace"
+
+        runtime.bootstrap(config: config, preferences: .default, routeSummary: "Route not configured")
+
+        for path in ["soul.md", "user.md", "memory.md", "session.md", "skills.md", "registry/skills.json", "state/facts.json", "state/preferences.json", "state/tasks.json", "state/session.json"] {
+            XCTAssertTrue(FileManager.default.fileExists(atPath: Paths.openClawDirectory.appendingPathComponent(path).path), path)
+        }
+
+        let soul = try runtime.readFile("soul.md")
+        XCTAssertTrue(soul.contains("one agent, one workspace"))
+        XCTAssertTrue(runtime.skills.contains(where: { $0.id == BuiltInSkillRegistry.pokemonTeamBuilderID }))
+    }
+
+    func testPokemonTeamBuilderPersistsArtifactsThroughGenericRunner() throws {
+        let runtime = OpenClawWorkspaceRuntime()
+        runtime.bootstrap(config: .default, preferences: .default, routeSummary: "Direct cloud model route")
+
+        let receipt = runtime.runSkill(
+            id: BuiltInSkillRegistry.pokemonTeamBuilderID,
+            input: [
+                "format": "Singles",
+                "strategy": "electric balance",
+                "mustInclude": "Pikachu, Gengar",
+                "avoid": "Charizard"
+            ],
+            config: .default,
+            preferences: .default,
+            routeSummary: "Direct cloud model route"
+        )
+
+        XCTAssertEqual(receipt.status, .persisted)
+        XCTAssertEqual(receipt.artifacts.count, 2)
+        XCTAssertTrue(receipt.output["members"]?.contains("Pikachu") == true)
+        XCTAssertTrue(receipt.artifacts.allSatisfy { FileManager.default.fileExists(atPath: Paths.openClawDirectory.appendingPathComponent($0).path) })
+        XCTAssertTrue(ReceiptFormatter.confirmedSummary(for: receipt).hasPrefix("Persisted:"))
+    }
+
+    func testSandboxRejectsUnsupportedShellWithoutFakeCompletion() {
+        let runtime = OpenClawWorkspaceRuntime()
+        runtime.bootstrap(config: .default, preferences: .default, routeSummary: "Route not configured")
+
+        let receipt = runtime.runSandbox(command: "rm -rf /", config: .default, preferences: .default, routeSummary: "Route not configured")
+
+        XCTAssertEqual(receipt.status, .failed)
+        XCTAssertTrue(receipt.error?.contains("Unsupported command") == true)
+        XCTAssertTrue(ReceiptFormatter.confirmedSummary(for: receipt).hasPrefix("Failed:"))
+    }
 }
 
 private final class FakeLocalLLMEngine: LocalLLMEngine {

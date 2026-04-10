@@ -66,7 +66,7 @@ struct MissionControlView: View {
                 .foregroundColor(BMOTheme.textSecondary)
 
             detailRow("Mode", value: appState.stackConfig.deploymentMode.title)
-            detailRow("Gateway", value: appState.stackConfig.gatewayURL)
+            detailRow("Runtime endpoint", value: appState.stackConfig.gatewayURL)
             detailRow("Role", value: appState.stackConfig.role)
             detailRow("Goal", value: appState.stackConfig.goal)
             detailRow("Node on iPhone", value: appState.stackConfig.installNodeOnThisPhone ? "Expected" : "Not expected")

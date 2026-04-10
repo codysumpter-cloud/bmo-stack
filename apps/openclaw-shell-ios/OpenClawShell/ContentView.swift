@@ -50,6 +50,10 @@ struct MainTabView: View {
             ModelsView()
         case .chat:
             ChatView()
+        case .skills:
+            SkillsView()
+        case .artifacts:
+            ArtifactsView()
         case .buddy:
             BuddyView()
         case .files:

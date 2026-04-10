@@ -88,7 +88,7 @@ struct HomeView: View {
                 }
 
                 VStack(alignment: .leading, spacing: 3) {
-                    Text(appState.stackConfig.deploymentMode == .bootstrapSelfHosted ? "Self-hosted OpenClaw stack" : "Gateway pairing shell")
+                    Text(appState.stackConfig.deploymentMode == .bootstrapSelfHosted ? "Self-hosted OpenClaw stack" : "Runtime pairing shell")
                         .font(.headline)
                         .foregroundColor(BMOTheme.textPrimary)
                     Text(appState.operatorDisplayName)
@@ -105,7 +105,7 @@ struct HomeView: View {
             }
 
             VStack(alignment: .leading, spacing: 8) {
-                infoLine(title: "Gateway", value: appState.stackConfig.gatewayURL)
+                infoLine(title: "Runtime", value: appState.stackConfig.gatewayURL)
                 infoLine(title: "Goal", value: appState.stackConfig.goal)
                 infoLine(title: "Role", value: appState.stackConfig.role)
             }

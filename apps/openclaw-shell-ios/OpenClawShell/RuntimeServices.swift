@@ -42,6 +42,12 @@ enum Paths {
         return folder
     }
 
+    static var openClawDirectory: URL {
+        let folder = workspaceDirectory.appendingPathComponent(".openclaw", isDirectory: true)
+        ensureDirectoryExists(folder)
+        return folder
+    }
+
     static var stateDirectory: URL {
         let folder = applicationSupportDirectory.appendingPathComponent("State", isDirectory: true)
         ensureDirectoryExists(folder)
@@ -749,7 +755,7 @@ enum CloudPromptBuilder {
         let name = operatorName.trimmingCharacters(in: .whitespacesAndNewlines)
         let displayName = name.isEmpty ? "the operator" : name
         let toolPosture = config.toolsEnabled
-            ? "The operator intends to use tool-capable OpenClaw routes when the Gateway exposes them."
+            ? "The operator intends to use tool-capable OpenClaw routes through the built-in Workspace Runtime as capabilities become available."
             : "The operator has not enabled tool-capable behavior for this stack profile."
 
         return """
@@ -759,11 +765,11 @@ enum CloudPromptBuilder {
 
         Current route: \(routeLabel).
         Stack name: \(config.stackName).
-        Gateway target: \(config.gatewayURL).
+        Runtime endpoint: \(config.gatewayURL).
         Admin/public domain: \(config.adminDomain).
         \(toolPosture)
 
-        Be honest about capabilities. This direct cloud chat route can reason and use attached file context, but it does not by itself grant direct device control, shell execution, or OpenClaw Gateway tools. If an action requires the Gateway, desktop node, or a tool bridge, say exactly what route is needed instead of refusing as though the request is app-only.
+        Be honest about capabilities. This direct cloud chat route can reason and use attached file context. Real filesystem, memory, skill, and sandbox changes must go through OpenClaw Workspace Runtime receipts. If a capability is unavailable in this iOS runtime, say unavailable or failed instead of claiming completion.
         """
     }
 }
@@ -1091,6 +1097,7 @@ final class AppState: ObservableObject {
     @Published var providerModels: [ProviderKind: [CloudModel]] = [:]
     @Published var providerModelLoading = Set<ProviderKind>()
     @Published var providerModelErrors: [ProviderKind: String] = [:]
+    @Published var workspaceRuntime = OpenClawWorkspaceRuntime()
 
     // MARK: Initializer – now placed after property declarations
     init(engine: LocalLLMEngine) {
@@ -1143,7 +1150,7 @@ final class AppState: ObservableObject {
 
     var operatorSummary: String {
         if let account = selectedProviderAccount {
-            return "Chat is routed directly through \(account.provider.displayName) using \(account.modelSlug). Gateway tools still require a real OpenClaw bridge at \(stackConfig.gatewayURL)."
+            return "Chat is routed through \(account.provider.displayName) using \(account.modelSlug). Workspace actions use the built-in OpenClaw runtime and receipts."
         } else if let model = selectedInstalledModel {
             if usesStubRuntime {
                 return "\(model.displayName) is selected, but local inference is unavailable in this build."
@@ -1151,8 +1158,8 @@ final class AppState: ObservableObject {
             return "Selected runtime target: \(model.modelID.isEmpty ? model.localFilename : model.modelID)."
         } else if usesStubRuntime {
             return stackConfig.deploymentMode == .bootstrapSelfHosted
-                ? "Stack profile is configured, but real chat still depends on a linked provider or a working on-device runtime bridge."
-                : "Pair the app to a real Gateway or link a provider before claiming the shell is ready."
+                ? "Stack profile is configured, but real chat still depends on a linked provider or a working on-device inference runtime."
+                : "Link a provider or local runtime before claiming the shell is ready."
         } else if engine.requiresModelSelection {
             return "Runtime bridge is present, but no packaged model is selected yet."
         } else {
@@ -1195,12 +1202,12 @@ final class AppState: ObservableObject {
             let target = model.modelID.isEmpty ? model.localFilename : model.modelID
             return usesStubRuntime ? "\(target) selected, but local inference is not live in this build." : target
         }
-        return "Gateway target: \(stackConfig.gatewayURL). Select a live route in Models before using chat as if the stack is online."
+        return "Runtime endpoint: \(stackConfig.gatewayURL). Select a live route in Models before using chat as if the stack is online."
     }
 
     var routeHealthSummary: String {
         if selectedProviderAccount != nil {
-            return "Direct cloud chat is ready. OpenClaw tools require a Gateway/tool bridge."
+            return "Cloud chat is ready. Workspace actions require OpenClaw runtime receipts."
         }
         if let model = selectedInstalledModel {
             return usesStubRuntime
@@ -1239,6 +1246,7 @@ final class AppState: ObservableObject {
         runtimePreferences.load()
         tabPreferencesStore.load()
         userPreferencesStore.load()
+        workspaceRuntime.bootstrap(config: stackConfig, preferences: userPreferencesStore.preferences, routeSummary: activeRouteModeLabel)
         refreshGemmaState()
         refreshRuntimeSummary()
         for account in providerStore.enabledProviders() {
@@ -1263,6 +1271,7 @@ final class AppState: ObservableObject {
             userPreferencesStore.updatePreferredName(config.operatorName)
         }
         persistStackConfig()
+        workspaceRuntime.bootstrap(config: stackConfig, preferences: userPreferencesStore.preferences, routeSummary: activeRouteModeLabel)
         buddyProfileStore?.load(for: config)
         refreshRuntimeSummary()
     }
@@ -1354,10 +1363,12 @@ final class AppState: ObservableObject {
 
     func updatePreferredOperatorName(_ value: String) {
         userPreferencesStore.updatePreferredName(value)
+        workspaceRuntime.bootstrap(config: stackConfig, preferences: userPreferencesStore.preferences, routeSummary: activeRouteModeLabel)
     }
 
     func updateTheme(_ theme: AppColorTheme) {
         userPreferencesStore.updateTheme(theme)
+        workspaceRuntime.bootstrap(config: stackConfig, preferences: userPreferencesStore.preferences, routeSummary: activeRouteModeLabel)
     }
 
     func setTabVisibility(_ tab: AppTab, isVisible: Bool) {
@@ -1490,6 +1501,7 @@ final class AppState: ObservableObject {
         }
 
         chatStore.messages.append(ChatMessage(role: .user, content: cleaned))
+        workspaceRuntime.refreshMetadata()
         chatStore.persist()
         chatStore.isGenerating = true
 
@@ -1508,6 +1520,7 @@ final class AppState: ObservableObject {
                 reply = try await engine.generate(prompt: cleaned, fileContexts: attachedFiles, chatHistory: chatStore.messages)
             }
             chatStore.messages.append(ChatMessage(role: .assistant, content: reply))
+            workspaceRuntime.refreshMetadata()
             chatStore.persist()
         } catch CloudExecutionServiceError.upstreamFailure(let message) {
             chatStore.errorMessage = message
@@ -1518,6 +1531,35 @@ final class AppState: ObservableObject {
         refreshRuntimeSummary()
 
         chatStore.isGenerating = false
+    }
+
+    func runSkill(id: String, input: [String: String] = [:]) -> OpenClawReceipt {
+        let receipt = workspaceRuntime.runSkill(id: id, input: input, config: stackConfig, preferences: userPreferencesStore.preferences, routeSummary: activeRouteModeLabel)
+        chatStore.messages.append(ChatMessage(role: .system, content: ReceiptFormatter.confirmedSummary(for: receipt)))
+        chatStore.persist()
+        return receipt
+    }
+
+    func regenerateArtifacts(target: String = "all") -> OpenClawReceipt {
+        let receipt = workspaceRuntime.regenerateArtifacts(target: target, config: stackConfig, preferences: userPreferencesStore.preferences, routeSummary: activeRouteModeLabel)
+        chatStore.messages.append(ChatMessage(role: .system, content: ReceiptFormatter.confirmedSummary(for: receipt)))
+        chatStore.persist()
+        return receipt
+    }
+
+    func runSandbox(command: String) -> OpenClawReceipt {
+        let receipt = workspaceRuntime.runSandbox(command: command, config: stackConfig, preferences: userPreferencesStore.preferences, routeSummary: activeRouteModeLabel)
+        chatStore.messages.append(ChatMessage(role: .system, content: ReceiptFormatter.confirmedSummary(for: receipt)))
+        chatStore.persist()
+        return receipt
+    }
+
+    var buddyRuntimeStatus: BuddyRuntimeStatus {
+        workspaceRuntime.buddyStatus(
+            activeModelAdapter: backendDisplayName,
+            brainConnected: selectedProviderAccount != nil || canUseSelectedLocalModel,
+            runtimeAvailable: workspaceRuntime.isBootstrapped,
+        )
     }
 
     // MARK: - Private
@@ -1547,7 +1589,7 @@ final class AppState: ObservableObject {
                     config: stackConfig,
                     operatorName: operatorDisplayName,
                     routeLabel: routeLabel
-                )
+                ) + "\n\nWorkspace Runtime: Available inside OpenClaw. Ask for actions through the runtime contract; do not claim files, memory, skills, or sandbox commands changed unless an OpenClaw receipt confirms it. Registered skills: \(workspaceRuntime.skills.map(\.name).joined(separator: ", ")). Canonical artifacts: soul.md, user.md, memory.md, session.md, skills.md."
             )
         ]
 
@@ -1574,10 +1616,10 @@ final class AppState: ObservableObject {
     private func generatedSetupChecklist(for config: StackConfig) -> [String] {
         var items: [String] = []
         if config.deploymentMode == .bootstrapSelfHosted {
-            items.append("Provision or verify an OpenClaw Gateway at \(config.gatewayURL).")
-            items.append("Set gateway.remote.url and pairing/public URL values to match \(config.adminDomain).")
+            items.append("Provision or verify the OpenClaw runtime endpoint at \(config.gatewayURL).")
+            items.append("Set runtime and pairing/public URL values to match \(config.adminDomain).")
         } else {
-            items.append("Pair this app to the existing Gateway at \(config.gatewayURL).")
+            items.append("Pair this app to the existing OpenClaw runtime endpoint at \(config.gatewayURL).")
         }
         if config.installNodeOnThisPhone {
             items.append("Treat this iPhone as a node surface and grant notification or device permissions as needed.")
