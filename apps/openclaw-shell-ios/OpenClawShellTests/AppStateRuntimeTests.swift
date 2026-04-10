@@ -96,9 +96,9 @@ final class AppStateRuntimeTests: XCTestCase {
         appState.setSelectedProvider(.openAI)
 
         XCTAssertEqual(appState.activeRouteModeLabel, "Direct cloud model route")
-        XCTAssertTrue(appState.operatorSummary.contains("routed directly through OpenAI"))
-        XCTAssertTrue(appState.operatorSummary.contains("Gateway tools still require"))
-        XCTAssertTrue(appState.routeHealthSummary.contains("Direct cloud chat is ready"))
+        XCTAssertTrue(appState.operatorSummary.contains("routed through OpenAI"))
+        XCTAssertTrue(appState.operatorSummary.contains("Workspace actions use the built-in OpenClaw runtime"))
+        XCTAssertTrue(appState.routeHealthSummary.contains("Cloud chat is ready"))
     }
 
     func testCloudSystemPromptDoesNotConfineAgentToAppOnly() {
@@ -116,8 +116,24 @@ final class AppStateRuntimeTests: XCTestCase {
 
         XCTAssertTrue(prompt.contains("not confined to the iOS app"))
         XCTAssertTrue(prompt.contains("full OpenClaw/operator context"))
-        XCTAssertTrue(prompt.contains("does not by itself grant direct device control"))
+        XCTAssertTrue(prompt.contains("Workspace Runtime receipts"))
+        XCTAssertTrue(prompt.contains("Do not reveal hidden reasoning"))
         XCTAssertFalse(prompt.contains("only perform functions inside the app"))
+    }
+
+    func testAgentReplySanitizerRemovesThoughtBlocks() {
+        let raw = """
+        <think>
+        private chain of thought
+        </think>
+
+        Here is the actual answer.
+        """
+
+        let cleaned = AgentReplySanitizer.userVisibleAnswer(from: raw)
+
+        XCTAssertEqual(cleaned, "Here is the actual answer.")
+        XCTAssertFalse(cleaned.localizedCaseInsensitiveContains("private chain"))
     }
 
     func testWorkspaceBootstrapCreatesCanonicalOpenClawArtifacts() throws {
@@ -158,8 +174,39 @@ final class AppStateRuntimeTests: XCTestCase {
         XCTAssertEqual(receipt.status, .persisted)
         XCTAssertEqual(receipt.artifacts.count, 2)
         XCTAssertTrue(receipt.output["members"]?.contains("Pikachu") == true)
+        XCTAssertTrue(receipt.output["strategy"]?.contains("Open with") == true)
+        XCTAssertTrue(receipt.output["rationale"]?.contains("Pikachu") == true)
         XCTAssertTrue(receipt.artifacts.allSatisfy { FileManager.default.fileExists(atPath: Paths.openClawDirectory.appendingPathComponent($0).path) })
         XCTAssertTrue(ReceiptFormatter.confirmedSummary(for: receipt).hasPrefix("Persisted:"))
+    }
+
+    func testWorkspaceArtifactsCanBeEditedAndDeletedWithReceipts() throws {
+        let runtime = OpenClawWorkspaceRuntime()
+        runtime.bootstrap(config: .default, preferences: .default, routeSummary: "Route not configured")
+
+        let writeReceipt = try runtime.writeFile("notes/test.md", content: "# Test\n")
+        XCTAssertEqual(writeReceipt.status, .persisted)
+        XCTAssertEqual(try runtime.readFile("notes/test.md"), "# Test\n")
+
+        let deleteReceipt = runtime.deleteFile("notes/test.md")
+        XCTAssertEqual(deleteReceipt.status, .persisted)
+        XCTAssertThrowsError(try runtime.readFile("notes/test.md"))
+    }
+
+    func testClawHubInstallsRegistryBackedSkill() throws {
+        let runtime = OpenClawWorkspaceRuntime()
+        runtime.bootstrap(config: .default, preferences: .default, routeSummary: "Route not configured")
+
+        let template = try XCTUnwrap(ClawHubCatalog.templates.first)
+        let receipt = runtime.installClawHubSkill(template)
+
+        XCTAssertEqual(receipt.status, .persisted)
+        XCTAssertTrue(runtime.skills.contains(where: { $0.id == template.id }))
+        XCTAssertTrue(FileManager.default.fileExists(atPath: Paths.openClawDirectory.appendingPathComponent("skills/\(template.id)/README.md").path))
+
+        let runReceipt = runtime.runSkill(id: template.id, input: ["request": "coach me"], config: .default, preferences: .default, routeSummary: "Route not configured")
+        XCTAssertEqual(runReceipt.status, .persisted)
+        XCTAssertFalse(runReceipt.artifacts.isEmpty)
     }
 
     func testSandboxRejectsUnsupportedShellWithoutFakeCompletion() {

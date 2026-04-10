@@ -14,6 +14,8 @@ struct SkillsView: View {
                         ActionReceiptCard(receipt: lastReceipt)
                     }
 
+                    clawHubCard
+
                     ForEach(appState.workspaceRuntime.skills) { skill in
                         skillCard(skill)
                     }
@@ -104,7 +106,7 @@ struct SkillsView: View {
                 .buttonStyle(BMOButtonStyle())
             } else {
                 Button {
-                    let input = skill.id == BuiltInSkillRegistry.artifactRebuilderID ? ["target": "all"] : [:]
+                    let input = skill.id == BuiltInSkillRegistry.artifactRebuilderID ? ["target": "all"] : ["request": "Run \(skill.name) from Skills."]
                     lastReceipt = appState.runSkill(id: skill.id, input: input)
                 } label: {
                     HStack {
@@ -114,6 +116,48 @@ struct SkillsView: View {
                     .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(BMOButtonStyle(isPrimary: false))
+            }
+        }
+        .bmoCard()
+    }
+
+    private var clawHubCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("ClawHub")
+                        .font(.headline)
+                        .foregroundColor(BMOTheme.textPrimary)
+                    Text("Install starter skills into `.openclaw/registry/skills.json` with real README and manifest artifacts.")
+                        .font(.caption)
+                        .foregroundColor(BMOTheme.textSecondary)
+                }
+                Spacer()
+                StatusBadge(label: "Local", color: BMOTheme.success)
+            }
+
+            ForEach(ClawHubCatalog.templates) { template in
+                let installed = appState.workspaceRuntime.skills.contains(where: { $0.id == template.id })
+                HStack(alignment: .top, spacing: 10) {
+                    Image(systemName: template.systemImage)
+                        .foregroundColor(BMOTheme.accent)
+                        .frame(width: 24)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(template.name)
+                            .font(.subheadline)
+                            .fontWeight(.semibold)
+                            .foregroundColor(BMOTheme.textPrimary)
+                        Text(template.description)
+                            .font(.caption)
+                            .foregroundColor(BMOTheme.textSecondary)
+                    }
+                    Spacer()
+                    Button(installed ? "Installed" : "Install") {
+                        lastReceipt = appState.installClawHubSkill(template)
+                    }
+                    .disabled(installed)
+                    .buttonStyle(.bordered)
+                }
             }
         }
         .bmoCard()
@@ -211,6 +255,26 @@ struct PokemonTeamBuilderView: View {
             Text("Open Artifacts to inspect the saved JSON and Markdown team files.")
                 .font(.caption)
                 .foregroundColor(BMOTheme.textTertiary)
+            if let strategy = receipt?.output["strategy"] {
+                Divider().overlay(BMOTheme.divider)
+                Text("Battle strategy")
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                    .foregroundColor(BMOTheme.textPrimary)
+                Text(strategy)
+                    .font(.caption)
+                    .foregroundColor(BMOTheme.textSecondary)
+            }
+            if let rationale = receipt?.output["rationale"] {
+                Divider().overlay(BMOTheme.divider)
+                Text("Why these picks")
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                    .foregroundColor(BMOTheme.textPrimary)
+                Text(rationale)
+                    .font(.caption)
+                    .foregroundColor(BMOTheme.textSecondary)
+            }
         }
         .bmoCard()
     }

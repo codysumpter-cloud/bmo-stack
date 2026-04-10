@@ -617,6 +617,29 @@ final class WorkspaceStore: ObservableObject {
         load()
     }
 
+    func createFile(named filename: String, content: String = "") {
+        let cleaned = filename
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .replacingOccurrences(of: "/", with: "-")
+            .replacingOccurrences(of: "\\", with: "-")
+        guard !cleaned.isEmpty else {
+            errorMessage = "Enter a filename first."
+            return
+        }
+
+        let destination = Paths.workspaceDirectory.appendingPathComponent(cleaned)
+        do {
+            if FileManager.default.fileExists(atPath: destination.path) {
+                errorMessage = "\(cleaned) already exists."
+                return
+            }
+            try content.write(to: destination, atomically: true, encoding: .utf8)
+            load()
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
     func delete(_ file: WorkspaceFile) {
         do {
             try FileManager.default.removeItem(at: file.localURL)
@@ -770,7 +793,52 @@ enum CloudPromptBuilder {
         \(toolPosture)
 
         Be honest about capabilities. This direct cloud chat route can reason and use attached file context. Real filesystem, memory, skill, and sandbox changes must go through OpenClaw Workspace Runtime receipts. If a capability is unavailable in this iOS runtime, say unavailable or failed instead of claiming completion.
+
+        Reply with the answer only. Do not reveal hidden reasoning, chain-of-thought, scratchpad notes, analysis sections, or internal deliberation unless the operator explicitly asks for an explanation. If asked to explain, give a concise rationale, not private step-by-step thoughts.
         """
+    }
+}
+
+enum AgentReplySanitizer {
+    static func userVisibleAnswer(from raw: String) -> String {
+        var text = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        text = removeDelimited("<think>", "</think>", from: text)
+        text = removeDelimited("<thinking>", "</thinking>", from: text)
+        text = removeDelimited("```thought", "```", from: text)
+        text = removeDelimited("```thinking", "```", from: text)
+
+        let dropPrefixes = [
+            "Thought process:",
+            "Thinking:",
+            "Reasoning:",
+            "Analysis:",
+            "Chain of thought:",
+            "Scratchpad:"
+        ]
+        var lines = text.components(separatedBy: .newlines)
+        while let first = lines.first {
+            let trimmed = first.trimmingCharacters(in: .whitespacesAndNewlines)
+            if trimmed.isEmpty || dropPrefixes.contains(where: { trimmed.range(of: $0, options: [.caseInsensitive, .anchored]) != nil }) {
+                lines.removeFirst()
+            } else {
+                break
+            }
+        }
+
+        text = lines.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
+        return text.isEmpty ? "I do not have a user-visible answer from that route." : text
+    }
+
+    private static func removeDelimited(_ start: String, _ end: String, from value: String) -> String {
+        var result = value
+        while let startRange = result.range(of: start, options: [.caseInsensitive]) {
+            guard let endRange = result.range(of: end, options: [.caseInsensitive], range: startRange.upperBound..<result.endIndex) else {
+                result.removeSubrange(startRange.lowerBound..<result.endIndex)
+                break
+            }
+            result.removeSubrange(startRange.lowerBound..<endRange.upperBound)
+        }
+        return result
     }
 }
 
@@ -1511,13 +1579,13 @@ final class AppState: ObservableObject {
             let reply: String
             if let account = selectedProviderAccount {
                 runtimeStatus = "Cloud: \(account.provider.displayName)"
-                reply = try await cloudExecutionService.send(
+                reply = AgentReplySanitizer.userVisibleAnswer(from: try await cloudExecutionService.send(
                     account: account,
                     messages: buildCloudMessages(attachedFiles: attachedFiles)
-                )
+                ))
             } else {
                 if usesStubRuntime { runtimeStatus = "Stub preview" }
-                reply = try await engine.generate(prompt: cleaned, fileContexts: attachedFiles, chatHistory: chatStore.messages)
+                reply = AgentReplySanitizer.userVisibleAnswer(from: try await engine.generate(prompt: cleaned, fileContexts: attachedFiles, chatHistory: chatStore.messages))
             }
             chatStore.messages.append(ChatMessage(role: .assistant, content: reply))
             workspaceRuntime.refreshMetadata()
@@ -1549,6 +1617,33 @@ final class AppState: ObservableObject {
 
     func runSandbox(command: String) -> OpenClawReceipt {
         let receipt = workspaceRuntime.runSandbox(command: command, config: stackConfig, preferences: userPreferencesStore.preferences, routeSummary: activeRouteModeLabel)
+        chatStore.messages.append(ChatMessage(role: .system, content: ReceiptFormatter.confirmedSummary(for: receipt)))
+        chatStore.persist()
+        return receipt
+    }
+
+    func writeWorkspaceArtifact(path: String, content: String) -> OpenClawReceipt {
+        let receipt: OpenClawReceipt
+        do {
+            receipt = try workspaceRuntime.writeFile(path, content: content, source: "user")
+        } catch {
+            receipt = OpenClawReceipt(actionId: UUID(), status: .failed, title: "Write \(path)", summary: "Could not write \(path)", output: [:], artifacts: [], logs: [], error: error.localizedDescription)
+        }
+        chatStore.messages.append(ChatMessage(role: .system, content: ReceiptFormatter.confirmedSummary(for: receipt)))
+        chatStore.persist()
+        return receipt
+    }
+
+    func deleteWorkspaceArtifact(path: String) -> OpenClawReceipt {
+        let receipt = workspaceRuntime.deleteFile(path, source: "user")
+        chatStore.messages.append(ChatMessage(role: .system, content: ReceiptFormatter.confirmedSummary(for: receipt)))
+        chatStore.persist()
+        return receipt
+    }
+
+    func installClawHubSkill(_ template: ClawHubSkillTemplate) -> OpenClawReceipt {
+        let receipt = workspaceRuntime.installClawHubSkill(template)
+        _ = regenerateArtifacts(target: "skills.md")
         chatStore.messages.append(ChatMessage(role: .system, content: ReceiptFormatter.confirmedSummary(for: receipt)))
         chatStore.persist()
         return receipt

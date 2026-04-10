@@ -32,6 +32,16 @@ enum OpenClawActionKind: String, Codable, CaseIterable, Hashable {
     case workspaceRead = "workspace.read"
 }
 
+struct ClawHubSkillTemplate: Identifiable, Hashable {
+    var id: String
+    var name: String
+    var description: String
+    var category: String
+    var tags: [String]
+    var starterMarkdown: String
+    var systemImage: String
+}
+
 struct OpenClawActionRecord: Identifiable, Codable, Hashable {
     var id: UUID
     var kind: OpenClawActionKind
@@ -132,11 +142,15 @@ struct PokemonTeamMember: Identifiable, Codable, Hashable {
     var name: String
     var role: String
     var notes: String
+    var reason: String = ""
+    var battlePlan: String = ""
 }
 
 struct PokemonTeamOutput: Codable, Hashable {
     var teamMembers: [PokemonTeamMember]
     var roleBreakdown: [String]
+    var selectionRationale: [String]
+    var battleStrategy: [String]
     var summary: String
     var weaknesses: [String]
     var suggestions: [String]
@@ -205,6 +219,68 @@ enum BuiltInSkillRegistry {
     }
 }
 
+enum ClawHubCatalog {
+    static let templates: [ClawHubSkillTemplate] = [
+        ClawHubSkillTemplate(
+            id: "clawhub-skill-composer",
+            name: "Skill Composer",
+            description: "Draft and evolve custom OpenClaw skills as manifest-backed workspace artifacts.",
+            category: "Authoring",
+            tags: ["skills", "authoring", "clawhub"],
+            starterMarkdown: """
+            # Skill Composer
+
+            ## Purpose
+            Help the agent turn repeated operator workflows into clear skill manifests, instructions, inputs, outputs, and verification notes.
+
+            ## Runtime contract
+            - Read existing `.openclaw/registry/skills.json`.
+            - Propose changes first when the request is ambiguous.
+            - Persist new skill files only through workspace receipts.
+            """,
+            systemImage: "wand.and.stars"
+        ),
+        ClawHubSkillTemplate(
+            id: "clawhub-buddy-battle-coach",
+            name: "Buddy Battle Coach",
+            description: "Analyze buddy stats, recent battles, and suggested training before a duel.",
+            category: "Buddy",
+            tags: ["buddy", "battle", "training"],
+            starterMarkdown: """
+            # Buddy Battle Coach
+
+            ## Purpose
+            Connect buddy state to tactical choices: train, feed, switch event, battle, or retire a weak plan.
+
+            ## Runtime contract
+            - Read buddy state and recent action receipts.
+            - Explain the recommended action.
+            - Never claim a battle happened without a persisted battle record.
+            """,
+            systemImage: "bolt.shield"
+        ),
+        ClawHubSkillTemplate(
+            id: "clawhub-workspace-architect",
+            name: "Workspace Architect",
+            description: "Review `.openclaw` artifacts and suggest better soul, memory, session, and skill files.",
+            category: "Workspace",
+            tags: ["artifacts", "memory", "workspace"],
+            starterMarkdown: """
+            # Workspace Architect
+
+            ## Purpose
+            Keep `.openclaw` coherent by improving canonical markdown and state files with receipt-backed edits.
+
+            ## Runtime contract
+            - Read canonical artifacts before editing.
+            - Preserve user-authored facts.
+            - Save changes through workspace receipts.
+            """,
+            systemImage: "building.columns"
+        )
+    ]
+}
+
 // MARK: - Workspace Runtime
 
 @MainActor
@@ -233,8 +309,8 @@ final class OpenClawWorkspaceRuntime: ObservableObject {
 
     func bootstrap(config: StackConfig, preferences: UserPreferences, routeSummary: String) {
         ensureWorkspaceTree()
-        skills = BuiltInSkillRegistry.manifests
-        writeJSON(skills, to: rootURL.appendingPathComponent("registry/skills.json"))
+        skills = loadSkillRegistry()
+        persistSkillRegistry()
         ensureStateStores(config: config, preferences: preferences, routeSummary: routeSummary)
         regenerateCanonicalArtifactsIfMissing(config: config, preferences: preferences, routeSummary: routeSummary)
         refreshMetadata()
@@ -257,6 +333,25 @@ final class OpenClawWorkspaceRuntime: ObservableObject {
         } catch {
             return finish(action, status: .failed, summary: "Could not write \(path)", error: error.localizedDescription)
         }
+    }
+
+    func deleteFile(_ path: String, source: String = "runtime") -> OpenClawReceipt {
+        let action = begin(kind: .workspaceWrite, source: source, title: "Delete \(path)", input: ["path": path])
+        do {
+            let url = try resolve(path)
+            guard fileManager.fileExists(atPath: url.path) else {
+                return finish(action, status: .failed, summary: "Could not delete \(path)", error: "File does not exist.")
+            }
+            try fileManager.removeItem(at: url)
+            appendEvent(type: "artifact.deleted", message: "Deleted \(path).", metadata: ["path": path])
+            return finish(action, status: .persisted, summary: "Deleted \(path)", output: ["path": path], artifacts: [path])
+        } catch {
+            return finish(action, status: .failed, summary: "Could not delete \(path)", error: error.localizedDescription)
+        }
+    }
+
+    func fileURL(for path: String) throws -> URL {
+        try resolve(path)
     }
 
     func listFiles(_ path: String = "") -> [String] {
@@ -317,8 +412,48 @@ final class OpenClawWorkspaceRuntime: ObservableObject {
         case BuiltInSkillRegistry.memoryInspectorID:
             return runMemoryInspector(manifest: manifest)
         default:
+            if manifest.entrypoint.hasPrefix("clawhub.") {
+                return runClawHubSkill(manifest: manifest, input: input)
+            }
             let action = begin(kind: .skillRun, source: "skills", title: manifest.name, input: input)
             return finish(action, status: .failed, summary: "Entrypoint is not implemented", error: "Missing entrypoint: \(manifest.entrypoint)")
+        }
+    }
+
+    func installClawHubSkill(_ template: ClawHubSkillTemplate) -> OpenClawReceipt {
+        let action = begin(kind: .skillRun, source: "clawhub", title: "Install \(template.name)", input: ["skillId": template.id])
+        if skills.contains(where: { $0.id == template.id }) {
+            return finish(action, status: .completed, summary: "\(template.name) is already installed", output: ["skillId": template.id])
+        }
+
+        let manifest = SkillManifest(
+            id: template.id,
+            name: template.name,
+            description: template.description,
+            version: "0.1.0",
+            category: template.category,
+            tags: template.tags,
+            permissions: ["workspace.read", "workspace.write", "actions.write"],
+            inputSchema: ["request": "string"],
+            outputSchema: ["summary": "string", "artifactPath": "string"],
+            ui: .init(route: "/skills/\(template.id)", systemImage: template.systemImage, accent: "accent"),
+            entrypoint: "clawhub.\(template.id)",
+            enabled: true
+        )
+
+        do {
+            let folder = "skills/\(template.id)"
+            skills.append(manifest)
+            skills.sort { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+            persistSkillRegistry()
+            _ = try writeFile("\(folder)/README.md", content: template.starterMarkdown, source: "clawhub")
+            let manifestData = try encoder.encode(manifest)
+            _ = try writeFile("\(folder)/manifest.json", content: String(data: manifestData, encoding: .utf8) ?? "{}", source: "clawhub")
+            refreshMetadata()
+            appendEvent(type: "skill.installed", message: "Installed \(template.name) from ClawHub.", metadata: ["skillId": template.id])
+            return finish(action, status: .persisted, summary: "Installed \(template.name) from ClawHub", output: ["skillId": template.id], artifacts: ["registry/skills.json", "\(folder)/README.md", "\(folder)/manifest.json"])
+        } catch {
+            return finish(action, status: .failed, summary: "Could not install \(template.name)", error: error.localizedDescription)
         }
     }
 
@@ -347,12 +482,23 @@ final class OpenClawWorkspaceRuntime: ObservableObject {
             } catch {
                 return finish(action, status: .failed, summary: "Could not read \(target)", error: error.localizedDescription)
             }
+        case "write":
+            guard parts.count >= 3 else {
+                return finish(action, status: .failed, summary: "write requires a file path and content", error: "Usage: write <path> <content>")
+            }
+            let target = parts[1]
+            let content = parts.dropFirst(2).joined(separator: " ")
+            do {
+                return try writeFile(target, content: content, source: "sandbox")
+            } catch {
+                return finish(action, status: .failed, summary: "Could not write \(target)", error: error.localizedDescription)
+            }
         case "regenerate":
             return regenerateArtifacts(target: parts.dropFirst().first ?? "all", config: config, preferences: preferences, routeSummary: routeSummary, source: "sandbox")
         case "skills":
             return finish(action, status: .completed, summary: "Listed registered skills", output: ["stdout": skills.map { "\($0.id) - \($0.name)" }.joined(separator: "\n"), "exitCode": "0"])
         case "help":
-            return finish(action, status: .completed, summary: "Printed sandbox help", output: ["stdout": "Supported commands: pwd, ls [path], cat <path>, regenerate [all|artifact], skills, help", "exitCode": "0"])
+            return finish(action, status: .completed, summary: "Printed sandbox help", output: ["stdout": "Supported commands: pwd, ls [path], cat <path>, write <path> <content>, regenerate [all|artifact], skills, help", "exitCode": "0"])
         default:
             return finish(
                 action,
@@ -405,6 +551,20 @@ final class OpenClawWorkspaceRuntime: ObservableObject {
 
     private var canonicalArtifactPaths: [String] {
         ["soul.md", "user.md", "memory.md", "session.md", "skills.md"]
+    }
+
+    private func loadSkillRegistry() -> [SkillManifest] {
+        let registryURL = rootURL.appendingPathComponent("registry/skills.json")
+        let existing = (try? Data(contentsOf: registryURL))
+            .flatMap { try? decoder.decode([SkillManifest].self, from: $0) } ?? []
+        var merged: [String: SkillManifest] = [:]
+        for manifest in existing { merged[manifest.id] = manifest }
+        for manifest in BuiltInSkillRegistry.manifests { merged[manifest.id] = manifest }
+        return merged.values.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+    }
+
+    private func persistSkillRegistry() {
+        writeJSON(skills, to: rootURL.appendingPathComponent("registry/skills.json"))
     }
 
     private func ensureWorkspaceTree() {
@@ -536,6 +696,8 @@ final class OpenClawWorkspaceRuntime: ObservableObject {
             "skills.md": """
             # skills.md
 
+            Skills are registry-backed and can be extended through ClawHub installs or user-authored manifests.
+
             \(skills.map { "- **\($0.name)** (`\($0.id)`): \($0.description)" }.joined(separator: "\n"))
             """
         ]
@@ -558,8 +720,20 @@ final class OpenClawWorkspaceRuntime: ObservableObject {
             selected.append(candidate)
         }
         let team = selected.prefix(6).enumerated().map { index, name in
-            PokemonTeamMember(name: name, role: roles[index % roles.count], notes: "\(format) pick for \(strategy).")
+            let role = roles[index % roles.count]
+            return PokemonTeamMember(
+                name: name,
+                role: role,
+                notes: "\(format) pick for \(strategy).",
+                reason: selectionReason(for: name, role: role, strategy: strategy, mustInclude: mustInclude),
+                battlePlan: battlePlan(for: name, role: role, format: format, strategy: strategy)
+            )
         }
+        let battleStrategy = [
+            "Open with \(team.first?.name ?? "the lead") to establish \(team.first?.role.lowercased() ?? "tempo").",
+            "Use pivots and utility picks to protect the main breakers until the opponent's answers are weakened.",
+            "Preserve \(team.last?.name ?? "the cleaner") for the final turn cycle instead of trading it early."
+        ]
         let weaknesses = [
             "Validate exact legality, moves, items, and EVs against the target format before competitive use.",
             "This MVP uses curated role coverage rather than a full damage calculator or matchup database."
@@ -571,6 +745,8 @@ final class OpenClawWorkspaceRuntime: ObservableObject {
         let output = PokemonTeamOutput(
             teamMembers: Array(team),
             roleBreakdown: team.map { "\($0.name): \($0.role)" },
+            selectionRationale: team.map { "\($0.name): \($0.reason)" },
+            battleStrategy: battleStrategy,
             summary: "Drafted a \(format) team around \(strategy).",
             weaknesses: weaknesses,
             suggestions: suggestions,
@@ -592,7 +768,12 @@ final class OpenClawWorkspaceRuntime: ObservableObject {
                 action,
                 status: .persisted,
                 summary: "Pokemon team drafted and saved",
-                output: ["summary": saved.summary, "members": saved.teamMembers.map(\.name).joined(separator: ", ")],
+                output: [
+                    "summary": saved.summary,
+                    "members": saved.teamMembers.map(\.name).joined(separator: ", "),
+                    "strategy": saved.battleStrategy.joined(separator: "\n"),
+                    "rationale": saved.selectionRationale.joined(separator: "\n")
+                ],
                 artifacts: [jsonPath, mdPath]
             )
         } catch {
@@ -610,6 +791,31 @@ final class OpenClawWorkspaceRuntime: ObservableObject {
         return finish(action, status: .completed, summary: "Read memory stores", output: ["summary": body], artifacts: paths)
     }
 
+    private func runClawHubSkill(manifest: SkillManifest, input: [String: String]) -> OpenClawReceipt {
+        let action = begin(kind: .skillRun, source: "skill.\(manifest.id)", title: manifest.name, input: input)
+        let request = input["request"].nilIfBlank ?? "Inspect this skill."
+        let path = "skills/\(manifest.id)/runs/\(safeSlug(String(Int(Date().timeIntervalSince1970)) + "-" + request.prefix(32))).md"
+        let body = """
+        # \(manifest.name) Run
+
+        - Skill: \(manifest.id)
+        - Request: \(request)
+        - Status: completed with local workspace receipt
+
+        ## Result
+        This ClawHub skill is installed and callable through the generic skill runner. Connect deeper domain logic by editing `skills/\(manifest.id)/README.md` and its manifest.
+        """
+        do {
+            let url = try resolve(path)
+            try fileManager.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+            try body.write(to: url, atomically: true, encoding: .utf8)
+            appendEvent(type: "skill.completed", message: "\(manifest.name) wrote \(path).", metadata: ["skillId": manifest.id, "artifact": path])
+            return finish(action, status: .persisted, summary: "\(manifest.name) wrote a run artifact", output: ["summary": "Run artifact created for \(request)"], artifacts: [path])
+        } catch {
+            return finish(action, status: .failed, summary: "\(manifest.name) could not write a run artifact", error: error.localizedDescription)
+        }
+    }
+
     private func pokemonMarkdown(output: PokemonTeamOutput, format: String, strategy: String) -> String {
         """
         # Pokemon Team
@@ -621,6 +827,15 @@ final class OpenClawWorkspaceRuntime: ObservableObject {
         ## Team
         \(output.teamMembers.map { "- **\($0.name)** - \($0.role): \($0.notes)" }.joined(separator: "\n"))
 
+        ## Why these Pokemon
+        \(output.selectionRationale.map { "- \($0)" }.joined(separator: "\n"))
+
+        ## Battle strategy
+        \(output.battleStrategy.map { "- \($0)" }.joined(separator: "\n"))
+
+        ## Individual battle plans
+        \(output.teamMembers.map { "- **\($0.name)**: \($0.battlePlan)" }.joined(separator: "\n"))
+
         ## Summary
         \(output.summary)
 
@@ -630,6 +845,30 @@ final class OpenClawWorkspaceRuntime: ObservableObject {
         ## Suggestions
         \(output.suggestions.map { "- \($0)" }.joined(separator: "\n"))
         """
+    }
+
+    private func selectionReason(for name: String, role: String, strategy: String, mustInclude: [String]) -> String {
+        if mustInclude.contains(where: { $0.caseInsensitiveCompare(name) == .orderedSame }) {
+            return "Included because the operator requested it, then assigned \(role.lowercased()) so it has a defined job."
+        }
+        return "Chosen to cover \(role.lowercased()) while supporting the \(strategy) plan."
+    }
+
+    private func battlePlan(for name: String, role: String, format: String, strategy: String) -> String {
+        switch role {
+        case "Lead / speed control":
+            return "Start or enter early, force tempo, and create the first safe switch for the \(strategy) core."
+        case "Physical breaker":
+            return "Pressure special walls and punish passive turns so the cleaner has an easier endgame."
+        case "Special attacker":
+            return "Attack from the opposite damage axis and exploit defensive pivots that wall the physical breaker."
+        case "Defensive pivot":
+            return "Absorb risky hits, scout the opponent's plan, and bring attackers in without spending momentum."
+        case "Utility support":
+            return "Patch matchup gaps with status, redirection, hazard control, screens, or emergency disruption."
+        default:
+            return "Stay healthy until the opponent's checks are weakened, then close the \(format.lowercased()) game."
+        }
     }
 
     private func begin(kind: OpenClawActionKind, source: String, title: String, input: [String: String]) -> OpenClawActionRecord {
@@ -692,7 +931,11 @@ final class OpenClawWorkspaceRuntime: ObservableObject {
         }
         guard let handle = try? FileHandle(forWritingTo: url) else { return }
         defer { try? handle.close() }
-        try? handle.seekToEnd()
+        do {
+            _ = try handle.seekToEnd()
+        } catch {
+            return
+        }
         if let data = value.data(using: .utf8) {
             handle.write(data)
         }

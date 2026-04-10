@@ -3,12 +3,18 @@ import SwiftUI
 struct MissionControlView: View {
     @EnvironmentObject private var appState: AppState
     @State private var selectedSurface: RepoSurface?
+    @State private var lastReceipt: OpenClawReceipt?
+    @State private var sandboxCommand = "ls"
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: BMOTheme.spacingMD) {
                     headerCard
+                    if let lastReceipt {
+                        ActionReceiptCard(receipt: lastReceipt)
+                    }
+                    openClawDashboardCard
                     stackContractCard
                     routeCard
                     metricsCard
@@ -54,6 +60,59 @@ struct MissionControlView: View {
             Text(appState.operatorSummary)
                 .font(.subheadline)
                 .foregroundColor(BMOTheme.textSecondary)
+        }
+        .bmoCard()
+    }
+
+    private var openClawDashboardCard: some View {
+        let status = appState.buddyRuntimeStatus
+        return VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("OpenClaw Dashboard")
+                        .font(.headline)
+                        .foregroundColor(BMOTheme.textPrimary)
+                    Text("One view for route, runtime, artifacts, skills, files, and receipts.")
+                        .font(.caption)
+                        .foregroundColor(BMOTheme.textSecondary)
+                }
+                Spacer()
+                StatusBadge(label: status.runtimeAvailable ? "Online" : "Needs setup", color: status.runtimeAvailable ? BMOTheme.success : BMOTheme.warning)
+            }
+
+            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
+                dashboardMetric("Artifacts", value: "\(appState.workspaceRuntime.artifacts.count)", icon: "doc.richtext")
+                dashboardMetric("Skills", value: "\(appState.workspaceRuntime.skills.count)", icon: "sparkles.rectangle.stack")
+                dashboardMetric("Files", value: "\(appState.workspaceStore.files.count)", icon: "folder")
+                dashboardMetric("Failures", value: "\(status.failedActions.count)", icon: "exclamationmark.triangle")
+            }
+
+            HStack(spacing: 8) {
+                Button("Regenerate Core") {
+                    lastReceipt = appState.regenerateArtifacts(target: "all")
+                }
+                .buttonStyle(BMOButtonStyle(isPrimary: false))
+
+                Button("Open Skills") {
+                    appState.selectedTab = .skills
+                }
+                .buttonStyle(BMOButtonStyle(isPrimary: false))
+            }
+
+            HStack(spacing: 8) {
+                TextField("Sandbox command", text: $sandboxCommand)
+                    .textFieldStyle(.plain)
+                    .foregroundColor(BMOTheme.textPrimary)
+                    .padding(10)
+                    .background(BMOTheme.backgroundSecondary)
+                    .clipShape(RoundedRectangle(cornerRadius: BMOTheme.radiusSmall, style: .continuous))
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                Button("Run") {
+                    lastReceipt = appState.runSandbox(command: sandboxCommand)
+                }
+                .buttonStyle(BMOButtonStyle())
+            }
         }
         .bmoCard()
     }
@@ -195,5 +254,25 @@ struct MissionControlView: View {
                 .foregroundColor(BMOTheme.textPrimary)
         }
         .font(.caption)
+    }
+
+    private func dashboardMetric(_ label: String, value: String, icon: String) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: icon)
+                .foregroundColor(BMOTheme.accent)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(label)
+                    .font(.caption2)
+                    .foregroundColor(BMOTheme.textTertiary)
+                Text(value)
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                    .foregroundColor(BMOTheme.textPrimary)
+            }
+            Spacer()
+        }
+        .padding(10)
+        .background(BMOTheme.backgroundSecondary)
+        .clipShape(RoundedRectangle(cornerRadius: BMOTheme.radiusSmall, style: .continuous))
     }
 }
