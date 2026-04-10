@@ -86,7 +86,7 @@ struct OnboardingFlow: View {
 
             VStack(alignment: .leading, spacing: 10) {
                 featureRow("Generate a concrete stack profile instead of fake setup copy")
-                featureRow("Target a real Gateway and node pairing flow")
+                featureRow("Target a real OpenClaw runtime and node pairing flow")
                 featureRow("Show honest readiness for local runtime, providers, and shell surfaces")
             }
             .padding(.horizontal, BMOTheme.spacingXL)
@@ -150,7 +150,7 @@ struct OnboardingFlow: View {
 
                 labeledField(title: "Stack name", text: $config.stackName, placeholder: "BeMoreAgent")
                 labeledField(title: "Primary goal", text: $config.goal, placeholder: "Run my own OpenClaw stack")
-                labeledField(title: "Gateway URL", text: $config.gatewayURL, placeholder: "https://gateway.example.com")
+                labeledField(title: "Runtime endpoint", text: $config.gatewayURL, placeholder: "https://openclaw.example.com")
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
                 labeledField(title: "Admin / public domain", text: $config.adminDomain, placeholder: "example.com")
@@ -251,7 +251,7 @@ struct OnboardingFlow: View {
 
                 toggleCard(icon: "iphone", title: "Install node on this phone", subtitle: "Treat iPhone capabilities as part of the self-hosted stack surface", isOn: $config.installNodeOnThisPhone)
                     .padding(.horizontal, BMOTheme.spacingLG)
-                toggleCard(icon: "desktopcomputer", title: "Expect desktop / server node", subtitle: "Assume a host Gateway or desktop companion is part of the stack", isOn: $config.installDesktopNode)
+                toggleCard(icon: "desktopcomputer", title: "Expect desktop / server node", subtitle: "Assume a host runtime or desktop companion is part of the stack", isOn: $config.installDesktopNode)
                     .padding(.horizontal, BMOTheme.spacingLG)
 
                 VStack(alignment: .leading, spacing: 12) {
@@ -328,9 +328,9 @@ struct OnboardingFlow: View {
 
         let steps = [
             (0.2, "Saving operator profile for \(trimmed(config.operatorName).isEmpty ? "this device" : trimmed(config.operatorName))"),
-            (0.4, "Targeting Gateway \(trimmed(config.gatewayURL))"),
+            (0.4, "Targeting runtime endpoint \(trimmed(config.gatewayURL))"),
             (0.6, config.installNodeOnThisPhone ? "Marking this iPhone as a node-capable surface" : "Skipping local node install on this phone"),
-            (0.8, config.installDesktopNode ? "Expecting a desktop or server Gateway companion" : "Running in phone-only pairing mode"),
+            (0.8, config.installDesktopNode ? "Expecting a desktop or server runtime companion" : "Running in phone-only mode"),
             (1.0, "Stack profile ready. The shell will show actual readiness instead of pretending setup is complete.")
         ]
 
@@ -370,7 +370,7 @@ struct OnboardingFlow: View {
                 VStack(spacing: 12) {
                     summaryRow(icon: "person.crop.circle", label: "Operator", value: trimmed(config.operatorName))
                     summaryRow(icon: "briefcase", label: "Role", value: trimmed(config.role))
-                    summaryRow(icon: "link", label: "Gateway", value: trimmed(config.gatewayURL))
+                    summaryRow(icon: "link", label: "Runtime", value: trimmed(config.gatewayURL))
                     summaryRow(icon: "switch.2", label: "Mode", value: config.deploymentMode.title)
                     summaryRow(icon: "gauge.open.with.lines.needle.33percent", label: "Autonomy", value: "\(config.autonomyLevel)/5")
                     summaryRow(icon: "brain", label: "Memory", value: config.memoryEnabled ? "On" : "Off")
@@ -549,10 +549,10 @@ struct OnboardingFlow: View {
     private var generatedChecklist: [String] {
         var items: [String] = []
         if config.deploymentMode == .bootstrapSelfHosted {
-            items.append("Provision or verify an OpenClaw Gateway at \(fallback(config.gatewayURL, defaultValue: "https://prismtek.dev")).")
-            items.append("Set gateway.remote.url and pairing/public URL values to match \(fallback(config.adminDomain, defaultValue: "prismtek.dev")).")
+            items.append("Provision or verify an OpenClaw runtime endpoint at \(fallback(config.gatewayURL, defaultValue: "https://prismtek.dev")).")
+            items.append("Set runtime and pairing/public URL values to match \(fallback(config.adminDomain, defaultValue: "prismtek.dev")).")
         } else {
-            items.append("Pair this app to the existing Gateway at \(fallback(config.gatewayURL, defaultValue: "https://prismtek.dev")).")
+            items.append("Pair this app to the existing OpenClaw runtime endpoint at \(fallback(config.gatewayURL, defaultValue: "https://prismtek.dev")).")
         }
         if config.installNodeOnThisPhone {
             items.append("Treat this iPhone as a node surface with notification, camera, and device capability permissions.")

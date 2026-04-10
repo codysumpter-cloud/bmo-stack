@@ -473,6 +473,8 @@ struct BuddyView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: BMOTheme.spacingMD) {
+                    systemStatusCard
+                    recentRuntimeCard
                     if let buddy = store.activeBuddy {
                         header(for: buddy)
                         sourceProfileCard(for: buddy)
@@ -575,6 +577,65 @@ struct BuddyView: View {
                 renameTarget = buddy
             }
             .buttonStyle(.bordered)
+        }
+        .bmoCard()
+    }
+
+    private var systemStatusCard: some View {
+        let status = appState.buddyRuntimeStatus
+        return VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("OpenClaw Buddy")
+                        .font(.system(size: 28, weight: .bold))
+                        .foregroundColor(BMOTheme.textPrimary)
+                    Text("Grounded in runtime, memory, artifacts, and receipts.")
+                        .font(.subheadline)
+                        .foregroundColor(BMOTheme.textSecondary)
+                }
+                Spacer()
+                StatusBadge(label: status.runtimeAvailable ? "Runtime Ready" : "Runtime Missing", color: status.runtimeAvailable ? BMOTheme.success : BMOTheme.error)
+            }
+
+            statusRow("Model adapter", value: status.activeModelAdapter, ok: status.brainConnected)
+            statusRow("Workspace runtime", value: status.runtimeAvailable ? "Bootstrapped" : "Not bootstrapped", ok: status.runtimeAvailable)
+            statusRow("Memory artifacts", value: status.memoryHealthy ? "Healthy" : "Needs regeneration", ok: status.memoryHealthy)
+            statusRow("Registered skills", value: "\(status.registeredSkillCount)", ok: status.registeredSkillCount > 0)
+            statusRow("Failed actions", value: "\(status.failedActions.count)", ok: status.failedActions.isEmpty)
+        }
+        .bmoCard()
+    }
+
+    private var recentRuntimeCard: some View {
+        let status = appState.buddyRuntimeStatus
+        return VStack(alignment: .leading, spacing: 12) {
+            Text("Suggested next actions")
+                .font(.subheadline)
+                .fontWeight(.semibold)
+                .foregroundColor(BMOTheme.textSecondary)
+
+            ForEach(status.suggestedNextActions, id: \.self) { action in
+                HStack(alignment: .top, spacing: 8) {
+                    Image(systemName: "arrow.right.circle.fill")
+                        .foregroundColor(BMOTheme.accent)
+                    Text(action)
+                        .font(.caption)
+                        .foregroundColor(BMOTheme.textPrimary)
+                    Spacer()
+                }
+            }
+
+            if !status.recentChanges.isEmpty {
+                Divider().overlay(BMOTheme.divider)
+                Text("Recent changes")
+                    .font(.caption)
+                    .foregroundColor(BMOTheme.textTertiary)
+                ForEach(status.recentChanges.prefix(3), id: \.id) { event in
+                    Text(event.message)
+                        .font(.caption)
+                        .foregroundColor(BMOTheme.textSecondary)
+                }
+            }
         }
         .bmoCard()
     }
@@ -821,6 +882,23 @@ struct BuddyView: View {
             Spacer()
             Text(value.isEmpty ? "—" : value)
                 .foregroundColor(BMOTheme.textPrimary)
+        }
+        .font(.caption)
+    }
+
+    private func statusRow(_ label: String, value: String, ok: Bool) -> some View {
+        HStack(alignment: .top) {
+            Text(label)
+                .foregroundColor(BMOTheme.textTertiary)
+            Spacer()
+            HStack(spacing: 6) {
+                Circle()
+                    .fill(ok ? BMOTheme.success : BMOTheme.warning)
+                    .frame(width: 7, height: 7)
+                Text(value.isEmpty ? "Unavailable" : value)
+                    .multilineTextAlignment(.trailing)
+                    .foregroundColor(BMOTheme.textPrimary)
+            }
         }
         .font(.caption)
     }
