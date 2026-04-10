@@ -4,6 +4,9 @@ import UniformTypeIdentifiers
 struct FilesView: View {
     @EnvironmentObject private var appState: AppState
     @State private var isImporterPresented = false
+    @State private var isCreatePresented = false
+    @State private var newFilename = "notes.md"
+    @State private var selectedFile: WorkspaceFile?
 
     var body: some View {
         NavigationStack {
@@ -25,10 +28,18 @@ struct FilesView: View {
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
-                        isImporterPresented = true
+                        isCreatePresented = true
                     } label: {
                         Image(systemName: "plus.circle.fill")
                             .foregroundColor(BMOTheme.accent)
+                    }
+                }
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        isImporterPresented = true
+                    } label: {
+                        Image(systemName: "square.and.arrow.down")
+                            .foregroundColor(BMOTheme.textSecondary)
                     }
                 }
             }
@@ -55,6 +66,35 @@ struct FilesView: View {
             } message: {
                 Text(appState.workspaceStore.errorMessage ?? "Unknown error")
             }
+            .sheet(isPresented: $isCreatePresented) {
+                NavigationStack {
+                    Form {
+                        Section("New workspace file") {
+                            TextField("Filename", text: $newFilename)
+                                .textInputAutocapitalization(.never)
+                                .autocorrectionDisabled()
+                            Text("Creates a real file in the Files workspace. Markdown, text, JSON, and source files can be edited after creation.")
+                                .font(.caption)
+                                .foregroundColor(BMOTheme.textTertiary)
+                        }
+                    }
+                    .navigationTitle("Create File")
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) {
+                            Button("Cancel") { isCreatePresented = false }
+                        }
+                        ToolbarItem(placement: .confirmationAction) {
+                            Button("Create") {
+                                appState.workspaceStore.createFile(named: newFilename, content: "# \(newFilename)\n\n")
+                                isCreatePresented = false
+                            }
+                        }
+                    }
+                }
+            }
+            .navigationDestination(item: $selectedFile) { file in
+                WorkspaceFileEditorView(file: file)
+            }
         }
     }
 
@@ -74,10 +114,17 @@ struct FilesView: View {
                 .foregroundColor(BMOTheme.textSecondary)
                 .multilineTextAlignment(.center)
 
-            Button("Import Files") {
-                isImporterPresented = true
+            HStack {
+                Button("Create File") {
+                    isCreatePresented = true
+                }
+                .buttonStyle(BMOButtonStyle())
+
+                Button("Import") {
+                    isImporterPresented = true
+                }
+                .buttonStyle(BMOButtonStyle(isPrimary: false))
             }
-            .buttonStyle(BMOButtonStyle())
             .padding(.top, BMOTheme.spacingSM)
         }
     }
@@ -107,11 +154,16 @@ struct FilesView: View {
             }
 
             VStack(alignment: .leading, spacing: 3) {
-                Text(file.filename)
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-                    .foregroundColor(BMOTheme.textPrimary)
-                    .lineLimit(1)
+                Button {
+                    selectedFile = file
+                } label: {
+                    Text(file.filename)
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .foregroundColor(BMOTheme.textPrimary)
+                        .lineLimit(1)
+                }
+                .buttonStyle(.plain)
                 Text(file.ext.uppercased())
                     .font(.caption2)
                     .foregroundColor(BMOTheme.textTertiary)
@@ -139,6 +191,12 @@ struct FilesView: View {
                     .font(.subheadline)
                     .foregroundColor(BMOTheme.error.opacity(0.6))
             }
+
+            ShareLink(item: file.localURL) {
+                Image(systemName: "square.and.arrow.up")
+                    .font(.subheadline)
+                    .foregroundColor(BMOTheme.textTertiary)
+            }
         }
         .bmoCard()
     }
@@ -155,6 +213,71 @@ struct FilesView: View {
             return "tablecells"
         default:
             return "doc"
+        }
+    }
+}
+
+struct WorkspaceFileEditorView: View {
+    @EnvironmentObject private var appState: AppState
+    @Environment(\.dismiss) private var dismiss
+    let file: WorkspaceFile
+    @State private var text = ""
+    @State private var isLoaded = false
+
+    var body: some View {
+        VStack(spacing: 0) {
+            if file.isTextLike {
+                TextEditor(text: $text)
+                    .font(.system(.body, design: .monospaced))
+                    .foregroundColor(BMOTheme.textPrimary)
+                    .scrollContentBackground(.hidden)
+                    .background(BMOTheme.backgroundPrimary)
+                    .padding(BMOTheme.spacingMD)
+            } else {
+                VStack(spacing: BMOTheme.spacingMD) {
+                    Image(systemName: "doc.fill")
+                        .font(.system(size: 44))
+                        .foregroundColor(BMOTheme.textTertiary)
+                    Text("This file is not editable as text.")
+                        .foregroundColor(BMOTheme.textSecondary)
+                    ShareLink(item: file.localURL) {
+                        Label("Export File", systemImage: "square.and.arrow.up")
+                    }
+                    .buttonStyle(BMOButtonStyle())
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(BMOTheme.backgroundPrimary)
+            }
+        }
+        .navigationTitle(file.filename)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                ShareLink(item: file.localURL) {
+                    Image(systemName: "square.and.arrow.up")
+                }
+            }
+            ToolbarItem(placement: .topBarTrailing) {
+                if file.isTextLike {
+                    Button("Save") {
+                        appState.workspaceStore.saveText(text, for: file)
+                    }
+                    .foregroundColor(BMOTheme.accent)
+                }
+            }
+            ToolbarItem(placement: .bottomBar) {
+                Button(role: .destructive) {
+                    appState.workspaceStore.delete(file)
+                    dismiss()
+                } label: {
+                    Label("Delete File", systemImage: "trash")
+                }
+            }
+        }
+        .onAppear {
+            guard !isLoaded else { return }
+            text = appState.workspaceStore.readText(for: file)
+            isLoaded = true
         }
     }
 }

@@ -410,6 +410,18 @@ final class BuddyProfileStore: ObservableObject {
         persist()
     }
 
+    func removeBuddy(_ target: GeneratedBuddy) {
+        guard var state else { return }
+        guard state.collection.count > 1 else { return }
+        state.collection.removeAll { $0.id == target.id }
+        state.tradeOffers.removeAll { $0.id == target.id }
+        if state.activeBuddy.id == target.id, let replacement = state.collection.first {
+            state.activeBuddy = replacement
+        }
+        self.state = state
+        persist()
+    }
+
     private func mutateActiveBuddy(_ mutation: (inout GeneratedBuddy) -> Void) {
         guard var state else { return }
         var buddy = state.activeBuddy
@@ -464,6 +476,7 @@ struct BuddyView: View {
     @StateObject private var store = BuddyProfileStore()
     @State private var renameTarget: GeneratedBuddy?
     @State private var renameDraft = ""
+    @State private var lastReceipt: OpenClawReceipt?
 
     private var profileID: String {
         BuddyGenerator.profileSignature(for: appState.stackConfig)
@@ -474,6 +487,9 @@ struct BuddyView: View {
             ScrollView {
                 VStack(spacing: BMOTheme.spacingMD) {
                     systemStatusCard
+                    if let lastReceipt {
+                        ActionReceiptCard(receipt: lastReceipt)
+                    }
                     recentRuntimeCard
                     if let buddy = store.activeBuddy {
                         header(for: buddy)
@@ -525,9 +541,10 @@ struct BuddyView: View {
                         }
                         ToolbarItem(placement: .confirmationAction) {
                             Button("Save") {
-                                store.renameBuddy(buddy, to: renameDraft)
-                                renameTarget = nil
-                            }
+                store.renameBuddy(buddy, to: renameDraft)
+                persistBuddyStateReceipt("Renamed \(buddy.name) to \(renameDraft).")
+                renameTarget = nil
+            }
                         }
                     }
                 }
@@ -674,14 +691,17 @@ struct BuddyView: View {
             HStack(spacing: 10) {
                 buttonChip(label: "Feed", icon: "carrot.fill") {
                     store.feedActiveBuddy()
+                    persistBuddyStateReceipt("Fed active buddy and persisted updated care stats.")
                 }
                 buttonChip(label: "Train", icon: "figure.run") {
                     store.trainActiveBuddy()
+                    persistBuddyStateReceipt("Trained active buddy and persisted updated battle stats.")
                 }
             }
 
             Button {
                 store.regenerateBuddy(from: appState.stackConfig)
+                persistBuddyStateReceipt("Generated a new active buddy from the current agent profile.")
             } label: {
                 HStack {
                     Image(systemName: "sparkles")
@@ -718,6 +738,9 @@ struct BuddyView: View {
 
             Button {
                 store.startBattle()
+                if let latest = store.battleHistory.first {
+                    persistBuddyStateReceipt(latest.summary)
+                }
             } label: {
                 HStack {
                     Image(systemName: "bolt.shield.fill")
@@ -781,6 +804,7 @@ struct BuddyView: View {
 
                     Button {
                         store.acceptTrade(offer, from: appState.stackConfig)
+                        persistBuddyStateReceipt("Accepted trade for \(offer.name) and made it the active buddy.")
                     } label: {
                         HStack {
                             Image(systemName: "arrow.triangle.swap")
@@ -841,6 +865,7 @@ struct BuddyView: View {
                             } else {
                                 Button("Make Active") {
                                     store.makeActiveBuddy(buddy)
+                                    persistBuddyStateReceipt("Made \(buddy.name) the active buddy.")
                                 }
                                 .buttonStyle(.bordered)
                             }
@@ -851,6 +876,16 @@ struct BuddyView: View {
                             }
                             .font(.caption)
                             .foregroundColor(BMOTheme.accent)
+
+                            if store.collection.count > 1 {
+                                Button(role: .destructive) {
+                                    store.removeBuddy(buddy)
+                                    persistBuddyStateReceipt("Removed \(buddy.name) from the buddy collection.")
+                                } label: {
+                                    Text("Remove")
+                                }
+                                .font(.caption)
+                            }
                         }
                     }
                 }
@@ -912,6 +947,23 @@ struct BuddyView: View {
             .frame(maxWidth: .infinity)
         }
         .buttonStyle(BMOButtonStyle(isPrimary: false))
+    }
+
+    private func persistBuddyStateReceipt(_ summary: String) {
+        let active = store.activeBuddy?.name ?? "No active buddy"
+        let latestBattle = store.battleHistory.first?.summary ?? "No battles yet."
+        let markdown = """
+        # Buddy State
+
+        - Active buddy: \(active)
+        - Collection count: \(store.collection.count)
+        - Last update: \(summary)
+        - Latest battle: \(latestBattle)
+
+        Buddy state is tied to the current OpenClaw agent profile signature:
+        `\(profileID)`
+        """
+        lastReceipt = appState.writeWorkspaceArtifact(path: "state/buddy.md", content: markdown)
     }
 }
 

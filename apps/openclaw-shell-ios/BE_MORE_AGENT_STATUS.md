@@ -16,6 +16,8 @@ Current shipped shell surfaces include:
 - Chat, Skills, Artifacts, Buddy, Files, and Settings tabs
 - `.openclaw/` workspace artifacts, JSON state stores, action/event logs, and a skills registry
 - Pokémon Team Builder as a registry-backed skill that saves JSON and Markdown artifacts
+- ClawHub local starter-skill installs that persist manifest and README artifacts
+- editable/exportable/deletable Files workspace entries and `.openclaw` artifacts
 - persisted tab ordering and visibility
 - persisted buddy rename and active selection
 - bundled repo-backed surface briefs inside Mission Control
@@ -28,7 +30,9 @@ Current shipped shell surfaces include:
 - Cloud routes can be configured in Settings and switched in Models.
 - Workspace actions run through OpenClaw runtime receipts. The UI should not claim files, memory,
   skills, or sandbox work completed unless the runtime returns a completed or persisted receipt.
-- The iOS sandbox currently exposes controlled OpenClaw commands (`pwd`, `ls`, `cat`, `regenerate`,
+- Cloud/local replies are sanitized before display so hidden reasoning/thought blocks are not shown
+  unless the operator explicitly asks for an explanation.
+- The iOS sandbox currently exposes controlled OpenClaw commands (`pwd`, `ls`, `cat`, `write`, `regenerate`,
   `skills`, `help`) rather than arbitrary host shell execution.
 
 ## Local build path
@@ -46,7 +50,7 @@ xcodebuild -project BeMoreAgent.xcodeproj \
 
 ## Release path
 
-- `CFBundleVersion` is currently `17`.
+- `CFBundleVersion` is currently `18`.
 - `IPHONEOS_DEPLOYMENT_TARGET` is currently `26.0`.
 - TestFlight delivery is repo-managed through `.github/workflows/testflight.yml`.
 - The operator runbook for that path is `apps/openclaw-shell-ios/ADMIN_TESTFLIGHT_RUNBOOK.md`.
@@ -58,7 +62,7 @@ xcodebuild -project BeMoreAgent.xcodeproj \
 - `project.yml` still has `dependencies: []`.
 - When `MLCSwift` is not importable, the app still uses the stub local-runtime path and cannot claim
   real on-device inference.
-- Arbitrary codex-style shell/process execution is not available on-device in this build. Build 17
+- Arbitrary codex-style shell/process execution is not available on-device in this build. Build 18
   provides a receipt-backed controlled sandbox surface and leaves real hardened process execution for
   a future platform/runtime integration.
 

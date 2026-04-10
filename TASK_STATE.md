@@ -1,19 +1,18 @@
 # Task State
 
-Last updated: 2026-04-09 19:33 UTC
+Last updated: 2026-04-10 10:25 UTC
 
 ## Current status
 
-- Description: Reconcile the real iOS shell state on current `master`, add a meaningful repo-backed BMO Stack surface inside the app, fix stale local-runtime/product copy, and refresh the iOS docs to match what actually ships.
-- Active repo: `/Users/taylor/development/bmo-stack`
-- Branch: `codex/ios-shell-surfaces-a`
-- Last successful step: rebased the work onto `origin/master` after confirming PR `#212` advanced the iOS target to build `13`, preserved the focused shell/doc changes, and kept the repo-managed TestFlight path intact.
-- Next intended step: rerun the required build plus simulator verification from the rebased branch, then publish the scoped PRs with truthful build/runtime status.
+- Description: Keep PR #229 merge-ready while tightening the MacBook OpenClaw/iOS boundary and host Telegram delivery policy.
+- Active repo: `/Users/prismtek/bmo-stack`
+- Branch: `fix/openclaw-build18-agent-workspace-ux`
+- Last successful step: applied host OpenClaw delivery policy, added repo-side boundary/policy doctors, and verified PR #229 was clean before this follow-up patch.
+- Next intended step: run repo checks, commit, push, and confirm the PR checks restart on the new head.
 - Verification complete: false
 - Manual steps remaining:
-  - rerun the required local build after edits on top of `origin/master`
-  - verify relaunch persistence for onboarding, buddy state, and tab layout after the rebase
-  - determine whether PR B local runtime work is honestly feasible from current `master`
+  - watch the new PR head checks after push
+  - verify live Telegram delivery with a real long response from Cody's channel
 - Safe to resume: true
 
 - 2026-04-09 19:13 UTC

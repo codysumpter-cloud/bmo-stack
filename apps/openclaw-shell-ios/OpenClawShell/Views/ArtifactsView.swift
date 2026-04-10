@@ -97,50 +97,123 @@ struct ArtifactsView: View {
 
 struct ArtifactPreviewView: View {
     @EnvironmentObject private var appState: AppState
+    @Environment(\.dismiss) private var dismiss
     let artifact: OpenClawArtifactMetadata
     @State private var content = ""
     @State private var error: String?
     @State private var receipt: OpenClawReceipt?
+    @State private var isEditing = false
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: BMOTheme.spacingMD) {
-                header
-                if let receipt {
-                    ActionReceiptCard(receipt: receipt)
-                }
-                if let error {
-                    Text(error)
-                        .font(.subheadline)
-                        .foregroundColor(BMOTheme.error)
-                        .bmoCard()
-                } else {
-                    Text(content.isEmpty ? "Empty artifact." : content)
-                        .font(.system(.caption, design: .monospaced))
+        Group {
+            if isEditing {
+                VStack(spacing: 0) {
+                    TextEditor(text: $content)
+                        .font(.system(.body, design: .monospaced))
                         .foregroundColor(BMOTheme.textPrimary)
-                        .textSelection(.enabled)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .bmoCard()
+                        .scrollContentBackground(.hidden)
+                        .background(BMOTheme.backgroundPrimary)
+                        .padding(BMOTheme.spacingMD)
+                }
+            } else {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: BMOTheme.spacingMD) {
+                        header
+                        if let receipt {
+                            ActionReceiptCard(receipt: receipt)
+                        }
+                        if let error {
+                            Text(error)
+                                .font(.subheadline)
+                                .foregroundColor(BMOTheme.error)
+                                .bmoCard()
+                        } else {
+                            actionBar
+                            preview
+                        }
+                    }
+                    .padding(.horizontal, BMOTheme.spacingMD)
+                    .padding(.bottom, BMOTheme.spacingXL)
                 }
             }
-            .padding(.horizontal, BMOTheme.spacingMD)
-            .padding(.bottom, BMOTheme.spacingXL)
         }
         .background(BMOTheme.backgroundPrimary)
         .navigationTitle(artifact.path)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                if let url = try? appState.workspaceRuntime.fileURL(for: artifact.path) {
+                    ShareLink(item: url) {
+                        Image(systemName: "square.and.arrow.up")
+                    }
+                }
+            }
             ToolbarItem(placement: .topBarTrailing) {
-                if ["soul.md", "user.md", "memory.md", "session.md", "skills.md"].contains(artifact.path) {
-                    Button("Regenerate") {
-                        receipt = appState.regenerateArtifacts(target: artifact.path)
+                if isEditing {
+                    Button("Save") {
+                        receipt = appState.writeWorkspaceArtifact(path: artifact.path, content: content)
+                        isEditing = false
                         load()
+                    }
+                    .foregroundColor(BMOTheme.accent)
+                } else {
+                    Button("Edit") {
+                        isEditing = true
                     }
                     .foregroundColor(BMOTheme.accent)
                 }
             }
+            ToolbarItem(placement: .bottomBar) {
+                HStack {
+                    if ["soul.md", "user.md", "memory.md", "session.md", "skills.md"].contains(artifact.path) {
+                        Button("Regenerate") {
+                            receipt = appState.regenerateArtifacts(target: artifact.path)
+                            load()
+                        }
+                        .foregroundColor(BMOTheme.accent)
+                    }
+
+                    Spacer()
+
+                    Button(role: .destructive) {
+                        receipt = appState.deleteWorkspaceArtifact(path: artifact.path)
+                        dismiss()
+                    } label: {
+                        Label("Delete", systemImage: "trash")
+                    }
+                }
+            }
         }
         .onAppear(perform: load)
+    }
+
+    private var preview: some View {
+        Text(content.isEmpty ? "Empty artifact." : content)
+            .font(.system(.caption, design: .monospaced))
+            .foregroundColor(BMOTheme.textPrimary)
+            .textSelection(.enabled)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .bmoCard()
+    }
+
+    private var actionBar: some View {
+        HStack(spacing: 10) {
+            Button {
+                isEditing = true
+            } label: {
+                Label("Edit", systemImage: "pencil")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(BMOButtonStyle(isPrimary: false))
+
+            if let url = try? appState.workspaceRuntime.fileURL(for: artifact.path) {
+                ShareLink(item: url) {
+                    Label("Export", systemImage: "square.and.arrow.up")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(BMOButtonStyle(isPrimary: false))
+            }
+        }
     }
 
     private var header: some View {
@@ -148,7 +221,7 @@ struct ArtifactPreviewView: View {
             Text(artifact.path)
                 .font(.headline)
                 .foregroundColor(BMOTheme.textPrimary)
-            Text("Preview is read from the persisted `.openclaw` artifact.")
+            Text("Read, edit, export, or delete this persisted `.openclaw` artifact. Canonical markdown can also be regenerated.")
                 .font(.caption)
                 .foregroundColor(BMOTheme.textTertiary)
         }

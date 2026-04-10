@@ -16,7 +16,7 @@ struct ChatView: View {
                                     .id(message.id)
                             }
 
-                            ForEach(appState.workspaceRuntime.recentActions.prefix(3)) { action in
+                            ForEach(chatScopedActions) { action in
                                 ActionRecordCard(action: action)
                             }
 
@@ -168,6 +168,13 @@ struct ChatView: View {
         !appState.chatStore.isGenerating &&
         !prompt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
         (appState.selectedProviderAccount != nil || (appState.selectedInstalledModel != nil && !appState.usesStubRuntime))
+    }
+
+    private var chatScopedActions: [OpenClawActionRecord] {
+        appState.workspaceRuntime.recentActions
+            .filter { $0.source == "chat" || $0.source == "assistant" }
+            .prefix(3)
+            .map { $0 }
     }
 
     private var statusLine: String {
