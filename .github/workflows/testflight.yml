@@ -19,7 +19,7 @@ jobs:
       run:
         working-directory: apps/openclaw-shell-ios
     env:
-      DEVELOPER_DIR: /Applications/Xcode.app/Contents/Developer
+      XCODE_DEVELOPER_DIR: ${{ vars.BEMOREAGENT_XCODE_DEVELOPER_DIR != '' && vars.BEMOREAGENT_XCODE_DEVELOPER_DIR || '/Applications/Xcode.app/Contents/Developer' }}
       ASC_API_KEY: ${{ secrets.APPSTORE_CONNECT_API_KEY }}
       ASC_KEY_ID: ${{ secrets.APPSTORE_CONNECT_KEY_ID }}
       ASC_ISSUER_ID: ${{ secrets.APPSTORE_CONNECT_ISSUER_ID }}
@@ -31,12 +31,35 @@ jobs:
           submodules: true
 
       - name: Select Xcode
-        run: sudo xcode-select -s /Applications/Xcode.app
+        run: |
+          xcode_app="${XCODE_DEVELOPER_DIR%/Contents/Developer}"
+          test -d "$xcode_app"
+          sudo xcode-select -s "$xcode_app"
+          echo "DEVELOPER_DIR=$XCODE_DEVELOPER_DIR" >> "$GITHUB_ENV"
 
       - name: Show Xcode version
         run: |
           xcodebuild -version
-          xcrun --sdk iphoneos --show-sdk-version
+          SDK_VERSION="$(xcrun --sdk iphoneos --show-sdk-version)"
+          echo "iPhoneOS SDK $SDK_VERSION"
+          python3 - "$SDK_VERSION" <<'PY2'
+          import pathlib
+          import re
+          import sys
+
+          sdk = tuple(int(part) for part in sys.argv[1].split('.')[:2])
+          project = pathlib.Path('project.yml').read_text()
+          match = re.search(r'IPHONEOS_DEPLOYMENT_TARGET:\s*([0-9]+(?:\.[0-9]+)?)', project)
+          if not match:
+              print('Missing IPHONEOS_DEPLOYMENT_TARGET in project.yml', file=sys.stderr)
+              sys.exit(1)
+          deployment = tuple(int(part) for part in match.group(1).split('.')[:2])
+          if len(deployment) == 1:
+              deployment = (deployment[0], 0)
+          if sdk < deployment:
+              print(f'Xcode SDK {sys.argv[1]} is too old for IPHONEOS_DEPLOYMENT_TARGET {match.group(1)}', file=sys.stderr)
+              sys.exit(1)
+          PY2
           sw_vers
 
       - name: Install XcodeGen if needed
@@ -111,9 +134,8 @@ jobs:
             -authenticationKeyPath "$RUNNER_TEMP/AuthKey.p8" \
             -authenticationKeyID "$ASC_KEY_ID" \
             -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
-            CODE_SIGN_STYLE=Manual \
+            CODE_SIGN_STYLE=Automatic \
             DEVELOPMENT_TEAM=DY9FHPRZA9 \
-            CODE_SIGN_IDENTITY="Apple Distribution" \
             clean archive
 
       - name: Export and upload to TestFlight
