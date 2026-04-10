@@ -252,7 +252,7 @@ enum StackDeploymentMode: String, Codable, CaseIterable, Hashable, Identifiable 
 
     var title: String {
         switch self {
-        case .pairToExistingGateway: return "Pair to an existing Gateway"
+        case .pairToExistingGateway: return "Pair to an existing runtime"
         case .bootstrapSelfHosted: return "Set up a self-hosted OpenClaw stack"
         }
     }
@@ -260,9 +260,9 @@ enum StackDeploymentMode: String, Codable, CaseIterable, Hashable, Identifiable 
     var subtitle: String {
         switch self {
         case .pairToExistingGateway:
-            return "Connect this iPhone to a Gateway you already run elsewhere."
+            return "Connect this iPhone to an OpenClaw runtime endpoint you already run elsewhere."
         case .bootstrapSelfHosted:
-            return "Use onboarding answers to generate the exact stack profile, Gateway target, and next setup steps for a self-hosted deployment."
+            return "Use onboarding answers to generate the exact stack profile, runtime target, and next setup steps for a self-hosted deployment."
         }
     }
 }
@@ -355,6 +355,8 @@ enum AppTab: String, Codable, CaseIterable, Hashable, Identifiable {
     case missionControl
     case models
     case chat
+    case skills
+    case artifacts
     case buddy
     case files
     case settings
@@ -366,6 +368,8 @@ enum AppTab: String, Codable, CaseIterable, Hashable, Identifiable {
         case .missionControl: return "Control"
         case .models: return "Models"
         case .chat: return "Chat"
+        case .skills: return "Skills"
+        case .artifacts: return "Artifacts"
         case .buddy: return "Buddy"
         case .files: return "Files"
         case .settings: return "Settings"
@@ -377,6 +381,8 @@ enum AppTab: String, Codable, CaseIterable, Hashable, Identifiable {
         case .missionControl: return "switch.2"
         case .models: return "cpu"
         case .chat: return "message.fill"
+        case .skills: return "sparkles.rectangle.stack.fill"
+        case .artifacts: return "doc.richtext.fill"
         case .buddy: return "person.2.fill"
         case .files: return "folder.fill"
         case .settings: return "gearshape.fill"

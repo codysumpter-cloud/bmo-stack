@@ -16,6 +16,10 @@ struct ChatView: View {
                                     .id(message.id)
                             }
 
+                            ForEach(appState.workspaceRuntime.recentActions.prefix(3)) { action in
+                                ActionRecordCard(action: action)
+                            }
+
                             if appState.chatStore.isGenerating {
                                 HStack(spacing: 8) {
                                     ProgressView()
@@ -78,6 +82,9 @@ struct ChatView: View {
                 Button("OK", role: .cancel) {}
             } message: {
                 Text(appState.chatStore.errorMessage ?? "Unknown error")
+            }
+            .onAppear {
+                appState.workspaceRuntime.refreshMetadata()
             }
         }
     }
@@ -171,6 +178,35 @@ struct ChatView: View {
             return appState.usesStubRuntime ? "Local model selected, runtime not included in this build" : "On-device model • \(model.displayName)"
         }
         return "Route not configured. Link a cloud provider to chat in this build."
+    }
+}
+
+private struct ActionRecordCard: View {
+    let action: OpenClawActionRecord
+
+    var body: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Text(action.title)
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundColor(BMOTheme.textPrimary)
+                    Spacer()
+                    StatusBadge(label: action.status.label, color: action.status.color)
+                }
+                Text(action.output["summary"] ?? action.error ?? action.kind.rawValue)
+                    .font(.caption)
+                    .foregroundColor(BMOTheme.textSecondary)
+                if !action.artifacts.isEmpty {
+                    Text(action.artifacts.joined(separator: ", "))
+                        .font(.caption2)
+                        .foregroundColor(BMOTheme.accent)
+                }
+            }
+            Spacer(minLength: 32)
+        }
+        .bmoCard()
     }
 }
 
