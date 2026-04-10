@@ -40,7 +40,7 @@ xcodebuild -project BeMoreAgent.xcodeproj \
 
 ## Release path
 
-- `CFBundleVersion` is currently `15`.
+- `CFBundleVersion` is currently `16`.
 - `IPHONEOS_DEPLOYMENT_TARGET` is currently `26.0`.
 - TestFlight delivery is repo-managed through `.github/workflows/testflight.yml`.
 - The operator runbook for that path is `apps/openclaw-shell-ios/ADMIN_TESTFLIGHT_RUNBOOK.md`.

@@ -744,6 +744,30 @@ struct CloudExecutionMessage: Hashable {
     var content: String
 }
 
+enum CloudPromptBuilder {
+    static func systemPrompt(config: StackConfig, operatorName: String, routeLabel: String) -> String {
+        let name = operatorName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let displayName = name.isEmpty ? "the operator" : name
+        let toolPosture = config.toolsEnabled
+            ? "The operator intends to use tool-capable OpenClaw routes when the Gateway exposes them."
+            : "The operator has not enabled tool-capable behavior for this stack profile."
+
+        return """
+        You are BeMoreAgent, the BMO-style operator agent for \(displayName)'s OpenClaw stack.
+
+        You are not confined to the iOS app. Do not frame yourself as app-only. Help with the full OpenClaw/operator context: planning, repo work, runtime diagnosis, provider setup, deployment reasoning, and stack operations.
+
+        Current route: \(routeLabel).
+        Stack name: \(config.stackName).
+        Gateway target: \(config.gatewayURL).
+        Admin/public domain: \(config.adminDomain).
+        \(toolPosture)
+
+        Be honest about capabilities. This direct cloud chat route can reason and use attached file context, but it does not by itself grant direct device control, shell execution, or OpenClaw Gateway tools. If an action requires the Gateway, desktop node, or a tool bridge, say exactly what route is needed instead of refusing as though the request is app-only.
+        """
+    }
+}
+
 enum CloudExecutionServiceError: Error {
     case invalidBaseURL
     case invalidResponse
@@ -1112,14 +1136,14 @@ final class AppState: ObservableObject {
     }
 
     var activeRouteModeLabel: String {
-        if selectedProviderAccount != nil { return "Gateway cloud route" }
+        if selectedProviderAccount != nil { return "Direct cloud model route" }
         if selectedInstalledModel != nil { return usesStubRuntime ? "Local runtime unavailable" : "On-device route" }
         return "Route not configured"
     }
 
     var operatorSummary: String {
         if let account = selectedProviderAccount {
-            return "OpenClaw shell is routed through \(account.provider.displayName) using \(account.modelSlug)."
+            return "Chat is routed directly through \(account.provider.displayName) using \(account.modelSlug). Gateway tools still require a real OpenClaw bridge at \(stackConfig.gatewayURL)."
         } else if let model = selectedInstalledModel {
             if usesStubRuntime {
                 return "\(model.displayName) is selected, but local inference is unavailable in this build."
@@ -1176,7 +1200,7 @@ final class AppState: ObservableObject {
 
     var routeHealthSummary: String {
         if selectedProviderAccount != nil {
-            return "Live provider route ready for real chat."
+            return "Direct cloud chat is ready. OpenClaw tools require a Gateway/tool bridge."
         }
         if let model = selectedInstalledModel {
             return usesStubRuntime
@@ -1427,7 +1451,7 @@ final class AppState: ObservableObject {
             let reply = try await cloudExecutionService.send(
                 account: account,
                 messages: [
-                    CloudExecutionMessage(role: .system, content: "You are verifying a chat transport inside the BeMoreAgent iOS app. Reply with exactly: ROUTE_OK"),
+                    CloudExecutionMessage(role: .system, content: "You are verifying BeMoreAgent's direct cloud chat route for an OpenClaw operator stack. Reply with exactly: ROUTE_OK"),
                     CloudExecutionMessage(role: .user, content: "Return ROUTE_OK")
                 ],
                 temperature: 0,
@@ -1515,8 +1539,16 @@ final class AppState: ObservableObject {
     }
 
     private func buildCloudMessages(attachedFiles: [WorkspaceFile]) -> [CloudExecutionMessage] {
+        let routeLabel = selectedProviderAccount.map { "\($0.provider.displayName) using \($0.modelSlug)" } ?? "No selected cloud provider"
         var messages: [CloudExecutionMessage] = [
-            CloudExecutionMessage(role: .system, content: "You are BeMoreAgent, a practical assistant inside the iOS app. Be concise, helpful, and use any attached file context when relevant.")
+            CloudExecutionMessage(
+                role: .system,
+                content: CloudPromptBuilder.systemPrompt(
+                    config: stackConfig,
+                    operatorName: operatorDisplayName,
+                    routeLabel: routeLabel
+                )
+            )
         ]
 
         if !attachedFiles.isEmpty {
