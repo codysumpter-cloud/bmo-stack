@@ -34,8 +34,12 @@ jobs:
         run: |
           xcode_app="${XCODE_DEVELOPER_DIR%/Contents/Developer}"
           test -d "$xcode_app"
-          sudo xcode-select -s "$xcode_app"
           echo "DEVELOPER_DIR=$XCODE_DEVELOPER_DIR" >> "$GITHUB_ENV"
+          if command -v sudo >/dev/null 2>&1 && sudo -n true 2>/dev/null; then
+            sudo xcode-select -s "$xcode_app"
+          else
+            echo "Skipping xcode-select; using DEVELOPER_DIR=$XCODE_DEVELOPER_DIR"
+          fi
 
       - name: Show Xcode version
         run: |
