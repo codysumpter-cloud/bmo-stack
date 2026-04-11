@@ -45,21 +45,23 @@ struct MainTabView: View {
     private func destination(for tab: AppTab) -> some View {
         switch tab {
         case .missionControl:
-            MissionControlView()
+            MissionControlView(store: appState.buddyStore)
         case .models:
             ModelsView()
         case .chat:
-            ChatView()
+            ChatView(store: appState.buddyStore)
         case .skills:
             SkillsView()
         case .artifacts:
             ArtifactsView()
         case .buddy:
-            BuddyView()
+            BuddyView(store: appState.buddyStore)
         case .files:
             FilesView()
         case .pairing:
             MacPairingView()
+        case .pricing:
+            PricingView()
         case .settings:
             SettingsView()
         }

@@ -1155,6 +1155,7 @@ final class AppState: ObservableObject {
     @Published var modelStore = ModelCatalogStore()
     @Published var workspaceStore = WorkspaceStore()
     @Published var chatStore = ChatStore()
+    @Published var buddyStore = BuddyProfileStore()
     @Published var providerStore = ProviderStore()
     @Published var runtimePreferences = RuntimePreferencesStore()
     @Published var tabPreferencesStore = TabPreferencesStore()
@@ -1328,6 +1329,7 @@ final class AppState: ObservableObject {
         runtimePreferences.load()
         tabPreferencesStore.load()
         userPreferencesStore.load()
+        buddyStore.load(for: stackConfig)
         workspaceRuntime.bootstrap(config: stackConfig, preferences: userPreferencesStore.preferences, routeSummary: activeRouteModeLabel)
         refreshGemmaState()
         refreshRuntimeSummary()
@@ -1354,6 +1356,7 @@ final class AppState: ObservableObject {
         }
         persistStackConfig()
         workspaceRuntime.bootstrap(config: stackConfig, preferences: userPreferencesStore.preferences, routeSummary: activeRouteModeLabel)
+        buddyStore.load(for: config)
         buddyProfileStore?.load(for: config)
         refreshRuntimeSummary()
     }
@@ -1740,7 +1743,7 @@ final class AppState: ObservableObject {
                     config: stackConfig,
                     operatorName: operatorDisplayName,
                     routeLabel: routeLabel
-                ) + "\n\nWorkspace Runtime: Available inside BeMore. Ask for actions through the runtime contract; do not claim files, memory, skills, or sandbox commands changed unless a BeMore receipt confirms it. Registered skills: \(workspaceRuntime.skills.map(\.name).joined(separator: ", ")). Canonical artifacts: soul.md, user.md, memory.md, session.md, skills.md.\n\nMac Power Mode: \(macPowerModeSummary)"
+                ) + "\n\n\(activeBuddyChatContext)\n\nWorkspace Runtime: Available inside BeMore. Ask for actions through the runtime contract; do not claim files, memory, skills, or sandbox commands changed unless a BeMore receipt confirms it. Registered skills: \(workspaceRuntime.skills.map(\.name).joined(separator: ", ")). Canonical artifacts: soul.md, user.md, memory.md, session.md, skills.md.\n\nMac Power Mode: \(macPowerModeSummary)"
             )
         ]
 
@@ -1762,6 +1765,14 @@ final class AppState: ObservableObject {
         }
 
         return messages
+    }
+
+    private var activeBuddyChatContext: String {
+        guard let buddy = buddyStore.activeBuddy else {
+            return "Active Buddy: none yet. Encourage the user to create or install a Buddy before treating chat as personalized."
+        }
+        let focus = buddy.state.currentFocus ?? "no active focus"
+        return "Active Buddy: \(buddy.displayName). Role: \(buddy.identity.role). Class: \(buddy.identity.class). Mood: \(buddy.state.mood). Focus: \(focus). Reply as the BeMore companion connected to this Buddy identity, and keep visible work tied to Buddy tasks, skills, receipts, and results."
     }
 
     private func generatedSetupChecklist(for config: StackConfig) -> [String] {

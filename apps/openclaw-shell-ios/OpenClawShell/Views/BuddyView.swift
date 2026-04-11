@@ -9,7 +9,7 @@ private struct BuddyPersonalizationDraft {
 
 struct BuddyView: View {
     @EnvironmentObject private var appState: AppState
-    @StateObject private var store = BuddyProfileStore()
+    @ObservedObject var store: BuddyProfileStore
     @State private var checkInNote = ""
     @State private var trainingNote = ""
     @State private var personalizationDraft = BuddyPersonalizationDraft()
@@ -19,9 +19,8 @@ struct BuddyView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: BMOTheme.spacingMD) {
-                    runtimeCard
-
                     if let activeBuddy = store.activeBuddy {
+                        myBuddyHeader(for: activeBuddy)
                         activeBuddyCard(for: activeBuddy)
                         actionCard(for: activeBuddy)
                         recentEventsCard(for: activeBuddy)
@@ -29,11 +28,10 @@ struct BuddyView: View {
                         emptyStateCard
                     }
 
-                    libraryCard
+                    rosterCard
+                    marketplaceCard
 
-                    if store.installedBuddies.isEmpty == false {
-                        rosterCard
-                    }
+                    trainingAndManagementCard
 
                     if let receipt = store.lastReceipt {
                         receiptCard(receipt)
@@ -52,53 +50,42 @@ struct BuddyView: View {
         }
         .task {
             store.load(for: appState.stackConfig)
-            appState.buddyProfileStore = store
-        }
-        .onDisappear {
-            if appState.buddyProfileStore === store {
-                appState.buddyProfileStore = nil
-            }
         }
         .sheet(isPresented: $isShowingPersonalizationSheet) {
             personalizationSheet
         }
     }
 
-    private var runtimeCard: some View {
+    private func myBuddyHeader(for buddy: BuddyInstance) -> some View {
         let status = appState.buddyRuntimeStatus
+        let template = store.contracts?.templateForInstance(buddy)
         return VStack(alignment: .leading, spacing: BMOTheme.spacingMD) {
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Buddy Runtime")
-                        .font(.headline)
+                    Text("My Buddy")
+                        .font(.caption.weight(.semibold))
+                        .foregroundColor(BMOTheme.textTertiary)
+                    Text(buddy.displayName)
+                        .font(.system(size: 30, weight: .bold))
                         .foregroundColor(BMOTheme.textPrimary)
-                    Text("Structured Buddy templates, installable local instances, readable continuity files, and receipt-backed updates.")
+                    Text(template?.onboardingCopy ?? "\(buddy.displayName) is the active companion for chat, skills, tasks, receipts, and results.")
                         .font(.subheadline)
                         .foregroundColor(BMOTheme.textSecondary)
                 }
                 Spacer()
                 StatusBadge(
-                    label: status.runtimeAvailable ? "Runtime Ready" : "Runtime Missing",
+                    label: status.runtimeAvailable ? "Connected" : "Phone-first",
                     color: status.runtimeAvailable ? BMOTheme.success : BMOTheme.warning
                 )
             }
 
-            HStack(spacing: BMOTheme.spacingSM) {
-                metricPill(title: "Installed", value: "\(status.installedBuddyCount)")
-                metricPill(title: "Active", value: status.hasActiveBuddy ? "Yes" : "No")
-                metricPill(title: "Skills", value: "\(status.registeredSkillCount)")
-                metricPill(title: "Failures", value: "\(status.failedActions.count)")
-            }
+            BuddyAsciiView(mood: buddyMood(for: buddy), compact: true)
 
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Suggested next actions")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundColor(BMOTheme.textPrimary)
-                ForEach(status.suggestedNextActions, id: \.self) { suggestion in
-                    Text("• \(suggestion)")
-                        .font(.caption)
-                        .foregroundColor(BMOTheme.textSecondary)
-                }
+            HStack(spacing: BMOTheme.spacingSM) {
+                metricPill(title: "Owned", value: "\(status.installedBuddyCount)")
+                metricPill(title: "Skills", value: "\(status.registeredSkillCount)")
+                metricPill(title: "Level", value: "\(buddy.progression.level)")
+                metricPill(title: "Bond", value: "\(buddy.progression.bond)")
             }
         }
         .bmoCard()
@@ -259,21 +246,21 @@ struct BuddyView: View {
         .bmoCard()
     }
 
-    private var libraryCard: some View {
+    private var marketplaceCard: some View {
         let installedTemplateIDs = Set(store.installedBuddies.map(\.templateId))
 
         return VStack(alignment: .leading, spacing: BMOTheme.spacingMD) {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Council Starter Pack")
+                    Text("Discover Buddies")
                         .font(.headline)
                         .foregroundColor(BMOTheme.textPrimary)
-                    Text("BeMore Buddy templates bundled with local continuity, training, and receipt-backed state.")
+                    Text("A curated Buddy marketplace beta. Install starter Buddies now; premium creator Buddies can live here when billing is ready.")
                         .font(.subheadline)
                         .foregroundColor(BMOTheme.textSecondary)
                 }
                 Spacer()
-                StatusBadge(label: "\(store.templates.count) templates", color: BMOTheme.accent)
+                StatusBadge(label: "Marketplace beta", color: BMOTheme.accent)
             }
 
             ForEach(store.templates) { template in
@@ -289,7 +276,7 @@ struct BuddyView: View {
                         }
                         Spacer()
                         if installedTemplateIDs.contains(template.templateID) {
-                            StatusBadge(label: "Installed", color: BMOTheme.success)
+                            StatusBadge(label: store.activeBuddy?.templateId == template.templateID ? "Active" : "Owned", color: BMOTheme.success)
                         } else {
                             Button("Install") {
                                 store.install(template: template, using: appState)
@@ -325,47 +312,84 @@ struct BuddyView: View {
 
     private var rosterCard: some View {
         VStack(alignment: .leading, spacing: BMOTheme.spacingMD) {
-            Text("Installed Buddy Roster")
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("My Buddy Roster")
+                        .font(.headline)
+                        .foregroundColor(BMOTheme.textPrimary)
+                    Text("Owned Buddies stay separate from marketplace templates. Equip one active Buddy at a time.")
+                        .font(.caption)
+                        .foregroundColor(BMOTheme.textSecondary)
+                }
+                Spacer()
+                StatusBadge(label: "\(store.installedBuddies.count) owned", color: BMOTheme.accent)
+            }
+
+            if store.installedBuddies.isEmpty {
+                Text("Install your first Buddy from Discover to start a roster.")
+                    .font(.subheadline)
+                    .foregroundColor(BMOTheme.textSecondary)
+            } else {
+                ForEach(store.installedBuddies) { buddy in
+                    let isActive = store.activeBuddy?.instanceId == buddy.instanceId
+                    let template = store.contracts?.templateForInstance(buddy)
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack(alignment: .top) {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(buddy.displayName)
+                                    .font(.headline)
+                                    .foregroundColor(BMOTheme.textPrimary)
+                                Text(template?.name ?? buddy.identity.role)
+                                    .font(.subheadline)
+                                    .foregroundColor(BMOTheme.textSecondary)
+                            }
+                            Spacer()
+                            if isActive {
+                                StatusBadge(label: "Active", color: BMOTheme.accent)
+                            } else {
+                                Button("Equip") {
+                                    store.makeActive(buddy, using: appState)
+                                }
+                                .buttonStyle(BMOButtonStyle(isPrimary: false))
+                            }
+                        }
+
+                        Text("Focus: \(buddy.state.currentFocus ?? "No active focus")")
+                            .font(.subheadline)
+                            .foregroundColor(BMOTheme.textSecondary)
+
+                        HStack(spacing: BMOTheme.spacingSM) {
+                            metricPill(title: "Level", value: "\(buddy.progression.level)")
+                            metricPill(title: "Bond", value: "\(buddy.progression.bond)")
+                            metricPill(title: "Mood", value: buddy.state.mood.capitalized)
+                        }
+                    }
+                    .padding(BMOTheme.spacingMD)
+                    .background(BMOTheme.backgroundSecondary)
+                    .clipShape(RoundedRectangle(cornerRadius: BMOTheme.radiusMedium, style: .continuous))
+                }
+            }
+        }
+        .bmoCard()
+    }
+
+    private var trainingAndManagementCard: some View {
+        VStack(alignment: .leading, spacing: BMOTheme.spacingMD) {
+            Text("Training and Plans")
                 .font(.headline)
                 .foregroundColor(BMOTheme.textPrimary)
-
-            ForEach(store.installedBuddies) { buddy in
-                let isActive = store.activeBuddy?.instanceId == buddy.instanceId
-                let template = store.contracts?.templateForInstance(buddy)
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack(alignment: .top) {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(buddy.displayName)
-                                .font(.headline)
-                                .foregroundColor(BMOTheme.textPrimary)
-                            Text(template?.name ?? buddy.identity.role)
-                                .font(.subheadline)
-                                .foregroundColor(BMOTheme.textSecondary)
-                        }
-                        Spacer()
-                        if isActive {
-                            StatusBadge(label: "Active", color: BMOTheme.accent)
-                        } else {
-                            Button("Make Active") {
-                                store.makeActive(buddy, using: appState)
-                            }
-                            .buttonStyle(BMOButtonStyle(isPrimary: false))
-                        }
-                    }
-
-                    Text("Focus: \(buddy.state.currentFocus ?? "No active focus")")
-                        .font(.subheadline)
-                        .foregroundColor(BMOTheme.textSecondary)
-
-                    HStack(spacing: BMOTheme.spacingSM) {
-                        metricPill(title: "Level", value: "\(buddy.progression.level)")
-                        metricPill(title: "Bond", value: "\(buddy.progression.bond)")
-                        metricPill(title: "Mood", value: buddy.state.mood.capitalized)
-                    }
+            Text("Training grows your active Buddy. Pricing controls future Buddy slots, premium marketplace access, and higher runtime capacity.")
+                .font(.subheadline)
+                .foregroundColor(BMOTheme.textSecondary)
+            HStack {
+                Button("Open Pricing") {
+                    appState.selectedTab = .pricing
                 }
-                .padding(BMOTheme.spacingMD)
-                .background(BMOTheme.backgroundSecondary)
-                .clipShape(RoundedRectangle(cornerRadius: BMOTheme.radiusMedium, style: .continuous))
+                .buttonStyle(BMOButtonStyle(isPrimary: false))
+                Button("Open Chat") {
+                    appState.selectedTab = .chat
+                }
+                .buttonStyle(BMOButtonStyle())
             }
         }
         .bmoCard()
@@ -498,6 +522,21 @@ struct BuddyView: View {
             return BMOTheme.warning
         default:
             return BMOTheme.textSecondary
+        }
+    }
+
+    private func buddyMood(for buddy: BuddyInstance) -> BuddyAnimationMood {
+        switch buddy.state.mood.lowercased() {
+        case "happy", "excited":
+            return .happy
+        case "working":
+            return .working
+        case "thinking":
+            return .thinking
+        case "sleepy", "tired":
+            return .sleepy
+        default:
+            return .idle
         }
     }
 }

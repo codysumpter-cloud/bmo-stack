@@ -339,6 +339,9 @@ struct StackConfig: Codable {
     var stackName: String
     var goal: String
     var role: String
+    var onboardingBuddyName: String?
+    var onboardingBuddyTemplateID: String?
+    var onboardingBuddyFocus: String?
     var autonomyLevel: Int // 1-5
     var memoryEnabled: Bool
     var toolsEnabled: Bool
@@ -357,6 +360,9 @@ struct StackConfig: Codable {
         stackName: "BeMoreAgent",
         goal: "",
         role: "",
+        onboardingBuddyName: nil,
+        onboardingBuddyTemplateID: nil,
+        onboardingBuddyFocus: nil,
         autonomyLevel: 3,
         memoryEnabled: true,
         toolsEnabled: true,
@@ -428,6 +434,7 @@ enum AppTab: String, Codable, CaseIterable, Hashable, Identifiable {
     case pairing
     case models
     case chat
+    case pricing
     case settings
 
     var id: String { rawValue }
@@ -442,6 +449,7 @@ enum AppTab: String, Codable, CaseIterable, Hashable, Identifiable {
         case .pairing: return "Mac"
         case .models: return "Models"
         case .chat: return "Chat"
+        case .pricing: return "Pricing"
         case .settings: return "Settings"
         }
     }
@@ -456,6 +464,7 @@ enum AppTab: String, Codable, CaseIterable, Hashable, Identifiable {
         case .pairing: return "macbook.and.iphone"
         case .models: return "cpu"
         case .chat: return "message.fill"
+        case .pricing: return "creditcard.fill"
         case .settings: return "gearshape.fill"
         }
     }
@@ -471,7 +480,7 @@ struct ShellPreferences: Codable, Hashable {
     var selectedTab: AppTab
 
     static let `default` = ShellPreferences(
-        orderedTabs: [.missionControl, .buddy, .files, .skills, .artifacts, .pairing, .models, .chat, .settings],
+        orderedTabs: [.missionControl, .buddy, .chat, .skills, .artifacts, .files, .pairing, .pricing, .models, .settings],
         hiddenTabs: [],
         selectedTab: .missionControl
     )
