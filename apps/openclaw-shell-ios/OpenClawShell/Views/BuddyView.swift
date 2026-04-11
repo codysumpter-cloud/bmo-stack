@@ -1,820 +1,321 @@
-import SwiftUI
 import Foundation
+import SwiftUI
 
-enum BuddyArchetype: String, CaseIterable, Codable, Hashable {
-    case tengu
-    case robot
-    case cat
-    case slime
-    case capybara
-
-    var displayName: String {
-        switch self {
-        case .tengu: return "Tengu"
-        case .robot: return "Robot"
-        case .cat: return "Cat"
-        case .slime: return "Slime"
-        case .capybara: return "Capybara"
-        }
-    }
-
-    var badge: String {
-        switch self {
-        case .tengu: return "Watcher"
-        case .robot: return "Builder"
-        case .cat: return "Shadow"
-        case .slime: return "Spark"
-        case .capybara: return "Anchor"
-        }
-    }
-
-    var asciiArt: String {
-        switch self {
-        case .tengu:
-            return """
-             /\\_/\\
-            ( o.o )
-             > ^ <
-            """
-        case .robot:
-            return """
-            [o_o]
-            /|_|\\
-             / \\
-            """
-        case .cat:
-            return "/\\_/\\\n( =.= )\n (___)"
-        case .slime:
-            return """
-             .-.
-            (o o)
-            | O \\
-             \\   \\
-              `~~~'
-            """
-        case .capybara:
-            return " ____\n/ __ \\\n/ /  \\_\\\n\\_\\____/"
-        }
-    }
-}
-
-struct BuddyStats: Codable, Hashable {
-    var bond: Int
-    var power: Int
-    var focus: Int
-    var curiosity: Int
-    var care: Int
-}
-
-struct GeneratedBuddy: Identifiable, Codable, Hashable {
-    var id: UUID
-    var seed: Int
-    var profileSignature: String
-    var name: String
-    var archetype: BuddyArchetype
-    var title: String
-    var originSummary: String
-    var specialty: String
-    var personalitySummary: String
-    var asciiArt: String
-    var stats: BuddyStats
-    var createdAt: Date
-}
-
-struct BuddyBattleRecord: Identifiable, Codable, Hashable {
-    var id: UUID
-    var title: String
-    var summary: String
-    var isVictory: Bool
-    var createdAt: Date
-}
-
-struct BuddySystemState: Codable {
-    var profileSignature: String
-    var activeBuddy: GeneratedBuddy
-    var collection: [GeneratedBuddy]
-    var tradeOffers: [GeneratedBuddy]
-    var battleHistory: [BuddyBattleRecord]
-}
-
-enum BuddyGenerator {
-    private static let titles = [
-        "of the Neon Vale",
-        "of Prism Harbor",
-        "the Quiet Wildcard",
-        "the Soft Thunder",
-        "of Kairos Drift",
-        "the Pocket Vanguard",
-        "the Signal Keeper"
-    ]
-
-    private static let suffixes = [
-        "Glint", "Nova", "Patch", "Orbit", "Tinker", "Rune", "Mochi", "Pixel", "Comet", "Bloop"
-    ]
-
-    static func profileSignature(for config: StackConfig) -> String {
-        [
-            config.stackName,
-            config.goal,
-            config.role,
-            String(config.autonomyLevel),
-            config.memoryEnabled ? "memory-on" : "memory-off",
-            config.toolsEnabled ? "tools-on" : "tools-off",
-            config.optimizationMode
-        ].joined(separator: "|")
-    }
-
-    static func makeBuddy(from config: StackConfig, seed: Int) -> GeneratedBuddy {
-        var generator = SeededGenerator(seed: UInt64(abs(seed) + 1))
-        let archetype = pickArchetype(for: config, using: &generator)
-        let sourceName = config.stackName.trimmingCharacters(in: .whitespacesAndNewlines)
-        let stem = (sourceName.isEmpty ? config.role : sourceName)
-            .split(separator: " ")
-            .first
-            .map(String.init)?
-            .capitalized ?? "BMO"
-        let title = titles[generator.nextInt(upperBound: titles.count)]
-        let suffix = suffixes[generator.nextInt(upperBound: suffixes.count)]
-
-        let autonomyBonus = config.autonomyLevel * 3
-        let toolBonus = config.toolsEnabled ? 8 : 0
-        let memoryBonus = config.memoryEnabled ? 8 : 0
-        let qualityBonus = config.optimizationMode == "quality" ? 8 : config.optimizationMode == "speed" ? 2 : 5
-
-        let stats = BuddyStats(
-            bond: min(100, 48 + memoryBonus + generator.nextInt(upperBound: 18)),
-            power: min(100, 42 + autonomyBonus + generator.nextInt(upperBound: 18)),
-            focus: min(100, 44 + qualityBonus + generator.nextInt(upperBound: 18)),
-            curiosity: min(100, 40 + toolBonus + generator.nextInt(upperBound: 20)),
-            care: min(100, 45 + memoryBonus + generator.nextInt(upperBound: 18))
-        )
-
-        return GeneratedBuddy(
-            id: UUID(),
-            seed: seed,
-            profileSignature: profileSignature(for: config),
-            name: "\(stem) \(suffix)",
-            archetype: archetype,
-            title: title,
-            originSummary: "Generated from \(config.role.isEmpty ? "your current setup" : config.role) with a \(config.optimizationMode) posture and autonomy \(config.autonomyLevel)/5.",
-            specialty: specialtySummary(for: config, archetype: archetype),
-            personalitySummary: personalitySummary(for: config, archetype: archetype),
-            asciiArt: archetype.asciiArt,
-            stats: stats,
-            createdAt: .now
-        )
-    }
-
-    private static func pickArchetype(for config: StackConfig, using generator: inout SeededGenerator) -> BuddyArchetype {
-        let role = config.role.lowercased()
-        let goal = config.goal.lowercased()
-
-        if role.contains("engineer") || config.toolsEnabled { return .robot }
-        if role.contains("designer") || role.contains("creator") { return .cat }
-        if role.contains("founder") || goal.contains("launch") || config.autonomyLevel >= 4 { return .tengu }
-        if role.contains("student") || goal.contains("learn") || goal.contains("research") { return .slime }
-        if role.contains("manager") || goal.contains("team") { return .capybara }
-        return BuddyArchetype.allCases[generator.nextInt(upperBound: BuddyArchetype.allCases.count)]
-    }
-
-    private static func personalitySummary(for config: StackConfig, archetype: BuddyArchetype) -> String {
-        let role = config.role.isEmpty ? "operator" : config.role
-        switch archetype {
-        case .tengu:
-            return "A daring scout shaped by your \(role) profile. It thrives when you want momentum, initiative, and a little healthy chaos."
-        case .robot:
-            return "A dependable systems buddy generated from your \(role) setup. It prefers checklists, structure, and tools that actually ship."
-        case .cat:
-            return "A taste-driven companion tuned to your \(role) instincts. It notices details, protects quality, and keeps sharp edges where they matter."
-        case .slime:
-            return "A playful learner grown from your \(role) profile. It absorbs new context quickly and turns uncertainty into curiosity."
-        case .capybara:
-            return "A steady social anchor generated from your \(role) setup. It smooths noisy systems and keeps the party together under pressure."
-        }
-    }
-
-    private static func specialtySummary(for config: StackConfig, archetype: BuddyArchetype) -> String {
-        let goal = config.goal.isEmpty ? "whatever comes next" : config.goal.lowercased()
-        switch archetype {
-        case .tengu:
-            return "Best at bold pushes toward \(goal)."
-        case .robot:
-            return "Best at reliable execution for \(goal)."
-        case .cat:
-            return "Best at craft, polish, and protecting signal while you chase \(goal)."
-        case .slime:
-            return "Best at experiments, learning loops, and leveling up around \(goal)."
-        case .capybara:
-            return "Best at collaboration, calm pacing, and sustainable progress toward \(goal)."
-        }
-    }
-}
-
-enum KairosMiniEvent: String, CaseIterable, Identifiable {
-    case none
-    case eclipse
-    case harvest
-    case storm
-
-    var id: String { rawValue }
-
-    var displayName: String {
-        switch self {
-        case .none: return "No Event"
-        case .eclipse: return "Eclipse"
-        case .harvest: return "Harvest"
-        case .storm: return "Storm"
-        }
-    }
-
-    var summary: String {
-        switch self {
-        case .none: return "Normal world state with no global modifier."
-        case .eclipse: return "High-drama event windows and spicy rival encounters."
-        case .harvest: return "Growth-heavy encounters with easier wins and better rewards."
-        case .storm: return "Riskier battles with sharper swings and stronger opponents."
-        }
-    }
-
-    var attackBonus: Int {
-        switch self {
-        case .none: return 0
-        case .eclipse: return 6
-        case .harvest: return 4
-        case .storm: return 8
-        }
-    }
-
-    var challengeBonus: Int {
-        switch self {
-        case .none: return 0
-        case .eclipse: return 5
-        case .harvest: return -4
-        case .storm: return 10
-        }
-    }
-}
-
-@MainActor
-final class BuddyProfileStore: ObservableObject {
-    @Published private(set) var state: BuddySystemState?
-    @Published var selectedEvent: KairosMiniEvent = .none
-
-    var activeBuddy: GeneratedBuddy? { state?.activeBuddy }
-    var collection: [GeneratedBuddy] { state?.collection ?? [] }
-    var tradeOffers: [GeneratedBuddy] { state?.tradeOffers ?? [] }
-    var battleHistory: [BuddyBattleRecord] { state?.battleHistory ?? [] }
-
-    private let fileURL = Paths.stateDirectory.appendingPathComponent("buddy-system.json")
-
-    func load(for config: StackConfig) {
-        let signature = BuddyGenerator.profileSignature(for: config)
-
-        if let data = try? Data(contentsOf: fileURL),
-           let decoded = try? JSONDecoder().decode(BuddySystemState.self, from: data) {
-            if decoded.profileSignature == signature {
-                state = decoded
-                return
-            }
-
-            var migrated = decoded
-            let newBuddy = BuddyGenerator.makeBuddy(from: config, seed: Int.random(in: 1...999_999))
-            migrated.profileSignature = signature
-            migrated.activeBuddy = newBuddy
-            migrated.collection = dedupe([newBuddy] + migrated.collection + [decoded.activeBuddy])
-            migrated.tradeOffers = makeTradeOffers(from: config, excluding: migrated.collection + [newBuddy])
-            state = migrated
-            persist()
-            return
-        }
-
-        let starter = BuddyGenerator.makeBuddy(from: config, seed: Int.random(in: 1...999_999))
-        state = BuddySystemState(
-            profileSignature: signature,
-            activeBuddy: starter,
-            collection: [starter],
-            tradeOffers: makeTradeOffers(from: config, excluding: [starter]),
-            battleHistory: []
-        )
-        persist()
-    }
-
-    func regenerateBuddy(from config: StackConfig) {
-        guard var state else { return }
-        let buddy = BuddyGenerator.makeBuddy(from: config, seed: Int.random(in: 1...999_999))
-        state.profileSignature = BuddyGenerator.profileSignature(for: config)
-        state.activeBuddy = buddy
-        state.collection = dedupe([buddy] + state.collection)
-        state.tradeOffers = makeTradeOffers(from: config, excluding: state.collection + [buddy])
-        self.state = state
-        persist()
-    }
-
-    func trainActiveBuddy() {
-        mutateActiveBuddy { buddy in
-            buddy.stats.power = min(100, buddy.stats.power + 5)
-            buddy.stats.focus = min(100, buddy.stats.focus + 3)
-            buddy.stats.bond = min(100, buddy.stats.bond + 2)
-        }
-    }
-
-    func feedActiveBuddy() {
-        mutateActiveBuddy { buddy in
-            buddy.stats.care = min(100, buddy.stats.care + 6)
-            buddy.stats.bond = min(100, buddy.stats.bond + 4)
-            buddy.stats.curiosity = min(100, buddy.stats.curiosity + 2)
-        }
-    }
-
-    func startBattle() {
-        guard var state else { return }
-        var buddy = state.activeBuddy
-        let event = selectedEvent
-        var generator = SeededGenerator(seed: UInt64(abs(buddy.seed) + battleHistory.count + 7))
-        let rivals = ["Echo Warden", "Sky Coil", "Dust Sprite", "Bit Fang", "Harbor Moth", "Rift Cub"]
-        let rival = rivals[generator.nextInt(upperBound: rivals.count)]
-        let allyScore = buddy.stats.power + buddy.stats.focus + event.attackBonus + Int.random(in: 4...18)
-        let rivalScore = 80 + event.challengeBonus + Int.random(in: 0...30)
-        let victory = allyScore >= rivalScore
-
-        if victory {
-            buddy.stats.power = min(100, buddy.stats.power + 4)
-            buddy.stats.bond = min(100, buddy.stats.bond + 3)
-        } else {
-            buddy.stats.focus = min(100, buddy.stats.focus + 2)
-            buddy.stats.care = min(100, buddy.stats.care + 2)
-        }
-
-        let summary = victory
-            ? "\(buddy.name) won a \(event.displayName.lowercased()) duel against \(rival) and brought home fresh XP."
-            : "\(buddy.name) lost a scrappy \(event.displayName.lowercased()) duel to \(rival), but learned enough to come back sharper."
-
-        let record = BuddyBattleRecord(
-            id: UUID(),
-            title: victory ? "Victory in \(event.displayName)" : "Setback in \(event.displayName)",
-            summary: summary,
-            isVictory: victory,
-            createdAt: .now
-        )
-
-        state.activeBuddy = buddy
-        state.collection = dedupe([buddy] + state.collection)
-        state.battleHistory = [record] + Array(state.battleHistory.prefix(7))
-        self.state = state
-        persist()
-    }
-
-    func acceptTrade(_ offer: GeneratedBuddy, from config: StackConfig) {
-        guard var state else { return }
-        let previous = state.activeBuddy
-        state.activeBuddy = offer
-        state.collection = dedupe([offer, previous] + state.collection)
-        state.tradeOffers = makeTradeOffers(from: config, excluding: state.collection + [offer])
-        self.state = state
-        persist()
-    }
-
-    func renameBuddy(_ target: GeneratedBuddy, to newName: String) {
-        guard var state else { return }
-        let cleaned = newName.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !cleaned.isEmpty else { return }
-
-        func renamed(_ buddy: GeneratedBuddy) -> GeneratedBuddy {
-            var updated = buddy
-            updated.name = cleaned
-            return updated
-        }
-
-        if state.activeBuddy.id == target.id {
-            state.activeBuddy = renamed(state.activeBuddy)
-        }
-
-        state.collection = dedupe(state.collection.map { buddy in
-            buddy.id == target.id ? renamed(buddy) : buddy
-        })
-        state.tradeOffers = state.tradeOffers.map { buddy in
-            buddy.id == target.id ? renamed(buddy) : buddy
-        }
-        self.state = state
-        persist()
-    }
-
-    func makeActiveBuddy(_ target: GeneratedBuddy) {
-        guard var state else { return }
-        guard state.activeBuddy.id != target.id else { return }
-        guard let selected = state.collection.first(where: { $0.id == target.id }) else { return }
-
-        state.activeBuddy = selected
-        state.collection = dedupe([selected] + state.collection)
-        self.state = state
-        persist()
-    }
-
-    func removeBuddy(_ target: GeneratedBuddy) {
-        guard var state else { return }
-        guard state.collection.count > 1 else { return }
-        state.collection.removeAll { $0.id == target.id }
-        state.tradeOffers.removeAll { $0.id == target.id }
-        if state.activeBuddy.id == target.id, let replacement = state.collection.first {
-            state.activeBuddy = replacement
-        }
-        self.state = state
-        persist()
-    }
-
-    private func mutateActiveBuddy(_ mutation: (inout GeneratedBuddy) -> Void) {
-        guard var state else { return }
-        var buddy = state.activeBuddy
-        mutation(&buddy)
-        state.activeBuddy = buddy
-        state.collection = dedupe([buddy] + state.collection)
-        self.state = state
-        persist()
-    }
-
-    private func makeTradeOffers(from config: StackConfig, excluding buddies: [GeneratedBuddy]) -> [GeneratedBuddy] {
-        let existingNames = Set(buddies.map { $0.name })
-        var offers: [GeneratedBuddy] = []
-        var attempts = 0
-
-        while offers.count < 3 && attempts < 20 {
-            attempts += 1
-            let candidate = BuddyGenerator.makeBuddy(from: config, seed: Int.random(in: 1...999_999))
-            if existingNames.contains(candidate.name) || offers.contains(where: { $0.name == candidate.name }) {
-                continue
-            }
-            offers.append(candidate)
-        }
-
-        return offers
-    }
-
-    private func dedupe(_ buddies: [GeneratedBuddy]) -> [GeneratedBuddy] {
-        var seen = Set<String>()
-        var unique: [GeneratedBuddy] = []
-
-        for buddy in buddies {
-            let key = "\(buddy.name)|\(buddy.archetype.rawValue)|\(buddy.seed)"
-            guard !seen.contains(key) else { continue }
-            seen.insert(key)
-            unique.append(buddy)
-        }
-
-        return unique
-    }
-
-    private func persist() {
-        guard let state else { return }
-        if let data = try? JSONEncoder().encode(state) {
-            try? data.write(to: fileURL, options: [.atomic])
-        }
-    }
+private struct BuddyPersonalizationDraft {
+    var displayName: String = ""
+    var nickname: String = ""
+    var currentFocus: String = ""
 }
 
 struct BuddyView: View {
     @EnvironmentObject private var appState: AppState
     @StateObject private var store = BuddyProfileStore()
-    @State private var renameTarget: GeneratedBuddy?
-    @State private var renameDraft = ""
-    @State private var lastReceipt: OpenClawReceipt?
-
-    private var profileID: String {
-        BuddyGenerator.profileSignature(for: appState.stackConfig)
-    }
+    @State private var checkInNote = ""
+    @State private var trainingNote = ""
+    @State private var personalizationDraft = BuddyPersonalizationDraft()
+    @State private var isShowingPersonalizationSheet = false
 
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: BMOTheme.spacingMD) {
-                    systemStatusCard
-                    if let lastReceipt {
-                        ActionReceiptCard(receipt: lastReceipt)
-                    }
-                    recentRuntimeCard
-                    if let buddy = store.activeBuddy {
-                        header(for: buddy)
-                        sourceProfileCard(for: buddy)
-                        careLoopCard
-                        battleCard
-                        tradeBazaarCard
-                        collectionCard
+                VStack(alignment: .leading, spacing: BMOTheme.spacingMD) {
+                    runtimeCard
+
+                    if let activeBuddy = store.activeBuddy {
+                        activeBuddyCard(for: activeBuddy)
+                        actionCard(for: activeBuddy)
+                        recentEventsCard(for: activeBuddy)
                     } else {
-                        ProgressView()
-                            .tint(BMOTheme.accent)
-                            .padding(.top, BMOTheme.spacingXL)
+                        emptyStateCard
+                    }
+
+                    libraryCard
+
+                    if store.installedBuddies.isEmpty == false {
+                        rosterCard
+                    }
+
+                    if let receipt = store.lastReceipt {
+                        receiptCard(receipt)
+                    }
+
+                    if let loadError = store.loadError {
+                        errorCard(loadError)
                     }
                 }
                 .padding(.horizontal, BMOTheme.spacingMD)
                 .padding(.bottom, BMOTheme.spacingXL)
             }
             .background(BMOTheme.backgroundPrimary)
-            .navigationTitle("")
-            .toolbar {
-                ToolbarItem(placement: .principal) {
-                    Text("Buddy")
+            .navigationTitle("Buddy")
+            .toolbarBackground(BMOTheme.backgroundPrimary, for: .navigationBar)
+        }
+        .task {
+            store.load(for: appState.stackConfig)
+            appState.buddyProfileStore = store
+        }
+        .onDisappear {
+            if appState.buddyProfileStore === store {
+                appState.buddyProfileStore = nil
+            }
+        }
+        .sheet(isPresented: $isShowingPersonalizationSheet) {
+            personalizationSheet
+        }
+    }
+
+    private var runtimeCard: some View {
+        let status = appState.buddyRuntimeStatus
+        return VStack(alignment: .leading, spacing: BMOTheme.spacingMD) {
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Build 18 Buddy Runtime")
                         .font(.headline)
                         .foregroundColor(BMOTheme.textPrimary)
-                }
-            }
-            .toolbarBackground(BMOTheme.backgroundPrimary, for: .navigationBar)
-            .toolbarBackground(.visible, for: .navigationBar)
-            .task(id: profileID) {
-                appState.buddyProfileStore = store
-                store.load(for: appState.stackConfig)
-            }
-            .onDisappear {
-                if appState.buddyProfileStore === store {
-                    appState.buddyProfileStore = nil
-                }
-            }
-            .sheet(item: $renameTarget) { buddy in
-                NavigationStack {
-                    Form {
-                        Section("Buddy Name") {
-                            TextField("Name", text: $renameDraft)
-                        }
-                    }
-                    .navigationTitle("Rename Buddy")
-                    .toolbar {
-                        ToolbarItem(placement: .cancellationAction) {
-                            Button("Cancel") { renameTarget = nil }
-                        }
-                        ToolbarItem(placement: .confirmationAction) {
-                            Button("Save") {
-                store.renameBuddy(buddy, to: renameDraft)
-                persistBuddyStateReceipt("Renamed \(buddy.name) to \(renameDraft).")
-                renameTarget = nil
-            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private func header(for buddy: GeneratedBuddy) -> some View {
-        VStack(alignment: .leading, spacing: 14) {
-            HStack(alignment: .top, spacing: 12) {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Generated Buddy")
-                        .font(.caption)
-                        .foregroundColor(BMOTheme.textTertiary)
-                    Text(buddy.name)
-                        .font(.system(size: 28, weight: .bold))
-                        .foregroundColor(BMOTheme.textPrimary)
-                    Text("\(buddy.archetype.displayName) \(buddy.title)")
+                    Text("Structured Buddy templates, installable local instances, readable continuity files, and receipt-backed updates.")
                         .font(.subheadline)
                         .foregroundColor(BMOTheme.textSecondary)
-                    StatusBadge(label: buddy.archetype.badge, color: BMOTheme.accent)
                 }
-
                 Spacer()
-
-                Text(buddy.asciiArt)
-                    .font(.system(.body, design: .monospaced))
-                    .foregroundColor(BMOTheme.accent)
-                    .padding(12)
-                    .background(BMOTheme.backgroundSecondary)
-                    .clipShape(RoundedRectangle(cornerRadius: BMOTheme.radiusMedium, style: .continuous))
+                StatusBadge(
+                    label: status.runtimeAvailable ? "Runtime Ready" : "Runtime Missing",
+                    color: status.runtimeAvailable ? BMOTheme.success : BMOTheme.warning
+                )
             }
 
-            Text(buddy.personalitySummary)
-                .font(.subheadline)
-                .foregroundColor(BMOTheme.textSecondary)
-
-            HStack(spacing: 8) {
-                statPill("Bond", value: buddy.stats.bond)
-                statPill("Power", value: buddy.stats.power)
-                statPill("Focus", value: buddy.stats.focus)
-                statPill("Care", value: buddy.stats.care)
+            HStack(spacing: BMOTheme.spacingSM) {
+                metricPill(title: "Installed", value: "\(status.installedBuddyCount)")
+                metricPill(title: "Active", value: status.hasActiveBuddy ? "Yes" : "No")
+                metricPill(title: "Skills", value: "\(status.registeredSkillCount)")
+                metricPill(title: "Failures", value: "\(status.failedActions.count)")
             }
 
-            Button("Rename buddy") {
-                renameDraft = buddy.name
-                renameTarget = buddy
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Suggested next actions")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundColor(BMOTheme.textPrimary)
+                ForEach(status.suggestedNextActions, id: \.self) { suggestion in
+                    Text("• \(suggestion)")
+                        .font(.caption)
+                        .foregroundColor(BMOTheme.textSecondary)
+                }
             }
-            .buttonStyle(.bordered)
         }
         .bmoCard()
     }
 
-    private var systemStatusCard: some View {
-        let status = appState.buddyRuntimeStatus
-        return VStack(alignment: .leading, spacing: 12) {
-            HStack {
+    private func activeBuddyCard(for buddy: BuddyInstance) -> some View {
+        let template = store.contracts?.templateForInstance(buddy)
+        let bondLabel = store.contracts.map { BuddyMarkdownRenderer.bondLabel(for: buddy.progression.bond, contracts: $0) } ?? "Bond"
+
+        return VStack(alignment: .leading, spacing: BMOTheme.spacingMD) {
+            HStack(alignment: .top, spacing: BMOTheme.spacingMD) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("OpenClaw Buddy")
-                        .font(.system(size: 28, weight: .bold))
+                    Text("Active Buddy")
+                        .font(.caption.weight(.semibold))
+                        .foregroundColor(BMOTheme.textTertiary)
+                    Text(buddy.displayName)
+                        .font(.title2.bold())
                         .foregroundColor(BMOTheme.textPrimary)
-                    Text("Grounded in runtime, memory, artifacts, and receipts.")
+                    Text("\(buddy.identity.class) • \(buddy.identity.role)")
                         .font(.subheadline)
                         .foregroundColor(BMOTheme.textSecondary)
                 }
                 Spacer()
-                StatusBadge(label: status.runtimeAvailable ? "Runtime Ready" : "Runtime Missing", color: status.runtimeAvailable ? BMOTheme.success : BMOTheme.error)
+                VStack(alignment: .trailing, spacing: 8) {
+                    StatusBadge(label: bondLabel, color: BMOTheme.accent)
+                    StatusBadge(label: buddy.state.mood.capitalized, color: moodColor(buddy.state.mood))
+                }
             }
 
-            statusRow("Model adapter", value: status.activeModelAdapter, ok: status.brainConnected)
-            statusRow("Workspace runtime", value: status.runtimeAvailable ? "Bootstrapped" : "Not bootstrapped", ok: status.runtimeAvailable)
-            statusRow("Memory artifacts", value: status.memoryHealthy ? "Healthy" : "Needs regeneration", ok: status.memoryHealthy)
-            statusRow("Registered skills", value: "\(status.registeredSkillCount)", ok: status.registeredSkillCount > 0)
-            statusRow("Failed actions", value: "\(status.failedActions.count)", ok: status.failedActions.isEmpty)
-        }
-        .bmoCard()
-    }
+            Text(asciiArt(for: buddy, template: template))
+                .font(.system(.body, design: .monospaced))
+                .foregroundColor(BMOTheme.accent)
+                .padding(BMOTheme.spacingMD)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(BMOTheme.backgroundSecondary)
+                .clipShape(RoundedRectangle(cornerRadius: BMOTheme.radiusMedium, style: .continuous))
 
-    private var recentRuntimeCard: some View {
-        let status = appState.buddyRuntimeStatus
-        return VStack(alignment: .leading, spacing: 12) {
-            Text("Suggested next actions")
+            Text(template?.onboardingCopy ?? "Legacy Buddy migrated into the Build 18 runtime.")
                 .font(.subheadline)
-                .fontWeight(.semibold)
                 .foregroundColor(BMOTheme.textSecondary)
 
-            ForEach(status.suggestedNextActions, id: \.self) { action in
-                HStack(alignment: .top, spacing: 8) {
-                    Image(systemName: "arrow.right.circle.fill")
-                        .foregroundColor(BMOTheme.accent)
-                    Text(action)
-                        .font(.caption)
-                        .foregroundColor(BMOTheme.textPrimary)
-                    Spacer()
-                }
+            HStack(spacing: BMOTheme.spacingSM) {
+                metricPill(title: "Level", value: "\(buddy.progression.level)")
+                metricPill(title: "XP", value: "\(buddy.progression.xp)")
+                metricPill(title: "Bond", value: "\(buddy.progression.bond)")
+                metricPill(title: "Tier", value: "\(buddy.progression.evolutionTier)")
             }
 
-            if !status.recentChanges.isEmpty {
-                Divider().overlay(BMOTheme.divider)
-                Text("Recent changes")
-                    .font(.caption)
-                    .foregroundColor(BMOTheme.textTertiary)
-                ForEach(status.recentChanges.prefix(3), id: \.id) { event in
-                    Text(event.message)
-                        .font(.caption)
-                        .foregroundColor(BMOTheme.textSecondary)
-                }
-            }
-        }
-        .bmoCard()
-    }
-
-    private func sourceProfileCard(for buddy: GeneratedBuddy) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Why this creature exists")
-                .font(.subheadline)
-                .fontWeight(.semibold)
-                .foregroundColor(BMOTheme.textSecondary)
-
-            profileRow(label: "Stack", value: appState.stackConfig.stackName)
-            profileRow(label: "Goal", value: appState.stackConfig.goal)
-            profileRow(label: "Role", value: appState.stackConfig.role)
-            profileRow(label: "Optimization", value: appState.stackConfig.optimizationMode.capitalized)
-            profileRow(label: "Specialty", value: buddy.specialty)
-
-            Text(buddy.originSummary)
-                .font(.caption)
-                .foregroundColor(BMOTheme.textTertiary)
-        }
-        .bmoCard()
-    }
-
-    private var careLoopCard: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Care loop")
-                .font(.subheadline)
-                .fontWeight(.semibold)
-                .foregroundColor(BMOTheme.textSecondary)
-
-            Text("This buddy is generated from your agent profile, not selected from a fixed roster. Regenerating preserves your collection and creates a fresh companion from the latest profile.")
-                .font(.caption)
-                .foregroundColor(BMOTheme.textTertiary)
-
-            HStack(spacing: 10) {
-                buttonChip(label: "Feed", icon: "carrot.fill") {
-                    store.feedActiveBuddy()
-                    persistBuddyStateReceipt("Fed active buddy and persisted updated care stats.")
-                }
-                buttonChip(label: "Train", icon: "figure.run") {
-                    store.trainActiveBuddy()
-                    persistBuddyStateReceipt("Trained active buddy and persisted updated battle stats.")
-                }
+            VStack(alignment: .leading, spacing: 6) {
+                profileRow(label: "Template", value: template?.name ?? "Legacy Buddy")
+                profileRow(label: "Focus", value: buddy.state.currentFocus ?? "No active focus")
+                profileRow(label: "Last active", value: BuddyMarkdownRenderer.iso8601(buddy.state.lastActiveAt))
+                profileRow(label: "Top move", value: buddy.equippedMoves.sorted(by: { $0.slot < $1.slot }).first?.name ?? "None")
             }
 
-            Button {
-                store.regenerateBuddy(from: appState.stackConfig)
-                persistBuddyStateReceipt("Generated a new active buddy from the current agent profile.")
-            } label: {
-                HStack {
-                    Image(systemName: "sparkles")
-                    Text("Generate new buddy from profile")
-                }
-                .frame(maxWidth: .infinity)
-            }
-            .buttonStyle(BMOButtonStyle())
-        }
-        .bmoCard()
-    }
-
-    private var battleCard: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text("Prismo's World")
-                    .font(.subheadline)
-                    .fontWeight(.semibold)
-                    .foregroundColor(BMOTheme.textSecondary)
-                Spacer()
-                StatusBadge(label: store.selectedEvent.displayName, color: BMOTheme.warning)
-            }
-
-            Picker("Kairos Event", selection: $store.selectedEvent) {
-                ForEach(KairosMiniEvent.allCases) { event in
-                    Text(event.displayName).tag(event)
-                }
-            }
-            .pickerStyle(.segmented)
-
-            Text(store.selectedEvent.summary)
-                .font(.caption)
-                .foregroundColor(BMOTheme.textTertiary)
-
-            Button {
-                store.startBattle()
-                if let latest = store.battleHistory.first {
-                    persistBuddyStateReceipt(latest.summary)
-                }
-            } label: {
-                HStack {
-                    Image(systemName: "bolt.shield.fill")
-                    Text("Start battle")
-                }
-                .frame(maxWidth: .infinity)
+            Button("Personalize Buddy") {
+                personalizationDraft = BuddyPersonalizationDraft(
+                    displayName: buddy.displayName,
+                    nickname: buddy.nickname ?? "",
+                    currentFocus: buddy.state.currentFocus ?? ""
+                )
+                isShowingPersonalizationSheet = true
             }
             .buttonStyle(BMOButtonStyle(isPrimary: false))
+        }
+        .bmoCard()
+    }
 
-            if let latest = store.battleHistory.first {
-                VStack(alignment: .leading, spacing: 6) {
-                    HStack {
-                        Text(latest.title)
+    private func actionCard(for buddy: BuddyInstance) -> some View {
+        VStack(alignment: .leading, spacing: BMOTheme.spacingMD) {
+            Text("Buddy Actions")
+                .font(.headline)
+                .foregroundColor(BMOTheme.textPrimary)
+
+            VStack(alignment: .leading, spacing: 10) {
+                Text("Check-in")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundColor(BMOTheme.textPrimary)
+                TextField("What changed or what matters now?", text: $checkInNote, axis: .vertical)
+                    .textFieldStyle(.plain)
+                    .foregroundColor(BMOTheme.textPrimary)
+                    .padding(BMOTheme.spacingMD)
+                    .background(BMOTheme.backgroundSecondary)
+                    .clipShape(RoundedRectangle(cornerRadius: BMOTheme.radiusMedium, style: .continuous))
+
+                Button("Record Check-in") {
+                    store.recordCheckIn(note: checkInNote, using: appState)
+                    checkInNote = ""
+                }
+                .buttonStyle(BMOButtonStyle())
+            }
+
+            Divider().overlay(BMOTheme.divider)
+
+            VStack(alignment: .leading, spacing: 10) {
+                Text("Training")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundColor(BMOTheme.textPrimary)
+
+                Picker("Training category", selection: $store.selectedTrainingCategory) {
+                    ForEach(store.contracts?.progression.trainingCategories ?? [], id: \.self) { category in
+                        Text(category).tag(category)
+                    }
+                }
+                .pickerStyle(.menu)
+                .tint(BMOTheme.accent)
+
+                TextField("What did you train or improve?", text: $trainingNote, axis: .vertical)
+                    .textFieldStyle(.plain)
+                    .foregroundColor(BMOTheme.textPrimary)
+                    .padding(BMOTheme.spacingMD)
+                    .background(BMOTheme.backgroundSecondary)
+                    .clipShape(RoundedRectangle(cornerRadius: BMOTheme.radiusMedium, style: .continuous))
+
+                Button("Record Training for \(buddy.displayName)") {
+                    store.recordTraining(note: trainingNote, using: appState)
+                    trainingNote = ""
+                }
+                .buttonStyle(BMOButtonStyle())
+            }
+        }
+        .bmoCard()
+    }
+
+    private func recentEventsCard(for buddy: BuddyInstance) -> some View {
+        let events = store.recentEvents(for: buddy)
+        return VStack(alignment: .leading, spacing: BMOTheme.spacingMD) {
+            Text("Recent Buddy Events")
+                .font(.headline)
+                .foregroundColor(BMOTheme.textPrimary)
+
+            if events.isEmpty {
+                Text("No runtime events recorded yet. Install, personalize, check in, or train to start the event stream.")
+                    .font(.subheadline)
+                    .foregroundColor(BMOTheme.textSecondary)
+            } else {
+                ForEach(events) { event in
+                    VStack(alignment: .leading, spacing: 6) {
+                        HStack {
+                            Text(event.type)
+                                .font(.caption.weight(.semibold))
+                                .foregroundColor(BMOTheme.accent)
+                            Spacer()
+                            Text(BuddyMarkdownRenderer.iso8601(event.occurredAt))
+                                .font(.caption)
+                                .foregroundColor(BMOTheme.textTertiary)
+                        }
+                        Text(event.summary)
                             .font(.subheadline)
                             .foregroundColor(BMOTheme.textPrimary)
-                        Spacer()
-                        StatusBadge(label: latest.isVictory ? "Victory" : "Setback", color: latest.isVictory ? BMOTheme.success : BMOTheme.warning)
                     }
-                    Text(latest.summary)
-                        .font(.caption)
-                        .foregroundColor(BMOTheme.textSecondary)
+                    .padding(BMOTheme.spacingMD)
+                    .background(BMOTheme.backgroundSecondary)
+                    .clipShape(RoundedRectangle(cornerRadius: BMOTheme.radiusMedium, style: .continuous))
                 }
             }
         }
         .bmoCard()
     }
 
-    private var tradeBazaarCard: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Trade bazaar")
-                .font(.subheadline)
-                .fontWeight(.semibold)
-                .foregroundColor(BMOTheme.textSecondary)
+    private var libraryCard: some View {
+        let installedTemplateIDs = Set(store.installedBuddies.map(\.templateId))
 
-            Text("Local trading scaffold for the iOS app. Accepting an offer rotates your active buddy and archives the previous one in your collection.")
-                .font(.caption)
-                .foregroundColor(BMOTheme.textTertiary)
+        return VStack(alignment: .leading, spacing: BMOTheme.spacingMD) {
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Council Starter Pack")
+                        .font(.headline)
+                        .foregroundColor(BMOTheme.textPrimary)
+                    Text("Official Build 18 Buddy templates bundled into the app from canonical PR #231 contracts.")
+                        .font(.subheadline)
+                        .foregroundColor(BMOTheme.textSecondary)
+                }
+                Spacer()
+                StatusBadge(label: "\(store.templates.count) templates", color: BMOTheme.accent)
+            }
 
-            ForEach(store.tradeOffers) { offer in
+            ForEach(store.templates) { template in
                 VStack(alignment: .leading, spacing: 10) {
                     HStack(alignment: .top) {
                         VStack(alignment: .leading, spacing: 4) {
-                            Text("\(offer.name) • \(offer.archetype.displayName)")
+                            Text(template.name)
                                 .font(.headline)
                                 .foregroundColor(BMOTheme.textPrimary)
-                            Text(offer.specialty)
-                                .font(.caption)
+                            Text(template.starterRole)
+                                .font(.subheadline)
                                 .foregroundColor(BMOTheme.textSecondary)
                         }
                         Spacer()
-                        Text(offer.asciiArt)
-                            .font(.system(size: 10, design: .monospaced))
-                            .foregroundColor(BMOTheme.accent)
-                    }
-
-                    HStack(spacing: 8) {
-                        statPill("Bond", value: offer.stats.bond)
-                        statPill("Power", value: offer.stats.power)
-                        statPill("Focus", value: offer.stats.focus)
-                    }
-
-                    Button {
-                        store.acceptTrade(offer, from: appState.stackConfig)
-                        persistBuddyStateReceipt("Accepted trade for \(offer.name) and made it the active buddy.")
-                    } label: {
-                        HStack {
-                            Image(systemName: "arrow.triangle.swap")
-                            Text("Accept trade")
+                        if installedTemplateIDs.contains(template.templateID) {
+                            StatusBadge(label: "Installed", color: BMOTheme.success)
+                        } else {
+                            Button("Install") {
+                                store.install(template: template, using: appState)
+                            }
+                            .buttonStyle(BMOButtonStyle(isPrimary: false))
                         }
-                        .frame(maxWidth: .infinity)
                     }
-                    .buttonStyle(BMOButtonStyle(isPrimary: false))
+
+                    Text(template.onboardingCopy)
+                        .font(.subheadline)
+                        .foregroundColor(BMOTheme.textSecondary)
+
+                    HStack(spacing: BMOTheme.spacingSM) {
+                        metricPill(title: "Power", value: "\(template.total)")
+                        metricPill(title: "Signature", value: template.moveSet.first?.name ?? "None")
+                    }
+
+                    Text(template.ascii.baseSilhouette)
+                        .font(.system(.caption, design: .monospaced))
+                        .foregroundColor(BMOTheme.accent)
+
+                    Text("Moves: \(template.moveSet.map(\.name).joined(separator: ", "))")
+                        .font(.caption)
+                        .foregroundColor(BMOTheme.textTertiary)
                 }
-                .padding(12)
+                .padding(BMOTheme.spacingMD)
                 .background(BMOTheme.backgroundSecondary)
                 .clipShape(RoundedRectangle(cornerRadius: BMOTheme.radiusMedium, style: .continuous))
             }
@@ -822,165 +323,181 @@ struct BuddyView: View {
         .bmoCard()
     }
 
-    private var collectionCard: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text("Collection")
-                    .font(.subheadline)
-                    .fontWeight(.semibold)
-                    .foregroundColor(BMOTheme.textSecondary)
-                Spacer()
-                Text("\(store.collection.count) buddies")
-                    .font(.caption)
-                    .foregroundColor(BMOTheme.textTertiary)
-            }
+    private var rosterCard: some View {
+        VStack(alignment: .leading, spacing: BMOTheme.spacingMD) {
+            Text("Installed Buddy Roster")
+                .font(.headline)
+                .foregroundColor(BMOTheme.textPrimary)
 
-            LazyVStack(spacing: 10) {
-                ForEach(store.collection) { buddy in
-                    HStack(alignment: .top, spacing: 12) {
-                        Text(buddy.asciiArt)
-                            .font(.system(size: 9, design: .monospaced))
-                            .foregroundColor(BMOTheme.accent)
-                            .padding(8)
-                            .background(BMOTheme.backgroundSecondary)
-                            .clipShape(RoundedRectangle(cornerRadius: BMOTheme.radiusSmall, style: .continuous))
-
+            ForEach(store.installedBuddies) { buddy in
+                let isActive = store.activeBuddy?.instanceId == buddy.instanceId
+                let template = store.contracts?.templateForInstance(buddy)
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack(alignment: .top) {
                         VStack(alignment: .leading, spacing: 4) {
-                            Text(buddy.name)
-                                .font(.subheadline)
+                            Text(buddy.displayName)
+                                .font(.headline)
                                 .foregroundColor(BMOTheme.textPrimary)
-                            Text("\(buddy.archetype.displayName) • \(buddy.title)")
-                                .font(.caption)
+                            Text(template?.name ?? buddy.identity.role)
+                                .font(.subheadline)
                                 .foregroundColor(BMOTheme.textSecondary)
-                            Text(buddy.specialty)
-                                .font(.caption2)
-                                .foregroundColor(BMOTheme.textTertiary)
                         }
-
                         Spacer()
-
-                        VStack(alignment: .trailing, spacing: 8) {
-                            if store.activeBuddy?.id == buddy.id {
-                                StatusBadge(label: "Active", color: BMOTheme.accent)
-                            } else {
-                                Button("Make Active") {
-                                    store.makeActiveBuddy(buddy)
-                                    persistBuddyStateReceipt("Made \(buddy.name) the active buddy.")
-                                }
-                                .buttonStyle(.bordered)
+                        if isActive {
+                            StatusBadge(label: "Active", color: BMOTheme.accent)
+                        } else {
+                            Button("Make Active") {
+                                store.makeActive(buddy, using: appState)
                             }
-
-                            Button("Rename") {
-                                renameDraft = buddy.name
-                                renameTarget = buddy
-                            }
-                            .font(.caption)
-                            .foregroundColor(BMOTheme.accent)
-
-                            if store.collection.count > 1 {
-                                Button(role: .destructive) {
-                                    store.removeBuddy(buddy)
-                                    persistBuddyStateReceipt("Removed \(buddy.name) from the buddy collection.")
-                                } label: {
-                                    Text("Remove")
-                                }
-                                .font(.caption)
-                            }
+                            .buttonStyle(BMOButtonStyle(isPrimary: false))
                         }
                     }
+
+                    Text("Focus: \(buddy.state.currentFocus ?? "No active focus")")
+                        .font(.subheadline)
+                        .foregroundColor(BMOTheme.textSecondary)
+
+                    HStack(spacing: BMOTheme.spacingSM) {
+                        metricPill(title: "Level", value: "\(buddy.progression.level)")
+                        metricPill(title: "Bond", value: "\(buddy.progression.bond)")
+                        metricPill(title: "Mood", value: buddy.state.mood.capitalized)
+                    }
                 }
+                .padding(BMOTheme.spacingMD)
+                .background(BMOTheme.backgroundSecondary)
+                .clipShape(RoundedRectangle(cornerRadius: BMOTheme.radiusMedium, style: .continuous))
             }
         }
         .bmoCard()
     }
 
-    private func statPill(_ label: String, value: Int) -> some View {
+    private var emptyStateCard: some View {
+        VStack(alignment: .leading, spacing: BMOTheme.spacingMD) {
+            Text("No Buddy Installed Yet")
+                .font(.headline)
+                .foregroundColor(BMOTheme.textPrimary)
+            Text("Install one Council starter Buddy below to create a clean local instance, start the Buddy event stream, and generate `.openclaw/buddy.md` plus `.openclaw/buddies.md`.")
+                .font(.subheadline)
+                .foregroundColor(BMOTheme.textSecondary)
+        }
+        .bmoCard()
+    }
+
+    private func receiptCard(_ receipt: OpenClawReceipt) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Text("Latest Buddy Receipt")
+                    .font(.headline)
+                    .foregroundColor(BMOTheme.textPrimary)
+                Spacer()
+                StatusBadge(label: receipt.status.label, color: receipt.status.color)
+            }
+
+            Text(receipt.summary)
+                .font(.subheadline)
+                .foregroundColor(BMOTheme.textSecondary)
+
+            if receipt.artifacts.isEmpty == false {
+                Text("Artifacts: \(receipt.artifacts.joined(separator: ", "))")
+                    .font(.caption)
+                    .foregroundColor(BMOTheme.textTertiary)
+            }
+        }
+        .bmoCard()
+    }
+
+    private func errorCard(_ message: String) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Buddy Load Error")
+                .font(.headline)
+                .foregroundColor(BMOTheme.error)
+            Text(message)
+                .font(.subheadline)
+                .foregroundColor(BMOTheme.textSecondary)
+        }
+        .bmoCard()
+    }
+
+    private var personalizationSheet: some View {
+        NavigationStack {
+            Form {
+                Section("Identity") {
+                    TextField("Display name", text: $personalizationDraft.displayName)
+                    TextField("Nickname", text: $personalizationDraft.nickname)
+                }
+
+                Section("Current Focus") {
+                    TextField("Focus", text: $personalizationDraft.currentFocus, axis: .vertical)
+                }
+            }
+            .navigationTitle("Personalize Buddy")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        isShowingPersonalizationSheet = false
+                    }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save") {
+                        store.personalizeActive(
+                            displayName: personalizationDraft.displayName,
+                            nickname: personalizationDraft.nickname,
+                            currentFocus: personalizationDraft.currentFocus,
+                            using: appState
+                        )
+                        isShowingPersonalizationSheet = false
+                    }
+                }
+            }
+        }
+    }
+
+    private func asciiArt(for buddy: BuddyInstance, template: CouncilStarterBuddyTemplate?) -> String {
+        guard let template else {
+            return buddy.visual?.currentAnimationState ?? buddy.displayName
+        }
+        let state = buddy.visual?.currentAnimationState ?? buddy.state.mood
+        return template.ascii.expressions[state] ?? template.ascii.baseSilhouette
+    }
+
+    private func metricPill(title: String, value: String) -> some View {
         VStack(alignment: .leading, spacing: 2) {
-            Text(label)
-                .font(.caption2)
-                .foregroundColor(BMOTheme.textTertiary)
-            Text("\(value)")
+            Text(title)
                 .font(.caption)
-                .fontWeight(.semibold)
+                .foregroundColor(BMOTheme.textTertiary)
+            Text(value)
+                .font(.subheadline.weight(.semibold))
                 .foregroundColor(BMOTheme.textPrimary)
         }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 6)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
         .background(BMOTheme.backgroundSecondary)
-        .clipShape(Capsule())
+        .clipShape(RoundedRectangle(cornerRadius: BMOTheme.radiusSmall, style: .continuous))
     }
 
     private func profileRow(label: String, value: String) -> some View {
-        HStack {
-            Text(label)
-                .foregroundColor(BMOTheme.textTertiary)
-            Spacer()
-            Text(value.isEmpty ? "—" : value)
-                .foregroundColor(BMOTheme.textPrimary)
-        }
-        .font(.caption)
-    }
-
-    private func statusRow(_ label: String, value: String, ok: Bool) -> some View {
         HStack(alignment: .top) {
             Text(label)
+                .font(.caption.weight(.semibold))
                 .foregroundColor(BMOTheme.textTertiary)
-            Spacer()
-            HStack(spacing: 6) {
-                Circle()
-                    .fill(ok ? BMOTheme.success : BMOTheme.warning)
-                    .frame(width: 7, height: 7)
-                Text(value.isEmpty ? "Unavailable" : value)
-                    .multilineTextAlignment(.trailing)
-                    .foregroundColor(BMOTheme.textPrimary)
-            }
+                .frame(width: 84, alignment: .leading)
+            Text(value)
+                .font(.subheadline)
+                .foregroundColor(BMOTheme.textSecondary)
+            Spacer(minLength: 0)
         }
-        .font(.caption)
     }
 
-    private func buttonChip(label: String, icon: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            HStack {
-                Image(systemName: icon)
-                Text(label)
-            }
-            .frame(maxWidth: .infinity)
+    private func moodColor(_ mood: String) -> Color {
+        switch mood.lowercased() {
+        case "happy", "excited":
+            return BMOTheme.success
+        case "working", "thinking":
+            return BMOTheme.accent
+        case "stressed":
+            return BMOTheme.warning
+        default:
+            return BMOTheme.textSecondary
         }
-        .buttonStyle(BMOButtonStyle(isPrimary: false))
-    }
-
-    private func persistBuddyStateReceipt(_ summary: String) {
-        let active = store.activeBuddy?.name ?? "No active buddy"
-        let latestBattle = store.battleHistory.first?.summary ?? "No battles yet."
-        let markdown = """
-        # Buddy State
-
-        - Active buddy: \(active)
-        - Collection count: \(store.collection.count)
-        - Last update: \(summary)
-        - Latest battle: \(latestBattle)
-
-        Buddy state is tied to the current OpenClaw agent profile signature:
-        `\(profileID)`
-        """
-        lastReceipt = appState.writeWorkspaceArtifact(path: "state/buddy.md", content: markdown)
-    }
-}
-
-private struct SeededGenerator {
-    private var state: UInt64
-
-    init(seed: UInt64) {
-        self.state = seed == 0 ? 0xCAFEF00D : seed
-    }
-
-    mutating func next() -> UInt64 {
-        state = 6364136223846793005 &* state &+ 1
-        return state
-    }
-
-    mutating func nextInt(upperBound: Int) -> Int {
-        guard upperBound > 0 else { return 0 }
-        return Int(next() % UInt64(upperBound))
     }
 }

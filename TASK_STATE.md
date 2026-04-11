@@ -1,18 +1,18 @@
 # Task State
 
-Last updated: 2026-04-10 10:25 UTC
+Last updated: 2026-04-11 00:20 UTC
 
 ## Current status
 
-- Description: Keep PR #229 merge-ready while tightening the MacBook OpenClaw/iOS boundary and host Telegram delivery policy.
-- Active repo: `/Users/prismtek/bmo-stack`
-- Branch: `fix/openclaw-build18-agent-workspace-ux`
-- Last successful step: applied host OpenClaw delivery policy, added repo-side boundary/policy doctors, and verified PR #229 was clean before this follow-up patch.
-- Next intended step: run repo checks, commit, push, and confirm the PR checks restart on the new head.
+- Description: Land the Build 18 Buddy library foundation on a fresh branch for `apps/openclaw-shell-ios` without reusing the MacBook setup branch or migrating iOS build ownership out of `bmo-stack`.
+- Active repo: `/Users/taylor/development/bmo-stack`
+- Branch: `codex/build18-buddy-library-foundation`
+- Last successful step: bundled the canonical Buddy/docs inputs through `OpenClawShell/RepoResources`, implemented the receipt-backed Buddy runtime/store/UI path, fixed the malformed schema payloads from the PR #231 reference import, and verified `xcodebuild ... test` passes locally with 15 tests.
+- Next intended step: stage the Build 18 files, commit, push, open the draft PR, and then watch/fix GitHub checks until green unless a blocker is outside repo scope.
 - Verification complete: false
 - Manual steps remaining:
-  - watch the new PR head checks after push
-  - verify live Telegram delivery with a real long response from Cody's channel
+  - create the commit and draft PR
+  - watch remote checks and address any repo-scoped failures
 - Safe to resume: true
 
 - 2026-04-09 19:13 UTC

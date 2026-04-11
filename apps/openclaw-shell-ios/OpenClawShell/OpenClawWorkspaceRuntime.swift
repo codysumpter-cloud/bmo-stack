@@ -28,6 +28,7 @@ enum OpenClawActionKind: String, Codable, CaseIterable, Hashable {
     case artifactRegenerate = "artifact.regenerate"
     case memoryRefresh = "memory.refresh"
     case sandboxRun = "sandbox.run"
+    case buddyMutation = "buddy.mutation"
     case workspaceWrite = "workspace.write"
     case workspaceRead = "workspace.read"
 }
@@ -445,6 +446,55 @@ final class OpenClawWorkspaceRuntime: ObservableObject {
         }
     }
 
+    func persistBuddyBundle(_ bundle: BuddyPersistenceBundle, source: String = "buddy.runtime") -> OpenClawReceipt {
+        let action = begin(kind: .buddyMutation, source: source, title: bundle.actionTitle, input: ["summary": bundle.summary])
+
+        do {
+            let stateURL = Paths.stateDirectory.appendingPathComponent("buddy-instances.json")
+            try fileManager.createDirectory(at: stateURL.deletingLastPathComponent(), withIntermediateDirectories: true)
+            try encoder.encode(bundle.libraryState).write(to: stateURL, options: [.atomic])
+
+            let eventURL = try resolve("state/buddy-runtime-events.json")
+            try fileManager.createDirectory(at: eventURL.deletingLastPathComponent(), withIntermediateDirectories: true)
+            try encoder.encode(bundle.eventLog).write(to: eventURL, options: [.atomic])
+
+            if let activeMarkdown = bundle.activeBuddyMarkdown {
+                let buddyURL = try resolve("buddy.md")
+                try activeMarkdown.write(to: buddyURL, atomically: true, encoding: .utf8)
+            } else {
+                let buddyURL = try resolve("buddy.md")
+                if fileManager.fileExists(atPath: buddyURL.path) {
+                    try fileManager.removeItem(at: buddyURL)
+                }
+            }
+
+            let buddiesURL = try resolve("buddies.md")
+            try bundle.rosterMarkdown.write(to: buddiesURL, atomically: true, encoding: .utf8)
+            appendEvent(
+                type: "buddy.state.persisted",
+                message: bundle.summary,
+                metadata: [
+                    "activeBuddyInstanceId": bundle.libraryState.activeBuddyInstanceId ?? "",
+                    "installedCount": String(bundle.libraryState.instances.count)
+                ]
+            )
+
+            return finish(
+                action,
+                status: .persisted,
+                summary: bundle.summary,
+                output: [
+                    "stateFile": stateURL.path,
+                    "activeBuddyInstanceId": bundle.libraryState.activeBuddyInstanceId ?? "",
+                    "installedCount": String(bundle.libraryState.instances.count)
+                ],
+                artifacts: ["state/buddy-runtime-events.json", "buddy.md", "buddies.md"]
+            )
+        } catch {
+            return finish(action, status: .failed, summary: "Could not persist Buddy state", error: error.localizedDescription)
+        }
+    }
+
     func fileURL(for path: String) throws -> URL {
         try resolve(path)
     }
@@ -616,11 +666,23 @@ final class OpenClawWorkspaceRuntime: ObservableObject {
         let canonical = artifacts.filter { canonicalArtifactPaths.contains($0.path) }
         let failed = recentActions.filter { $0.status == .failed }
         let missing = canonical.filter { $0.freshness == .missing }.map(\.path)
+        let buddyState = loadBuddyLibraryState()
+        let buddyArtifactPaths = ["buddy.md", "buddies.md", "state/buddy-runtime-events.json"]
+        let missingBuddyArtifacts = buddyArtifactPaths.filter { path in
+            fileManager.fileExists(atPath: rootURL.appendingPathComponent(path).path) == false
+        }
         var suggestions: [String] = []
         if missing.isEmpty {
             suggestions.append("Open Skills and run Pokemon Team Builder to create a saved team artifact.")
         } else {
             suggestions.append("Regenerate missing artifacts: \(missing.joined(separator: ", ")).")
+        }
+        if buddyState.instances.isEmpty {
+            suggestions.insert("Install a Council Starter Pack Buddy from the Buddy tab.", at: 0)
+        } else if buddyState.activeBuddyInstanceId == nil {
+            suggestions.insert("Choose one installed Buddy as the active primary Buddy.", at: 0)
+        } else if missingBuddyArtifacts.isEmpty == false {
+            suggestions.insert("Re-run a Buddy action to refresh \(missingBuddyArtifacts.joined(separator: ", ")).", at: 0)
         }
         if failed.isEmpty == false {
             suggestions.append("Review failed action receipts before trusting generated summaries.")
@@ -635,6 +697,8 @@ final class OpenClawWorkspaceRuntime: ObservableObject {
             runtimeAvailable: runtimeAvailable,
             memoryHealthy: missing.isEmpty && fileManager.fileExists(atPath: rootURL.appendingPathComponent("state/facts.json").path),
             artifacts: canonical,
+            installedBuddyCount: buddyState.instances.count,
+            hasActiveBuddy: buddyState.activeBuddyInstanceId != nil,
             registeredSkillCount: skills.count,
             recentChanges: Array(recentEvents.prefix(5)),
             failedActions: Array(failed.prefix(5)),
@@ -1130,6 +1194,15 @@ final class OpenClawWorkspaceRuntime: ObservableObject {
             return partial + String(character)
         }.trimmingCharacters(in: CharacterSet(charactersIn: "-"))
     }
+
+    private func loadBuddyLibraryState() -> BuddyLibraryState {
+        let url = Paths.stateDirectory.appendingPathComponent("buddy-instances.json")
+        guard let data = try? Data(contentsOf: url),
+              let state = try? decoder.decode(BuddyLibraryState.self, from: data) else {
+            return BuddyLibraryState()
+        }
+        return state
+    }
 }
 
 struct BuddyRuntimeStatus {
@@ -1138,6 +1211,8 @@ struct BuddyRuntimeStatus {
     var runtimeAvailable: Bool
     var memoryHealthy: Bool
     var artifacts: [OpenClawArtifactMetadata]
+    var installedBuddyCount: Int
+    var hasActiveBuddy: Bool
     var registeredSkillCount: Int
     var recentChanges: [OpenClawEventRecord]
     var failedActions: [OpenClawActionRecord]
