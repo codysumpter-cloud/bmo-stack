@@ -17,6 +17,29 @@ The `Build & TestFlight` workflow expects these GitHub repository secrets:
 - `APPSTORE_CONNECT_API_KEY`
 - `APPSTORE_CONNECT_KEY_ID`
 - `APPSTORE_CONNECT_ISSUER_ID`
+- `BEMORE_IOS_DISTRIBUTION_CERTIFICATE_P12_BASE64`
+- `BEMORE_IOS_DISTRIBUTION_CERTIFICATE_PASSWORD`
+- `BEMORE_IOS_APPSTORE_PROFILE_BASE64`
+
+The runner must not rely on Apple automatic certificate creation. It imports the BeMoreAgent
+App Store signing certificate and App Store provisioning profile first, then lets Xcode automatic
+signing select those existing assets. This avoids the Apple Developer certificate-quota failure:
+
+```text
+Choose a certificate to revoke. Your account has reached the maximum number of certificates.
+```
+
+Current expected signing inputs:
+
+- Team: `DY9FHPRZA9`
+- Bundle identifier: `BeMoreAgent`
+- Profile application identifier: `DY9FHPRZA9.BeMoreAgent`
+- Profile name: `iOS Team Store Provisioning Profile: BeMoreAgent`
+- Certificate: `iPhone Distribution: Cody Sumpter (DY9FHPRZA9)`
+
+If the `.p12` private-key export is blocked by macOS Keychain UI authorization, export it from Keychain
+Access on the Mac with the matching private key, base64 encode it, and set the three `BEMORE_IOS_*`
+secrets before rerunning `Build & TestFlight`.
 
 ### Variables
 
