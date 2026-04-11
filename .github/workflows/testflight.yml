@@ -26,7 +26,7 @@ jobs:
       IOS_DISTRIBUTION_CERTIFICATE_P12_BASE64: ${{ secrets.BEMORE_IOS_DISTRIBUTION_CERTIFICATE_P12_BASE64 }}
       IOS_DISTRIBUTION_CERTIFICATE_PASSWORD: ${{ secrets.BEMORE_IOS_DISTRIBUTION_CERTIFICATE_PASSWORD }}
       IOS_APPSTORE_PROFILE_BASE64: ${{ secrets.BEMORE_IOS_APPSTORE_PROFILE_BASE64 }}
-      IOS_APPSTORE_PROFILE_NAME: iOS Team Store Provisioning Profile: BeMoreAgent
+      IOS_APPSTORE_PROFILE_NAME: 'iOS Team Store Provisioning Profile: BeMoreAgent'
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
