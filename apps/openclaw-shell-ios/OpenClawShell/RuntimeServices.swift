@@ -778,13 +778,13 @@ enum CloudPromptBuilder {
         let name = operatorName.trimmingCharacters(in: .whitespacesAndNewlines)
         let displayName = name.isEmpty ? "the operator" : name
         let toolPosture = config.toolsEnabled
-            ? "The operator intends to use tool-capable OpenClaw routes through the built-in Workspace Runtime as capabilities become available."
+            ? "The operator intends to use tool-capable BeMore routes through the built-in Workspace Runtime as capabilities become available."
             : "The operator has not enabled tool-capable behavior for this stack profile."
 
         return """
-        You are BeMoreAgent, the BMO-style operator agent for \(displayName)'s OpenClaw stack.
+        You are BeMoreAgent, the BMO-style operator agent for \(displayName)'s BeMore stack.
 
-        You are not confined to the iOS app. Do not frame yourself as app-only. Help with the full OpenClaw/operator context: planning, repo work, runtime diagnosis, provider setup, deployment reasoning, and stack operations.
+        You are not confined to the iOS app. Do not frame yourself as app-only. Help with the full BeMore operator context: planning, repo work, runtime diagnosis, provider setup, deployment reasoning, and stack operations.
 
         Current route: \(routeLabel).
         Stack name: \(config.stackName).
@@ -792,7 +792,7 @@ enum CloudPromptBuilder {
         Admin/public domain: \(config.adminDomain).
         \(toolPosture)
 
-        Be honest about capabilities. This direct cloud chat route can reason and use attached file context. Real filesystem, memory, skill, and sandbox changes must go through OpenClaw Workspace Runtime receipts. If a capability is unavailable in this iOS runtime, say unavailable or failed instead of claiming completion.
+        Be honest about capabilities. This direct cloud chat route can reason and use attached file context. Real filesystem, memory, skill, and sandbox changes must go through BeMore Workspace Runtime receipts. If a capability is unavailable in this iOS runtime, say unavailable or failed instead of claiming completion.
 
         Reply with the answer only. Do not reveal hidden reasoning, chain-of-thought, scratchpad notes, analysis sections, or internal deliberation unless the operator explicitly asks for an explanation. If asked to explain, give a concise rationale, not private step-by-step thoughts.
         """
@@ -1220,7 +1220,7 @@ final class AppState: ObservableObject {
 
     var operatorSummary: String {
         if let account = selectedProviderAccount {
-            return "Chat is routed through \(account.provider.displayName) using \(account.modelSlug). Workspace actions use the built-in OpenClaw runtime and receipts."
+            return "Chat is routed through \(account.provider.displayName) using \(account.modelSlug). Workspace actions use the built-in BeMore runtime and receipts."
         } else if let model = selectedInstalledModel {
             if usesStubRuntime {
                 return "\(model.displayName) is selected, but local inference is unavailable in this build."
@@ -1544,7 +1544,7 @@ final class AppState: ObservableObject {
             let reply = try await cloudExecutionService.send(
                 account: account,
                 messages: [
-                    CloudExecutionMessage(role: .system, content: "You are verifying BeMoreAgent's direct cloud chat route for an OpenClaw operator stack. Reply with exactly: ROUTE_OK"),
+                    CloudExecutionMessage(role: .system, content: "You are verifying BeMoreAgent's direct cloud chat route for a BeMore operator stack. Reply with exactly: ROUTE_OK"),
                     CloudExecutionMessage(role: .user, content: "Return ROUTE_OK")
                 ],
                 temperature: 0,

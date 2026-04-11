@@ -168,7 +168,7 @@ enum BuiltInSkillRegistry {
             SkillManifest(
                 id: pokemonTeamBuilderID,
                 name: "Pokemon Team Builder",
-                description: "Draft, analyze, save, and export structured Pokemon teams as OpenClaw artifacts.",
+                description: "Draft, analyze, save, and export structured Pokemon teams as BeMore workspace artifacts.",
                 version: "1.0.0",
                 category: "Games",
                 tags: ["pokemon", "team-builder", "strategy"],
@@ -191,7 +191,7 @@ enum BuiltInSkillRegistry {
             SkillManifest(
                 id: artifactRebuilderID,
                 name: "Artifact Rebuilder",
-                description: "Regenerate canonical soul, user, memory, session, and skills artifacts from current OpenClaw state.",
+                description: "Regenerate canonical soul, user, memory, session, and skills artifacts from current BeMore workspace state.",
                 version: "1.0.0",
                 category: "System",
                 tags: ["artifacts", "memory", "workspace"],
@@ -225,7 +225,7 @@ enum ClawHubCatalog {
         ClawHubSkillTemplate(
             id: "clawhub-skill-composer",
             name: "Skill Composer",
-            description: "Draft and evolve custom OpenClaw skills as manifest-backed workspace artifacts.",
+            description: "Draft and evolve custom BeMore skills as manifest-backed workspace artifacts.",
             category: "Authoring",
             tags: ["skills", "authoring", "clawhub"],
             starterMarkdown: """
@@ -410,7 +410,7 @@ final class OpenClawWorkspaceRuntime: ObservableObject {
         ensureStateStores(config: config, preferences: preferences, routeSummary: routeSummary)
         regenerateCanonicalArtifactsIfMissing(config: config, preferences: preferences, routeSummary: routeSummary)
         refreshMetadata()
-        appendEvent(type: "workspace.bootstrapped", message: "OpenClaw workspace runtime bootstrapped.")
+        appendEvent(type: "workspace.bootstrapped", message: "BeMore workspace runtime bootstrapped.")
     }
 
     func readFile(_ path: String) throws -> String {
@@ -654,7 +654,7 @@ final class OpenClawWorkspaceRuntime: ObservableObject {
                 status: .failed,
                 summary: "Arbitrary shell execution is unavailable in the iOS sandbox",
                 output: ["exitCode": "127"],
-                error: "Unsupported command '\(op)'. Build 17 exposes a controlled OpenClaw command surface; TODO: connect a hardened process runner where platform policy allows it."
+                error: "Unsupported command '\(op)'. Build 18 exposes a controlled BeMore command surface; TODO: connect a hardened process runner where platform policy allows it."
             )
         }
     }
@@ -746,7 +746,7 @@ final class OpenClawWorkspaceRuntime: ObservableObject {
         }
         let latestLog = rootURL.appendingPathComponent("logs/latest-actions.log")
         if !fileManager.fileExists(atPath: latestLog.path) {
-            try? "OpenClaw action log initialized.\n".write(to: latestLog, atomically: true, encoding: .utf8)
+            try? "BeMore action log initialized.\n".write(to: latestLog, atomically: true, encoding: .utf8)
         }
     }
 
@@ -754,8 +754,8 @@ final class OpenClawWorkspaceRuntime: ObservableObject {
         writeJSON([
             "identity": [preferences.preferredName.nilIfBlank ?? config.operatorName.nilIfBlank ?? "operator"],
             "project": [config.stackName],
-            "workflow": [config.goal.nilIfBlank ?? "Build and operate an OpenClaw workspace"],
-            "tooling": ["OpenClaw iOS workspace runtime", routeSummary],
+            "workflow": [config.goal.nilIfBlank ?? "Build and operate a BeMore workspace"],
+            "tooling": ["BeMore iOS workspace runtime", routeSummary],
             "game": ["Pokemon Team Builder is a registered skill"]
         ], to: rootURL.appendingPathComponent("state/facts.json"))
 
@@ -801,7 +801,7 @@ final class OpenClawWorkspaceRuntime: ObservableObject {
             "soul.md": """
             # soul.md
 
-            OpenClaw is one agent, one workspace, one sandbox, and one capability surface.
+            BeMore is one agent, one workspace, one sandbox, and one capability surface.
 
             ## Operating posture
             - Prefer confirmed runtime receipts over fluent claims.
@@ -833,7 +833,7 @@ final class OpenClawWorkspaceRuntime: ObservableObject {
             # memory.md
 
             ## Durable facts
-            - OpenClaw should feel like a real agent workspace, not a chat-only shell.
+            - BeMore should feel like a real agent workspace, not a chat-only shell.
             - Canonical artifacts live under `.openclaw/`.
             - Pokemon Team Builder is a first-class skill and saves artifacts.
             - Completion language must be receipt-aware.

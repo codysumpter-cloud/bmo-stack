@@ -30,13 +30,13 @@ Current shipped shell surfaces include:
 - Relaunch returns to the main tab shell after onboarding is complete.
 - The local runtime is still stubbed unless `MLCSwift` is actually present and wired.
 - Cloud routes can be configured in Settings and switched in Models.
-- Workspace actions run through OpenClaw runtime receipts. The UI should not claim files, memory,
+- Workspace actions run through BeMore runtime receipts. The UI should not claim files, memory,
   skills, or sandbox work completed unless the runtime returns a completed or persisted receipt.
-- Buddy install/personalize/check-in/training actions also run through OpenClaw runtime receipts and
+- Buddy install/personalize/check-in/training actions also run through BeMore runtime receipts and
   should not claim continuity updates unless the receipt persisted the Buddy bundle artifacts.
 - Cloud/local replies are sanitized before display so hidden reasoning/thought blocks are not shown
   unless the operator explicitly asks for an explanation.
-- The iOS sandbox currently exposes controlled OpenClaw commands (`pwd`, `ls`, `cat`, `write`, `regenerate`,
+- The iOS sandbox currently exposes controlled BeMore commands (`pwd`, `ls`, `cat`, `write`, `regenerate`,
   `skills`, `help`) rather than arbitrary host shell execution.
 
 ## Local build path

@@ -97,7 +97,7 @@ final class AppStateRuntimeTests: XCTestCase {
 
         XCTAssertEqual(appState.activeRouteModeLabel, "Direct cloud model route")
         XCTAssertTrue(appState.operatorSummary.contains("routed through OpenAI"))
-        XCTAssertTrue(appState.operatorSummary.contains("Workspace actions use the built-in OpenClaw runtime"))
+        XCTAssertTrue(appState.operatorSummary.contains("Workspace actions use the built-in BeMore runtime"))
         XCTAssertTrue(appState.routeHealthSummary.contains("Cloud chat is ready"))
     }
 
@@ -115,7 +115,7 @@ final class AppStateRuntimeTests: XCTestCase {
         )
 
         XCTAssertTrue(prompt.contains("not confined to the iOS app"))
-        XCTAssertTrue(prompt.contains("full OpenClaw/operator context"))
+        XCTAssertTrue(prompt.contains("full BeMore operator context"))
         XCTAssertTrue(prompt.contains("Workspace Runtime receipts"))
         XCTAssertTrue(prompt.contains("Do not reveal hidden reasoning"))
         XCTAssertFalse(prompt.contains("only perform functions inside the app"))
@@ -139,7 +139,7 @@ final class AppStateRuntimeTests: XCTestCase {
     func testWorkspaceBootstrapCreatesCanonicalOpenClawArtifacts() throws {
         let runtime = OpenClawWorkspaceRuntime()
         var config = StackConfig.default
-        config.stackName = "OpenClaw"
+        config.stackName = "BeMore"
         config.role = "operator"
         config.goal = "build a real workspace"
 

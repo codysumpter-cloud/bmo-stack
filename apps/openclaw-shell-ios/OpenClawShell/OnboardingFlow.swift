@@ -78,7 +78,7 @@ struct OnboardingFlow: View {
                 .font(.system(size: 36, weight: .bold))
                 .foregroundColor(BMOTheme.textPrimary)
 
-            Text("Build the mobile front door for a real self-hosted OpenClaw stack, based on the answers you give here.")
+            Text("Build the mobile front door for a real BeMore stack, based on the answers you give here.")
                 .font(.body)
                 .foregroundColor(BMOTheme.textSecondary)
                 .multilineTextAlignment(.center)
@@ -86,7 +86,7 @@ struct OnboardingFlow: View {
 
             VStack(alignment: .leading, spacing: 10) {
                 featureRow("Generate a concrete stack profile instead of fake setup copy")
-                featureRow("Target a real OpenClaw runtime and node pairing flow")
+                featureRow("Target a real BeMore runtime and Mac pairing flow")
                 featureRow("Show honest readiness for local runtime, providers, and shell surfaces")
             }
             .padding(.horizontal, BMOTheme.spacingXL)
@@ -114,7 +114,7 @@ struct OnboardingFlow: View {
                     .foregroundColor(BMOTheme.textPrimary)
                     .padding(.horizontal, BMOTheme.spacingLG)
 
-                Text("This should match the real OpenClaw deployment the app is going to represent.")
+                Text("This should match the real BeMore deployment the app is going to represent.")
                     .font(.subheadline)
                     .foregroundColor(BMOTheme.textSecondary)
                     .padding(.horizontal, BMOTheme.spacingLG)
@@ -149,8 +149,8 @@ struct OnboardingFlow: View {
                 .padding(.horizontal, BMOTheme.spacingLG)
 
                 labeledField(title: "Stack name", text: $config.stackName, placeholder: "BeMoreAgent")
-                labeledField(title: "Primary goal", text: $config.goal, placeholder: "Run my own OpenClaw stack")
-                labeledField(title: "Runtime endpoint", text: $config.gatewayURL, placeholder: "https://openclaw.example.com")
+                labeledField(title: "Primary goal", text: $config.goal, placeholder: "Run my own BeMore stack")
+                labeledField(title: "Runtime endpoint", text: $config.gatewayURL, placeholder: "https://bemore.example.com")
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
                 labeledField(title: "Admin / public domain", text: $config.adminDomain, placeholder: "example.com")
@@ -363,7 +363,7 @@ struct OnboardingFlow: View {
                     .font(.system(size: 28, weight: .bold))
                     .foregroundColor(BMOTheme.textPrimary)
 
-                Text("Your iPhone shell now reflects a real OpenClaw setup profile.")
+                Text("Your iPhone shell now reflects a real BeMore setup profile.")
                     .font(.subheadline)
                     .foregroundColor(BMOTheme.textSecondary)
 
@@ -422,7 +422,7 @@ struct OnboardingFlow: View {
 
                 Button("Launch shell") {
                     config.stackName = fallback(config.stackName, defaultValue: "BeMoreAgent")
-                    config.goal = fallback(config.goal, defaultValue: "Run a self-hosted OpenClaw stack")
+                    config.goal = fallback(config.goal, defaultValue: "Run a self-hosted BeMore stack")
                     config.role = fallback(config.role, defaultValue: "Operator")
                     config.operatorName = fallback(config.operatorName, defaultValue: "Operator")
                     config.gatewayURL = fallback(config.gatewayURL, defaultValue: "https://prismtek.dev")
@@ -549,10 +549,10 @@ struct OnboardingFlow: View {
     private var generatedChecklist: [String] {
         var items: [String] = []
         if config.deploymentMode == .bootstrapSelfHosted {
-            items.append("Provision or verify an OpenClaw runtime endpoint at \(fallback(config.gatewayURL, defaultValue: "https://prismtek.dev")).")
+            items.append("Provision or verify a BeMore runtime endpoint at \(fallback(config.gatewayURL, defaultValue: "https://prismtek.dev")).")
             items.append("Set runtime and pairing/public URL values to match \(fallback(config.adminDomain, defaultValue: "prismtek.dev")).")
         } else {
-            items.append("Pair this app to the existing OpenClaw runtime endpoint at \(fallback(config.gatewayURL, defaultValue: "https://prismtek.dev")).")
+            items.append("Pair this app to the existing BeMore runtime endpoint at \(fallback(config.gatewayURL, defaultValue: "https://prismtek.dev")).")
         }
         if config.installNodeOnThisPhone {
             items.append("Treat this iPhone as a node surface with notification, camera, and device capability permissions.")
