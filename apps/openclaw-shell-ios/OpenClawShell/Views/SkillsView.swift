@@ -41,7 +41,7 @@ struct SkillsView: View {
     private var headerCard: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text("OpenClaw Skills")
+                Text("BeMore Skills")
                     .font(.system(size: 28, weight: .bold))
                     .foregroundColor(BMOTheme.textPrimary)
                 Spacer()

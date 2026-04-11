@@ -1,6 +1,6 @@
 # BeMoreAgent iOS Shell
 
-Native SwiftUI iPhone shell for the BeMoreAgent/OpenClaw operator stack.
+Native SwiftUI iPhone shell for the BeMoreAgent operator stack.
 
 ## Current product shell
 
