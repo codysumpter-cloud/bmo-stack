@@ -337,7 +337,7 @@ struct OnboardingFlow: View {
             Text("Your active Buddy")
                 .font(.headline)
                 .foregroundColor(BMOTheme.textPrimary)
-            Text(selectedTemplate?.ascii.baseSilhouette ?? "  /\\_/\\\n ( o.o )\n  > ^ <")
+            Text(selectedTemplate?.ascii.baseSilhouette ?? "    /\\\n  < o  o >\n  /|  v |\\\n /_|____|_\\")
                 .font(.system(.caption, design: .monospaced))
                 .foregroundColor(BMOTheme.accent)
             Text("\(fallback(buddyName, defaultValue: selectedTemplate?.name ?? "Buddy")) will become the Buddy shown on Home and in Chat.")
