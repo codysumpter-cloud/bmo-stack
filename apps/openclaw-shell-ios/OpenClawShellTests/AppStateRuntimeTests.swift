@@ -136,7 +136,7 @@ final class AppStateRuntimeTests: XCTestCase {
         XCTAssertFalse(cleaned.localizedCaseInsensitiveContains("private chain"))
     }
 
-    func testWorkspaceBootstrapCreatesCanonicalOpenClawArtifacts() throws {
+    func testWorkspaceBootstrapCreatesCanonicalBeMoreArtifacts() throws {
         let runtime = OpenClawWorkspaceRuntime()
         var config = StackConfig.default
         config.stackName = "BeMore"
@@ -153,7 +153,7 @@ final class AppStateRuntimeTests: XCTestCase {
         XCTAssertTrue(soul.contains("one agent, one workspace"))
         let skillsMarkdown = try runtime.readFile("skills.md")
         XCTAssertTrue(skillsMarkdown.contains("## Installed skills"))
-        XCTAssertTrue(skillsMarkdown.contains("## ClawHub starters"))
+        XCTAssertTrue(skillsMarkdown.contains("## Buddy Skill Hub starters"))
         XCTAssertTrue(skillsMarkdown.contains("File Crafter"))
         XCTAssertTrue(skillsMarkdown.contains("Chat should not treat old skill artifacts as active context"))
         XCTAssertTrue(runtime.skills.contains(where: { $0.id == BuiltInSkillRegistry.pokemonTeamBuilderID }))

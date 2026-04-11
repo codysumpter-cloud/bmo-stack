@@ -7,9 +7,12 @@ enum BuddyAnimationMood {
     case working
     case sleepy
     case levelUp
+    case needsAttention
 }
 
 struct BuddyAsciiView: View {
+    var buddy: BuddyInstance?
+    var template: CouncilStarterBuddyTemplate?
     let mood: BuddyAnimationMood
     var compact = false
     @State private var tick = 0
@@ -28,7 +31,7 @@ struct BuddyAsciiView: View {
                     tick += 1
                 }
             }
-            .accessibilityLabel("Buddy \(label)")
+            .accessibilityLabel("\(buddy?.displayName ?? "Buddy") \(label)")
     }
 
     private var label: String {
@@ -39,6 +42,7 @@ struct BuddyAsciiView: View {
         case .working: return "working"
         case .sleepy: return "sleepy"
         case .levelUp: return "level up"
+        case .needsAttention: return "needs attention"
         }
     }
 
@@ -48,41 +52,91 @@ struct BuddyAsciiView: View {
     }
 
     private var framesForMood: [String] {
+        if let template {
+            let state = moodKey
+            if state == "idle", template.ascii.idleFrames.isEmpty == false {
+                return template.ascii.idleFrames
+            }
+            if let expression = template.ascii.expressions[state] {
+                return [expression, template.ascii.baseSilhouette]
+            }
+            return activeTemplateFallbackFrames(for: template.ascii.baseSilhouette)
+        }
         switch mood {
         case .idle:
             return [
-                Self.make(["   /\\_/\\", "  ( o.o )", "  /| _ |\\", "   /   \\", "  _|   |_"]),
-                Self.make(["   /\\_/\\", "  ( o.o )", "  /| _ |\\", "   /   \\", "   |___|"])
+                Self.make(["    /\\", "  < o  o >", "  /|  v |\\", " /_|____|_\\", "   /_  _\\"]),
+                Self.make(["    /\\", "  < o  o >", "  /|  v |\\", " /_|____|_\\", "   \\_  _/"])
             ]
         case .happy:
             return [
-                Self.make(["   /\\_/\\", "  ( ^.^ )", "  /| * |\\", "   / \\ \\", "  _| |_|"]),
-                Self.make(["  \\/\\_/\\/", "  ( ^o^ )", "  /| * |\\", "   / \\ \\", "  _| |_|"])
+                Self.make(["  \\ /\\ /", "  < ^  ^ >", "  /|  * |\\", " /_|____|_\\", "    /  \\"]),
+                Self.make([" *  /\\  *", "  < ^  o >", "  /|  * |\\", " /_|____|_\\", "    \\  /"])
             ]
         case .thinking:
             return [
-                Self.make(["   /\\_/\\", "  ( o.o )  ?", "  /| _ |\\", "   /   \\", "   |___|"]),
-                Self.make(["   /\\_/\\", "  ( o_o )  ..", "  /| _ |\\", "   /   \\", "   |___|"])
+                Self.make(["    /\\   ?", "  < o  o >", "  /|  ? |\\", " /_|____|_\\", "    /  \\"]),
+                Self.make(["    /\\  ..", "  < o  O >", "  /|  ? |\\", " /_|____|_\\", "    \\  /"])
             ]
         case .working:
             return [
-                Self.make(["    .-.", "  <(o o)> *", "   /| # |\\", "  /_|___|_\\", "    \\ /"]),
-                Self.make(["    .-.", "  <(o o)> **", "   /| # |\\", "  /_|___|_\\", "    / \\"])
+                Self.make(["    /\\  #", "  < >  < >", "  /| [ ]|\\", " /_|____|_\\", "   /_  _\\"]),
+                Self.make(["    /\\  ##", "  < >  < >", "  /| [*]|\\", " /_|____|_\\", "   \\_  _/"])
             ]
         case .sleepy:
             return [
-                Self.make(["   /\\_/\\", "  ( -.- ) z", "  /| _ |\\", "   /   \\", "   |___|"]),
-                Self.make(["   /\\_/\\", "  ( -.- ) zz", "  /| _ |\\", "   /   \\", "  _|___|_"])
+                Self.make(["    /\\   z", "  < -  - >", "  /|  . |\\", " /_|____|_\\", "    /__\\"]),
+                Self.make(["    /\\  zz", "  < -  - >", "  /|  . |\\", " /_|____|_\\", "   _/  \\_"])
             ]
         case .levelUp:
             return [
-                Self.make(["  * /\\_/\\ *", "   ( ^.^ )", "  /|[*]|\\", "   / \\ \\", "  _| |_|"]),
-                Self.make([" **/\\_/\\**", "   ( ^o^ )", "  /|[*]|\\", "   / \\ \\", "  _| |_|"])
+                Self.make([" ** /\\ **", "  < ^  ^ >", "  /|{*}|\\", " /_|____|_\\", "    /  \\"]),
+                Self.make(["*** /\\ ***", "  < ^  o >", "  /|{*}|\\", " /_|____|_\\", "    \\  /"])
             ]
+        case .needsAttention:
+            return [
+                Self.make([" !  /\\  !", "  < o  o >", "  /|  ! |\\", " /_|____|_\\", "    /  \\"]),
+                Self.make([" !! /\\ !!", "  < O  o >", "  /|  ! |\\", " /_|____|_\\", "    \\  /"])
+            ]
+        }
+    }
+
+    private func activeTemplateFallbackFrames(for silhouette: String) -> [String] {
+        switch mood {
+        case .idle:
+            return [silhouette]
+        case .happy:
+            return [Self.wrap(silhouette, top: "\\   /", bottom: "  YES"), Self.wrap(silhouette, top: " \\ / ", bottom: "  <3 ")]
+        case .thinking:
+            return [Self.wrap(silhouette, top: "  ? ", bottom: "  ..."), Self.wrap(silhouette, top: " ?  ", bottom: "  hmm")]
+        case .working:
+            return [Self.wrap(silhouette, top: "  ##", bottom: "[work]"), Self.wrap(silhouette, top: " ###", bottom: "[build]")]
+        case .sleepy:
+            return [Self.wrap(silhouette, top: "   z", bottom: " rest"), Self.wrap(silhouette, top: "  zz", bottom: " slow")]
+        case .levelUp:
+            return [Self.wrap(silhouette, top: "** **", bottom: "LEVEL"), Self.wrap(silhouette, top: "*****", bottom: " UP! ")]
+        case .needsAttention:
+            return [Self.wrap(silhouette, top: " ! !", bottom: "check"), Self.wrap(silhouette, top: "!! !!", bottom: " care")]
+        }
+    }
+
+    private var moodKey: String {
+        switch mood {
+        case .idle: return buddy?.visual?.currentAnimationState ?? buddy?.state.mood ?? "idle"
+        case .happy: return "happy"
+        case .thinking: return "thinking"
+        case .working: return "working"
+        case .sleepy: return "sleepy"
+        case .levelUp: return "levelUp"
+        case .needsAttention: return "needsAttention"
         }
     }
 
     private static func make(_ lines: [String]) -> String {
         lines.joined(separator: "\n")
+    }
+
+    private static func wrap(_ silhouette: String, top: String, bottom: String) -> String {
+        "\(top)\n\(silhouette.trimmingCharacters(in: .newlines))\n\(bottom)"
     }
 }

@@ -79,7 +79,7 @@ struct BuddyView: View {
                 )
             }
 
-            BuddyAsciiView(mood: buddyMood(for: buddy), compact: true)
+            BuddyAsciiView(buddy: buddy, template: template, mood: buddyMood(for: buddy), compact: true)
 
             HStack(spacing: BMOTheme.spacingSM) {
                 metricPill(title: "Owned", value: "\(status.installedBuddyCount)")
@@ -115,13 +115,7 @@ struct BuddyView: View {
                 }
             }
 
-            Text(asciiArt(for: buddy, template: template))
-                .font(.system(.body, design: .monospaced))
-                .foregroundColor(BMOTheme.accent)
-                .padding(BMOTheme.spacingMD)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(BMOTheme.backgroundSecondary)
-                .clipShape(RoundedRectangle(cornerRadius: BMOTheme.radiusMedium, style: .continuous))
+            BuddyAsciiView(buddy: buddy, template: template, mood: buddyMood(for: buddy))
 
             Text(template?.onboardingCopy ?? "Buddy profile is ready for the BeMore runtime.")
                 .font(.subheadline)
@@ -535,6 +529,8 @@ struct BuddyView: View {
             return .thinking
         case "sleepy", "tired":
             return .sleepy
+        case "needsattention", "needs attention", "stressed":
+            return .needsAttention
         default:
             return .idle
         }

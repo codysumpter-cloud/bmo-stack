@@ -95,7 +95,7 @@ struct ChatView: View {
 
     private var buddyChatHeader: some View {
         HStack(alignment: .center, spacing: 12) {
-            BuddyAsciiView(mood: buddyMood, compact: true)
+            BuddyAsciiView(buddy: store.activeBuddy, template: store.activeBuddy.flatMap { store.contracts?.templateForInstance($0) }, mood: buddyMood, compact: true)
                 .frame(width: 126)
             VStack(alignment: .leading, spacing: 4) {
                 Text("Chatting with \(store.activeBuddy?.displayName ?? "your Buddy")")
@@ -232,6 +232,8 @@ struct ChatView: View {
             return .thinking
         case "sleepy", "tired":
             return .sleepy
+        case "needsattention", "needs attention", "stressed":
+            return .needsAttention
         default:
             return appState.chatStore.isGenerating ? .thinking : .idle
         }

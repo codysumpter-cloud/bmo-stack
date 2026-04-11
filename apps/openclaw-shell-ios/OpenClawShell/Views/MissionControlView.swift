@@ -64,7 +64,7 @@ struct MissionControlView: View {
                 StatusBadge(label: buddy == nil ? "Needs Buddy" : status.runtimeAvailable ? "Ready" : "Phone-first", color: buddy == nil ? BMOTheme.warning : status.runtimeAvailable ? BMOTheme.success : BMOTheme.accent)
             }
 
-            BuddyAsciiView(mood: buddyMood(for: status, buddy: buddy))
+            BuddyAsciiView(buddy: buddy, template: buddy.flatMap { store.contracts?.templateForInstance($0) }, mood: buddyMood(for: status, buddy: buddy))
 
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
                 dashboardMetric("Owned", value: "\(store.installedBuddies.count)", icon: "person.2.fill")
@@ -251,11 +251,13 @@ struct MissionControlView: View {
                 return .thinking
             case "sleepy", "tired":
                 return .sleepy
+            case "needsattention", "needs attention", "stressed":
+                return .needsAttention
             default:
                 break
             }
         }
-        if !status.failedActions.isEmpty { return .thinking }
+        if !status.failedActions.isEmpty { return .needsAttention }
         if appState.macRuntimeSnapshot?.processes.contains(where: { $0.status == "running" }) == true { return .working }
         if status.recentChanges.isEmpty && appState.workspaceStore.files.isEmpty { return .sleepy }
         if !status.recentChanges.isEmpty { return .happy }
