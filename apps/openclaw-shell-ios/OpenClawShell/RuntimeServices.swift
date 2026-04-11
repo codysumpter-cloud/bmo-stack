@@ -1683,6 +1683,13 @@ final class AppState: ObservableObject {
         return receipt
     }
 
+    func persistBuddyBundle(_ bundle: BuddyPersistenceBundle) -> OpenClawReceipt {
+        let receipt = workspaceRuntime.persistBuddyBundle(bundle, source: "buddy.user")
+        chatStore.messages.append(ChatMessage(role: .system, content: ReceiptFormatter.confirmedSummary(for: receipt)))
+        chatStore.persist()
+        return receipt
+    }
+
     func deleteWorkspaceArtifact(path: String) -> OpenClawReceipt {
         let receipt = workspaceRuntime.deleteFile(path, source: "user")
         chatStore.messages.append(ChatMessage(role: .system, content: ReceiptFormatter.confirmedSummary(for: receipt)))
