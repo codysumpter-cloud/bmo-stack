@@ -54,7 +54,7 @@ xcodebuild -project BeMoreAgent.xcodeproj \
 
 ## Release path
 
-- `CFBundleVersion` is currently `18`.
+- `CFBundleVersion` is currently `19` because App Store Connect already has build `18` and rejects duplicate uploads.
 - `IPHONEOS_DEPLOYMENT_TARGET` is currently `26.0`.
 - TestFlight delivery is repo-managed through `.github/workflows/testflight.yml`.
 - The operator runbook for that path is `apps/openclaw-shell-ios/ADMIN_TESTFLIGHT_RUNBOOK.md`.
@@ -66,7 +66,7 @@ xcodebuild -project BeMoreAgent.xcodeproj \
 - `project.yml` still has `dependencies: []`.
 - When `MLCSwift` is not importable, the app still uses the stub local-runtime path and cannot claim
   real on-device inference.
-- Arbitrary codex-style shell/process execution is not available on-device in this build. Build 18
+- Arbitrary codex-style shell/process execution is not available on-device in this build. Build 19
   provides a receipt-backed controlled sandbox surface and leaves real hardened process execution for
   a future platform/runtime integration.
 - Buddy Workshop authoring, external package publishing, and marketplace flows are not shipped in
