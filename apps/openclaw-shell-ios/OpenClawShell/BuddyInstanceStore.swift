@@ -213,7 +213,7 @@ final class BuddyProfileStore: ObservableObject {
             } else if let migrated = store.migrateLegacyState(contracts: contracts) {
                 libraryState = migrated
                 // Persist immediately so migration doesn't re-run on every launch.
-                try? store.persistLibraryState(migrated)
+                try store.persistLibraryState(migrated)
             } else {
                 libraryState = BuddyLibraryState()
             }

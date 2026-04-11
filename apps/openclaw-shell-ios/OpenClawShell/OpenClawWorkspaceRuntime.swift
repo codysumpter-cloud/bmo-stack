@@ -479,7 +479,7 @@ final class OpenClawWorkspaceRuntime: ObservableObject {
                 ]
             )
 
-            var artifacts = ["State/buddy-instances.json", "state/buddy-runtime-events.json", "buddies.md"]
+            var artifacts = ["state/buddy-instances.json", "state/buddy-runtime-events.json", "buddies.md"]
             if bundle.activeBuddyMarkdown != nil {
                 artifacts.append("buddy.md")
             }
