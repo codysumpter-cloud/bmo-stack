@@ -599,8 +599,8 @@ final class OpenClawWorkspaceRuntime: ObservableObject {
             let manifestData = try encoder.encode(manifest)
             _ = try writeFile("\(folder)/manifest.json", content: String(data: manifestData, encoding: .utf8) ?? "{}", source: "clawhub")
             refreshMetadata()
-            appendEvent(type: "skill.installed", message: "Installed \(template.name) from ClawHub.", metadata: ["skillId": template.id])
-            return finish(action, status: .persisted, summary: "Installed \(template.name) from ClawHub", output: ["skillId": template.id], artifacts: ["registry/skills.json", "\(folder)/README.md", "\(folder)/manifest.json"])
+            appendEvent(type: "skill.installed", message: "Installed \(template.name) from Buddy Skill Hub.", metadata: ["skillId": template.id])
+            return finish(action, status: .persisted, summary: "Installed \(template.name) from Buddy Skill Hub", output: ["skillId": template.id], artifacts: ["registry/skills.json", "\(folder)/README.md", "\(folder)/manifest.json"])
         } catch {
             return finish(action, status: .failed, summary: "Could not install \(template.name)", error: error.localizedDescription)
         }
@@ -654,7 +654,7 @@ final class OpenClawWorkspaceRuntime: ObservableObject {
                 status: .failed,
                 summary: "Arbitrary shell execution is unavailable in the iOS sandbox",
                 output: ["exitCode": "127"],
-                error: "Unsupported command '\(op)'. Build 18 exposes a controlled BeMore command surface; TODO: connect a hardened process runner where platform policy allows it."
+                error: "Unsupported command '\(op)'. iPhone uses a controlled BeMore command surface; pair with Mac for full process execution."
             )
         }
     }
@@ -859,14 +859,14 @@ final class OpenClawWorkspaceRuntime: ObservableObject {
             "skills.md": """
             # skills.md
 
-            Skills are registry-backed and can be extended through ClawHub installs or user-authored manifests.
+            Skills are registry-backed and can be extended through Buddy Skill Hub installs or user-authored manifests.
 
             ## Installed skills
             \(skills.map { skill in
                 "- **\(skill.name)** (`\(skill.id)`): \(skill.description)\n  - Category: \(skill.category)\n  - Entrypoint: \(skill.entrypoint)\n  - Permissions: \(skill.permissions.joined(separator: ", "))"
             }.joined(separator: "\n"))
 
-            ## ClawHub starters
+            ## Buddy Skill Hub starters
             \(ClawHubCatalog.templates.map { "- **\($0.name)** (`\($0.id)`): \($0.description)" }.joined(separator: "\n"))
 
             ## Skill authoring rules
@@ -979,7 +979,7 @@ final class OpenClawWorkspaceRuntime: ObservableObject {
         - Status: completed with local workspace receipt
 
         ## Result
-        This ClawHub skill is installed and callable through the generic skill runner. Connect deeper domain logic by editing `skills/\(manifest.id)/README.md` and its manifest.
+        This Buddy Skill Hub skill is installed and callable through the generic skill runner. Connect deeper domain logic by editing `skills/\(manifest.id)/README.md` and its manifest.
         """
         do {
             let url = try resolve(path)

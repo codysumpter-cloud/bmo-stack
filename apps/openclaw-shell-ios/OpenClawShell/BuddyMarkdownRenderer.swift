@@ -110,7 +110,7 @@ enum BuddyMarkdownRenderer {
         if let level = nextLevel.level, let remainingXP = nextLevel.remainingXP {
             lines.append("Next level: \(level) in \(remainingXP) XP.")
         } else {
-            lines.append("Level cap reached for the current Build 18 wedge.")
+            lines.append("Level cap reached for the current BeMore companion wedge.")
         }
 
         if let challenge = roleProfile?.dailyChallengeHook {

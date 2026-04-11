@@ -47,7 +47,7 @@ struct SkillsView: View {
                 Spacer()
                 StatusBadge(label: "\(appState.workspaceRuntime.skills.count) registered", color: BMOTheme.accent)
             }
-            Text("Skills are loaded from `.openclaw/registry/skills.json` and run through the same receipt-backed Workspace Runtime used by local and cloud routes.")
+            Text("Skills run through the same receipt-backed BeMore workspace runtime used by Buddy, mobile actions, and Mac pairing.")
                 .font(.subheadline)
                 .foregroundColor(BMOTheme.textSecondary)
         }
@@ -125,10 +125,10 @@ struct SkillsView: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("ClawHub")
+                    Text("Buddy Skill Hub")
                         .font(.headline)
                         .foregroundColor(BMOTheme.textPrimary)
-                    Text("Install starter skills into `.openclaw/registry/skills.json` with real README and manifest artifacts.")
+                    Text("Install starter skills into the BeMore workspace registry with real README, manifest, artifact, and receipt output.")
                         .font(.caption)
                         .foregroundColor(BMOTheme.textSecondary)
                 }
