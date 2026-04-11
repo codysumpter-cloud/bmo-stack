@@ -58,6 +58,8 @@ struct MainTabView: View {
             BuddyView()
         case .files:
             FilesView()
+        case .pairing:
+            MacPairingView()
         case .settings:
             SettingsView()
         }
