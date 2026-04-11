@@ -1,0 +1,1 @@
+../../../../../docs/POKEMON_CHAMPIONS_TEAM_BUILDER_BACKEND.md

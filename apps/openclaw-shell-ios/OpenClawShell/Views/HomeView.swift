@@ -88,7 +88,7 @@ struct HomeView: View {
                 }
 
                 VStack(alignment: .leading, spacing: 3) {
-                    Text(appState.stackConfig.deploymentMode == .bootstrapSelfHosted ? "Self-hosted OpenClaw stack" : "Runtime pairing shell")
+                    Text(appState.stackConfig.deploymentMode == .bootstrapSelfHosted ? "Self-hosted BeMore stack" : "BeMore Mac pairing")
                         .font(.headline)
                         .foregroundColor(BMOTheme.textPrimary)
                     Text(appState.operatorDisplayName)
@@ -154,14 +154,11 @@ struct HomeView: View {
                 quickAction(icon: "message", label: "New Chat") {
                     appState.chatStore.clear()
                 }
+                quickAction(icon: "macbook.and.iphone", label: "Pair Mac") {
+                    appState.selectedTab = .pairing
+                }
                 quickAction(icon: "folder.badge.plus", label: "Import File") {
                     isHomeFileImporterPresented = true
-                }
-                quickAction(icon: "arrow.clockwise", label: "Refresh") {
-                    appState.modelStore.refreshInstalledModels()
-                    appState.workspaceStore.load()
-                    appState.refreshGemmaState()
-                    appState.refreshRuntimeSummary()
                 }
             }
         }
@@ -217,6 +214,10 @@ struct HomeView: View {
             }
 
             Text("Cloud providers can be linked in Settings and switched day-to-day in Models. Settings handles credentials; Models is the live route control surface.")
+                .font(.caption)
+                .foregroundColor(BMOTheme.textTertiary)
+
+            Text(appState.macPowerModeSummary)
                 .font(.caption)
                 .foregroundColor(BMOTheme.textTertiary)
 

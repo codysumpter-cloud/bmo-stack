@@ -49,7 +49,7 @@ struct MissionControlView: View {
                     Text(appState.operatorDisplayName)
                         .font(.system(size: 28, weight: .bold))
                         .foregroundColor(BMOTheme.textPrimary)
-                    Text("OpenClaw mobile operator shell")
+                    Text("BeMore mobile operator shell")
                         .font(.subheadline)
                         .foregroundColor(BMOTheme.textSecondary)
                 }
@@ -69,7 +69,7 @@ struct MissionControlView: View {
         return VStack(alignment: .leading, spacing: 12) {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("OpenClaw Dashboard")
+                    Text("BeMore Dashboard")
                         .font(.headline)
                         .foregroundColor(BMOTheme.textPrimary)
                     Text("One view for route, runtime, artifacts, skills, files, and receipts.")
@@ -86,6 +86,8 @@ struct MissionControlView: View {
                 dashboardMetric("Files", value: "\(appState.workspaceStore.files.count)", icon: "folder")
                 dashboardMetric("Failures", value: "\(status.failedActions.count)", icon: "exclamationmark.triangle")
             }
+
+            detailRow("Mac power mode", value: appState.macPowerModeSummary)
 
             HStack(spacing: 8) {
                 Button("Regenerate Core") {

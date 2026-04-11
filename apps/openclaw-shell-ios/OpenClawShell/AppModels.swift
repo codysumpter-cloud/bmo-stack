@@ -242,6 +242,74 @@ struct EngineRuntimeConfig: Sendable {
     let modelLib: String
 }
 
+// MARK: - BeMore Mac pairing
+
+struct MacRuntimeTask: Codable, Hashable, Identifiable {
+    let id: String
+    let title: String
+    let status: String
+    let detail: String?
+    let command: String?
+}
+
+struct MacRuntimeProcess: Codable, Hashable, Identifiable {
+    let id: String
+    let command: String
+    let status: String
+    let stdout: String?
+    let stderr: String?
+    let exitCode: Int?
+}
+
+struct MacRuntimeDiffFile: Codable, Hashable, Identifiable {
+    var id: String { path }
+    let path: String
+    let status: String
+    let summary: String
+}
+
+struct MacRuntimeDiff: Codable, Hashable {
+    let files: [MacRuntimeDiffFile]
+    let unifiedDiff: String?
+}
+
+struct MacRuntimeArtifact: Codable, Hashable, Identifiable {
+    let id: String
+    let name: String
+    let relativePath: String
+    let kind: String
+}
+
+struct MacRuntimeReceipt: Codable, Hashable, Identifiable {
+    let id: String
+    let action: String
+    let status: String
+    let summary: String
+}
+
+struct MacRuntimeBuddy: Codable, Hashable {
+    let mode: String
+    let activeFocus: String
+    let guidance: [String]
+}
+
+struct MacRuntimePairing: Codable, Hashable {
+    let hostName: String
+    let status: String
+    let pairingCode: String?
+}
+
+struct MacRuntimeSnapshot: Codable, Hashable {
+    let workspaceRoot: String?
+    let tasks: [MacRuntimeTask]
+    let processes: [MacRuntimeProcess]
+    let artifacts: [MacRuntimeArtifact]
+    let receipts: [MacRuntimeReceipt]
+    let diff: MacRuntimeDiff
+    let buddy: MacRuntimeBuddy
+    let pairing: MacRuntimePairing
+}
+
 // MARK: - Onboarding / Stack
 
 enum StackDeploymentMode: String, Codable, CaseIterable, Hashable, Identifiable {
@@ -253,14 +321,14 @@ enum StackDeploymentMode: String, Codable, CaseIterable, Hashable, Identifiable 
     var title: String {
         switch self {
         case .pairToExistingGateway: return "Pair to an existing runtime"
-        case .bootstrapSelfHosted: return "Set up a self-hosted OpenClaw stack"
+        case .bootstrapSelfHosted: return "Set up a self-hosted BeMore stack"
         }
     }
 
     var subtitle: String {
         switch self {
         case .pairToExistingGateway:
-            return "Connect this iPhone to an OpenClaw runtime endpoint you already run elsewhere."
+            return "Connect this iPhone to a BeMore Mac runtime endpoint you already run."
         case .bootstrapSelfHosted:
             return "Use onboarding answers to generate the exact stack profile, runtime target, and next setup steps for a self-hosted deployment."
         }
@@ -359,6 +427,7 @@ enum AppTab: String, Codable, CaseIterable, Hashable, Identifiable {
     case artifacts
     case buddy
     case files
+    case pairing
     case settings
 
     var id: String { rawValue }
@@ -372,6 +441,7 @@ enum AppTab: String, Codable, CaseIterable, Hashable, Identifiable {
         case .artifacts: return "Artifacts"
         case .buddy: return "Buddy"
         case .files: return "Files"
+        case .pairing: return "Pairing"
         case .settings: return "Settings"
         }
     }
@@ -385,6 +455,7 @@ enum AppTab: String, Codable, CaseIterable, Hashable, Identifiable {
         case .artifacts: return "doc.richtext.fill"
         case .buddy: return "person.2.fill"
         case .files: return "folder.fill"
+        case .pairing: return "macbook.and.iphone"
         case .settings: return "gearshape.fill"
         }
     }

@@ -1166,6 +1166,8 @@ final class AppState: ObservableObject {
     @Published var providerModelLoading = Set<ProviderKind>()
     @Published var providerModelErrors: [ProviderKind: String] = [:]
     @Published var workspaceRuntime = OpenClawWorkspaceRuntime()
+    @Published var macRuntimeSnapshot: MacRuntimeSnapshot?
+    @Published var macRuntimeStatus = "Mac not inspected"
 
     // MARK: Initializer – now placed after property declarations
     init(engine: LocalLLMEngine) {
@@ -1275,7 +1277,7 @@ final class AppState: ObservableObject {
 
     var routeHealthSummary: String {
         if selectedProviderAccount != nil {
-            return "Cloud chat is ready. Workspace actions require OpenClaw runtime receipts."
+            return "Cloud chat is ready. Workspace actions require BeMore runtime receipts."
         }
         if let model = selectedInstalledModel {
             return usesStubRuntime
@@ -1289,6 +1291,18 @@ final class AppState: ObservableObject {
 
     var persistenceSummary: String {
         "Files, chat history, provider metadata, buddy state, onboarding stack profile, and tab preferences persist locally inside the app container."
+    }
+
+    var macPairingEndpoint: String {
+        stackConfig.gatewayURL.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    var macPowerModeSummary: String {
+        guard let snapshot = macRuntimeSnapshot else {
+            return "Pair with BeMore Mac to inspect workspace state, tasks, command output, artifacts, receipts, and diffs from the phone."
+        }
+        let workspace = snapshot.workspaceRoot ?? "no workspace"
+        return "\(snapshot.pairing.hostName) is \(snapshot.pairing.status); \(workspace); \(snapshot.tasks.count) task\(snapshot.tasks.count == 1 ? "" : "s"), \(snapshot.processes.count) process\(snapshot.processes.count == 1 ? "" : "es"), \(snapshot.receipts.count) receipt\(snapshot.receipts.count == 1 ? "" : "s")."
     }
 
     weak var buddyProfileStore: BuddyProfileStore?
@@ -1550,6 +1564,41 @@ final class AppState: ObservableObject {
         }
     }
 
+    // MARK: - BeMore Mac pairing
+
+    func refreshMacRuntimeSnapshot() async {
+        let endpoint = macPairingEndpoint
+        guard var components = URLComponents(string: endpoint), !endpoint.isEmpty else {
+            macRuntimeStatus = "Add a BeMore Mac endpoint in onboarding or settings."
+            return
+        }
+
+        if components.scheme == nil {
+            components.scheme = "https"
+        }
+
+        let normalizedPath = components.path.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+        components.path = normalizedPath.hasSuffix("api/snapshot") ? components.path : "/api/snapshot"
+
+        guard let url = components.url else {
+            macRuntimeStatus = "Mac endpoint is not a valid URL."
+            return
+        }
+
+        do {
+            macRuntimeStatus = "Inspecting BeMore Mac..."
+            let (data, response) = try await URLSession.shared.data(from: url)
+            if let http = response as? HTTPURLResponse, !(200..<300).contains(http.statusCode) {
+                macRuntimeStatus = "Mac runtime returned HTTP \(http.statusCode)."
+                return
+            }
+            macRuntimeSnapshot = try JSONDecoder().decode(MacRuntimeSnapshot.self, from: data)
+            macRuntimeStatus = "Paired power mode ready"
+        } catch {
+            macRuntimeStatus = "Mac unavailable: \(error.localizedDescription)"
+        }
+    }
+
     // MARK: - Chat
 
     func send(prompt: String) async {
@@ -1634,6 +1683,13 @@ final class AppState: ObservableObject {
         return receipt
     }
 
+    func persistBuddyBundle(_ bundle: BuddyPersistenceBundle) -> OpenClawReceipt {
+        let receipt = workspaceRuntime.persistBuddyBundle(bundle, source: "buddy.user")
+        chatStore.messages.append(ChatMessage(role: .system, content: ReceiptFormatter.confirmedSummary(for: receipt)))
+        chatStore.persist()
+        return receipt
+    }
+
     func deleteWorkspaceArtifact(path: String) -> OpenClawReceipt {
         let receipt = workspaceRuntime.deleteFile(path, source: "user")
         chatStore.messages.append(ChatMessage(role: .system, content: ReceiptFormatter.confirmedSummary(for: receipt)))
@@ -1684,7 +1740,7 @@ final class AppState: ObservableObject {
                     config: stackConfig,
                     operatorName: operatorDisplayName,
                     routeLabel: routeLabel
-                ) + "\n\nWorkspace Runtime: Available inside OpenClaw. Ask for actions through the runtime contract; do not claim files, memory, skills, or sandbox commands changed unless an OpenClaw receipt confirms it. Registered skills: \(workspaceRuntime.skills.map(\.name).joined(separator: ", ")). Canonical artifacts: soul.md, user.md, memory.md, session.md, skills.md."
+                ) + "\n\nWorkspace Runtime: Available inside BeMore. Ask for actions through the runtime contract; do not claim files, memory, skills, or sandbox commands changed unless a BeMore receipt confirms it. Registered skills: \(workspaceRuntime.skills.map(\.name).joined(separator: ", ")). Canonical artifacts: soul.md, user.md, memory.md, session.md, skills.md.\n\nMac Power Mode: \(macPowerModeSummary)"
             )
         ]
 
@@ -1711,10 +1767,10 @@ final class AppState: ObservableObject {
     private func generatedSetupChecklist(for config: StackConfig) -> [String] {
         var items: [String] = []
         if config.deploymentMode == .bootstrapSelfHosted {
-            items.append("Provision or verify the OpenClaw runtime endpoint at \(config.gatewayURL).")
+            items.append("Provision or verify the BeMore Mac runtime endpoint at \(config.gatewayURL).")
             items.append("Set runtime and pairing/public URL values to match \(config.adminDomain).")
         } else {
-            items.append("Pair this app to the existing OpenClaw runtime endpoint at \(config.gatewayURL).")
+            items.append("Pair this app to the existing BeMore Mac runtime endpoint at \(config.gatewayURL).")
         }
         if config.installNodeOnThisPhone {
             items.append("Treat this iPhone as a node surface and grant notification or device permissions as needed.")
