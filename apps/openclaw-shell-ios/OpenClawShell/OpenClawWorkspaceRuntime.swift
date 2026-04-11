@@ -479,6 +479,10 @@ final class OpenClawWorkspaceRuntime: ObservableObject {
                 ]
             )
 
+            var artifacts = ["State/buddy-instances.json", "state/buddy-runtime-events.json", "buddies.md"]
+            if bundle.activeBuddyMarkdown != nil {
+                artifacts.append("buddy.md")
+            }
             return finish(
                 action,
                 status: .persisted,
@@ -488,7 +492,7 @@ final class OpenClawWorkspaceRuntime: ObservableObject {
                     "activeBuddyInstanceId": bundle.libraryState.activeBuddyInstanceId ?? "",
                     "installedCount": String(bundle.libraryState.instances.count)
                 ],
-                artifacts: ["state/buddy-runtime-events.json", "buddy.md", "buddies.md"]
+                artifacts: artifacts
             )
         } catch {
             return finish(action, status: .failed, summary: "Could not persist Buddy state", error: error.localizedDescription)

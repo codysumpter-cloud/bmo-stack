@@ -324,14 +324,14 @@ For portability, cross-device workflows, and keeping things working together.
 **Role:** Auditor
 
 **Stats**
-- Focus 8
+- Focus 9
 - Creativity 2
 - Memory 6
-- Speed 4
+- Speed 5
 - Logic 8
-- Empathy 1
+- Empathy 2
 - Discipline 10
-- Charm 1
+- Charm 2
 
 **Moves**
 - UNACCEPTABLE

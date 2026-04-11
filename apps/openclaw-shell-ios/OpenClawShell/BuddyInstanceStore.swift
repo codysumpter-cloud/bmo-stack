@@ -14,6 +14,27 @@ struct BuddyInstanceStore {
         return decoder
     }()
 
+    // Tolerant decoder for legacy JSON that may use either ISO 8601 strings or
+    // numeric timestamps (seconds since Apple reference date, the JSONEncoder default).
+    private let legacyDecoder: JSONDecoder = {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .custom { decoder in
+            let container = try decoder.singleValueContainer()
+            if let str = try? container.decode(String.self) {
+                let iso = ISO8601DateFormatter()
+                if let date = iso.date(from: str) { return date }
+                throw DecodingError.dataCorruptedError(
+                    in: container,
+                    debugDescription: "Cannot parse date string: \(str)"
+                )
+            }
+            // JSONEncoder default: Double seconds since Jan 1 2001 (Apple reference date)
+            let seconds = try container.decode(Double.self)
+            return Date(timeIntervalSinceReferenceDate: seconds)
+        }
+        return decoder
+    }()
+
     var libraryStateURL: URL {
         Paths.stateDirectory.appendingPathComponent("buddy-instances.json")
     }
@@ -44,7 +65,7 @@ struct BuddyInstanceStore {
 
     func migrateLegacyState(contracts: BuddyCanonicalResources) -> BuddyLibraryState? {
         guard let data = try? Data(contentsOf: legacyStateURL),
-              let legacy = try? decoder.decode(LegacyBuddySystemState.self, from: data) else {
+              let legacy = try? legacyDecoder.decode(LegacyBuddySystemState.self, from: data) else {
             return nil
         }
 
@@ -187,7 +208,15 @@ final class BuddyProfileStore: ObservableObject {
         do {
             let contracts = try BuddyContractLoader.loadCanonicalResources()
             self.contracts = contracts
-            libraryState = store.loadLibraryState() ?? store.migrateLegacyState(contracts: contracts) ?? BuddyLibraryState()
+            if let existing = store.loadLibraryState() {
+                libraryState = existing
+            } else if let migrated = store.migrateLegacyState(contracts: contracts) {
+                libraryState = migrated
+                // Persist immediately so migration doesn't re-run on every launch.
+                try? store.persistLibraryState(migrated)
+            } else {
+                libraryState = BuddyLibraryState()
+            }
             eventLog = store.loadEventLog() ?? BuddyRuntimeEventLog()
             if libraryState.activeBuddyInstanceId == nil {
                 libraryState.activeBuddyInstanceId = libraryState.instances.first?.instanceId

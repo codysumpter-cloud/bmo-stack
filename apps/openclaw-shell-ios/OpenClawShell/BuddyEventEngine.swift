@@ -106,7 +106,8 @@ struct BuddyEventEngine {
         instance.state.currentFocus = currentFocus?.trimmingCharacters(in: .whitespacesAndNewlines).nilIfBlank ?? instance.state.currentFocus
         instance.state.mood = nextMood(from: instance.state.mood, preferred: "happy")
         instance.state.lastActiveAt = now
-        instance.progression.bond = min(contracts.progression.maxBond, instance.progression.bond + cappedBondDelta(currentEvents, on: now, requested: 1))
+        let actualBondDelta = cappedBondDelta(currentEvents, on: now, requested: 1)
+        instance.progression.bond = min(contracts.progression.maxBond, instance.progression.bond + actualBondDelta)
 
         let updated = recalculateProgression(for: instance, template: contracts.templateForInstance(instance), now: now)
         var nextState = currentState
@@ -129,7 +130,7 @@ struct BuddyEventEngine {
                 ],
                 effects: BuddyRuntimeEventEffects(
                     xpDelta: nil,
-                    bondDelta: 1,
+                    bondDelta: actualBondDelta > 0 ? actualBondDelta : nil,
                     proficiencyDeltas: nil,
                     moodTarget: updated.state.mood,
                     stateTransition: "personalized",
@@ -420,7 +421,7 @@ struct BuddyEventEngine {
     private func buildInstance(from template: CouncilStarterBuddyTemplate, now: Date) -> BuddyInstance {
         let roleProfile = contracts.progression.roleProfiles[template.id]
         return BuddyInstance(
-            instanceId: "buddy_inst_\(template.id)_\(Int(now.timeIntervalSince1970))",
+            instanceId: "buddy_inst_\(template.id)_\(UUID().uuidString.lowercased())",
             templateId: template.templateID,
             displayName: template.name,
             nickname: nil,

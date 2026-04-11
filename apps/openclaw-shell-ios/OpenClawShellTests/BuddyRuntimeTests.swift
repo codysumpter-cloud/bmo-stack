@@ -172,4 +172,57 @@ final class BuddyRuntimeTests: XCTestCase {
         XCTAssertEqual(migrated.activeBuddy?.provenance.installedFrom, "custom_creation")
         XCTAssertEqual(migrated.activeBuddy?.progression.badges, ["legacy_migrated"])
     }
+
+    // Verifies migration succeeds when the legacy file used JSONEncoder defaults
+    // (numeric timestamps — seconds since Apple reference date Jan 1 2001).
+    func testLegacyBuddySystemMigratesWithNumericDateTimestamps() throws {
+        // Date(timeIntervalSinceReferenceDate: 798_897_600) ≈ 2026-04-08T12:00:00Z
+        let numericCreatedAt = 798_897_600.0
+        let legacyJSON = """
+        {
+          "profileSignature": "legacy|operator",
+          "activeBuddy": {
+            "id": "A1B2C3D4-1234-5678-ABCD-000000000001",
+            "seed": 7,
+            "profileSignature": "legacy|operator",
+            "name": "Numeric Pal",
+            "archetype": "robot",
+            "title": "Numeric Helper",
+            "originSummary": "Generated from legacy numeric profile",
+            "specialty": "Time handling",
+            "personalitySummary": "A legacy Buddy with numeric dates",
+            "asciiArt": "[~_~]",
+            "stats": {
+              "bond": 30,
+              "power": 40,
+              "focus": 50,
+              "curiosity": 35,
+              "care": 45
+            },
+            "createdAt": \(numericCreatedAt)
+          },
+          "collection": [],
+          "tradeOffers": [],
+          "battleHistory": []
+        }
+        """
+
+        try legacyJSON.write(
+            to: Paths.stateDirectory.appendingPathComponent("buddy-system.json"),
+            atomically: true,
+            encoding: .utf8
+        )
+
+        let contracts = try BuddyContractLoader.loadCanonicalResources()
+        let migrated = try XCTUnwrap(BuddyInstanceStore().migrateLegacyState(contracts: contracts))
+
+        XCTAssertEqual(migrated.instances.count, 1)
+        XCTAssertEqual(migrated.activeBuddy?.displayName, "Numeric Pal")
+        XCTAssertEqual(migrated.activeBuddy?.templateId, "legacy.generated.v1")
+        XCTAssertEqual(migrated.activeBuddy?.provenance.installedFrom, "custom_creation")
+        XCTAssertEqual(migrated.activeBuddy?.progression.badges, ["legacy_migrated"])
+        // Installed date should decode to a valid non-nil Date (not epoch or distant-past)
+        let installedAt = try XCTUnwrap(migrated.activeBuddy?.provenance.installedAt)
+        XCTAssertGreaterThan(installedAt.timeIntervalSince1970, 0)
+    }
 }
