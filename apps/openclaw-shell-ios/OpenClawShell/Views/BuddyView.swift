@@ -381,7 +381,7 @@ struct BuddyView: View {
                 }
                 .buttonStyle(BMOButtonStyle(isPrimary: false))
                 Button("Open Chat") {
-                    appState.selectedTab = .chat
+                    appState.openChat(from: .buddy)
                 }
                 .buttonStyle(BMOButtonStyle())
             }

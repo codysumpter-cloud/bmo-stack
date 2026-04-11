@@ -101,6 +101,28 @@ final class AppStateRuntimeTests: XCTestCase {
         XCTAssertTrue(appState.routeHealthSummary.contains("Cloud chat is ready"))
     }
 
+    func testCompactTabOrderAvoidsMoreTabNavigationTrap() {
+        let appState = AppState(engine: FakeLocalLLMEngine())
+
+        XCTAssertEqual(appState.compactTabOrder, [.missionControl, .chat, .buddy, .settings])
+        XCTAssertLessThanOrEqual(appState.compactTabOrder.count, 4)
+    }
+
+    func testOpenChatStoresReturnSurfaceAndLeaveChatRestoresIt() {
+        let appState = AppState(engine: FakeLocalLLMEngine())
+        appState.selectedTab = .buddy
+
+        appState.openChat(from: .buddy)
+
+        XCTAssertEqual(appState.selectedTab, .chat)
+        XCTAssertEqual(appState.chatReturnTab, .buddy)
+
+        appState.leaveChat()
+
+        XCTAssertEqual(appState.selectedTab, .buddy)
+        XCTAssertNil(appState.chatReturnTab)
+    }
+
     func testCloudSystemPromptDoesNotConfineAgentToAppOnly() {
         var config = StackConfig.default
         config.stackName = "BeMoreAgent"

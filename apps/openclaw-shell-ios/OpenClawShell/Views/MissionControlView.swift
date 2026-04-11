@@ -87,7 +87,7 @@ struct MissionControlView: View {
 
             HStack(spacing: 8) {
                 Button("Chat with \(store.activeBuddy?.displayName ?? "Buddy")") {
-                    appState.selectedTab = .chat
+                    appState.openChat(from: .missionControl)
                 }
                 .buttonStyle(BMOButtonStyle())
 
