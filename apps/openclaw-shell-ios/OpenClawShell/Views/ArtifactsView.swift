@@ -54,13 +54,13 @@ struct ArtifactsView: View {
     private var header: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text(".openclaw")
+                Text("Results")
                     .font(.system(size: 28, weight: .bold))
                     .foregroundColor(BMOTheme.textPrimary)
                 Spacer()
                 StatusBadge(label: "\(appState.workspaceRuntime.artifacts.count) files", color: BMOTheme.accent)
             }
-            Text("Canonical files, state stores, action receipts, event logs, registry data, and saved skill outputs live here.")
+            Text("Canonical state, receipts, event logs, registry data, and saved Buddy skill outputs live here.")
                 .font(.subheadline)
                 .foregroundColor(BMOTheme.textSecondary)
         }
@@ -221,7 +221,7 @@ struct ArtifactPreviewView: View {
             Text(artifact.path)
                 .font(.headline)
                 .foregroundColor(BMOTheme.textPrimary)
-            Text("Read, edit, export, or delete this persisted `.openclaw` artifact. Canonical markdown can also be regenerated.")
+            Text("Read, edit, export, or delete this persisted `Results` artifact. Canonical markdown can also be regenerated.")
                 .font(.caption)
                 .foregroundColor(BMOTheme.textTertiary)
         }

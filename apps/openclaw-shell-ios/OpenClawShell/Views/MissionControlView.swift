@@ -10,16 +10,15 @@ struct MissionControlView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: BMOTheme.spacingMD) {
-                    headerCard
+                    buddyHomeCard
+                    primaryFlowCard
                     if let lastReceipt {
                         ActionReceiptCard(receipt: lastReceipt)
                     }
-                    openClawDashboardCard
-                    stackContractCard
+                    taskAndResultsCard
+                    skillsCard
+                    macPowerCard
                     routeCard
-                    metricsCard
-                    providerCard
-                    shellCard
                     stackSurfacesCard
                 }
                 .padding(.horizontal, BMOTheme.spacingMD)
@@ -29,7 +28,7 @@ struct MissionControlView: View {
             .navigationTitle("")
             .toolbar {
                 ToolbarItem(placement: .principal) {
-                    Text("Mission Control")
+                    Text("Buddy Home")
                         .font(.headline)
                         .foregroundColor(BMOTheme.textPrimary)
                 }
@@ -39,66 +38,91 @@ struct MissionControlView: View {
             .sheet(item: $selectedSurface) { surface in
                 RepoSurfaceDetailView(surface: surface)
             }
+            .onAppear { appState.workspaceRuntime.refreshMetadata() }
         }
     }
 
-    private var headerCard: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(appState.operatorDisplayName)
-                        .font(.system(size: 28, weight: .bold))
+    private var buddyHomeCard: some View {
+        let status = appState.buddyRuntimeStatus
+        return VStack(alignment: .leading, spacing: BMOTheme.spacingMD) {
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("BeMore")
+                        .font(.caption.weight(.semibold))
+                        .foregroundColor(BMOTheme.textTertiary)
+                    Text("Buddy keeps the work moving.")
+                        .font(.system(size: 30, weight: .bold))
                         .foregroundColor(BMOTheme.textPrimary)
-                    Text("BeMore mobile operator shell")
+                    Text(appState.operatorSummary)
                         .font(.subheadline)
                         .foregroundColor(BMOTheme.textSecondary)
                 }
                 Spacer()
-                StatusBadge(label: appState.activeRouteModeLabel, color: appState.selectedProviderAccount != nil ? BMOTheme.success : (appState.selectedInstalledModel != nil ? BMOTheme.accent : BMOTheme.warning))
+                StatusBadge(label: status.runtimeAvailable ? "Buddy ready" : "Needs setup", color: status.runtimeAvailable ? BMOTheme.success : BMOTheme.warning)
             }
 
-            Text(appState.operatorSummary)
-                .font(.subheadline)
-                .foregroundColor(BMOTheme.textSecondary)
+            BuddyAsciiView(mood: buddyMood(for: status))
+
+            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
+                dashboardMetric("Workspace", value: "\(appState.workspaceStore.files.count)", icon: "folder")
+                dashboardMetric("Skills", value: "\(status.registeredSkillCount)", icon: "sparkles.rectangle.stack")
+                dashboardMetric("Receipts", value: "\(status.recentChanges.count)", icon: "checklist.checked")
+                dashboardMetric("Mac", value: appState.macRuntimeSnapshot == nil ? "pair" : "live", icon: "macbook.and.iphone")
+            }
         }
         .bmoCard()
     }
 
-    private var openClawDashboardCard: some View {
+    private var primaryFlowCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Start with Buddy")
+                .font(.headline)
+                .foregroundColor(BMOTheme.textPrimary)
+            Text("Use the same mobile loop as the Mac shell: choose workspace context, run a skill or task, inspect the result, and keep the receipt.")
+                .font(.subheadline)
+                .foregroundColor(BMOTheme.textSecondary)
+
+            HStack(spacing: 8) {
+                Button("Open Buddy") {
+                    appState.selectedTab = .buddy
+                }
+                .buttonStyle(BMOButtonStyle())
+
+                Button("Pair Mac") {
+                    appState.selectedTab = .pairing
+                }
+                .buttonStyle(BMOButtonStyle(isPrimary: false))
+            }
+
+            HStack(spacing: 8) {
+                Button("Workspace") {
+                    appState.selectedTab = .files
+                }
+                .buttonStyle(BMOButtonStyle(isPrimary: false))
+
+                Button("Skills") {
+                    appState.selectedTab = .skills
+                }
+                .buttonStyle(BMOButtonStyle(isPrimary: false))
+            }
+        }
+        .bmoCard()
+    }
+
+    private var taskAndResultsCard: some View {
         let status = appState.buddyRuntimeStatus
         return VStack(alignment: .leading, spacing: 12) {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("BeMore Dashboard")
+                    Text("Tasks and results")
                         .font(.headline)
                         .foregroundColor(BMOTheme.textPrimary)
-                    Text("One view for route, runtime, artifacts, skills, files, and receipts.")
+                    Text("Receipt-backed work is the proof surface on iPhone too.")
                         .font(.caption)
                         .foregroundColor(BMOTheme.textSecondary)
                 }
                 Spacer()
-                StatusBadge(label: status.runtimeAvailable ? "Online" : "Needs setup", color: status.runtimeAvailable ? BMOTheme.success : BMOTheme.warning)
-            }
-
-            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
-                dashboardMetric("Artifacts", value: "\(appState.workspaceRuntime.artifacts.count)", icon: "doc.richtext")
-                dashboardMetric("Skills", value: "\(appState.workspaceRuntime.skills.count)", icon: "sparkles.rectangle.stack")
-                dashboardMetric("Files", value: "\(appState.workspaceStore.files.count)", icon: "folder")
-                dashboardMetric("Failures", value: "\(status.failedActions.count)", icon: "exclamationmark.triangle")
-            }
-
-            detailRow("Mac power mode", value: appState.macPowerModeSummary)
-
-            HStack(spacing: 8) {
-                Button("Regenerate Core") {
-                    lastReceipt = appState.regenerateArtifacts(target: "all")
-                }
-                .buttonStyle(BMOButtonStyle(isPrimary: false))
-
-                Button("Open Skills") {
-                    appState.selectedTab = .skills
-                }
-                .buttonStyle(BMOButtonStyle(isPrimary: false))
+                StatusBadge(label: "\(status.failedActions.count) blocked", color: status.failedActions.isEmpty ? BMOTheme.success : BMOTheme.warning)
             }
 
             HStack(spacing: 8) {
@@ -115,34 +139,65 @@ struct MissionControlView: View {
                 }
                 .buttonStyle(BMOButtonStyle())
             }
+
+            if status.recentChanges.isEmpty {
+                Text("Run a Buddy action, skill, or Mac inspection to create the next result.")
+                    .font(.caption)
+                    .foregroundColor(BMOTheme.textTertiary)
+            } else {
+                ForEach(Array(status.recentChanges.prefix(3)), id: \.id) { event in
+                    detailRow(event.type, value: event.message)
+                }
+            }
         }
         .bmoCard()
     }
 
-    private var stackContractCard: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("Stack contract")
+    private var skillsCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("Buddy skills")
+                    .font(.headline)
+                    .foregroundColor(BMOTheme.textPrimary)
+                Spacer()
+                StatusBadge(label: "\(appState.workspaceRuntime.skills.count) registered", color: BMOTheme.accent)
+            }
+            Text("Skills make Buddy more useful: they produce artifacts, receipts, and task context rather than decorative shortcuts.")
                 .font(.subheadline)
-                .fontWeight(.semibold)
                 .foregroundColor(BMOTheme.textSecondary)
+            Button("Open Skills") {
+                appState.selectedTab = .skills
+            }
+            .buttonStyle(BMOButtonStyle(isPrimary: false))
+        }
+        .bmoCard()
+    }
 
-            detailRow("Mode", value: appState.stackConfig.deploymentMode.title)
-            detailRow("Runtime endpoint", value: appState.stackConfig.gatewayURL)
-            detailRow("Role", value: appState.stackConfig.role)
-            detailRow("Goal", value: appState.stackConfig.goal)
-            detailRow("Node on iPhone", value: appState.stackConfig.installNodeOnThisPhone ? "Expected" : "Not expected")
-            detailRow("Desktop/server node", value: appState.stackConfig.installDesktopNode ? "Expected" : "Optional")
+    private var macPowerCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("Mac power mode")
+                    .font(.headline)
+                    .foregroundColor(BMOTheme.textPrimary)
+                Spacer()
+                StatusBadge(label: appState.macRuntimeSnapshot == nil ? "Not paired" : "Paired", color: appState.macRuntimeSnapshot == nil ? BMOTheme.warning : BMOTheme.success)
+            }
+            Text(appState.macPowerModeSummary)
+                .font(.subheadline)
+                .foregroundColor(BMOTheme.textSecondary)
+            Button("Inspect Mac runtime") {
+                Task { await appState.refreshMacRuntimeSnapshot() }
+            }
+            .buttonStyle(BMOButtonStyle(isPrimary: false))
         }
         .bmoCard()
     }
 
     private var routeCard: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Route control")
-                .font(.subheadline)
-                .fontWeight(.semibold)
-                .foregroundColor(BMOTheme.textSecondary)
-
+            Text("Runtime route")
+                .font(.headline)
+                .foregroundColor(BMOTheme.textPrimary)
             detailRow("Active route", value: appState.activeRouteTitle)
             detailRow("Target", value: appState.activeRouteDetail)
             detailRow("Health", value: appState.routeHealthSummary)
@@ -150,61 +205,12 @@ struct MissionControlView: View {
         .bmoCard()
     }
 
-    private var metricsCard: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("Live local state")
-                .font(.subheadline)
-                .fontWeight(.semibold)
-                .foregroundColor(BMOTheme.textSecondary)
-
-            detailRow("Workspace", value: appState.workspaceStatusSummary)
-            detailRow("Messages", value: "\(appState.chatStore.messages.count)")
-            detailRow("Installed models", value: "\(appState.modelStore.installedModels.count)")
-            detailRow("Persistence", value: appState.persistenceSummary)
-        }
-        .bmoCard()
-    }
-
-    private var providerCard: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("Providers")
-                .font(.subheadline)
-                .fontWeight(.semibold)
-                .foregroundColor(BMOTheme.textSecondary)
-
-            ForEach(ProviderKind.allCases) { provider in
-                let account = appState.providerStore.account(for: provider)
-                detailRow(provider.displayName, value: account.isEnabled ? account.modelSlug : "Not linked")
-            }
-        }
-        .bmoCard()
-    }
-
-    private var shellCard: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("Shell tabs")
-                .font(.subheadline)
-                .fontWeight(.semibold)
-                .foregroundColor(BMOTheme.textSecondary)
-
-            Text(appState.orderedVisibleTabs.map(\.title).joined(separator: " • "))
-                .font(.subheadline)
-                .foregroundColor(BMOTheme.textPrimary)
-            Text("Manage tab order in Settings. Mission Control stays the stable landing surface for stack health and route truth.")
-                .font(.caption)
-                .foregroundColor(BMOTheme.textTertiary)
-        }
-        .bmoCard()
-    }
-
     private var stackSurfacesCard: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("BMO Stack Surfaces")
-                .font(.subheadline)
-                .fontWeight(.semibold)
-                .foregroundColor(BMOTheme.textSecondary)
-
-            Text("These briefs are bundled from real repo docs so the iOS shell can expose meaningful stack surfaces without pretending to reimplement the whole desktop operator stack.")
+            Text("Reference surfaces")
+                .font(.headline)
+                .foregroundColor(BMOTheme.textPrimary)
+            Text("Repo briefs stay available as supporting context, but Buddy Home is now the product center.")
                 .font(.caption)
                 .foregroundColor(BMOTheme.textTertiary)
 
@@ -222,9 +228,6 @@ struct MissionControlView: View {
                                 .font(.caption)
                                 .multilineTextAlignment(.leading)
                                 .foregroundColor(BMOTheme.textSecondary)
-                            Text(surface.sourcePath)
-                                .font(.caption2)
-                                .foregroundColor(BMOTheme.textTertiary)
                         }
 
                         Spacer()
@@ -238,12 +241,20 @@ struct MissionControlView: View {
                     }
                     .padding(12)
                     .background(BMOTheme.backgroundSecondary)
-                    .clipShape(RoundedRectangle(cornerRadius: BMOTheme.radiusMedium, style: .continuous))
+                    .clipShape(RoundedRectangle(cornerRadius: BMOTheme.radiusSmall, style: .continuous))
                 }
                 .buttonStyle(.plain)
             }
         }
         .bmoCard()
+    }
+
+    private func buddyMood(for status: BuddyRuntimeStatus) -> BuddyAnimationMood {
+        if !status.failedActions.isEmpty { return .thinking }
+        if appState.macRuntimeSnapshot?.processes.contains(where: { $0.status == "running" }) == true { return .working }
+        if status.recentChanges.isEmpty && appState.workspaceStore.files.isEmpty { return .sleepy }
+        if !status.recentChanges.isEmpty { return .happy }
+        return status.runtimeAvailable ? .idle : .thinking
     }
 
     private func detailRow(_ label: String, value: String) -> some View {

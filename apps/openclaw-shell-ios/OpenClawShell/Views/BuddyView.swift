@@ -69,7 +69,7 @@ struct BuddyView: View {
         return VStack(alignment: .leading, spacing: BMOTheme.spacingMD) {
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Build 18 Buddy Runtime")
+                    Text("Buddy Runtime")
                         .font(.headline)
                         .foregroundColor(BMOTheme.textPrimary)
                     Text("Structured Buddy templates, installable local instances, readable continuity files, and receipt-backed updates.")
@@ -136,7 +136,7 @@ struct BuddyView: View {
                 .background(BMOTheme.backgroundSecondary)
                 .clipShape(RoundedRectangle(cornerRadius: BMOTheme.radiusMedium, style: .continuous))
 
-            Text(template?.onboardingCopy ?? "Legacy Buddy migrated into the Build 18 runtime.")
+            Text(template?.onboardingCopy ?? "Buddy profile is ready for the BeMore runtime.")
                 .font(.subheadline)
                 .foregroundColor(BMOTheme.textSecondary)
 
@@ -268,7 +268,7 @@ struct BuddyView: View {
                     Text("Council Starter Pack")
                         .font(.headline)
                         .foregroundColor(BMOTheme.textPrimary)
-                    Text("Official Build 18 Buddy templates bundled into the app from canonical PR #231 contracts.")
+                    Text("BeMore Buddy templates bundled with local continuity, training, and receipt-backed state.")
                         .font(.subheadline)
                         .foregroundColor(BMOTheme.textSecondary)
                 }
@@ -376,7 +376,7 @@ struct BuddyView: View {
             Text("No Buddy Installed Yet")
                 .font(.headline)
                 .foregroundColor(BMOTheme.textPrimary)
-            Text("Install one Council starter Buddy below to create a clean local instance, start the Buddy event stream, and generate `.openclaw/buddy.md` plus `.openclaw/buddies.md`.")
+            Text("Install a starter Buddy to create a local companion, start the Buddy event stream, and keep receipt-backed continuity.")
                 .font(.subheadline)
                 .foregroundColor(BMOTheme.textSecondary)
         }

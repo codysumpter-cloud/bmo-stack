@@ -421,41 +421,41 @@ struct KnownModel: Identifiable {
 
 enum AppTab: String, Codable, CaseIterable, Hashable, Identifiable {
     case missionControl
-    case models
-    case chat
-    case skills
-    case artifacts
     case buddy
     case files
+    case skills
+    case artifacts
     case pairing
+    case models
+    case chat
     case settings
 
     var id: String { rawValue }
 
     var title: String {
         switch self {
-        case .missionControl: return "Control"
+        case .missionControl: return "Home"
+        case .buddy: return "Buddy"
+        case .files: return "Workspace"
+        case .skills: return "Skills"
+        case .artifacts: return "Results"
+        case .pairing: return "Mac"
         case .models: return "Models"
         case .chat: return "Chat"
-        case .skills: return "Skills"
-        case .artifacts: return "Artifacts"
-        case .buddy: return "Buddy"
-        case .files: return "Files"
-        case .pairing: return "Pairing"
         case .settings: return "Settings"
         }
     }
 
     var systemImage: String {
         switch self {
-        case .missionControl: return "switch.2"
+        case .missionControl: return "heart.text.square.fill"
+        case .buddy: return "person.crop.circle.badge.checkmark"
+        case .files: return "folder.fill"
+        case .skills: return "sparkles.rectangle.stack.fill"
+        case .artifacts: return "checklist.checked"
+        case .pairing: return "macbook.and.iphone"
         case .models: return "cpu"
         case .chat: return "message.fill"
-        case .skills: return "sparkles.rectangle.stack.fill"
-        case .artifacts: return "doc.richtext.fill"
-        case .buddy: return "person.2.fill"
-        case .files: return "folder.fill"
-        case .pairing: return "macbook.and.iphone"
         case .settings: return "gearshape.fill"
         }
     }
@@ -471,7 +471,7 @@ struct ShellPreferences: Codable, Hashable {
     var selectedTab: AppTab
 
     static let `default` = ShellPreferences(
-        orderedTabs: AppTab.allCases,
+        orderedTabs: [.missionControl, .buddy, .files, .skills, .artifacts, .pairing, .models, .chat, .settings],
         hiddenTabs: [],
         selectedTab: .missionControl
     )

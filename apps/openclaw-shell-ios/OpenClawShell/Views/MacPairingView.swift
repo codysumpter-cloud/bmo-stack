@@ -78,7 +78,7 @@ struct MacPairingView: View {
                     detailRow("Pair code", value: code)
                 }
             } else {
-                Text("No Mac snapshot yet. Start BeMore Mac Build 1, expose the runtime endpoint intentionally, then inspect it here.")
+                Text("No Mac snapshot yet. Start BeMore Mac, expose the runtime endpoint intentionally, then inspect it here.")
                     .font(.caption)
                     .foregroundColor(BMOTheme.textSecondary)
             }
@@ -105,7 +105,7 @@ struct MacPairingView: View {
             }
 
             if appState.macRuntimeSnapshot?.tasks.isEmpty ?? true {
-                Text("No Mac tasks reported.")
+                Text("No Mac tasks yet. Create or run a Buddy task on the Mac to mirror it here.")
                     .font(.caption)
                     .foregroundColor(BMOTheme.textTertiary)
             }
@@ -137,7 +137,7 @@ struct MacPairingView: View {
             }
 
             if appState.macRuntimeSnapshot?.processes.isEmpty ?? true {
-                Text("No Mac command output reported.")
+                Text("No Mac command output yet. Run a task on the Mac to inspect it here.")
                     .font(.caption)
                     .foregroundColor(BMOTheme.textTertiary)
             }
@@ -161,7 +161,7 @@ struct MacPairingView: View {
                     .font(.caption2.monospaced())
                     .foregroundColor(BMOTheme.textSecondary)
             } else {
-                Text("No unified diff reported.")
+                Text("No Mac diff yet.")
                     .font(.caption)
                     .foregroundColor(BMOTheme.textTertiary)
             }
@@ -185,7 +185,7 @@ struct MacPairingView: View {
             }
 
             if (appState.macRuntimeSnapshot?.artifacts.isEmpty ?? true) && (appState.macRuntimeSnapshot?.receipts.isEmpty ?? true) {
-                Text("No Mac artifacts or receipts reported.")
+                Text("No Mac artifacts or receipts yet.")
                     .font(.caption)
                     .foregroundColor(BMOTheme.textTertiary)
             }
