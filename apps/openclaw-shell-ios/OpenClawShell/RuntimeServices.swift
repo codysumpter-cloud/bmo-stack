@@ -1169,6 +1169,7 @@ final class AppState: ObservableObject {
     @Published var workspaceRuntime = OpenClawWorkspaceRuntime()
     @Published var macRuntimeSnapshot: MacRuntimeSnapshot?
     @Published var macRuntimeStatus = "Mac not inspected"
+    @Published var chatReturnTab: AppTab?
 
     // MARK: Initializer – now placed after property declarations
     init(engine: LocalLLMEngine) {
@@ -1177,6 +1178,18 @@ final class AppState: ObservableObject {
 
     var orderedVisibleTabs: [AppTab] {
         tabPreferencesStore.preferences.visibleTabs
+    }
+
+    var compactTabOrder: [AppTab] {
+        [.missionControl, .chat, .buddy, .settings]
+    }
+
+    var desktopTabOrder: [AppTab] {
+        [.missionControl, .buddy, .chat, .files, .skills, .artifacts, .settings]
+    }
+
+    var stableHomeTab: AppTab {
+        .missionControl
     }
 
     var selectedTab: AppTab {
@@ -1358,6 +1371,7 @@ final class AppState: ObservableObject {
         workspaceRuntime.bootstrap(config: stackConfig, preferences: userPreferencesStore.preferences, routeSummary: activeRouteModeLabel)
         buddyStore.load(for: config)
         buddyProfileStore?.load(for: config)
+        chatReturnTab = nil
         refreshRuntimeSummary()
     }
 
@@ -1465,7 +1479,7 @@ final class AppState: ObservableObject {
         }
         tabPreferencesStore.persist()
         if !orderedVisibleTabs.contains(selectedTab) {
-            selectedTab = orderedVisibleTabs.first ?? .missionControl
+            selectedTab = orderedVisibleTabs.first ?? stableHomeTab
         }
     }
 
@@ -1475,6 +1489,23 @@ final class AppState: ObservableObject {
         let hiddenTabs = tabPreferencesStore.preferences.orderedTabs.filter { tabPreferencesStore.preferences.hiddenTabs.contains($0) }
         tabPreferencesStore.preferences.orderedTabs = visibleTabs + hiddenTabs
         tabPreferencesStore.persist()
+    }
+
+    func openChat(from source: AppTab? = nil, resetConversation: Bool = false) {
+        let origin = source ?? (selectedTab == .chat ? chatReturnTab : selectedTab)
+        if origin != .chat {
+            chatReturnTab = origin
+        }
+        if resetConversation {
+            chatStore.clear()
+        }
+        selectedTab = .chat
+    }
+
+    func leaveChat() {
+        let destination = chatReturnTab ?? stableHomeTab
+        chatReturnTab = nil
+        selectedTab = destination
     }
 
     func removeProvider(_ provider: ProviderKind) {

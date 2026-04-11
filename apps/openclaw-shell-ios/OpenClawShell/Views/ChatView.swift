@@ -61,6 +61,14 @@ struct ChatView: View {
             .background(BMOTheme.backgroundPrimary)
             .navigationTitle("")
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        appState.leaveChat()
+                    } label: {
+                        Label(appState.chatReturnTab == nil ? "Home" : "Back", systemImage: "chevron.left")
+                            .foregroundColor(BMOTheme.textSecondary)
+                    }
+                }
                 ToolbarItem(placement: .principal) {
                     Text(store.activeBuddy?.displayName ?? "Buddy Chat")
                         .font(.headline)
@@ -108,7 +116,8 @@ struct ChatView: View {
             }
             Spacer()
             Button("Switch") {
-                appState.selectedTab = .buddy
+                appState.chatReturnTab = .buddy
+                appState.leaveChat()
             }
             .buttonStyle(BMOButtonStyle(isPrimary: false))
         }

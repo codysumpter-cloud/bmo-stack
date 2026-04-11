@@ -12,6 +12,8 @@ extension AppState {
         runtimePreferences.selection.selectedInstalledFilename = nil
         runtimePreferences.selection.selectedProvider = nil
         runtimePreferences.persist()
+        selectedTab = stableHomeTab
+        chatReturnTab = nil
         refreshRuntimeSummary()
     }
 }

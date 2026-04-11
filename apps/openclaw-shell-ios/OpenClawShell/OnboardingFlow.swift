@@ -4,6 +4,7 @@ enum OnboardingStep: Int, CaseIterable {
     case welcome
     case chooseBuddy
     case nameBuddy
+    case focusBuddy
     case powerMode
     case building
     case summary
@@ -17,6 +18,7 @@ struct OnboardingFlow: View {
     @State private var selectedTemplateID = ""
     @State private var buddyName = ""
     @State private var buddyFocus = ""
+    @State private var selectedPowerMode: BuddyPowerMode = .balanced
     @State private var showAdvancedSetup = false
     @State private var buildProgress: Double = 0
     @State private var buildMessages: [String] = []
@@ -37,6 +39,7 @@ struct OnboardingFlow: View {
                     case .welcome: welcomeScreen
                     case .chooseBuddy: chooseBuddyScreen
                     case .nameBuddy: nameBuddyScreen
+                    case .focusBuddy: focusBuddyScreen
                     case .powerMode: powerModeScreen
                     case .building: buildingScreen
                     case .summary: summaryScreen
@@ -62,6 +65,7 @@ struct OnboardingFlow: View {
             if buddyFocus.isEmpty {
                 buddyFocus = config.onboardingBuddyFocus ?? "Help me decide what matters and finish the next useful step."
             }
+            selectedPowerMode = config.onboardingPowerMode ?? .balanced
         }
     }
 
@@ -151,11 +155,32 @@ struct OnboardingFlow: View {
         ScrollView {
             VStack(alignment: .leading, spacing: BMOTheme.spacingLG) {
                 Spacer().frame(height: BMOTheme.spacingXL)
-                onboardingTitle("Make this Buddy yours", subtitle: "This name and focus follow your Buddy into Home, Chat, tasks, training, and receipts.")
+                onboardingTitle("Name your Buddy", subtitle: "Give your companion the name you want to see on Home, Chat, tasks, training, and receipts.")
                 labeledField(title: "Buddy name", text: $buddyName, placeholder: selectedTemplate?.name ?? "Buddy")
-                labeledField(title: "First focus", text: $buddyFocus, placeholder: selectedTemplate?.canonicalRole ?? "Help me finish the next useful step")
                 selectedBuddyPreview
-                navButtons(back: .chooseBuddy, next: .powerMode, canProceed: !trimmed(buddyName).isEmpty)
+                navButtons(back: .chooseBuddy, next: .focusBuddy, canProceed: !trimmed(buddyName).isEmpty)
+                    .padding(.top, BMOTheme.spacingMD)
+            }
+        }
+    }
+
+    private var focusBuddyScreen: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: BMOTheme.spacingLG) {
+                Spacer().frame(height: BMOTheme.spacingXL)
+                onboardingTitle("Pick your Buddy's first focus", subtitle: "This sets the first use-case BeMore reinforces after onboarding. You can change it later.")
+                labeledField(title: "First focus", text: $buddyFocus, placeholder: selectedTemplate?.canonicalRole ?? "Help me finish the next useful step")
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("How this will show up")
+                        .font(.headline)
+                        .foregroundColor(BMOTheme.textPrimary)
+                    Text("\(fallback(buddyName, defaultValue: selectedTemplate?.name ?? "Buddy")) will open on Home with this focus, carry it into Chat, and use it as the default for the first check-ins and receipts.")
+                        .font(.subheadline)
+                        .foregroundColor(BMOTheme.textSecondary)
+                }
+                .bmoCard()
+                .padding(.horizontal, BMOTheme.spacingLG)
+                navButtons(back: .nameBuddy, next: .powerMode, canProceed: !trimmed(buddyFocus).isEmpty)
                     .padding(.top, BMOTheme.spacingMD)
             }
         }
@@ -166,6 +191,35 @@ struct OnboardingFlow: View {
             VStack(alignment: .leading, spacing: BMOTheme.spacingLG) {
                 Spacer().frame(height: BMOTheme.spacingXL)
                 onboardingTitle("Power mode is optional", subtitle: "BeMore can start as your Buddy on iPhone. Pairing Mac and route setup are stronger-mode choices, not the first thing you have to understand.")
+
+                VStack(spacing: 12) {
+                    ForEach(BuddyPowerMode.allCases) { mode in
+                        Button {
+                            selectedPowerMode = mode
+                        } label: {
+                            HStack(alignment: .top, spacing: 12) {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(mode.title)
+                                        .font(.headline)
+                                    Text(mode.subtitle)
+                                        .font(.subheadline)
+                                        .foregroundColor(BMOTheme.textSecondary)
+                                }
+                                Spacer()
+                                if selectedPowerMode == mode {
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .foregroundColor(BMOTheme.accent)
+                                }
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding()
+                            .foregroundColor(BMOTheme.textPrimary)
+                            .background(selectedPowerMode == mode ? BMOTheme.backgroundCardHover : BMOTheme.backgroundCard)
+                            .clipShape(RoundedRectangle(cornerRadius: BMOTheme.radiusMedium, style: .continuous))
+                        }
+                    }
+                }
+                .padding(.horizontal, BMOTheme.spacingLG)
 
                 toggleCard(icon: "macbook.and.iphone", title: "Pair with Mac later", subtitle: "Keep Mac runtime pairing available after you land on Buddy Home.", isOn: $config.installDesktopNode)
                     .padding(.horizontal, BMOTheme.spacingLG)
@@ -194,7 +248,7 @@ struct OnboardingFlow: View {
                 .clipShape(RoundedRectangle(cornerRadius: BMOTheme.radiusMedium, style: .continuous))
                 .padding(.horizontal, BMOTheme.spacingLG)
 
-                navButtons(back: .nameBuddy, next: .building, canProceed: true)
+                navButtons(back: .focusBuddy, next: .building, canProceed: true)
                     .padding(.top, BMOTheme.spacingMD)
             }
         }
@@ -265,6 +319,7 @@ struct OnboardingFlow: View {
                     summaryRow(icon: "person.crop.circle.badge.checkmark", label: "Active Buddy", value: buddyName)
                     summaryRow(icon: "sparkles", label: "Starter", value: selectedTemplate?.name ?? "Default Buddy")
                     summaryRow(icon: "scope", label: "Focus", value: buddyFocus)
+                    summaryRow(icon: "dial.high", label: "Power mode", value: selectedPowerMode.title)
                     summaryRow(icon: "macbook.and.iphone", label: "Mac power", value: config.installDesktopNode ? "Available later" : "Phone-first")
                     summaryRow(icon: "creditcard", label: "Plans", value: "Free now; Plus and Council previews in Pricing")
                 }
@@ -321,6 +376,8 @@ struct OnboardingFlow: View {
         config.onboardingBuddyName = cleanedBuddyName
         config.onboardingBuddyTemplateID = templateID
         config.onboardingBuddyFocus = cleanedFocus
+        config.onboardingPowerMode = selectedPowerMode
+        config.optimizationMode = selectedPowerMode.optimizationMode
         config.setupChecklist = generatedChecklist
         config.isOnboardingComplete = true
         appState.completeOnboarding(config)
@@ -493,6 +550,7 @@ struct OnboardingFlow: View {
 
     private var generatedChecklist: [String] {
         var items = ["Keep \(fallback(buddyName, defaultValue: selectedTemplate?.name ?? "Buddy")) active on Home, Chat, Skills, and Results."]
+        items.append("Start in \(selectedPowerMode.title.lowercased()) so the first-run shell matches your comfort level.")
         if config.installDesktopNode {
             items.append("Pair a BeMore Mac runtime when you want workspace execution, diffs, artifacts, and receipts from your desktop.")
         }

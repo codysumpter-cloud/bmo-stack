@@ -1,14 +1,14 @@
 # Task State
 
-Last updated: 2026-04-11 00:20 UTC
+Last updated: 2026-04-11 16:12 UTC
 
 ## Current status
 
-- Description: Land the Build 18 Buddy library foundation on a fresh branch for `apps/openclaw-shell-ios` without reusing the MacBook setup branch or migrating iOS build ownership out of `bmo-stack`.
+- Description: Complete the BeMore usability rescue pass by fixing the iOS chat escape trap, simplifying the Buddy-first shell, and adding first-run onboarding in `apps/openclaw-shell-ios`.
 - Active repo: `/Users/taylor/development/bmo-stack`
 - Branch: `codex/build18-buddy-library-foundation`
-- Last successful step: bundled the canonical Buddy/docs inputs through `OpenClawShell/RepoResources`, implemented the receipt-backed Buddy runtime/store/UI path, fixed the malformed schema payloads from the PR #231 reference import, and verified `xcodebuild ... test` passes locally with 15 tests.
-- Next intended step: stage the Build 18 files, commit, push, open the draft PR, and then watch/fix GitHub checks until green unless a blocker is outside repo scope.
+- Last successful step: validated the rescue changes with `xcodebuild ... build`, `xcodebuild ... test` on the iPhone 17 Pro simulator, simulator smoke checks for onboarding/chat escape, and a no-sign build of the device variant with `CODE_SIGNING_ALLOWED=NO`.
+- Next intended step: stage the usability rescue changes, publish the draft PR, and watch/fix GitHub checks until green.
 - Verification complete: false
 - Manual steps remaining:
   - create the commit and draft PR

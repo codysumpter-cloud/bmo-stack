@@ -335,6 +335,41 @@ enum StackDeploymentMode: String, Codable, CaseIterable, Hashable, Identifiable 
     }
 }
 
+enum BuddyPowerMode: String, Codable, CaseIterable, Hashable, Identifiable {
+    case gentle
+    case balanced
+    case turbo
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .gentle: return "Easy Start"
+        case .balanced: return "Balanced"
+        case .turbo: return "Power Mode"
+        }
+    }
+
+    var subtitle: String {
+        switch self {
+        case .gentle:
+            return "Keep the shell simple and put Buddy guidance first."
+        case .balanced:
+            return "Show the normal Buddy, workspace, and results flow."
+        case .turbo:
+            return "Keep advanced runtime setup and Mac power surfaces close."
+        }
+    }
+
+    var optimizationMode: String {
+        switch self {
+        case .gentle: return "balanced"
+        case .balanced: return "balanced"
+        case .turbo: return "quality"
+        }
+    }
+}
+
 struct StackConfig: Codable {
     var stackName: String
     var goal: String
@@ -342,6 +377,7 @@ struct StackConfig: Codable {
     var onboardingBuddyName: String?
     var onboardingBuddyTemplateID: String?
     var onboardingBuddyFocus: String?
+    var onboardingPowerMode: BuddyPowerMode?
     var autonomyLevel: Int // 1-5
     var memoryEnabled: Bool
     var toolsEnabled: Bool
@@ -363,6 +399,7 @@ struct StackConfig: Codable {
         onboardingBuddyName: nil,
         onboardingBuddyTemplateID: nil,
         onboardingBuddyFocus: nil,
+        onboardingPowerMode: nil,
         autonomyLevel: 3,
         memoryEnabled: true,
         toolsEnabled: true,
