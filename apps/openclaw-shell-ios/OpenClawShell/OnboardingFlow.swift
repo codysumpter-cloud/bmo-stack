@@ -2,17 +2,22 @@ import SwiftUI
 
 enum OnboardingStep: Int, CaseIterable {
     case welcome
-    case intent
-    case operatorProfile
-    case stackSetup
+    case chooseBuddy
+    case nameBuddy
+    case powerMode
     case building
     case summary
 }
 
 struct OnboardingFlow: View {
     @EnvironmentObject private var appState: AppState
+    @StateObject private var buddyStore = BuddyProfileStore()
     @State private var step: OnboardingStep = .welcome
     @State private var config = StackConfig.default
+    @State private var selectedTemplateID = ""
+    @State private var buddyName = ""
+    @State private var buddyFocus = ""
+    @State private var showAdvancedSetup = false
     @State private var buildProgress: Double = 0
     @State private var buildMessages: [String] = []
 
@@ -30,9 +35,9 @@ struct OnboardingFlow: View {
                 Group {
                     switch step {
                     case .welcome: welcomeScreen
-                    case .intent: intentScreen
-                    case .operatorProfile: operatorProfileScreen
-                    case .stackSetup: stackSetupScreen
+                    case .chooseBuddy: chooseBuddyScreen
+                    case .nameBuddy: nameBuddyScreen
+                    case .powerMode: powerModeScreen
                     case .building: buildingScreen
                     case .summary: summaryScreen
                     }
@@ -46,6 +51,17 @@ struct OnboardingFlow: View {
         .preferredColorScheme(.dark)
         .onAppear {
             config = appState.stackConfig
+            buddyStore.load(for: appState.stackConfig)
+            appState.buddyStore.load(for: appState.stackConfig)
+            if selectedTemplateID.isEmpty {
+                selectedTemplateID = buddyStore.templates.first?.templateID ?? ""
+            }
+            if buddyName.isEmpty {
+                buddyName = config.onboardingBuddyName ?? "Buddy"
+            }
+            if buddyFocus.isEmpty {
+                buddyFocus = config.onboardingBuddyFocus ?? "Help me decide what matters and finish the next useful step."
+            }
         }
     }
 
@@ -69,33 +85,32 @@ struct OnboardingFlow: View {
         VStack(spacing: BMOTheme.spacingLG) {
             Spacer()
 
-            Image(systemName: "point.3.connected.trianglepath.dotted")
-                .font(.system(size: 64))
-                .foregroundColor(BMOTheme.accent)
-                .shadow(color: BMOTheme.accentGlow, radius: 20)
+            BuddyAsciiView(mood: .happy)
+                .padding(.horizontal, BMOTheme.spacingXL)
 
-            Text("BeMoreAgent")
+            Text("Welcome to BeMore")
                 .font(.system(size: 36, weight: .bold))
                 .foregroundColor(BMOTheme.textPrimary)
+                .multilineTextAlignment(.center)
 
-            Text("Build the mobile front door for a real BeMore stack, based on the answers you give here.")
+            Text("Start with a Buddy. Runtime pairing, models, and power mode come after your companion has an identity.")
                 .font(.body)
                 .foregroundColor(BMOTheme.textSecondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, BMOTheme.spacingXL)
 
             VStack(alignment: .leading, spacing: 10) {
-                featureRow("Generate a concrete stack profile instead of fake setup copy")
-                featureRow("Target a real BeMore runtime and Mac pairing flow")
-                featureRow("Show honest readiness for local runtime, providers, and shell surfaces")
+                featureRow("Choose the Buddy who will be with you on Home, Chat, Skills, and Results")
+                featureRow("Name them and set their first focus")
+                featureRow("Add Mac power mode later when you want a stronger runtime")
             }
             .padding(.horizontal, BMOTheme.spacingXL)
 
             Spacer()
 
-            Button("Build my stack") {
+            Button("Create my Buddy") {
                 withAnimation(.easeInOut(duration: 0.35)) {
-                    step = .intent
+                    step = .chooseBuddy
                 }
             }
             .buttonStyle(BMOButtonStyle())
@@ -104,175 +119,82 @@ struct OnboardingFlow: View {
         }
     }
 
-    private var intentScreen: some View {
+    private var chooseBuddyScreen: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: BMOTheme.spacingLG) {
                 Spacer().frame(height: BMOTheme.spacingXL)
 
-                Text("What stack are we setting up?")
-                    .font(.system(size: 28, weight: .bold))
-                    .foregroundColor(BMOTheme.textPrimary)
-                    .padding(.horizontal, BMOTheme.spacingLG)
+                onboardingTitle("Choose your first Buddy", subtitle: "Pick a starter archetype. You can own more Buddies later, but this one becomes your active companion now.")
 
-                Text("This should match the real BeMore deployment the app is going to represent.")
-                    .font(.subheadline)
-                    .foregroundColor(BMOTheme.textSecondary)
-                    .padding(.horizontal, BMOTheme.spacingLG)
-
-                VStack(spacing: 12) {
-                    ForEach(StackDeploymentMode.allCases) { mode in
-                        Button {
-                            config.deploymentMode = mode
-                        } label: {
-                            VStack(alignment: .leading, spacing: 8) {
-                                HStack {
-                                    Text(mode.title)
-                                        .font(.headline)
-                                    Spacer()
-                                    if config.deploymentMode == mode {
-                                        Image(systemName: "checkmark.circle.fill")
-                                            .foregroundColor(BMOTheme.accent)
-                                    }
-                                }
-                                Text(mode.subtitle)
-                                    .font(.caption)
-                                    .foregroundColor(BMOTheme.textSecondary)
-                            }
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding()
-                            .foregroundColor(BMOTheme.textPrimary)
-                            .background(config.deploymentMode == mode ? BMOTheme.backgroundCardHover : BMOTheme.backgroundCard)
-                            .clipShape(RoundedRectangle(cornerRadius: BMOTheme.radiusMedium, style: .continuous))
-                        }
-                    }
-                }
-                .padding(.horizontal, BMOTheme.spacingLG)
-
-                labeledField(title: "Stack name", text: $config.stackName, placeholder: "BeMoreAgent")
-                labeledField(title: "Primary goal", text: $config.goal, placeholder: "Run my own BeMore stack")
-                labeledField(title: "Runtime endpoint", text: $config.gatewayURL, placeholder: "https://bemore.example.com")
-                    .textInputAutocapitalization(.never)
-                    .autocorrectionDisabled()
-                labeledField(title: "Admin / public domain", text: $config.adminDomain, placeholder: "example.com")
-                    .textInputAutocapitalization(.never)
-                    .autocorrectionDisabled()
-
-                navButtons(back: .welcome, next: .operatorProfile, canProceed: canContinueFromIntent)
-                    .padding(.top, BMOTheme.spacingMD)
-            }
-        }
-    }
-
-    private var operatorProfileScreen: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: BMOTheme.spacingLG) {
-                Spacer().frame(height: BMOTheme.spacingXL)
-
-                Text("Who is this stack for?")
-                    .font(.system(size: 28, weight: .bold))
-                    .foregroundColor(BMOTheme.textPrimary)
-                    .padding(.horizontal, BMOTheme.spacingLG)
-
-                labeledField(title: "Operator name", text: $config.operatorName, placeholder: "Cody")
-                labeledField(title: "Role", text: $config.role, placeholder: "Builder, founder, operator")
-
-                VStack(alignment: .leading, spacing: 10) {
-                    Text("Autonomy")
-                        .font(.headline)
-                        .foregroundColor(BMOTheme.textPrimary)
-                    Text("How aggressively should the stack try to act on its own once connected?")
-                        .font(.caption)
+                if buddyStore.templates.isEmpty {
+                    Text("Buddy templates are still loading. Continue and BeMore will use the default Buddy when it is ready.")
+                        .font(.subheadline)
                         .foregroundColor(BMOTheme.textSecondary)
-                    HStack {
-                        Text("Guarded")
-                            .font(.caption)
-                            .foregroundColor(BMOTheme.textTertiary)
-                        Slider(value: Binding(get: { Double(config.autonomyLevel) }, set: { config.autonomyLevel = Int($0) }), in: 1...5, step: 1)
-                            .tint(BMOTheme.accent)
-                        Text("Autonomous")
-                            .font(.caption)
-                            .foregroundColor(BMOTheme.textTertiary)
-                    }
-                }
-                .bmoCard()
-                .padding(.horizontal, BMOTheme.spacingLG)
-
-                toggleCard(icon: "brain", title: "Memory", subtitle: "Persist operator context and stack state locally on device", isOn: $config.memoryEnabled)
-                    .padding(.horizontal, BMOTheme.spacingLG)
-                toggleCard(icon: "wrench.and.screwdriver", title: "Tools", subtitle: "Allow tool and API actions when the connected stack supports them", isOn: $config.toolsEnabled)
-                    .padding(.horizontal, BMOTheme.spacingLG)
-                toggleCard(icon: "app.badge", title: "Notifications", subtitle: "Enable push surfaces for node events and stack health", isOn: $config.enableNotifications)
-                    .padding(.horizontal, BMOTheme.spacingLG)
-
-                VStack(alignment: .leading, spacing: 10) {
-                    Text("Optimization")
-                        .font(.headline)
-                        .foregroundColor(BMOTheme.textPrimary)
-                    HStack(spacing: 10) {
-                        ForEach(["speed", "balanced", "quality"], id: \.self) { mode in
-                            Button {
-                                config.optimizationMode = mode
-                            } label: {
-                                Text(mode.capitalized)
-                                    .font(.subheadline)
-                                    .fontWeight(.medium)
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 12)
-                                    .foregroundColor(config.optimizationMode == mode ? BMOTheme.backgroundPrimary : BMOTheme.textSecondary)
-                                    .background(config.optimizationMode == mode ? BMOTheme.accent : BMOTheme.backgroundSecondary)
-                                    .clipShape(RoundedRectangle(cornerRadius: BMOTheme.radiusSmall, style: .continuous))
-                            }
+                        .bmoCard()
+                        .padding(.horizontal, BMOTheme.spacingLG)
+                } else {
+                    VStack(spacing: 12) {
+                        ForEach(buddyStore.templates) { template in
+                            buddyTemplateButton(template)
                         }
                     }
+                    .padding(.horizontal, BMOTheme.spacingLG)
                 }
-                .bmoCard()
-                .padding(.horizontal, BMOTheme.spacingLG)
 
-                navButtons(back: .intent, next: .stackSetup, canProceed: !trimmed(config.operatorName).isEmpty && !trimmed(config.role).isEmpty)
+                navButtons(back: .welcome, next: .nameBuddy, canProceed: !selectedTemplateID.isEmpty || buddyStore.templates.isEmpty)
                     .padding(.top, BMOTheme.spacingMD)
             }
         }
     }
 
-    private var stackSetupScreen: some View {
+    private var nameBuddyScreen: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: BMOTheme.spacingLG) {
                 Spacer().frame(height: BMOTheme.spacingXL)
+                onboardingTitle("Make this Buddy yours", subtitle: "This name and focus follow your Buddy into Home, Chat, tasks, training, and receipts.")
+                labeledField(title: "Buddy name", text: $buddyName, placeholder: selectedTemplate?.name ?? "Buddy")
+                labeledField(title: "First focus", text: $buddyFocus, placeholder: selectedTemplate?.canonicalRole ?? "Help me finish the next useful step")
+                selectedBuddyPreview
+                navButtons(back: .chooseBuddy, next: .powerMode, canProceed: !trimmed(buddyName).isEmpty)
+                    .padding(.top, BMOTheme.spacingMD)
+            }
+        }
+    }
 
-                Text("What should this app stand up?")
-                    .font(.system(size: 28, weight: .bold))
-                    .foregroundColor(BMOTheme.textPrimary)
+    private var powerModeScreen: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: BMOTheme.spacingLG) {
+                Spacer().frame(height: BMOTheme.spacingXL)
+                onboardingTitle("Power mode is optional", subtitle: "BeMore can start as your Buddy on iPhone. Pairing Mac and route setup are stronger-mode choices, not the first thing you have to understand.")
+
+                toggleCard(icon: "macbook.and.iphone", title: "Pair with Mac later", subtitle: "Keep Mac runtime pairing available after you land on Buddy Home.", isOn: $config.installDesktopNode)
+                    .padding(.horizontal, BMOTheme.spacingLG)
+                toggleCard(icon: "bell.badge", title: "Buddy notifications", subtitle: "Allow BeMore to remind you about Buddy tasks, results, and check-ins when enabled.", isOn: $config.enableNotifications)
                     .padding(.horizontal, BMOTheme.spacingLG)
 
-                Text("This is the contract the shell should reflect after onboarding.")
-                    .font(.subheadline)
-                    .foregroundColor(BMOTheme.textSecondary)
-                    .padding(.horizontal, BMOTheme.spacingLG)
-
-                toggleCard(icon: "iphone", title: "Install node on this phone", subtitle: "Treat iPhone capabilities as part of the self-hosted stack surface", isOn: $config.installNodeOnThisPhone)
-                    .padding(.horizontal, BMOTheme.spacingLG)
-                toggleCard(icon: "desktopcomputer", title: "Expect desktop / server node", subtitle: "Assume a host runtime or desktop companion is part of the stack", isOn: $config.installDesktopNode)
-                    .padding(.horizontal, BMOTheme.spacingLG)
-
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Generated setup checklist")
+                DisclosureGroup(isExpanded: $showAdvancedSetup) {
+                    VStack(spacing: BMOTheme.spacingMD) {
+                        labeledField(title: "Runtime endpoint", text: $config.gatewayURL, placeholder: "https://bemore.example.com")
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+                        labeledField(title: "Public domain", text: $config.adminDomain, placeholder: "example.com")
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+                        toggleCard(icon: "wrench.and.screwdriver", title: "Tools", subtitle: "Allow tool and API actions when the connected runtime supports them.", isOn: $config.toolsEnabled)
+                        toggleCard(icon: "brain", title: "Memory", subtitle: "Persist Buddy and operator context locally on device.", isOn: $config.memoryEnabled)
+                    }
+                    .padding(.top, BMOTheme.spacingMD)
+                } label: {
+                    Text("Advanced runtime setup")
                         .font(.headline)
                         .foregroundColor(BMOTheme.textPrimary)
-                    ForEach(generatedChecklist, id: \.self) { item in
-                        HStack(alignment: .top, spacing: 8) {
-                            Image(systemName: "checklist")
-                                .foregroundColor(BMOTheme.accent)
-                                .padding(.top, 2)
-                            Text(item)
-                                .font(.subheadline)
-                                .foregroundColor(BMOTheme.textSecondary)
-                        }
-                    }
                 }
-                .bmoCard()
+                .padding(BMOTheme.spacingMD)
+                .background(BMOTheme.backgroundCard)
+                .clipShape(RoundedRectangle(cornerRadius: BMOTheme.radiusMedium, style: .continuous))
                 .padding(.horizontal, BMOTheme.spacingLG)
 
-                navButtons(back: .operatorProfile, next: .building, canProceed: true)
+                navButtons(back: .nameBuddy, next: .building, canProceed: true)
                     .padding(.top, BMOTheme.spacingMD)
             }
         }
@@ -291,12 +213,12 @@ struct OnboardingFlow: View {
                     .stroke(BMOTheme.accent, style: StrokeStyle(lineWidth: 4, lineCap: .round))
                     .frame(width: 120, height: 120)
                     .rotationEffect(.degrees(-90))
-                Image(systemName: "server.rack")
+                Image(systemName: "heart.text.square.fill")
                     .font(.system(size: 36))
                     .foregroundColor(BMOTheme.accent)
             }
 
-            Text("Building your stack profile...")
+            Text("Waking \(buddyName)")
                 .font(.system(size: 24, weight: .bold))
                 .foregroundColor(BMOTheme.textPrimary)
 
@@ -321,115 +243,36 @@ struct OnboardingFlow: View {
         .onAppear { runBuildSequence() }
     }
 
-    private func runBuildSequence() {
-        config.setupChecklist = generatedChecklist
-        buildProgress = 0
-        buildMessages = []
-
-        let steps = [
-            (0.2, "Saving operator profile for \(trimmed(config.operatorName).isEmpty ? "this device" : trimmed(config.operatorName))"),
-            (0.4, "Targeting runtime endpoint \(trimmed(config.gatewayURL))"),
-            (0.6, config.installNodeOnThisPhone ? "Marking this iPhone as a node-capable surface" : "Skipping local node install on this phone"),
-            (0.8, config.installDesktopNode ? "Expecting a desktop or server runtime companion" : "Running in phone-only mode"),
-            (1.0, "Stack profile ready. The shell will show actual readiness instead of pretending setup is complete.")
-        ]
-
-        for (index, (progress, message)) in steps.enumerated() {
-            DispatchQueue.main.asyncAfter(deadline: .now() + Double(index) * 0.5) {
-                withAnimation(.easeOut(duration: 0.35)) {
-                    buildProgress = progress
-                    buildMessages.append(message)
-                }
-            }
-        }
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + Double(steps.count) * 0.5 + 0.4) {
-            withAnimation(.easeInOut(duration: 0.35)) {
-                step = .summary
-            }
-        }
-    }
-
     private var summaryScreen: some View {
         ScrollView {
             VStack(spacing: BMOTheme.spacingLG) {
                 Spacer().frame(height: BMOTheme.spacingXL)
 
-                Image(systemName: "checkmark.seal.fill")
-                    .font(.system(size: 48))
-                    .foregroundColor(BMOTheme.success)
+                BuddyAsciiView(mood: .levelUp)
+                    .padding(.horizontal, BMOTheme.spacingXL)
 
-                Text(trimmed(config.stackName).isEmpty ? "BeMoreAgent" : trimmed(config.stackName))
+                Text("\(buddyName) is ready")
                     .font(.system(size: 28, weight: .bold))
                     .foregroundColor(BMOTheme.textPrimary)
 
-                Text("Your iPhone shell now reflects a real BeMore setup profile.")
+                Text("You’ll land on Buddy Home. Chat, Skills, Results, and Mac power mode all point back to this active Buddy.")
                     .font(.subheadline)
                     .foregroundColor(BMOTheme.textSecondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, BMOTheme.spacingLG)
 
                 VStack(spacing: 12) {
-                    summaryRow(icon: "person.crop.circle", label: "Operator", value: trimmed(config.operatorName))
-                    summaryRow(icon: "briefcase", label: "Role", value: trimmed(config.role))
-                    summaryRow(icon: "link", label: "Runtime", value: trimmed(config.gatewayURL))
-                    summaryRow(icon: "switch.2", label: "Mode", value: config.deploymentMode.title)
-                    summaryRow(icon: "gauge.open.with.lines.needle.33percent", label: "Autonomy", value: "\(config.autonomyLevel)/5")
-                    summaryRow(icon: "brain", label: "Memory", value: config.memoryEnabled ? "On" : "Off")
-                    summaryRow(icon: "wrench.and.screwdriver", label: "Tools", value: config.toolsEnabled ? "On" : "Off")
+                    summaryRow(icon: "person.crop.circle.badge.checkmark", label: "Active Buddy", value: buddyName)
+                    summaryRow(icon: "sparkles", label: "Starter", value: selectedTemplate?.name ?? "Default Buddy")
+                    summaryRow(icon: "scope", label: "Focus", value: buddyFocus)
+                    summaryRow(icon: "macbook.and.iphone", label: "Mac power", value: config.installDesktopNode ? "Available later" : "Phone-first")
+                    summaryRow(icon: "creditcard", label: "Plans", value: "Free now; Plus and Council previews in Pricing")
                 }
                 .bmoCard()
                 .padding(.horizontal, BMOTheme.spacingLG)
 
-                VStack(alignment: .leading, spacing: 10) {
-                    Text("Next steps the app expects")
-                        .font(.headline)
-                        .foregroundColor(BMOTheme.textPrimary)
-                    ForEach(config.setupChecklist, id: \.self) { item in
-                        Text("• \(item)")
-                            .font(.subheadline)
-                            .foregroundColor(BMOTheme.textSecondary)
-                    }
-                }
-                .bmoCard()
-                .padding(.horizontal, BMOTheme.spacingLG)
-
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Primary Agent")
-                        .font(.caption)
-                        .foregroundColor(BMOTheme.textTertiary)
-                    HStack(spacing: 12) {
-                        Circle()
-                            .fill(BMOTheme.accent)
-                            .frame(width: 40, height: 40)
-                            .overlay(
-                                Image(systemName: "cpu")
-                                    .foregroundColor(BMOTheme.backgroundPrimary)
-                            )
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("BMO Agent")
-                                .font(.headline)
-                                .foregroundColor(BMOTheme.textPrimary)
-                            Text(primaryAgentSummary)
-                                .font(.caption)
-                                .foregroundColor(BMOTheme.textSecondary)
-                        }
-                    }
-                    Text(primaryAgentDetail)
-                        .font(.caption)
-                        .foregroundColor(BMOTheme.textTertiary)
-                }
-                .bmoCard()
-                .padding(.horizontal, BMOTheme.spacingLG)
-
-                Button("Launch shell") {
-                    config.stackName = fallback(config.stackName, defaultValue: "BeMoreAgent")
-                    config.goal = fallback(config.goal, defaultValue: "Run a self-hosted BeMore stack")
-                    config.role = fallback(config.role, defaultValue: "Operator")
-                    config.operatorName = fallback(config.operatorName, defaultValue: "Operator")
-                    config.gatewayURL = fallback(config.gatewayURL, defaultValue: "https://prismtek.dev")
-                    config.adminDomain = fallback(config.adminDomain, defaultValue: "prismtek.dev")
-                    config.setupChecklist = generatedChecklist
-                    config.isOnboardingComplete = true
-                    appState.completeOnboarding(config)
+                Button("Go to Buddy Home") {
+                    finishOnboarding()
                 }
                 .buttonStyle(BMOButtonStyle())
                 .padding(.top, BMOTheme.spacingMD)
@@ -439,13 +282,131 @@ struct OnboardingFlow: View {
         }
     }
 
+    private func runBuildSequence() {
+        buildProgress = 0
+        buildMessages = []
+        let name = fallback(buddyName, defaultValue: selectedTemplate?.name ?? "Buddy")
+        let steps = [
+            (0.25, "Creating \(name) as your active Buddy"),
+            (0.50, "Linking Buddy to Home, Chat, Skills, and Results"),
+            (0.75, config.installDesktopNode ? "Keeping Mac power mode available as an optional upgrade" : "Starting in phone-first mode"),
+            (1.0, "Preparing your Buddy-first BeMore shell")
+        ]
+        for (index, (progress, message)) in steps.enumerated() {
+            DispatchQueue.main.asyncAfter(deadline: .now() + Double(index) * 0.5) {
+                withAnimation(.easeOut(duration: 0.35)) {
+                    buildProgress = progress
+                    buildMessages.append(message)
+                }
+            }
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + Double(steps.count) * 0.5 + 0.4) {
+            withAnimation(.easeInOut(duration: 0.35)) {
+                step = .summary
+            }
+        }
+    }
+
+    private func finishOnboarding() {
+        let cleanedBuddyName = fallback(buddyName, defaultValue: selectedTemplate?.name ?? "Buddy")
+        let cleanedFocus = fallback(buddyFocus, defaultValue: selectedTemplate?.canonicalRole ?? "Finish the next useful step")
+        let templateID = selectedTemplate?.templateID ?? selectedTemplateID
+
+        config.stackName = fallback(config.stackName, defaultValue: "BeMore")
+        config.goal = cleanedFocus
+        config.role = selectedTemplate?.canonicalRole ?? "Buddy companion"
+        config.operatorName = fallback(config.operatorName, defaultValue: "Builder")
+        config.gatewayURL = fallback(config.gatewayURL, defaultValue: "https://prismtek.dev")
+        config.adminDomain = fallback(config.adminDomain, defaultValue: "prismtek.dev")
+        config.onboardingBuddyName = cleanedBuddyName
+        config.onboardingBuddyTemplateID = templateID
+        config.onboardingBuddyFocus = cleanedFocus
+        config.setupChecklist = generatedChecklist
+        config.isOnboardingComplete = true
+        appState.completeOnboarding(config)
+        appState.buddyStore.ensureStarterBuddy(templateID: templateID, displayName: cleanedBuddyName, focus: cleanedFocus, using: appState)
+        appState.selectedTab = .missionControl
+    }
+
+    private var selectedTemplate: CouncilStarterBuddyTemplate? {
+        buddyStore.templates.first(where: { $0.templateID == selectedTemplateID || $0.id == selectedTemplateID }) ?? buddyStore.templates.first
+    }
+
+    private var selectedBuddyPreview: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Your active Buddy")
+                .font(.headline)
+                .foregroundColor(BMOTheme.textPrimary)
+            Text(selectedTemplate?.ascii.baseSilhouette ?? "  /\\_/\\\n ( o.o )\n  > ^ <")
+                .font(.system(.caption, design: .monospaced))
+                .foregroundColor(BMOTheme.accent)
+            Text("\(fallback(buddyName, defaultValue: selectedTemplate?.name ?? "Buddy")) will become the Buddy shown on Home and in Chat.")
+                .font(.subheadline)
+                .foregroundColor(BMOTheme.textSecondary)
+        }
+        .bmoCard()
+        .padding(.horizontal, BMOTheme.spacingLG)
+    }
+
+    private func buddyTemplateButton(_ template: CouncilStarterBuddyTemplate) -> some View {
+        Button {
+            selectedTemplateID = template.templateID
+            if buddyName == "Buddy" || buddyName.isEmpty {
+                buddyName = template.name
+            }
+            if buddyFocus.isEmpty {
+                buddyFocus = template.canonicalRole
+            }
+        } label: {
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(alignment: .top) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(template.name)
+                            .font(.headline)
+                        Text(template.starterRole)
+                            .font(.subheadline)
+                            .foregroundColor(BMOTheme.textSecondary)
+                    }
+                    Spacer()
+                    if selectedTemplateID == template.templateID {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(BMOTheme.accent)
+                    }
+                }
+                Text(template.onboardingCopy)
+                    .font(.subheadline)
+                    .foregroundColor(BMOTheme.textSecondary)
+                Text(template.ascii.baseSilhouette)
+                    .font(.system(.caption2, design: .monospaced))
+                    .foregroundColor(BMOTheme.accent)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding()
+            .foregroundColor(BMOTheme.textPrimary)
+            .background(selectedTemplateID == template.templateID ? BMOTheme.backgroundCardHover : BMOTheme.backgroundCard)
+            .clipShape(RoundedRectangle(cornerRadius: BMOTheme.radiusMedium, style: .continuous))
+        }
+    }
+
+    private func onboardingTitle(_ title: String, subtitle: String) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(title)
+                .font(.system(size: 28, weight: .bold))
+                .foregroundColor(BMOTheme.textPrimary)
+            Text(subtitle)
+                .font(.subheadline)
+                .foregroundColor(BMOTheme.textSecondary)
+        }
+        .padding(.horizontal, BMOTheme.spacingLG)
+    }
+
     @ViewBuilder
     private func labeledField(title: String, text: Binding<String>, placeholder: String) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(title)
                 .font(.headline)
                 .foregroundColor(BMOTheme.textPrimary)
-            TextField(placeholder, text: text)
+            TextField(placeholder, text: text, axis: title == "First focus" ? .vertical : .horizontal)
                 .textFieldStyle(.plain)
                 .padding()
                 .background(BMOTheme.backgroundCard)
@@ -453,33 +414,6 @@ struct OnboardingFlow: View {
                 .foregroundColor(BMOTheme.textPrimary)
         }
         .padding(.horizontal, BMOTheme.spacingLG)
-    }
-
-    private var primaryAgentSummary: String {
-        appState.usesStubRuntime
-            ? "Local-first shell • route setup after launch"
-            : "On-device runtime available after model install"
-    }
-
-    private var primaryAgentDetail: String {
-        appState.usesStubRuntime
-            ? "This build still uses the stub local runtime. Launch into Mission Control, then use Models to link a cloud route or prepare a local model."
-            : "Finish onboarding, then use Models to select an installed on-device route."
-    }
-
-    private func summaryRow(icon: String, label: String, value: String) -> some View {
-        HStack(alignment: .top) {
-            Image(systemName: icon)
-                .frame(width: 24)
-                .foregroundColor(BMOTheme.accent)
-            Text(label)
-                .foregroundColor(BMOTheme.textSecondary)
-            Spacer()
-            Text(value.isEmpty ? "Not set" : value)
-                .fontWeight(.medium)
-                .multilineTextAlignment(.trailing)
-                .foregroundColor(BMOTheme.textPrimary)
-        }
     }
 
     private func toggleCard(icon: String, title: String, subtitle: String, isOn: Binding<Bool>) -> some View {
@@ -520,7 +454,7 @@ struct OnboardingFlow: View {
 
             Spacer()
 
-            Button("Continue") {
+            Button(next == .building ? "Start BeMore" : "Continue") {
                 withAnimation(.easeInOut(duration: 0.35)) { step = next }
             }
             .buttonStyle(BMOButtonStyle())
@@ -542,28 +476,30 @@ struct OnboardingFlow: View {
         }
     }
 
-    private var canContinueFromIntent: Bool {
-        !trimmed(config.stackName).isEmpty && !trimmed(config.goal).isEmpty && !trimmed(config.gatewayURL).isEmpty && !trimmed(config.adminDomain).isEmpty
+    private func summaryRow(icon: String, label: String, value: String) -> some View {
+        HStack(alignment: .top) {
+            Image(systemName: icon)
+                .frame(width: 24)
+                .foregroundColor(BMOTheme.accent)
+            Text(label)
+                .foregroundColor(BMOTheme.textSecondary)
+            Spacer()
+            Text(value.isEmpty ? "Not set" : value)
+                .fontWeight(.medium)
+                .multilineTextAlignment(.trailing)
+                .foregroundColor(BMOTheme.textPrimary)
+        }
     }
 
     private var generatedChecklist: [String] {
-        var items: [String] = []
-        if config.deploymentMode == .bootstrapSelfHosted {
-            items.append("Provision or verify a BeMore runtime endpoint at \(fallback(config.gatewayURL, defaultValue: "https://prismtek.dev")).")
-            items.append("Set runtime and pairing/public URL values to match \(fallback(config.adminDomain, defaultValue: "prismtek.dev")).")
-        } else {
-            items.append("Pair this app to the existing BeMore runtime endpoint at \(fallback(config.gatewayURL, defaultValue: "https://prismtek.dev")).")
-        }
-        if config.installNodeOnThisPhone {
-            items.append("Treat this iPhone as a node surface with notification, camera, and device capability permissions.")
-        }
+        var items = ["Keep \(fallback(buddyName, defaultValue: selectedTemplate?.name ?? "Buddy")) active on Home, Chat, Skills, and Results."]
         if config.installDesktopNode {
-            items.append("Keep a desktop or server node online so the shell has a real self-hosted stack to connect to.")
+            items.append("Pair a BeMore Mac runtime when you want workspace execution, diffs, artifacts, and receipts from your desktop.")
         }
         if config.toolsEnabled {
-            items.append("Enable only the tools the operator actually wants exposed through the stack.")
+            items.append("Enable only the tools you want this Buddy to use through the connected runtime.")
         }
-        items.append("Verify local runtime readiness honestly. Do not claim on-device inference is live unless the runtime bridge is actually present.")
+        items.append("Use Pricing to compare free Buddy slots, Plus runtime capacity, and Council/marketplace access before upgrading.")
         return items
     }
 

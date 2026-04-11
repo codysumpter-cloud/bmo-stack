@@ -2,6 +2,7 @@ import SwiftUI
 
 struct MissionControlView: View {
     @EnvironmentObject private var appState: AppState
+    @ObservedObject var store: BuddyProfileStore
     @State private var selectedSurface: RepoSurface?
     @State private var lastReceipt: OpenClawReceipt?
     @State private var sandboxCommand = "ls"
@@ -18,8 +19,6 @@ struct MissionControlView: View {
                     taskAndResultsCard
                     skillsCard
                     macPowerCard
-                    routeCard
-                    stackSurfacesCard
                 }
                 .padding(.horizontal, BMOTheme.spacingMD)
                 .padding(.bottom, BMOTheme.spacingXL)
@@ -38,33 +37,37 @@ struct MissionControlView: View {
             .sheet(item: $selectedSurface) { surface in
                 RepoSurfaceDetailView(surface: surface)
             }
-            .onAppear { appState.workspaceRuntime.refreshMetadata() }
+            .onAppear {
+                appState.workspaceRuntime.refreshMetadata()
+                store.load(for: appState.stackConfig)
+            }
         }
     }
 
     private var buddyHomeCard: some View {
         let status = appState.buddyRuntimeStatus
+        let buddy = store.activeBuddy
         return VStack(alignment: .leading, spacing: BMOTheme.spacingMD) {
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("BeMore")
+                    Text("My Buddy")
                         .font(.caption.weight(.semibold))
                         .foregroundColor(BMOTheme.textTertiary)
-                    Text("Buddy keeps the work moving.")
+                    Text(buddy?.displayName ?? "Choose your Buddy")
                         .font(.system(size: 30, weight: .bold))
                         .foregroundColor(BMOTheme.textPrimary)
-                    Text(appState.operatorSummary)
+                    Text(homeSubtitle(for: buddy))
                         .font(.subheadline)
                         .foregroundColor(BMOTheme.textSecondary)
                 }
                 Spacer()
-                StatusBadge(label: status.runtimeAvailable ? "Buddy ready" : "Needs setup", color: status.runtimeAvailable ? BMOTheme.success : BMOTheme.warning)
+                StatusBadge(label: buddy == nil ? "Needs Buddy" : status.runtimeAvailable ? "Ready" : "Phone-first", color: buddy == nil ? BMOTheme.warning : status.runtimeAvailable ? BMOTheme.success : BMOTheme.accent)
             }
 
-            BuddyAsciiView(mood: buddyMood(for: status))
+            BuddyAsciiView(mood: buddyMood(for: status, buddy: buddy))
 
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
-                dashboardMetric("Workspace", value: "\(appState.workspaceStore.files.count)", icon: "folder")
+                dashboardMetric("Owned", value: "\(store.installedBuddies.count)", icon: "person.2.fill")
                 dashboardMetric("Skills", value: "\(status.registeredSkillCount)", icon: "sparkles.rectangle.stack")
                 dashboardMetric("Receipts", value: "\(status.recentChanges.count)", icon: "checklist.checked")
                 dashboardMetric("Mac", value: appState.macRuntimeSnapshot == nil ? "pair" : "live", icon: "macbook.and.iphone")
@@ -78,30 +81,30 @@ struct MissionControlView: View {
             Text("Start with Buddy")
                 .font(.headline)
                 .foregroundColor(BMOTheme.textPrimary)
-            Text("Use the same mobile loop as the Mac shell: choose workspace context, run a skill or task, inspect the result, and keep the receipt.")
+            Text("Talk to your active Buddy, train them, run a skill, or inspect the latest result. Runtime setup stays secondary until you ask for more power.")
                 .font(.subheadline)
                 .foregroundColor(BMOTheme.textSecondary)
 
             HStack(spacing: 8) {
-                Button("Open Buddy") {
-                    appState.selectedTab = .buddy
+                Button("Chat with \(store.activeBuddy?.displayName ?? "Buddy")") {
+                    appState.selectedTab = .chat
                 }
                 .buttonStyle(BMOButtonStyle())
 
-                Button("Pair Mac") {
-                    appState.selectedTab = .pairing
+                Button("Train Buddy") {
+                    appState.selectedTab = .buddy
                 }
                 .buttonStyle(BMOButtonStyle(isPrimary: false))
             }
 
             HStack(spacing: 8) {
-                Button("Workspace") {
-                    appState.selectedTab = .files
+                Button("Discover") {
+                    appState.selectedTab = .buddy
                 }
                 .buttonStyle(BMOButtonStyle(isPrimary: false))
 
-                Button("Skills") {
-                    appState.selectedTab = .skills
+                Button("Plans") {
+                    appState.selectedTab = .pricing
                 }
                 .buttonStyle(BMOButtonStyle(isPrimary: false))
             }
@@ -114,7 +117,7 @@ struct MissionControlView: View {
         return VStack(alignment: .leading, spacing: 12) {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Tasks and results")
+                    Text("\(store.activeBuddy?.displayName ?? "Buddy")'s next result")
                         .font(.headline)
                         .foregroundColor(BMOTheme.textPrimary)
                     Text("Receipt-backed work is the proof surface on iPhone too.")
@@ -141,7 +144,7 @@ struct MissionControlView: View {
             }
 
             if status.recentChanges.isEmpty {
-                Text("Run a Buddy action, skill, or Mac inspection to create the next result.")
+                Text("Run a Buddy action, skill, or Mac inspection to create the next receipt-backed result.")
                     .font(.caption)
                     .foregroundColor(BMOTheme.textTertiary)
             } else {
@@ -193,18 +196,6 @@ struct MissionControlView: View {
         .bmoCard()
     }
 
-    private var routeCard: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("Runtime route")
-                .font(.headline)
-                .foregroundColor(BMOTheme.textPrimary)
-            detailRow("Active route", value: appState.activeRouteTitle)
-            detailRow("Target", value: appState.activeRouteDetail)
-            detailRow("Health", value: appState.routeHealthSummary)
-        }
-        .bmoCard()
-    }
-
     private var stackSurfacesCard: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Reference surfaces")
@@ -249,12 +240,34 @@ struct MissionControlView: View {
         .bmoCard()
     }
 
-    private func buddyMood(for status: BuddyRuntimeStatus) -> BuddyAnimationMood {
+    private func buddyMood(for status: BuddyRuntimeStatus, buddy: BuddyInstance?) -> BuddyAnimationMood {
+        if let buddy {
+            switch buddy.state.mood.lowercased() {
+            case "happy", "excited":
+                return .happy
+            case "working":
+                return .working
+            case "thinking":
+                return .thinking
+            case "sleepy", "tired":
+                return .sleepy
+            default:
+                break
+            }
+        }
         if !status.failedActions.isEmpty { return .thinking }
         if appState.macRuntimeSnapshot?.processes.contains(where: { $0.status == "running" }) == true { return .working }
         if status.recentChanges.isEmpty && appState.workspaceStore.files.isEmpty { return .sleepy }
         if !status.recentChanges.isEmpty { return .happy }
         return status.runtimeAvailable ? .idle : .thinking
+    }
+
+    private func homeSubtitle(for buddy: BuddyInstance?) -> String {
+        guard let buddy else {
+            return "Create or install a Buddy before setup details take over the product."
+        }
+        let focus = buddy.state.currentFocus ?? "ready for the next useful step"
+        return "\(buddy.identity.role) • \(focus)"
     }
 
     private func detailRow(_ label: String, value: String) -> some View {

@@ -287,6 +287,31 @@ final class BuddyProfileStore: ObservableObject {
         }
     }
 
+    func ensureStarterBuddy(templateID: String, displayName: String, focus: String, using appState: AppState) {
+        if contracts == nil {
+            load(for: appState.stackConfig)
+        }
+        guard let template = templates.first(where: { $0.templateID == templateID || $0.id == templateID }) ?? templates.first else {
+            loadError = "No starter Buddy templates are available."
+            return
+        }
+
+        if let existing = installedBuddies.first(where: { $0.templateId == template.templateID || $0.templateId == template.id }) {
+            makeActive(existing, using: appState)
+        } else {
+            install(template: template, using: appState)
+        }
+
+        let cleanedName = displayName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let cleanedFocus = focus.trimmingCharacters(in: .whitespacesAndNewlines)
+        personalizeActive(
+            displayName: cleanedName.isEmpty ? template.name : cleanedName,
+            nickname: nil,
+            currentFocus: cleanedFocus.isEmpty ? template.canonicalRole : cleanedFocus,
+            using: appState
+        )
+    }
+
     private func mutate(using appState: AppState, operation: (BuddyCanonicalResources) throws -> BuddyPersistenceBundle) {
         guard let contracts else {
             loadError = "Buddy contracts are not loaded yet."
