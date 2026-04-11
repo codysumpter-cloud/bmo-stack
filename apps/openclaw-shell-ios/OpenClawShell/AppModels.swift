@@ -481,7 +481,7 @@ struct ShellPreferences: Codable, Hashable {
 
     static let `default` = ShellPreferences(
         orderedTabs: [.missionControl, .buddy, .chat, .skills, .artifacts, .files, .pairing, .pricing, .models, .settings],
-        hiddenTabs: [],
+        hiddenTabs: [.pairing, .pricing, .models],
         selectedTab: .missionControl
     )
 
