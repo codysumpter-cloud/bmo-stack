@@ -14,7 +14,7 @@ concurrency:
 jobs:
   build-ios:
     name: Generate and build BeMoreAgent
-    runs-on: ${{ fromJSON(vars.BEMOREAGENT_IOS_RUNS_ON != '' && vars.BEMOREAGENT_IOS_RUNS_ON || '"macos-latest"') }}
+    runs-on: macos-latest
     defaults:
       run:
         working-directory: apps/openclaw-shell-ios
