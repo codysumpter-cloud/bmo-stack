@@ -1,0 +1,249 @@
+name: Build & TestFlight
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'apps/openclaw-shell-ios/**'
+      - '.github/workflows/testflight.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: bemoreagent-testflight-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: macos-26
+    defaults:
+      run:
+        working-directory: apps/openclaw-shell-ios
+    env:
+      XCODE_DEVELOPER_DIR: ${{ vars.BEMOREAGENT_XCODE_DEVELOPER_DIR != '' && vars.BEMOREAGENT_XCODE_DEVELOPER_DIR || '/Applications/Xcode.app/Contents/Developer' }}
+      ASC_API_KEY: ${{ secrets.APPSTORE_CONNECT_API_KEY }}
+      ASC_KEY_ID: ${{ secrets.APPSTORE_CONNECT_KEY_ID }}
+      ASC_ISSUER_ID: ${{ secrets.APPSTORE_CONNECT_ISSUER_ID }}
+      IOS_DISTRIBUTION_CERTIFICATE_P12_BASE64: ${{ secrets.BEMORE_IOS_DISTRIBUTION_CERTIFICATE_P12_BASE64 }}
+      IOS_DISTRIBUTION_CERTIFICATE_PASSWORD: ${{ secrets.BEMORE_IOS_DISTRIBUTION_CERTIFICATE_PASSWORD }}
+      IOS_APPSTORE_PROFILE_BASE64: ${{ secrets.BEMORE_IOS_APPSTORE_PROFILE_BASE64 }}
+      IOS_APPSTORE_PROFILE_NAME: 'iOS Team Store Provisioning Profile: BeMoreAgent'
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          submodules: true
+
+      - name: Select Xcode
+        run: |
+          xcode_app="${XCODE_DEVELOPER_DIR%/Contents/Developer}"
+          test -d "$xcode_app"
+          echo "DEVELOPER_DIR=$XCODE_DEVELOPER_DIR" >> "$GITHUB_ENV"
+          if command -v sudo >/dev/null 2>&1 && sudo -n true 2>/dev/null; then
+            sudo xcode-select -s "$xcode_app"
+          else
+            echo "Skipping xcode-select; using DEVELOPER_DIR=$XCODE_DEVELOPER_DIR"
+          fi
+
+      - name: Show Xcode version
+        run: |
+          xcodebuild -version
+          SDK_VERSION="$(xcrun --sdk iphoneos --show-sdk-version)"
+          echo "iPhoneOS SDK $SDK_VERSION"
+          python3 - "$SDK_VERSION" <<'PY2'
+          import pathlib
+          import re
+          import sys
+
+          sdk = tuple(int(part) for part in sys.argv[1].split('.')[:2])
+          project = pathlib.Path('project.yml').read_text()
+          match = re.search(r'IPHONEOS_DEPLOYMENT_TARGET:\s*([0-9]+(?:\.[0-9]+)?)', project)
+          if not match:
+              print('Missing IPHONEOS_DEPLOYMENT_TARGET in project.yml', file=sys.stderr)
+              sys.exit(1)
+          deployment = tuple(int(part) for part in match.group(1).split('.')[:2])
+          if len(deployment) == 1:
+              deployment = (deployment[0], 0)
+          if sdk < deployment:
+              print(f'Xcode SDK {sys.argv[1]} is too old for IPHONEOS_DEPLOYMENT_TARGET {match.group(1)}', file=sys.stderr)
+              sys.exit(1)
+          PY2
+          sw_vers
+
+      - name: Install XcodeGen if needed
+        run: |
+          if ! command -v xcodegen >/dev/null 2>&1; then
+            brew install xcodegen
+          fi
+          xcodegen --version
+
+      - name: Validate App Store Connect secrets
+        run: |
+          test -n "$ASC_API_KEY"
+          test -n "$ASC_KEY_ID"
+          test -n "$ASC_ISSUER_ID"
+
+      - name: Write App Store Connect API key
+        run: |
+          umask 077
+          if printf '%s' "$ASC_API_KEY" | grep -q 'BEGIN PRIVATE KEY'; then
+            printf '%s' "$ASC_API_KEY" > "$RUNNER_TEMP/AuthKey.p8"
+          else
+            printf '%s' "$ASC_API_KEY" | base64 --decode > "$RUNNER_TEMP/AuthKey.p8"
+          fi
+
+      - name: Validate CI signing assets
+        run: |
+          missing=0
+          for name in IOS_DISTRIBUTION_CERTIFICATE_P12_BASE64 IOS_DISTRIBUTION_CERTIFICATE_PASSWORD IOS_APPSTORE_PROFILE_BASE64; do
+            if [ -z "${!name:-}" ]; then
+              echo "::error title=Missing BeMoreAgent CI signing secret::$name is required for GitHub-hosted TestFlight delivery. Export the BeMoreAgent App Store distribution .p12 and App Store .mobileprovision profile, then set BEMORE_IOS_DISTRIBUTION_CERTIFICATE_P12_BASE64, BEMORE_IOS_DISTRIBUTION_CERTIFICATE_PASSWORD, and BEMORE_IOS_APPSTORE_PROFILE_BASE64."
+              missing=1
+            fi
+          done
+          if [ "$missing" -ne 0 ]; then
+            exit 65
+          fi
+          echo "CI signing assets are present for team DY9FHPRZA9 and bundle id BeMoreAgent."
+
+      - name: Import CI signing assets
+        run: |
+          umask 077
+          SIGNING_KEYCHAIN="$RUNNER_TEMP/bemoreagent-signing.keychain-db"
+          SIGNING_KEYCHAIN_PASSWORD="$(uuidgen)"
+          CERT_PATH="$RUNNER_TEMP/bemoreagent-distribution.p12"
+          PROFILE_DIR="$HOME/Library/MobileDevice/Provisioning Profiles"
+          PROFILE_PATH="$PROFILE_DIR/BeMoreAgent-AppStore.mobileprovision"
+
+          printf '%s' "$IOS_DISTRIBUTION_CERTIFICATE_P12_BASE64" | base64 --decode > "$CERT_PATH"
+          mkdir -p "$PROFILE_DIR"
+          printf '%s' "$IOS_APPSTORE_PROFILE_BASE64" | base64 --decode > "$PROFILE_PATH"
+
+          security create-keychain -p "$SIGNING_KEYCHAIN_PASSWORD" "$SIGNING_KEYCHAIN"
+          security set-keychain-settings -lut 21600 "$SIGNING_KEYCHAIN"
+          security unlock-keychain -p "$SIGNING_KEYCHAIN_PASSWORD" "$SIGNING_KEYCHAIN"
+          security import "$CERT_PATH" -k "$SIGNING_KEYCHAIN" -P "$IOS_DISTRIBUTION_CERTIFICATE_PASSWORD" -T /usr/bin/codesign -T /usr/bin/security -T /usr/bin/xcodebuild
+          security list-keychains -d user -s "$SIGNING_KEYCHAIN"
+          security default-keychain -d user -s "$SIGNING_KEYCHAIN"
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$SIGNING_KEYCHAIN_PASSWORD" "$SIGNING_KEYCHAIN"
+
+          security find-identity -v -p codesigning "$SIGNING_KEYCHAIN"
+          PROFILE_NAME="$(security cms -D -i "$PROFILE_PATH" | plutil -extract Name raw -o - -)"
+          PROFILE_BUNDLE="$(security cms -D -i "$PROFILE_PATH" | plutil -extract Entitlements.application-identifier raw -o - -)"
+          PROFILE_GET_TASK_ALLOW="$(security cms -D -i "$PROFILE_PATH" | plutil -extract Entitlements.get-task-allow raw -o - -)"
+          echo "Imported profile: $PROFILE_NAME"
+          echo "Profile application identifier: $PROFILE_BUNDLE"
+          if [ "$PROFILE_BUNDLE" != "DY9FHPRZA9.BeMoreAgent" ]; then
+            echo "::error title=Wrong provisioning profile::Expected DY9FHPRZA9.BeMoreAgent, got $PROFILE_BUNDLE"
+            exit 65
+          fi
+          if [ "$PROFILE_GET_TASK_ALLOW" != "false" ]; then
+            echo "::error title=Wrong provisioning profile::Expected an App Store profile with get-task-allow=false, got $PROFILE_GET_TASK_ALLOW"
+            exit 65
+          fi
+          if [ "$PROFILE_NAME" != "$IOS_APPSTORE_PROFILE_NAME" ]; then
+            echo "::notice title=Provisioning profile name differs::Expected '$IOS_APPSTORE_PROFILE_NAME', got '$PROFILE_NAME'. The workflow will use the imported name."
+            echo "IOS_APPSTORE_PROFILE_NAME=$PROFILE_NAME" >> "$GITHUB_ENV"
+          fi
+          echo "BEMORE_SIGNING_KEYCHAIN=$SIGNING_KEYCHAIN" >> "$GITHUB_ENV"
+          echo "BEMORE_SIGNING_PROFILE_PATH=$PROFILE_PATH" >> "$GITHUB_ENV"
+
+      - name: Show app version and build
+        run: |
+          VERSION=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' OpenClawShell/Info.plist)
+          BUILD=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' OpenClawShell/Info.plist)
+          echo "Preparing BeMoreAgent $VERSION ($BUILD) for TestFlight"
+
+      - name: Generate Xcode project
+        run: |
+          test -f project.yml
+          xcodegen generate
+          test -d BeMoreAgent.xcodeproj
+          test -f exportOptions-upload.plist
+
+      - name: Verify bundle identifier contract
+        run: |
+          python3 - <<'PY2'
+          import pathlib
+          import re
+          import sys
+
+          project = pathlib.Path('project.yml').read_text()
+          expected = 'BeMoreAgent'
+          match = re.search(r'PRODUCT_BUNDLE_IDENTIFIER:\s*([^\n]+)', project)
+          if not match:
+              print('Missing PRODUCT_BUNDLE_IDENTIFIER in project.yml', file=sys.stderr)
+              sys.exit(1)
+          actual = match.group(1).strip()
+          if actual != expected:
+              print(f'Bundle identifier drifted: expected {expected}, got {actual}', file=sys.stderr)
+              sys.exit(1)
+
+          info = pathlib.Path('OpenClawShell/Info.plist').read_text()
+          if '$(PRODUCT_BUNDLE_IDENTIFIER)' not in info:
+              print('Info.plist must inherit PRODUCT_BUNDLE_IDENTIFIER', file=sys.stderr)
+              sys.exit(1)
+
+          print(f'Bundle identifier verified: {actual}')
+          PY2
+
+      - name: Build and archive release
+        run: |
+          xcodebuild -project BeMoreAgent.xcodeproj \
+            -scheme BeMoreAgent \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath "$RUNNER_TEMP/BeMoreAgent.xcarchive" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$RUNNER_TEMP/AuthKey.p8" \
+            -authenticationKeyID "$ASC_KEY_ID" \
+            -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
+            CODE_SIGN_STYLE=Automatic \
+            DEVELOPMENT_TEAM=DY9FHPRZA9 \
+            OTHER_CODE_SIGN_FLAGS="--keychain $BEMORE_SIGNING_KEYCHAIN" \
+            clean archive
+
+      - name: Export and upload to TestFlight
+        run: |
+          plutil -p exportOptions-upload.plist
+          xcodebuild -exportArchive \
+            -archivePath "$RUNNER_TEMP/BeMoreAgent.xcarchive" \
+            -exportPath "$RUNNER_TEMP/BeMoreAgent-export" \
+            -exportOptionsPlist exportOptions-upload.plist \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$RUNNER_TEMP/AuthKey.p8" \
+            -authenticationKeyID "$ASC_KEY_ID" \
+            -authenticationKeyIssuerID "$ASC_ISSUER_ID"
+
+      - name: Publish TestFlight summary
+        if: success()
+        run: |
+          SOURCE_VERSION=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' OpenClawShell/Info.plist)
+          SOURCE_BUILD=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' OpenClawShell/Info.plist)
+          ARCHIVE_PLIST="$RUNNER_TEMP/BeMoreAgent.xcarchive/Products/Applications/BeMoreAgent.app/Info.plist"
+          ARCHIVE_VERSION=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$ARCHIVE_PLIST")
+          ARCHIVE_BUILD=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$ARCHIVE_PLIST")
+          {
+            echo '## TestFlight upload'
+            echo ''
+            echo "- Source version: $SOURCE_VERSION ($SOURCE_BUILD)"
+            echo "- Archived version: $ARCHIVE_VERSION ($ARCHIVE_BUILD)"
+            echo '- Upload step: xcodebuild -exportArchive completed successfully'
+            echo '- Admin runbook: apps/openclaw-shell-ios/ADMIN_TESTFLIGHT_RUNBOOK.md'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload distribution logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: bemoreagent-xcdistributionlogs
+          path: ${{ runner.temp }}/**/BeMoreAgent_*.xcdistributionlogs
+          if-no-files-found: ignore
+
+      - name: Clean temporary signing files
+        if: always()
+        run: |
+          rm -f "$RUNNER_TEMP/AuthKey.p8" "$RUNNER_TEMP/bemoreagent-distribution.p12"
+          if [ -n "${BEMORE_SIGNING_KEYCHAIN:-}" ]; then
+            security delete-keychain "$BEMORE_SIGNING_KEYCHAIN" || true
+          fi

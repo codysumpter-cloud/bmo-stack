@@ -1,28 +1,48 @@
-# OpenClaw Shell for iPhone
+# BeMoreAgent iOS Shell
 
-A native SwiftUI iPhone shell for on-device local-LLM workflows.
+Native SwiftUI iPhone shell for the BeMoreAgent operator stack.
 
-This subtree is the fast path for testing an OpenClaw-style iPhone app from Xcode with a free Apple ID, while keeping the runtime swappable.
+## Current product shell
 
-## What is in here
+The app currently exposes six product surfaces:
 
-- `Home` tab with native stack onboarding, compilation, dashboard state, and stack preview
-- `Models` tab for saving curated model sources and downloading model weights into app storage
-- `Chat` tab with local history, file-context selection, stack-aware prompts, and an engine boundary
-- `Files` tab for persistent workspace imports stored inside app-scoped storage
-- `Editor` tab with a bundled web-backed editor shell you can later replace with Monaco
-- `MLCBridgeEngine` that is **compile-safe without MLC** and **ready to wire** once you add the local `MLCSwift` package and packaged libraries
+- `Control` for Mission Control style operator visibility over live local state, routing posture, provider linkage, and persistence health.
+- `Models` as the primary route and model control surface for local installs, cloud route activation, and active-route visibility.
+- `Chat` for conversation history and file-context assisted prompts.
+- `Buddy` for the bundled Council Starter Pack, local Buddy installs, personalization, active-Buddy continuity, and receipt-backed check-ins/training.
+- `Files` for app-scoped workspace imports.
+- `Settings` for provider editing, maintenance, shell management, and storage summaries.
 
-## Current runtime posture
+The shell persists local state under app-scoped Application Support, including:
 
-This app builds immediately without an on-device runtime package because it falls back to a stub path when `MLCSwift` is not present.
+- chat history
+- workspace file copies
+- installed model metadata
+- provider configuration
+- runtime selection
+- tab order and visibility
+- buddy library state and runtime events
+- operator preferences
 
-Once you prepare MLC on your Mac, you can switch to real on-device inference by:
+The Buddy surface now bundles repo-owned canonical Buddy contracts and starter content from the
+main `bmo-stack` repo. Installing or personalizing a Buddy persists:
 
-1. packaging model libraries and configs into `dist/`
-2. adding the local `ios/MLCSwift` package to the Xcode project
-3. setting the local model's `modelLib` value in the app
-4. selecting that model in the app
+- `State/buddy-instances.json`
+- `.openclaw/state/buddy-runtime-events.json`
+- `.openclaw/buddy.md`
+- `.openclaw/buddies.md`
+
+Bundle identity continuity matters for this state. See [`BUILD_14_CONTINUITY_NOTE.md`](./BUILD_14_CONTINUITY_NOTE.md) for why build 14 could look like a fresh install after the bundle identifier briefly changed.
+
+## Runtime posture
+
+This subtree does not claim a completed on-device runtime. It builds without `MLCSwift` by falling back to a stub local engine boundary, and real local inference still depends on packaging and wiring an actual runtime.
+
+Today the honest split is:
+
+- local state, model import/download, route selection, and shell persistence are real
+- cloud chat routes are real when the operator links valid provider credentials
+- on-device inference remains gated on the missing runtime package and packaged model libraries
 
 ## Quick start
 
@@ -30,86 +50,31 @@ Once you prepare MLC on your Mac, you can switch to real on-device inference by:
 brew install xcodegen
 cd apps/openclaw-shell-ios
 xcodegen generate
-xcodebuild -project OpenClawShell.xcodeproj \
-  -scheme OpenClawShell \
+xcodebuild -project BeMoreAgent.xcodeproj \
+  -scheme BeMoreAgent \
   -sdk iphonesimulator \
   -destination 'generic/platform=iOS Simulator' \
   -derivedDataPath .build/DerivedData \
   build
-open OpenClawShell.xcodeproj
+open BeMoreAgent.xcodeproj
 ```
 
-Then in Xcode:
+Admin and release notes live in [`ADMIN_TESTFLIGHT_RUNBOOK.md`](./ADMIN_TESTFLIGHT_RUNBOOK.md).
 
-1. pick your Apple ID team
-2. set a unique bundle identifier
-3. run on your iPhone
+## Operator notes
 
-## Security defaults
+- Use `Models` to choose the active local model or cloud route.
+- Use `Settings` to edit provider credentials and manage tab visibility/order.
+- Use `Control` to inspect current routing posture and local durability.
+- Use `Buddy` to install a Council starter Buddy, make a Buddy active, personalize its identity, and
+  record receipt-backed check-ins or training updates.
+- Buddy actions regenerate the readable `.openclaw/buddy.md` and `.openclaw/buddies.md` continuity
+  files alongside the machine-readable JSON state.
 
-- imported workspace files are copied into app-scoped Application Support storage
-- broad Files app sharing is disabled by default
-- model downloads and chat state stay inside the app container unless you explicitly share exported files
+## Known limits
 
-## MLC bridge notes
-
-Use the included `mlc-package-config.sample.json` as a starting point for packaging.
-
-The app expects:
-
-- packaged libraries under a local `dist/lib` search path
-- runtime config and optionally bundled weights under `dist/bundle`
-- a `modelLib` string that matches the packaged model library name you generated
-
-## Product gap snapshot
-
-Current shape: a credible local iPhone stack-builder foundation.
-
-What is already real:
-
-- app-scoped storage for files, state, model artifacts, and compiled stack definitions
-- native onboarding flow that compiles a local-first stack definition into a home dashboard and preview
-- file import and local editing
-- chat history and model selection state
-- compile-safe runtime boundary that can later switch from stub to on-device inference
-
-What still makes it feel like a test harness instead of the real product:
-
-- runtime posture is easy to misunderstand unless you inspect the code
-- the distinction between local prepared imports and network downloads needs to stay visible in the UI
-- there is still no richer operator surface yet for approvals, logs, recovery, or task supervision
-- file handling is still single-device and flat, without stronger workspace semantics
-- the stack compiler is deterministic and local-first, but still opinionated scaffolding rather than a full runtime-integrated product brain
-
-## Prioritized roadmap
-
-1. **Operator trust surface**
-   - keep runtime/backend/model state obvious
-   - expose reset/recovery/status actions in-app
-   - make local-first vs networked paths unmistakable
-2. **Real on-device runtime**
-   - wire `MLCSwift`
-   - package and validate one known-good on-device model path
-   - add practical readiness/error reporting for model boot and memory pressure
-3. **Safer workspace UX**
-   - add stronger file metadata, workspace grouping, and better large-file handling
-   - make file attachments to chat explicit and reviewable
-4. **Mobile operator workflows**
-   - introduce routines, local diagnostics, and task/result history suited for phone use
-   - keep approvals and destructive actions narrow and inspectable
-5. **Shared product architecture**
-   - converge the iOS shell and Windows workstation around the same product language: local-first, explicit capability boundaries, durable recovery, boring reliability
-
-## Changes made in this pass
-
-- replaced the old control-first shell with a `Home` source-of-truth flow for stack onboarding, compilation, dashboard state, and stack preview
-- added a native stack-builder domain model plus local persistence for onboarding answers and compiled stack state
-- split the oversized tab UI into `Features/Home`, `Features/Chat`, `Features/Files`, `Features/Models`, and `Features/Editor`
-- wired the compiled stack into chat context, files guidance, model posture, and starter prompts so the app feels stack-aware instead of generic
-- kept the simulator build green with `xcodegen` plus `xcodebuild` against repo-local DerivedData
-
-## Honest limits
-
-- This subtree was assembled here without Xcode or the iOS SDK, so it was not simulator-compiled in this environment.
-- The MLC bridge is designed to be safe before package hookup and practical after hookup, but you should still do one compile-fix pass locally once `MLCSwift` and packaged libraries are present.
-- The new control surface improves operator clarity, but it is still not a full mobile workstation yet.
+- The local runtime path is still a stub unless the runtime package is added and configured.
+- Provider testing depends on real upstream credentials and network reachability.
+- Simulator builds can be blocked by host-side Xcode/CoreSimulator state even when the project files are valid.
+- Buddy Workshop publishing, marketplace distribution, and creator workflows are not part of this
+  shell wedge yet; this build only ships the bundled canonical starter pack plus local instance continuity.

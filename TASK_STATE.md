@@ -1,42 +1,41 @@
 # Task State
 
-Last updated: 2026-04-07 11:13 UTC
+Last updated: 2026-04-11 16:12 UTC
 
 ## Current status
 
-- Description: Advance `apps/openclaw-shell-ios` from a shell scaffold into a native stack-builder foundation with local onboarding, persistence, dashboard, and preview surfaces.
-- Active repo: `/Users/prismtek/code/bmo-stack`
-- Branch: `fix/openclaw-shell-ios-local-build`
-- Last successful step: added native stack-builder models and store, split the oversized shell into feature folders, regenerated the Xcode project, and passed a simulator `xcodebuild` using repo-local DerivedData.
-- Next intended step: push commit `9bcf242` to `origin/fix/openclaw-shell-ios-local-build` once network/DNS access to GitHub is restored, then continue the next stack-aware runtime integration slice.
-- Verification complete: true
+- Description: Complete the BeMore usability rescue pass by fixing the iOS chat escape trap, simplifying the Buddy-first shell, and adding first-run onboarding in `apps/openclaw-shell-ios`.
+- Active repo: `/Users/taylor/development/bmo-stack`
+- Branch: `codex/build18-buddy-library-foundation`
+- Last successful step: validated the rescue changes with `xcodebuild ... build`, `xcodebuild ... test` on the iPhone 17 Pro simulator, simulator smoke checks for onboarding/chat escape, and a no-sign build of the device variant with `CODE_SIGNING_ALLOWED=NO`.
+- Next intended step: stage the usability rescue changes, publish the draft PR, and watch/fix GitHub checks until green.
+- Verification complete: false
 - Manual steps remaining:
-  - restore network/DNS access so `git push origin fix/openclaw-shell-ios-local-build` can reach GitHub
-  - set a real Apple Development team and unique bundle identifier in Xcode before installing on a physical iPhone
-  - enable Developer Mode on the iPhone before direct device install
+  - create the commit and draft PR
+  - watch remote checks and address any repo-scoped failures
 - Safe to resume: true
 
+- 2026-04-09 19:13 UTC
+  - Repo: `/Users/taylor/development/bmo-stack`
+  - Branch: `codex/ios-shell-surfaces-a`
+  - Files touched: none yet on this branch
+  - Last successful step: access gate, baseline build, and baseline simulator verification passed on current `master`; current master already includes persisted tab management, buddy rename/active selection persistence, and Models route control.
+  - Next intended step: implement focused PR A deltas rather than re-creating already-landed work
+  - Verification complete: false
+  - Manual steps remaining: code/doc edits, rebuild, simulator verification, PR B feasibility call
+  - Safe to resume: true
+
+- 2026-04-09 19:33 UTC
+  - Repo: `/Users/taylor/development/bmo-stack`
+  - Branch: `codex/ios-shell-surfaces-a`
+  - Files touched: Mission Control shell/docs plus repo-backed surface view
+  - Last successful step: fetched `origin/master`, confirmed PR `#212` landed at `2026-04-09T18:53:22Z`, rebased onto build `13`, and restored the in-progress shell/doc changes cleanly
+  - Next intended step: rerun required build + simulator checks, then publish PR A and separate runtime-blocker PR B
+  - Verification complete: false
+  - Manual steps remaining: rebuild, final simulator verification, PR publication
+  - Safe to resume: true
+
 ## Recent checkpoints
-
-- 2026-04-07 11:13 UTC
-  - Repo: `/Users/prismtek/code/bmo-stack`
-  - Branch: `fix/openclaw-shell-ios-local-build`
-  - Files touched: checkpoint files only
-  - Last successful step: committed the stack-builder foundation as `9bcf242` and re-ran the simulator build successfully on the committed tree
-  - Next intended step: retry `git push origin fix/openclaw-shell-ios-local-build` once GitHub DNS resolution works again
-  - Verification complete: true
-  - Manual steps remaining: network/DNS recovery for GitHub push, then physical-device signing setup
-  - Safe to resume: true
-
-- 2026-04-07 11:11 UTC
-  - Repo: `/Users/prismtek/code/bmo-stack`
-  - Branch: `fix/openclaw-shell-ios-local-build`
-  - Files touched: `apps/openclaw-shell-ios/OpenClawShell/ContentView.swift`, `apps/openclaw-shell-ios/OpenClawShell/RuntimeServices.swift`, `apps/openclaw-shell-ios/OpenClawShell/Models/StackBuilderModels.swift`, `apps/openclaw-shell-ios/OpenClawShell/Stores/StackBuilderStore.swift`, `apps/openclaw-shell-ios/OpenClawShell/Features/Home/HomeView.swift`, `apps/openclaw-shell-ios/OpenClawShell/Features/Chat/ChatView.swift`, `apps/openclaw-shell-ios/OpenClawShell/Features/Files/FilesView.swift`, `apps/openclaw-shell-ios/OpenClawShell/Features/Models/ModelsView.swift`, `apps/openclaw-shell-ios/OpenClawShell/Features/Editor/EditorView.swift`, `apps/openclaw-shell-ios/README.md`
-  - Last successful step: `xcodegen generate` plus `xcodebuild -project apps/openclaw-shell-ios/OpenClawShell.xcodeproj -scheme OpenClawShell -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' -derivedDataPath /Users/prismtek/code/bmo-stack/apps/openclaw-shell-ios/.build/DerivedData build` succeeded after landing the stack-builder foundation
-  - Next intended step: commit, push, and continue the next stack-aware runtime integration slice on the same PR branch
-  - Verification complete: true
-  - Manual steps remaining: Apple team/bundle id selection and Developer Mode for direct iPhone install
-  - Safe to resume: true
 
 - 2026-04-07 10:39 UTC
   - Repo: `/Users/prismtek/code/bmo-stack`

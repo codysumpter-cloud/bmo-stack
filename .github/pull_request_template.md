@@ -1,33 +1,20 @@
 ## Summary
-- 
 
-## Why
-- 
+<!-- What changed and why? -->
 
-## Changes
-- 
+## Task contract
+- Plan: `context/plans/<yyyy-mm-dd-slug>.md`
+- Verification: yes
+- Rollback: yes
 
-## Validation
-- [ ] `make doctor`
-- [ ] `make doctor-plus` (if relevant)
-- [ ] `make up` / `make down` (if compose or service changes were touched)
-- [ ] `bash -n` on changed shell scripts
-- [ ] checked docs / README updates if behavior changed
+## Verification
+- [ ] Local verification completed
+- [ ] CI verification completed or expected checks identified
 
-## OpenClaw / worker impact
-- [ ] no agent-routing changes
-- [ ] updates `main` / `bmo-tron` behavior
-- [ ] affects sandbox, bridge, or gateway config
-- [ ] affects Telegram or other channel behavior
+## Rollback
+- [ ] Revert PR is sufficient
+- [ ] Any manual rollback steps are described below
 
-## Context / docs impact
-- [ ] no context changes
-- [ ] updates files under `context/`
-- [ ] updates bootstrap or recovery docs
-- [ ] updates GitHub automation / workflows
+## Notes
 
-## Checklist
-- [ ] this PR is scoped tightly
-- [ ] secrets were not committed
-- [ ] branch protection checks should pass
-- [ ] follow-up work is called out if needed
+<!-- Optional: risks, follow-ups, screenshots, or links -->

@@ -73,6 +73,7 @@ This repo is intentionally local-first and operator-visible.
 - Host OpenClaw handles Telegram-facing runtime behavior.
 - OpenShell and NemoClaw provide disposable worker sandboxes.
 - `bmo-stack` provides the canonical operating environment, policy surface, and integration glue.
+- The iOS app uses its own app-container workspace. It must not read or mutate the MacBook `~/.openclaw` runtime unless Cody explicitly connects it through a gateway, pairing, or export/import path.
 
 Manual operator steps still exist:
 
@@ -88,6 +89,7 @@ Manual operator steps still exist:
 - Do not claim `prismtek.dev` web-chat fixes from `bmo-stack` alone unless the relevant `prismtek-site` path was changed and validated.
 - Do not patch vendored or donor paths first when the real owner is upstream.
 - Prefer machine-checkable manifests, validators, and runbooks over doc-only promises.
+- Use `make openclaw-boundary-doctor` to verify the MacBook OpenClaw/runtime boundary and `make openclaw-host-policy` to reapply the host Telegram delivery policy.
 
 ## Licensing and provenance
 
@@ -104,4 +106,5 @@ This repository is licensed under the Apache License 2.0.
 - `docs/ENTERPRISE_APP_FACTORY_BRIDGE.md`
 - `docs/PRIVATE_APP_REPO_INTEGRATION.md`
 - `docs/BMO_NATIVE_RUNTIME.md`
+- `docs/BMO_MYTHOS_LITE.md`
 - `docs/MISSION_CONTROL_BMO_STACK_SYNC.md`

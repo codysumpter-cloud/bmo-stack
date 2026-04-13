@@ -12,6 +12,8 @@ Important decisions:
 3. Context should not live only inside the sandbox.
 4. Share project files, not live runtime state.
 5. Prefer one-message replies unless asked otherwise.
+6. The iOS app's `.openclaw` workspace is app-container state, not the MacBook `~/.openclaw` runtime. The two should connect only through an explicit gateway, pairing, or export/import path.
+7. Telegram delivery should collect up to 20 inbound messages into one agent turn, then deliver the answer in the fewest platform-safe chunks.
 
 Restart recovery:
 - Authoritative startup sequence is in `context/RUNBOOK.md`, Restart Recovery Protocol.

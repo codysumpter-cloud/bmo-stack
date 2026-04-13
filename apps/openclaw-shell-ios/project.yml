@@ -1,23 +1,40 @@
-name: OpenClawShell
+name: BeMoreAgent
 options:
   bundleIdPrefix: com.prismtek
 configs:
   Debug: debug
   Release: release
 settings:
-  IPHONEOS_DEPLOYMENT_TARGET: 17.0
-  SWIFT_VERSION: 5.0
+  IPHONEOS_DEPLOYMENT_TARGET: 26.0
+  SWIFT_VERSION: "5.9"
 targets:
-  OpenClawShell:
+  BeMoreAgent:
     type: application
     platform: iOS
     sources:
       - path: OpenClawShell
         excludes:
           - "**/.DS_Store"
+      - path: OpenClawShell/Views/RepoSurfaceDetailView.swift
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.prismtek.openclawshell
+        PRODUCT_BUNDLE_IDENTIFIER: BeMoreAgent
+        INFOPLIST_KEY_CFBundleIdentifier: BeMoreAgent
         INFOPLIST_FILE: OpenClawShell/Info.plist
-        DEVELOPMENT_TEAM: ""
+        DEVELOPMENT_TEAM: DY9FHPRZA9
+        CODE_SIGN_STYLE: Automatic
+        PRODUCT_NAME: BeMoreAgent
     dependencies: []
+  BeMoreAgentTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: OpenClawShellTests
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: BeMoreAgentTests
+        GENERATE_INFOPLIST_FILE: YES
+        DEVELOPMENT_TEAM: DY9FHPRZA9
+        CODE_SIGN_STYLE: Automatic
+    dependencies:
+      - target: BeMoreAgent

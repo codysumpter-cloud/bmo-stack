@@ -7,6 +7,7 @@
 - `prismtek-site` owns the public `prismtek.dev` Cloudflare Pages surface.
 - `context/` is the canonical repo context.
 - `openshell sandbox list` is the live sandbox truth when available.
+- MacBook OpenClaw runtime state under `~/.openclaw` and the iOS app's app-container `.openclaw` workspace are separate by default. Connect them only through an explicit gateway, pairing, or export/import path.
 
 ## Restart recovery protocol
 
@@ -88,6 +89,8 @@ Run these before ad hoc debugging when they fit:
 4. `make workspace-sync`
 5. `make site-caretaker`
 6. `make worker-ready`
+
+Use `make openclaw-boundary-doctor` when checking that the MacBook OpenClaw runtime remains isolated from the iOS app sandbox. Use `make openclaw-host-policy` to reapply the Telegram delivery policy that collects up to 20 inbound messages into one turn and avoids tiny outbound chunks.
 
 `make worker-ready` changes sandbox state, so prefer it after the status and routing checks above.
 

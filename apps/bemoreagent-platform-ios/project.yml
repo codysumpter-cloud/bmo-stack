@@ -1,0 +1,24 @@
+name: BeMoreAgentPlatform
+options:
+  bundleIdPrefix: com.prismtek
+configs:
+  Debug: debug
+  Release: release
+settings:
+  IPHONEOS_DEPLOYMENT_TARGET: 17.0
+  SWIFT_VERSION: "5.9"
+targets:
+  BeMoreAgentPlatform:
+    type: application
+    platform: iOS
+    sources:
+      - path: BeMoreAgentPlatform
+        excludes:
+          - "**/.DS_Store"
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.prismtek.bemoreagent.platform
+        INFOPLIST_FILE: BeMoreAgentPlatform/Info.plist
+        DEVELOPMENT_TEAM: ""
+        PRODUCT_NAME: BeMoreAgentPlatform
+    dependencies: []

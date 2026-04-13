@@ -1,4 +1,4 @@
-.PHONY: up down status logs doctor sync-context sync-context-host-to-repo sync-context-repo-to-host context-reseed worker-create worker-upload-config worker-connect worker-status recover-session worker-ready health-check doctor-plus checkpoint omni-sync omni-doctor omni-launch recover-bmo update-all runtime-doctor runtime-profile-dev runtime-profile-snappy runtime-profile-robust runtime-face-idle runtime-loop runtime-router runtime-profile2-dev runtime-profile2-snappy runtime-profile2-robust runtime-stt-once runtime-face-rich-idle runtime-launch runtime-launch-dry runtime-cloud-once runtime-cloud-dry workspace-sync project-snapshot continuity-report continuity-publish site-caretaker site-route-report site-work-report site-route-scaffold site-route-update site-donor-extract site-page-checklist site-parity-matrix site-parity-report site-parity-update site-react-template launchd-install durable-init durable-run-next durable-status durable-resume durable-cancel
+.PHONY: up down status logs doctor sync-context sync-context-host-to-repo sync-context-repo-to-host context-reseed worker-create worker-upload-config worker-connect worker-status recover-session worker-ready health-check doctor-plus checkpoint omni-sync omni-doctor omni-launch recover-bmo update-all runtime-doctor runtime-profile-dev runtime-profile-snappy runtime-profile-robust runtime-face-idle runtime-loop runtime-router runtime-profile2-dev runtime-profile2-snappy runtime-profile2-robust runtime-stt-once runtime-face-rich-idle runtime-launch runtime-launch-dry runtime-cloud-once runtime-cloud-dry workspace-sync openclaw-boundary-doctor openclaw-host-policy project-snapshot continuity-report continuity-publish site-caretaker site-route-report site-work-report site-route-scaffold site-route-update site-donor-extract site-page-checklist site-parity-matrix site-parity-report site-parity-update site-react-template launchd-install durable-init durable-run-next durable-status durable-resume durable-cancel
 
 # Docker Compose file
 COMPOSE_FILE=compose.yaml
@@ -159,6 +159,12 @@ runtime-cloud-dry:
 
 workspace-sync:
 	@python3 ./scripts/bmo-workspace-sync.py $(if $(ARGS),$(ARGS))
+
+openclaw-boundary-doctor:
+	@python3 ./scripts/openclaw-boundary-doctor.py
+
+openclaw-host-policy:
+	@python3 ./scripts/apply-openclaw-host-policy.py
 
 project-snapshot:
 	@bash ./scripts/bmo-project-snapshot.sh $(if $(ARGS),$(ARGS))
