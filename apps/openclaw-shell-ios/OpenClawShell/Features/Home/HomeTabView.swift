@@ -249,10 +249,10 @@ private struct StackDashboardView: View {
         }
     }
 
-    private func mappedTab(for surface: StackSurface) -> OpenClawShellTab {
+    private func mappedTab(for surface: StackSurface) -> AppTab {
         switch surface {
         case .home:
-            return .home
+            return .missionControl
         case .chat:
             return .chat
         case .files:
@@ -262,7 +262,7 @@ private struct StackDashboardView: View {
         case .editor:
             return .editor
         case .preview:
-            return .home
+            return .missionControl
         }
     }
 }

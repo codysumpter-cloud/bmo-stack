@@ -7,91 +7,109 @@ struct FilesTabView: View {
 
     var body: some View {
         NavigationStack {
-            List {
-                if let stack = appState.activeStack {
-                    Section("Stack Workspace") {
-                        Text(stack.workspaceGuidance)
-                            .font(.footnote)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-
-                if appState.workspaceStore.files.isEmpty {
-                    ContentUnavailableView(
-                        "No files yet",
-                        systemImage: "folder",
-                        description: Text(appState.activeStack?.workspaceGuidance ?? "Import files you want your local assistant to keep around.")
-                    )
-                }
-
-                ForEach(appState.workspaceStore.files) { file in
-                    Button {
-                        appState.workspaceStore.selectedFile = file
-                        if let stack = appState.activeStack, stack.enabledSurfaces.contains(.editor) {
-                            appState.route(to: .editor)
-                        }
-                    } label: {
-                        HStack {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(file.filename)
-                                Text(file.localURL.lastPathComponent)
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                            }
-                            Spacer()
-                            if appState.workspaceStore.selectedFile?.id == file.id {
-                                Image(systemName: "checkmark.circle.fill")
-                            }
-                        }
-                    }
-                    .swipeActions {
-                        Button(role: .destructive) {
-                            appState.workspaceStore.delete(file)
+            mainList
+                .navigationTitle(\"Files\")
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
+                            isImporterPresented = true
                         } label: {
-                            Label("Delete", systemImage: "trash")
+                            Label(\"Import\", systemImage: \"plus\")
                         }
                     }
                 }
-            }
-            .navigationTitle("Files")
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        isImporterPresented = true
-                    } label: {
-                        Label("Import", systemImage: "plus")
-                    }
+                .fileImporter(
+                    isPresented: $isImporterPresented,
+                    allowedContentTypes: [.data, .plainText, .json, .sourceCode, .xml, .commaSeparatedText, .text],
+                    allowsMultipleSelection: true
+                ) { result in
+                    handleImport(result)
+                }
+                .safeAreaInset(edge: .bottom) {
+                    bottomPreview
+                }
+                .alert(\"Files error\", isPresented: Binding(get: {
+                    appState.workspaceStore.errorMessage != nil
+                }, set: { _ in
+                    appState.workspaceStore.errorMessage = nil
+                })) {
+                    Button(\"OK\", role: .cancel) {}
+                } message: {
+                    Text(appState.workspaceStore.errorMessage ?? \"Unknown error\")
+                }
+        }
+    }
+
+    private var mainList: some View {
+        List {
+            if let stack = appState.activeStack {
+                Section(\"Stack Workspace\") {
+                    Text(stack.workspaceGuidance)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
                 }
             }
-            .fileImporter(
-                isPresented: $isImporterPresented,
-                allowedContentTypes: [.data, .plainText, .json, .sourceCode, .xml, .commaSeparatedText, .text],
-                allowsMultipleSelection: true
-            ) { result in
-                switch result {
-                case .success(let urls):
-                    appState.workspaceStore.importFiles(from: urls)
-                case .failure(let error):
-                    appState.workspaceStore.errorMessage = error.localizedDescription
+
+            if appState.workspaceStore.files.isEmpty {
+                ContentUnavailableView(
+                    \"No files yet\",
+                    systemImage: \"folder\",
+                    description: Text(appState.activeStack?.workspaceGuidance ?? \"Import files you want your local assistant to keep around.\")
+                )
+            }
+
+            ForEach(appState.workspaceStore.files) { file in
+                fileRow(for: file)
+            }
+        }
+    }
+
+    private func fileRow(for file: WorkspaceFile) -> some View {
+        Button {
+            appState.workspaceStore.selectedFile = file
+            if let stack = appState.activeStack, stack.enabledSurfaces.contains(.editor) {
+                appState.route(to: .editor)
+            }
+        } label: {
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(file.filename)
+                    Text(file.localURL.lastPathComponent)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                Spacer()
+                if appState.workspaceStore.selectedFile?.id == file.id {
+                    Image(systemName: \"checkmark.circle.fill\")
                 }
             }
-            .safeAreaInset(edge: .bottom) {
-                if let selected = appState.workspaceStore.selectedFile {
-                    TextFilePreview(file: selected)
-                        .environmentObject(appState)
-                        .frame(maxHeight: 280)
-                        .background(.thinMaterial)
-                }
+        }
+        .swipeActions {
+            Button(role: .destructive) {
+                appState.workspaceStore.delete(file)
+            } label: {
+                Label(\"Delete\", systemImage: \"trash\")
             }
-            .alert("Files error", isPresented: Binding(get: {
-                appState.workspaceStore.errorMessage != nil
-            }, set: { _ in
-                appState.workspaceStore.errorMessage = nil
-            })) {
-                Button("OK", role: .cancel) {}
-            } message: {
-                Text(appState.workspaceStore.errorMessage ?? "Unknown error")
+        }
+    }
+
+    private var bottomPreview: some View {
+        Group {
+            if let selected = appState.workspaceStore.selectedFile {
+                TextFilePreview(file: selected)
+                    .environmentObject(appState)
+                    .frame(maxHeight: 280)
+                    .background(.thinMaterial)
             }
+        }
+    }
+
+    private func handleImport(_ result: Result<[URL], Error>) {
+        switch result {
+        case .success(let urls):
+            appState.workspaceStore.importFiles(from: urls)
+        case .failure(let error):
+            appState.workspaceStore.errorMessage = error.localizedDescription
         }
     }
 }
