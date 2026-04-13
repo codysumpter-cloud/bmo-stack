@@ -116,6 +116,8 @@ private func shellDestination(for tab: AppTab, appState: AppState) -> some View 
     switch tab {
     case .missionControl:
         MissionControlView(store: appState.buddyStore)
+    case .editor:
+        EditorTabView()
     case .models:
         ModelsView()
     case .chat:

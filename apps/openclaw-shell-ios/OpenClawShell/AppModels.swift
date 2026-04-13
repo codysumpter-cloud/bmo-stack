@@ -464,6 +464,7 @@ struct KnownModel: Identifiable {
 
 enum AppTab: String, Codable, CaseIterable, Hashable, Identifiable {
     case missionControl
+    case editor
     case buddy
     case files
     case skills
@@ -479,6 +480,7 @@ enum AppTab: String, Codable, CaseIterable, Hashable, Identifiable {
     var title: String {
         switch self {
         case .missionControl: return "Home"
+        case .editor: return "Editor"
         case .buddy: return "Buddy"
         case .files: return "Workspace"
         case .skills: return "Skills"
@@ -494,6 +496,7 @@ enum AppTab: String, Codable, CaseIterable, Hashable, Identifiable {
     var systemImage: String {
         switch self {
         case .missionControl: return "heart.text.square.fill"
+        case .editor: return "doc.text.fill"
         case .buddy: return "person.crop.circle.badge.checkmark"
         case .files: return "folder.fill"
         case .skills: return "sparkles.rectangle.stack.fill"
