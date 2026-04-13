@@ -1335,25 +1335,25 @@ final class AppState: ObservableObject {
     func compileStack() {
         _ = stackStore.compileCurrentStack()
         configureConversationForCurrentStack()
-        selectedTab = .home
+        selectedTab = .missionControl
     }
     
     func reopenStackOnboarding() {
         stackStore.reopenOnboarding()
-        selectedTab = .home
+        selectedTab = .missionControl
     }
     
     func resetStackBuilder() {
         stackStore.reset()
         configureConversationForCurrentStack(forceReplace: true)
-        selectedTab = .home
+        selectedTab = .missionControl
     }
     
     func clearConversation() {
-        chatStore.clear(systemMessage: activeStack?.chatSystemPrompt)
+        chatStore.clear()
     }
     
-    func route(to tab: OpenClawShellTab) {
+    func route(to tab: AppTab) {
         selectedTab = tab
     }
     
@@ -1715,7 +1715,7 @@ final class AppState: ObservableObject {
                 ))
             } else {
                 if usesStubRuntime { runtimeStatus = "Stub preview" }
-                reply = AgentReplySanitizer.userVisibleAnswer(from: try await engine.generate(prompt: cleaned, fileContexts: attachedFiles, chatHistory: chatStore.messages))
+                reply = AgentReplySanitizer.userVisibleAnswer(from: try await engine.generate(prompt: cleaned, fileContexts: attachedFiles, chatHistory: chatStore.messages, activeStack: activeStack))
             }
             chatStore.messages.append(ChatMessage(role: .assistant, content: reply))
             workspaceRuntime.refreshMetadata()
