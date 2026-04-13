@@ -1155,9 +1155,8 @@ final class UserPreferencesStore: ObservableObject {
 
 // MARK: - App state
 
-@MainActor
+  @MainActor
 final class AppState: ObservableObject {
-    @Published var selectedTab: OpenClawShellTab = .home
     @Published var stackStore = StackBuilderStore()
     @Published var pendingPrompt: String?
     // MARK: Stored properties – declared before the initializer so they are in scope
