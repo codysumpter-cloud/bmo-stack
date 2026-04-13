@@ -8,13 +8,13 @@ struct FilesTabView: View {
     var body: some View {
         NavigationStack {
             mainList
-                .navigationTitle(\"Files\")
+                .navigationTitle("Files")
                 .toolbar {
                     ToolbarItem(placement: .topBarTrailing) {
                         Button {
                             isImporterPresented = true
                         } label: {
-                            Label(\"Import\", systemImage: \"plus\")
+                            Label("Import", systemImage: "plus")
                         }
                     }
                 }
@@ -28,14 +28,14 @@ struct FilesTabView: View {
                 .safeAreaInset(edge: .bottom) {
                     bottomPreview
                 }
-                .alert(\"Files error\", isPresented: Binding(get: {
+                .alert("Files error", isPresented: Binding(get: {
                     appState.workspaceStore.errorMessage != nil
                 }, set: { _ in
                     appState.workspaceStore.errorMessage = nil
                 })) {
-                    Button(\"OK\", role: .cancel) {}
+                    Button("OK", role: .cancel) {}
                 } message: {
-                    Text(appState.workspaceStore.errorMessage ?? \"Unknown error\")
+                    Text(appState.workspaceStore.errorMessage ?? "Unknown error")
                 }
         }
     }
@@ -43,7 +43,7 @@ struct FilesTabView: View {
     private var mainList: some View {
         List {
             if let stack = appState.activeStack {
-                Section(\"Stack Workspace\") {
+                Section("Stack Workspace") {
                     Text(stack.workspaceGuidance)
                         .font(.footnote)
                         .foregroundStyle(.secondary)
@@ -52,9 +52,9 @@ struct FilesTabView: View {
 
             if appState.workspaceStore.files.isEmpty {
                 ContentUnavailableView(
-                    \"No files yet\",
-                    systemImage: \"folder\",
-                    description: Text(appState.activeStack?.workspaceGuidance ?? \"Import files you want your local assistant to keep around.\")
+                    "No files yet",
+                    systemImage: "folder",
+                    description: Text(appState.activeStack?.workspaceGuidance ?? "Import files you want your local assistant to keep around.")
                 )
             }
 
@@ -80,7 +80,7 @@ struct FilesTabView: View {
                 }
                 Spacer()
                 if appState.workspaceStore.selectedFile?.id == file.id {
-                    Image(systemName: \"checkmark.circle.fill\")
+                    Image(systemName: "checkmark.circle.fill")
                 }
             }
         }
@@ -88,7 +88,7 @@ struct FilesTabView: View {
             Button(role: .destructive) {
                 appState.workspaceStore.delete(file)
             } label: {
-                Label(\"Delete\", systemImage: \"trash\")
+                Label("Delete", systemImage: "trash")
             }
         }
     }
