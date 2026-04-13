@@ -59,6 +59,7 @@ enum Paths {
     static var chatStateFile: URL { stateDirectory.appendingPathComponent("chat.json") }
     static var providersFile: URL { stateDirectory.appendingPathComponent("providers.json") }
     static var runtimeSelectionFile: URL { stateDirectory.appendingPathComponent("runtime-selection.json") }
+    static var stackBuilderStateFile: URL { stateDirectory.appendingPathComponent("stack-builder.json") }
     static var stackConfigFile: URL { stateDirectory.appendingPathComponent("stack-config.json") }
     static var tabPreferencesFile: URL { stateDirectory.appendingPathComponent("tab-preferences.json") }
     static var userPreferencesFile: URL { stateDirectory.appendingPathComponent("user-preferences.json") }
@@ -225,7 +226,7 @@ protocol LocalLLMEngine {
 
     func bootstrap() async throws
     func configureRuntime(_ config: EngineRuntimeConfig?) async throws
-    func generate(prompt: String, fileContexts: [WorkspaceFile], chatHistory: [ChatMessage]) async throws -> String
+    func generate(prompt: String, fileContexts: [WorkspaceFile], chatHistory: [ChatMessage], activeStack: CompiledStack?) async throws -> String
 }
 
 // MARK: - MLC / Stub engine
@@ -278,8 +279,8 @@ final class MLCBridgeEngine: LocalLLMEngine {
         #endif
     }
 
-    func generate(prompt: String, fileContexts: [WorkspaceFile], chatHistory: [ChatMessage]) async throws -> String {
-        let contextPrefix = buildContextPrefix(fileContexts: fileContexts, chatHistory: chatHistory)
+    func generate(prompt: String, fileContexts: [WorkspaceFile], chatHistory: [ChatMessage], activeStack: CompiledStack?) async throws -> String {
+        let contextPrefix = buildContextPrefix(fileContexts: fileContexts, chatHistory: chatHistory, activeStack: activeStack)
         let finalPrompt = contextPrefix + prompt
 
         #if canImport(MLCSwift)
@@ -318,9 +319,13 @@ final class MLCBridgeEngine: LocalLLMEngine {
         #endif
     }
 
-    private func buildContextPrefix(fileContexts: [WorkspaceFile], chatHistory: [ChatMessage]) -> String {
+    private func buildContextPrefix(fileContexts: [WorkspaceFile], chatHistory: [ChatMessage], activeStack: CompiledStack?) -> String {
         var parts: [String] = []
-
+        
+        if let activeStack {
+            parts.append("STACK SUMMARY:\n\(activeStack.summary)\nMODEL STRATEGY:\n\(activeStack.recommendedModelStrategy)\nWORKSPACE GUIDANCE:\n\(activeStack.workspaceGuidance)\nSYSTEM PROMPT:\n\(activeStack.chatSystemPrompt)")
+        }
+        
         if !fileContexts.isEmpty {
             let rendered = fileContexts.map { file -> String in
                 let text = (try? String(contentsOf: file.localURL, encoding: .utf8)) ?? "[binary or unreadable file]"
@@ -328,14 +333,15 @@ final class MLCBridgeEngine: LocalLLMEngine {
             }
             parts.append(rendered.joined(separator: "\n\n"))
         }
-
+        
         if !chatHistory.isEmpty {
-            let clipped = chatHistory.suffix(8).map { "\($0.role.rawValue.uppercased()): \($0.content)" }.joined(separator: "\n")
-            parts.append("RECENT CHAT:\n\(clipped)")
+            let history = chatHistory.map { msg in
+                "\(msg.role.rawValue.capitalized): \(msg.content)"
+            }.joined(separator: "\n\n")
+            parts.append("CHAT HISTORY:\n\(history)")
         }
-
-        guard !parts.isEmpty else { return "" }
-        return parts.joined(separator: "\n\n") + "\n\nUSER REQUEST:\n"
+        
+        return parts.joined(separator: "\n\n")
     }
 }
 
@@ -1151,6 +1157,9 @@ final class UserPreferencesStore: ObservableObject {
 
 @MainActor
 final class AppState: ObservableObject {
+    @Published var selectedTab: OpenClawShellTab = .home
+    @Published var stackStore = StackBuilderStore()
+    @Published var pendingPrompt: String?
     // MARK: Stored properties – declared before the initializer so they are in scope
     @Published var modelStore = ModelCatalogStore()
     @Published var workspaceStore = WorkspaceStore()
@@ -1161,6 +1170,9 @@ final class AppState: ObservableObject {
     @Published var tabPreferencesStore = TabPreferencesStore()
     @Published var userPreferencesStore = UserPreferencesStore()
     @Published var runtimeStatus = "Not configured"
+    var activeStack: CompiledStack? {
+        stackStore.compiledStack
+    }
     @Published var stackConfig = StackConfig.default
     @Published var gemmaDownloadState: ModelDownloadState = .notInstalled
     @Published var providerModels: [ProviderKind: [CloudModel]] = [:]
@@ -1321,6 +1333,41 @@ final class AppState: ObservableObject {
 
     weak var buddyProfileStore: BuddyProfileStore?
 
+    func compileStack() {
+        _ = stackStore.compileCurrentStack()
+        configureConversationForCurrentStack()
+        selectedTab = .home
+    }
+    
+    func reopenStackOnboarding() {
+        stackStore.reopenOnboarding()
+        selectedTab = .home
+    }
+    
+    func resetStackBuilder() {
+        stackStore.reset()
+        configureConversationForCurrentStack(forceReplace: true)
+        selectedTab = .home
+    }
+    
+    func clearConversation() {
+        chatStore.clear(systemMessage: activeStack?.chatSystemPrompt)
+    }
+    
+    func route(to tab: OpenClawShellTab) {
+        selectedTab = tab
+    }
+    
+    func openChat(with prompt: String) {
+        pendingPrompt = prompt
+        selectedTab = .chat
+    }
+    
+    func consumePendingPrompt() -> String? {
+        defer { pendingPrompt = nil }
+        return pendingPrompt
+    }
+    
     private let engine: LocalLLMEngine
     private let cloudExecutionService = CloudExecutionService()
 
@@ -1335,6 +1382,7 @@ final class AppState: ObservableObject {
 
     func bootstrap() async {
         loadStackConfig()
+        stackStore.load()
         modelStore.load()
         workspaceStore.load()
         chatStore.load()
@@ -1352,7 +1400,7 @@ final class AppState: ObservableObject {
         do {
             try await engine.bootstrap()
             try await applySelectedModelIfPossible()
-            refreshRuntimeSummary()
+            configureConversationForCurrentStack()
         } catch {
             chatStore.errorMessage = error.localizedDescription
             runtimeStatus = "Runtime error"
@@ -1850,5 +1898,21 @@ final class AppState: ObservableObject {
             EngineRuntimeConfig(modelURL: installed.localURL, modelID: installed.modelID, modelLib: installed.modelLib)
         )
         runtimeStatus = installed.modelID.isEmpty ? "On-device: \(installed.localFilename)" : "On-device: \(installed.modelID)"
+    }
+    private func configureConversationForCurrentStack(forceReplace: Bool = false) {
+        if let activeStack {
+            let currentFirst = chatStore.messages.first?.content ?? ""
+            let shouldReplace = forceReplace || chatStore.messages.isEmpty || currentFirst.contains("OpenClawShell is ready.") || currentFirst.contains("Conversation cleared.")
+            if shouldReplace {
+                chatStore.messages = [ChatMessage(role: .system, content: activeStack.chatSystemPrompt)]
+                chatStore.persist()
+            }
+            return
+        }
+        
+        if forceReplace || chatStore.messages.isEmpty {
+            chatStore.messages = [ChatMessage(role: .system, content: "OpenClawShell is ready. Add a packaged MLC runtime or use the stub path until then.")]
+            chatStore.persist()
+        }
     }
 }
