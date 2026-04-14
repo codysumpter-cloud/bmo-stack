@@ -1,0 +1,1 @@
+../../../../../docs/COUNCIL_STARTER_PACK.md

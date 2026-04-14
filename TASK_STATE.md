@@ -1,18 +1,18 @@
 # Task State
 
-Last updated: 2026-04-10 10:25 UTC
+Last updated: 2026-04-11 16:12 UTC
 
 ## Current status
 
-- Description: Keep PR #229 merge-ready while tightening the MacBook OpenClaw/iOS boundary and host Telegram delivery policy.
-- Active repo: `/Users/prismtek/bmo-stack`
-- Branch: `fix/openclaw-build18-agent-workspace-ux`
-- Last successful step: applied host OpenClaw delivery policy, added repo-side boundary/policy doctors, and verified PR #229 was clean before this follow-up patch.
-- Next intended step: run repo checks, commit, push, and confirm the PR checks restart on the new head.
+- Description: Complete the BeMore usability rescue pass by fixing the iOS chat escape trap, simplifying the Buddy-first shell, and adding first-run onboarding in `apps/openclaw-shell-ios`.
+- Active repo: `/Users/taylor/development/bmo-stack`
+- Branch: `codex/build18-buddy-library-foundation`
+- Last successful step: validated the rescue changes with `xcodebuild ... build`, `xcodebuild ... test` on the iPhone 17 Pro simulator, simulator smoke checks for onboarding/chat escape, and a no-sign build of the device variant with `CODE_SIGNING_ALLOWED=NO`.
+- Next intended step: stage the usability rescue changes, publish the draft PR, and watch/fix GitHub checks until green.
 - Verification complete: false
 - Manual steps remaining:
-  - watch the new PR head checks after push
-  - verify live Telegram delivery with a real long response from Cody's channel
+  - create the commit and draft PR
+  - watch remote checks and address any repo-scoped failures
 - Safe to resume: true
 
 - 2026-04-09 19:13 UTC
