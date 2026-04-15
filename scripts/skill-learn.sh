@@ -11,12 +11,18 @@ require_cmd() {
   }
 }
 
+ensure_memory() {
+  mkdir -p "$(dirname "$MEMORY")"
+  [ -f "$MEMORY" ] || printf '{\n  "history": []\n}\n' >"$MEMORY"
+}
+
 log_result() {
   local input="$1"
   local skill="$2"
   local action="$3"
   local success="$4"
 
+  ensure_memory
   require_cmd jq
 
   tmp="$(mktemp)"
@@ -35,6 +41,7 @@ log_result() {
 }
 
 summarize() {
+  ensure_memory
   require_cmd jq
   jq '.history | group_by(.skill) | map({skill: .[0].skill, success_rate: (map(select(.success == true)) | length) / length})' "$MEMORY"
 }

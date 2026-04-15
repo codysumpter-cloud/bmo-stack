@@ -1,0 +1,66 @@
+{
+  "site": "prismtek.dev",
+  "lastUpdated": "2026-03-25T17:20:00Z",
+  "entries": [
+    {
+      "route": "/",
+      "label": "Home",
+      "priority": "P0",
+      "navigation_parity": "partial",
+      "visual_parity": "partial",
+      "content_parity": "partial",
+      "cta_parity": "pending",
+      "functional_parity": "pending",
+      "deploy_parity": "pending",
+      "notes": "Homepage is the first parity lock because its sections seed the React migration."
+    },
+    {
+      "route": "/arcade-games/",
+      "label": "Arcade Games",
+      "priority": "P0",
+      "navigation_parity": "pending",
+      "visual_parity": "pending",
+      "content_parity": "pending",
+      "cta_parity": "pending",
+      "functional_parity": "pending",
+      "deploy_parity": "pending",
+      "notes": "Needs donor intake and route brief before React implementation review."
+    },
+    {
+      "route": "/projects/",
+      "label": "Projects",
+      "priority": "P0",
+      "navigation_parity": "pending",
+      "visual_parity": "pending",
+      "content_parity": "pending",
+      "cta_parity": "pending",
+      "functional_parity": "pending",
+      "deploy_parity": "pending",
+      "notes": "Treat as a core content route after homepage parity is stronger."
+    },
+    {
+      "route": "/downloads/",
+      "label": "Downloads",
+      "priority": "P0",
+      "navigation_parity": "pending",
+      "visual_parity": "pending",
+      "content_parity": "pending",
+      "cta_parity": "pending",
+      "functional_parity": "pending",
+      "deploy_parity": "pending",
+      "notes": "Downloads route must preserve real functionality, not just card layout."
+    },
+    {
+      "route": "/build-log/",
+      "label": "Build Log",
+      "priority": "P0",
+      "navigation_parity": "pending",
+      "visual_parity": "pending",
+      "content_parity": "pending",
+      "cta_parity": "pending",
+      "functional_parity": "pending",
+      "deploy_parity": "pending",
+      "notes": "Build Log should preserve chronology and update expectations in the React version."
+    }
+  ]
+}

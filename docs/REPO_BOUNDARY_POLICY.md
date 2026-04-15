@@ -1,6 +1,6 @@
 # Repository Boundary Policy
 
-This document defines what belongs in the public `bmo-stack` repository and what should remain in private deployment overlays.
+This document defines what belongs in the public `BeMore-stack` repository and what should remain in private deployment overlays.
 
 ## Public repository scope
 

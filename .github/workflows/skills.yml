@@ -4,14 +4,18 @@ on:
   pull_request:
     paths:
       - 'skills/**'
-      - 'scripts/validate-skills.py'
+      - 'config/skills/**'
+      - 'scripts/bmo-skill-pack.mjs'
+      - 'scripts/validate-skills.mjs'
       - '.github/workflows/skills.yml'
   push:
     branches:
       - master
     paths:
       - 'skills/**'
-      - 'scripts/validate-skills.py'
+      - 'config/skills/**'
+      - 'scripts/bmo-skill-pack.mjs'
+      - 'scripts/validate-skills.mjs'
       - '.github/workflows/skills.yml'
 
 permissions:
@@ -24,12 +28,15 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
         with:
-          python-version: '3.x'
+          node-version: '22'
 
       - name: Validate skills registry
-        run: python3 scripts/validate-skills.py
+        run: node scripts/validate-skills.mjs
+
+      - name: Validate BMO skill pack
+        run: node scripts/bmo-skill-pack.mjs list

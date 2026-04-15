@@ -1,7 +1,10 @@
 {
   "skills": {
     "telegram-routing": {
-      "actions": ["status", "fix"],
+      "actions": [
+        "status",
+        "fix"
+      ],
       "triggers": [
         "telegram",
         "bind telegram",
@@ -11,7 +14,11 @@
       "default_action": "fix"
     },
     "sandbox-debugging": {
-      "actions": ["explain", "recreate", "status"],
+      "actions": [
+        "explain",
+        "recreate",
+        "status"
+      ],
       "triggers": [
         "sandbox",
         "main agent appears sandboxed",
@@ -22,7 +29,9 @@
       "default_action": "explain"
     },
     "ci-failure-diagnosis": {
-      "actions": ["show"],
+      "actions": [
+        "show"
+      ],
       "triggers": [
         "ruleset",
         "required checks",
@@ -36,7 +45,10 @@
       "default_action": "show"
     },
     "bootstrap-recovery": {
-      "actions": ["doctor", "configure"],
+      "actions": [
+        "doctor",
+        "configure"
+      ],
       "triggers": [
         "env file",
         ".env missing",
@@ -48,7 +60,11 @@
       "default_action": "doctor"
     },
     "context-sync": {
-      "actions": ["apply", "host-to-repo", "repo-to-host"],
+      "actions": [
+        "apply",
+        "host-to-repo",
+        "repo-to-host"
+      ],
       "triggers": [
         "identity drift",
         "context drift",
@@ -58,7 +74,11 @@
       "default_action": "apply"
     },
     "openclaw-agent-split": {
-      "actions": ["status", "fix-routing", "reapply-identity"],
+      "actions": [
+        "status",
+        "fix-routing",
+        "reapply-identity"
+      ],
       "triggers": [
         "main sandbox off",
         "bmo-tron",
@@ -68,7 +88,9 @@
       "default_action": "status"
     },
     "browser-automation": {
-      "actions": ["show"],
+      "actions": [
+        "show"
+      ],
       "triggers": [
         "browser automation",
         "web ui",
@@ -76,6 +98,123 @@
         "browser worker"
       ],
       "default_action": "show"
+    },
+    "skills-access-diagnosis": {
+      "actions": [
+        "show",
+        "run"
+      ],
+      "triggers": [
+        "cannot access skills",
+        "skills missing",
+        "clawhub hangs",
+        "skill install stuck",
+        "openclaw skills check"
+      ],
+      "default_action": "run"
+    },
+    "universal-intake": {
+      "actions": [
+        "run"
+      ],
+      "triggers": [
+        "read this link",
+        "watch this video",
+        "analyze this file",
+        "summarize this url",
+        "extract keyframes",
+        "fetch any link"
+      ],
+      "default_action": "run"
+    },
+    "video-review": {
+      "actions": [
+        "run"
+      ],
+      "triggers": [
+        "review this video",
+        "summarize youtube",
+        "analyze video content",
+        "extract video transcript",
+        "watch and react",
+        "video breakdown"
+      ],
+      "default_action": "run"
+    },
+    "agent-automation": {
+      "actions": [
+        "run"
+      ],
+      "triggers": [
+        "run routine",
+        "agent automation",
+        "schedule agent"
+      ],
+      "default_action": "run"
+    },
+    "mission-control-enhancement": {
+      "actions": [
+        "run"
+      ],
+      "triggers": [
+        "enhance mission control",
+        "mission control panels"
+      ],
+      "default_action": "run"
+    },
+    "claw-code-harness": {
+      "actions": [
+        "install",
+        "manifest",
+        "summary",
+        "commands",
+        "tools"
+      ],
+      "triggers": [
+        "claw-code",
+        "claw code",
+        "harness manifest",
+        "tool inventory",
+        "command inventory"
+      ],
+      "default_action": "summary"
+    },
+    "omx-nim-coding": {
+      "actions": [
+        "doctor",
+        "codex",
+        "claw",
+        "dispatch"
+      ],
+      "triggers": [
+        "omx nim",
+        "nvidia nim",
+        "codex nim",
+        "mission control nim",
+        "free coding model"
+      ],
+      "default_action": "dispatch"
+    },
+    "telegram-coding-dispatch": {
+      "actions": [
+        "doctor",
+        "brief",
+        "dispatch",
+        "status",
+        "result"
+      ],
+      "triggers": [
+        "fix this",
+        "make this work",
+        "build this",
+        "can you code this",
+        "do the coding part",
+        "from telegram",
+        "from my phone",
+        "i do not know how to prompt this",
+        "turn this into a proper prompt"
+      ],
+      "default_action": "dispatch"
     }
   }
 }

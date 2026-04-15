@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bmostack.dev/schemas/runtime/security-review-lane-event.schema.json",
+  "title": "Security Review Lane Event",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "runId",
+    "laneId",
+    "stage",
+    "status",
+    "emittedAt"
+  ],
+  "properties": {
+    "runId": {"type": "string", "minLength": 1},
+    "laneId": {
+      "type": "string",
+      "enum": ["intake", "static-analysis", "dynamic-discovery", "triage", "patch", "review"]
+    },
+    "stage": {
+      "type": "string",
+      "enum": [
+        "queued",
+        "starting",
+        "running",
+        "blocked",
+        "completed",
+        "failed",
+        "awaiting-approval"
+      ]
+    },
+    "status": {"type": "string", "enum": ["ok", "warning", "error"]},
+    "findingIds": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "summary": {"type": "string"},
+    "blocker": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {"type": "string", "enum": ["approval", "build", "sandbox", "tooling", "policy", "timeout"]},
+        "detail": {"type": "string"}
+      }
+    },
+    "nextAction": {"type": "string"},
+    "emittedAt": {"type": "string", "format": "date-time"}
+  }
+}

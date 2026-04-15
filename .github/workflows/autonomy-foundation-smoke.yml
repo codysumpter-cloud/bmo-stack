@@ -1,0 +1,204 @@
+name: autonomy-foundation-smoke
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.x'
+
+      - name: Verify toolchain
+        run: |
+          jq --version
+          node --version
+
+      - name: Seed memory fixture
+        run: |
+          python3 - <<'PY'
+          import json
+          import time
+          from pathlib import Path
+
+          data = {
+              "history": [
+                  {
+                      "input": "ci failed",
+                      "skill": "ci-failure-diagnosis",
+                      "action": "show",
+                      "success": True,
+                      "ts": int(time.time()) - 60,
+                  }
+              ]
+          }
+
+          Path("skills/memory.json").write_text(
+              json.dumps(data, indent=2) + "\n",
+              encoding="utf-8",
+          )
+          PY
+
+      - name: Run goal planner
+        run: python3 scripts/skill_goal_plan.py --goal "improve system reliability" --output smoke-plan.json
+
+      - name: Execute planned evolution
+        run: bash scripts/skill_execute_plan.sh workflows/smoke-plan.json
+
+      - name: Reflect
+        run: python3 scripts/skill_reflect.py --output workflows/smoke-reflection.json
+
+      - name: Score skills
+        run: python3 scripts/skill_confidence.py --output workflows/smoke-scorecard.json
+
+      - name: Assert scorecard schema
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          scorecard = json.loads(Path("workflows/smoke-scorecard.json").read_text(encoding="utf-8"))
+          assert scorecard["score_model"] == "beta-prior-v1"
+          assert isinstance(scorecard["skills"], dict)
+          assert "ci-failure-diagnosis" in scorecard["skills"]
+
+          sample = scorecard["skills"]["ci-failure-diagnosis"]
+          required = {
+              "attempts",
+              "successes",
+              "failures",
+              "success_rate",
+              "posterior_confidence",
+              "recency_weight",
+              "disabled",
+              "decayed",
+              "final_score",
+          }
+          missing = required - set(sample)
+          assert not missing, f"missing fields: {sorted(missing)}"
+          PY
+
+      - name: Run diagnosis script
+        run: node scripts/skills-access-diagnosis.mjs > workflows/skills-diagnosis.json
+
+      - name: Render BMO skill pack
+        run: node scripts/bmo-skill-pack.mjs json > workflows/bmo-skill-pack.json
+
+      - name: Assert diagnosis schema
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          report = json.loads(Path("workflows/skills-diagnosis.json").read_text(encoding="utf-8"))
+          assert isinstance(report["skill_search_order"], list)
+          assert len(report["skill_search_order"] ) == 3
+          assert "manual_install_targets" in report
+          assert "preferred_default" in report["manual_install_targets"]
+          assert "workspace_override" in report["manual_install_targets"]
+          PY
+
+      - name: Assert skill pack schema
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          pack = json.loads(Path("workflows/bmo-skill-pack.json").read_text(encoding="utf-8"))
+          assert pack["pack_name"] == "bmo-baseline"
+          assert len(pack["skill_search_order"]) == 3
+          assert len(pack["local_routines"]) >= 3
+          assert len(pack["community_shortlist"]) >= 3
+          PY
+
+      - name: Validate GitHub automation contract
+        run: node scripts/validate-github-automation.mjs
+
+      - name: Validate council spawn manifest
+        run: node scripts/council-manifest.mjs validate
+
+      - name: Validate BMO routine pack
+        run: node scripts/bmo-routines.mjs validate
+
+      - name: Apply BMO runtime profile
+        run: python3 scripts/apply-bmo-runtime-profile.py dev --env-file workflows/test-bmo-runtime.env --output workflows/bmo-runtime-profile.json
+
+      - name: Assert BMO runtime profile schema
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          profile = json.loads(Path("workflows/bmo-runtime-profile.json").read_text(encoding="utf-8"))
+          assert profile["profile"] == "dev"
+          assert profile["values"]["BMO_TEXT_MODEL"]
+          assert profile["values"]["BMO_VISION_MODEL"]
+          assert profile["values"]["BMO_TTS_MODE"]
+          PY
+
+      - name: Assert generated runtime env is sourceable
+        run: |
+          set -a
+          . workflows/test-bmo-runtime.env
+          set +a
+          test "$BMO_SYSTEM_PROMPT_EXTRAS" = "Keep responses concise, practical, and BMO-like."
+
+      - name: Render BMO idle face
+        run: bash scripts/bmo-face.sh idle
+
+      - name: Run BMO runtime doctor
+        run: BMO_RUNTIME_ENV_FILE=workflows/test-bmo-runtime.env bash scripts/bmo-runtime-doctor.sh
+
+      - name: Replan loop
+        run: bash scripts/skill_replan.sh
+
+      - name: Validate autonomy planner v3 scripts
+        run: python3 -m py_compile scripts/github-issue-planner-v3.py scripts/github-autonomy-selftest.py
+
+      - name: Seed autonomy planner v3 sample plan
+        run: |
+          mkdir -p .github/autonomy
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          plan = {
+              "issue_number": 999,
+              "issue_url": "https://github.com/codysumpter-cloud/BeMore-stack/issues/999",
+              "issue_title": "docs: sample issue",
+              "issue_body": "Update `docs/example.md`",
+              "summary": "Autonomy plan for issue #999: docs: sample issue",
+              "scope": "docs",
+              "risk": "low",
+              "execution_mode": "builtin_scaffold",
+              "executor_allowed": True,
+              "blocked_reason": "",
+              "branch_name": "autonomy/issue-999-sample-issue",
+              "packet_path": ".github/autonomy/issues/issue-999-sample-issue.md",
+              "target_files": ["docs/example.md"],
+              "suggested_targets": ["docs/example.md"],
+              "checks": ["python3 scripts/github-autonomy-selftest.py .github/autonomy/plan.json"],
+              "pr_title": "autonomy: scaffold issue #999",
+              "run_id": "smoke",
+          }
+          Path(".github/autonomy/plan.json").write_text(
+              json.dumps(plan, indent=2) + "\n",
+              encoding="utf-8",
+          )
+          PY
+
+      - name: Validate autonomy planner v3 sample plan
+        run: python3 scripts/github-autonomy-selftest.py .github/autonomy/plan.json

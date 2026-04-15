@@ -1,0 +1,20 @@
+*.code-workspace
+context/continuity/live-status.json
+workflows/bmo-continuity.json
+workflows/bmo-workspace-sync.json
+
+# Durable runtime local state
+data/runtime_jobs.json
+
+# Local iOS signing artifacts and archives
+apps/openclaw-shell-ios/AuthKey_*.p8
+apps/openclaw-shell-ios/*.xcarchive/
+apps/openclaw-shell-ios/BeMoreAgent.xcodeproj/
+apps/openclaw-shell-ios/build/
+apps/openclaw-shell-ios/build-upload*/
+apps/openclaw-shell-ios/export/
+apps/openclaw-shell-ios/DirectUploadExport*/
+apps/openclaw-shell-ios/exportOptions.plist
+apps/openclaw-shell-ios/exportOptionsAppStore.plist
+apps/openclaw-shell-ios/exportOptions-auto-appstore.plist
+apps/openclaw-shell-ios/.DS_Store

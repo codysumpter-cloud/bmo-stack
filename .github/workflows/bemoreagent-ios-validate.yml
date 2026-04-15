@@ -1,0 +1,81 @@
+name: BeMoreAgent iOS validation
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+concurrency:
+  group: bemoreagent-ios-validate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-ios:
+    name: Generate and build BeMoreAgent
+    runs-on: ${{ fromJSON(vars.BEMOREAGENT_IOS_RUNS_ON != '' && vars.BEMOREAGENT_IOS_RUNS_ON || '["self-hosted","macOS"]') }}
+    defaults:
+      run:
+        working-directory: apps/openclaw-shell-ios
+    env:
+      XCODE_DEVELOPER_DIR: ${{ vars.BEMOREAGENT_XCODE_DEVELOPER_DIR != '' && vars.BEMOREAGENT_XCODE_DEVELOPER_DIR || '/Applications/Xcode.app/Contents/Developer' }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: |
+          xcode_app="${XCODE_DEVELOPER_DIR%/Contents/Developer}"
+          test -d "$xcode_app"
+          echo "DEVELOPER_DIR=$XCODE_DEVELOPER_DIR" >> "$GITHUB_ENV"
+          if command -v sudo >/dev/null 2>&1 && sudo -n true 2>/dev/null; then
+            sudo xcode-select -s "$xcode_app"
+          else
+            echo "Skipping xcode-select; using DEVELOPER_DIR=$XCODE_DEVELOPER_DIR"
+          fi
+
+      - name: Show Xcode version
+        run: |
+          xcodebuild -version
+          SDK_VERSION="$(xcrun --sdk iphonesimulator --show-sdk-version)"
+          echo "iPhoneSimulator SDK $SDK_VERSION"
+
+      - name: Install XcodeGen if needed
+        run: |
+          if ! command -v xcodegen >/dev/null 2>&1; then
+            brew install xcodegen
+          fi
+          xcodegen --version
+
+      - name: Show app version and build
+        run: |
+          VERSION=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' OpenClawShell/Info.plist)
+          BUILD=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' OpenClawShell/Info.plist)
+          echo "Building BeMoreAgent $VERSION ($BUILD)"
+
+      - name: Generate project
+        run: xcodegen generate
+
+      - name: Build for iOS Simulator
+        run: |
+          xcodebuild \
+            -project BeMoreAgent.xcodeproj \
+            -scheme BeMoreAgent \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath .build/DerivedData \
+            build
+
+      - name: Publish validation summary
+        if: always()
+        run: |
+          VERSION=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' OpenClawShell/Info.plist)
+          BUILD=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' OpenClawShell/Info.plist)
+          {
+            echo '## BeMoreAgent iOS validation'
+            echo ''
+            echo "- Version: $VERSION ($BUILD)"
+            echo '- Project generated from apps/openclaw-shell-ios/project.yml'
+            echo '- Destination: generic/platform=iOS Simulator'
+          } >> "$GITHUB_STEP_SUMMARY"

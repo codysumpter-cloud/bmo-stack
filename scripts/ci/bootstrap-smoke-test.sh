@@ -43,33 +43,35 @@ chmod +x "$FAKE_BIN/openclaw"
 cat >"$FAKE_BIN/rsync" <<'EOF'
 #!/usr/bin/env bash
 set -euo pipefail
-python3 - "$@" <<'PY'
-import os
-import shutil
-import sys
+node - "$@" <<'JS'
+const fs = require("node:fs");
+const path = require("node:path");
 
-args = [a for a in sys.argv[1:] if not a.startswith('-')]
-if len(args) != 2:
-    raise SystemExit('unsupported rsync invocation')
+const args = process.argv.slice(2).filter((arg) => !arg.startsWith("-"));
+if (args.length !== 2) {
+  throw new Error("unsupported rsync invocation");
+}
 
-src, dst = args
-src = src.rstrip('/')
-dst = dst.rstrip('/')
+const [rawSrc, rawDst] = args;
+const src = rawSrc.replace(/\/+$/, "");
+const dst = rawDst.replace(/\/+$/, "");
 
-if os.path.isdir(src):
-    os.makedirs(dst, exist_ok=True)
-    for entry in os.listdir(src):
-        s = os.path.join(src, entry)
-        d = os.path.join(dst, entry)
-        if os.path.isdir(s):
-            shutil.copytree(s, d, dirs_exist_ok=True)
-        else:
-            os.makedirs(os.path.dirname(d), exist_ok=True)
-            shutil.copy2(s, d)
-else:
-    os.makedirs(os.path.dirname(dst), exist_ok=True)
-    shutil.copy2(src, dst)
-PY
+function copyRecursive(sourcePath, destinationPath) {
+  const stat = fs.statSync(sourcePath);
+  if (stat.isDirectory()) {
+    fs.mkdirSync(destinationPath, { recursive: true });
+    for (const entry of fs.readdirSync(sourcePath)) {
+      copyRecursive(path.join(sourcePath, entry), path.join(destinationPath, entry));
+    }
+    return;
+  }
+
+  fs.mkdirSync(path.dirname(destinationPath), { recursive: true });
+  fs.copyFileSync(sourcePath, destinationPath);
+}
+
+copyRecursive(src, dst);
+JS
 EOF
 chmod +x "$FAKE_BIN/rsync"
 
@@ -89,18 +91,26 @@ echo "Running configure-openclaw-agents smoke test..."
 bash ./scripts/configure-openclaw-agents.sh
 
 test -f "$HOME/.openclaw/openclaw.json"
-python3 - <<'PY'
-import json
-import os
-from pathlib import Path
+node - <<'JS'
+const fs = require("node:fs");
+const path = require("node:path");
 
-p = Path(os.environ['HOME']) / '.openclaw' / 'openclaw.json'
-cfg = json.loads(p.read_text())
-agents = {item['id']: item for item in cfg['agents']['list']}
+const configPath = path.join(process.env.HOME, ".openclaw", "openclaw.json");
+const cfg = JSON.parse(fs.readFileSync(configPath, "utf8"));
+const agents = Object.fromEntries(cfg.agents.list.map((item) => [item.id, item]));
 
-assert cfg['agents']['defaults']['sandbox']['mode'] == 'off'
-assert agents['main']['sandbox']['mode'] == 'off'
-assert agents['bmo-tron']['sandbox']['mode'] == 'all'
-assert agents['bmo-tron']['sandbox']['docker']['network'] == 'bridge'
-print('Bootstrap smoke test passed.')
-PY
+if (cfg.agents.defaults.sandbox.mode !== "off") {
+  throw new Error("expected default sandbox mode off");
+}
+if (agents.main.sandbox.mode !== "off") {
+  throw new Error("expected main sandbox mode off");
+}
+if (agents["bmo-tron"].sandbox.mode !== "all") {
+  throw new Error("expected bmo-tron sandbox mode all");
+}
+if (agents["bmo-tron"].sandbox.docker.network !== "bridge") {
+  throw new Error("expected bmo-tron docker network bridge");
+}
+
+console.log("Bootstrap smoke test passed.");
+JS

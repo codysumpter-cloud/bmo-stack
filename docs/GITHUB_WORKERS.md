@@ -1,65 +1,92 @@
 # GitHub Workers
 
-This repository now defines two GitHub-oriented workers with Adventure Time identities.
+This repository now has five real GitHub automation surfaces:
+
+- Planner v3
+- Workspace Sync
+- Continuity Publisher
+- Cosmic Owl
+- Moe
+
+The machine-readable contract lives in `config/github/automation-contract.json`.
+
+## Planner v3
+
+**Type:** GitHub-hosted issue-to-PR planner and scaffold worker
+**Implementation:** `.github/workflows/issue-to-pr-v2.yml`
+
+### What it does
+- Watches for the current trigger label: `autonomy:execute`
+- Builds a planner-v3 issue plan
+- Runs the executor and verification surfaces
+- Produces a scaffold PR path for human review
+
+### What it does not do
+- It does not count as a real fix by itself
+- It does not bypass implementation, tests, or review
+
+## Workspace Sync
+
+**Type:** self-hosted workspace mirror worker
+**Implementation:** `.github/workflows/workspace-sync-on-merge.yml` + `scripts/sync-openclaw-workspaces.sh`
+
+### What it does
+- Runs on pushes to `master` when `BMO_WORKSPACE_SYNC_ENABLED=true`
+- Syncs the host and worker OpenClaw workspace mirrors
+- Keeps startup/identity files aligned after merges
+
+### Required repo variables
+- `BMO_WORKSPACE_SYNC_ENABLED`
+- `BMO_OPENCLAW_HOST_WORKSPACE`
+- `BMO_OPENCLAW_WORKER_WORKSPACE`
+- `BMO_WORKSPACE_SYNC_RUNS_ON`
+
+## Continuity Publisher
+
+**Type:** GitHub-hosted continuity publisher
+**Implementation:** `.github/workflows/publish-continuity.yml` + `scripts/bmo-continuity-report.mjs`
+
+### What it does
+- Builds a canonical repo continuity snapshot on every push to `master`
+- Publishes that snapshot to the Prismtek site continuity API when configured
+- Writes a workflow summary even when publish credentials are missing
+
+### Required configuration
+- repo variable: `PRISMTEK_CONTINUITY_URL`
+- repo secret: `PRISMTEK_CONTINUITY_TOKEN`
+
+### Why it matters
+- the public site Mission Control can see repo state
+- the MacBook bot and website bot can share one continuity format
+- Codex sessions can inspect the same snapshot through repo and site surfaces
 
 ## Cosmic Owl
 
 **Type:** GitHub-native caretaker worker  
 **Implementation:** `.github/workflows/github-caretaker.yml` + `scripts/github-maintenance-report.sh`
 
-### What Cosmic Owl does
-- Runs on `workflow_dispatch` and a daily `schedule`
+### What it does
+- Runs on `workflow_dispatch` and a daily schedule
 - Checks repository health using simple drift thresholds
 - Generates a maintenance report
 - Uploads the report as a workflow artifact
 - Opens a maintenance issue when thresholds are exceeded
 
-### What Cosmic Owl does not do
-- Does not push directly to `main`
-- Does not perform deep code repair by default
-- Does not pretend to be a general-purpose coding agent
-
-### Permissions
-- `contents: read`
-- `issues: write`
-- `pull-requests: write`
-
-### What is still manual
-- Tuning thresholds for stale commits / issue counts
-- Deciding when a maintenance issue should become a real repair task
-- Human review of any follow-up actions
-
 ## Moe
 
-**Type:** GitHub repair / draft-PR worker  
+**Type:** GitHub repair and draft-PR worker
 **Implementation:** `.github/workflows/moe-repair.yml` + `scripts/moe-open-pr.sh`
 
-### What Moe does
+### What it does
 - Runs on `workflow_dispatch`
 - Creates a repair branch from `master`
 - Runs a repo-local change script
 - Commits the resulting changes if any exist
 - Pushes the branch and opens a draft PR
 
-### What Moe does not do
-- Does not push directly to `main`
-- Does not decide architecture or orchestration
-- Does not bypass human review
+## Source-of-truth files
 
-### Permissions
-- `contents: write`
-- `pull-requests: write`
-
-### What is still manual
-- Supplying the change script and PR metadata
-- Reviewing and merging Moe's draft PRs
-- Escalating complex changes to a deeper worker or self-hosted runner
-
-## Sample maintenance report
-
-See `docs/COSMIC_OWL_REPORT_SAMPLE.md`.
-
-## Real vs simulated
-
-- **Real:** Cosmic Owl GitHub workflow, Moe GitHub workflow, worker naming registry, council definitions.
-- **Simulated/policy:** broader council orchestration still depends on BMO/Prismo following documented routing rules unless backed by additional automation.
+- `config/github/automation-contract.json`
+- `config/council/spawn-manifest.json`
+- `context/WORKER_NAMING_REGISTRY.md`
+- `context/council/README_CANONICAL.md`

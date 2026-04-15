@@ -3,6 +3,7 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SKILL_RUNNER="$ROOT_DIR/scripts/skill.sh"
+SELECTOR="$ROOT_DIR/scripts/skill_select.py"
 MODE="suggest"
 INPUT=""
 
@@ -69,7 +70,30 @@ suggest_for_text() {
     return
   fi
 
+  if printf '%s' "$lower" | grep -Eq 'browser automation|web ui|ui automation|browser worker'; then
+    echo "browser-automation show"
+    return
+  fi
+
+  if printf '%s' "$lower" | grep -Eq 'cannot access skills|skills missing|clawhub|skill install stuck|skills list --eligible|openclaw skills check'; then
+    echo "skills-access-diagnosis run"
+    return
+  fi
+
   echo ""
+}
+
+select_with_selector() {
+  local text="$1"
+  local tmp
+
+  [ -f "$SELECTOR" ] || return 1
+  command -v jq >/dev/null 2>&1 || return 1
+
+  tmp="$(mktemp)"
+  python3 "$SELECTOR" --text "$text" --output "$tmp" >/dev/null
+  jq -r '.selected | if . == null then "" else "\(.skill) \(.action)" end' "$tmp"
+  rm -f "$tmp"
 }
 
 main() {
@@ -101,8 +125,12 @@ main() {
   suggestion="$(suggest_for_text "$text")"
 
   if [ -z "$suggestion" ]; then
+    suggestion="$(select_with_selector "$text" || true)"
+  fi
+
+  if [ -z "$suggestion" ]; then
     echo "No auto-trigger match found."
-    echo "Try manual inspection with: $SKILL_RUNNER list"
+    echo "Try manual inspection with: bash $SKILL_RUNNER list"
     exit 1
   fi
 
@@ -113,8 +141,8 @@ main() {
   echo "Suggested action: $action"
 
   if [ "$MODE" = "apply" ]; then
-    echo "Applying: $SKILL_RUNNER run $skill $action"
-    "$SKILL_RUNNER" run "$skill" "$action"
+    echo "Applying: bash $SKILL_RUNNER run $skill $action"
+    bash "$SKILL_RUNNER" run "$skill" "$action"
   fi
 }
 

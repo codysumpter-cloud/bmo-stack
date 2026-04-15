@@ -1,30 +1,75 @@
-version: 1
-lastUpdated: 2026-03-11
+version: 3
+lastUpdated: 2026-03-26
+strictMode: true
 
 members:
-  - id: frontend-developer
-    role: Frontend Developer
+  - name: BMO
+    seat: runtime
     status: active
-  - id: ai-engineer
-    role: AI Engineer
+    zero_vote_streak: 0
+    selection_rate_30: null
+  - name: Prismo
+    seat: runtime
     status: active
-  - id: rapid-prototyper
-    role: Rapid Prototyper
+    zero_vote_streak: 0
+    selection_rate_30: null
+  - name: NEPTR
+    seat: runtime
     status: active
-  - id: reality-checker
-    role: Reality Checker (QA)
+    zero_vote_streak: 0
+    selection_rate_30: null
+  - name: Princess Bubblegum
+    seat: specialist
     status: active
-  - id: social-media-strategist
-    role: Social Media Strategist
+    zero_vote_streak: 0
+    selection_rate_30: null
+  - name: Finn
+    seat: specialist
     status: active
-  - id: professor-agent
-    role: Professor Agent (Council Advisor)
+    zero_vote_streak: 0
+    selection_rate_30: null
+  - name: Jake
+    seat: specialist
     status: active
-  - id: pixel-art-director
-    role: Pixel Art Director
+    zero_vote_streak: 0
+    selection_rate_30: null
+  - name: Marceline
+    seat: specialist
     status: active
-  - id: hd-visual-video-producer
-    role: HD Visual + Video Producer
+    zero_vote_streak: 0
+    selection_rate_30: null
+  - name: Simon
+    seat: specialist
+    status: active
+    zero_vote_streak: 0
+    selection_rate_30: null
+  - name: Peppermint Butler
+    seat: specialist
+    status: active
+    zero_vote_streak: 0
+    selection_rate_30: null
+  - name: Lady Rainicorn
+    seat: specialist
+    status: active
+    zero_vote_streak: 0
+    selection_rate_30: null
+  - name: Lemongrab
+    seat: specialist
+    status: active
+    zero_vote_streak: 0
+    selection_rate_30: null
+  - name: Flame Princess
+    seat: specialist
+    status: active
+    zero_vote_streak: 0
+    selection_rate_30: null
+
+workers:
+  - name: Cosmic Owl
+    kind: github-worker
+    status: active
+  - name: Moe
+    kind: github-worker
     status: active
 
 retiredMembers: []

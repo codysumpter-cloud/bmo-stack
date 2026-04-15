@@ -1,22 +1,75 @@
 #!/usr/bin/env bash
-# bmo-context-reseed: One-command context reseed
+# bmo-context-reseed: one-command context and workspace reseed
 
 set -euo pipefail
 
-HOST_CONTEXT_DIR="$HOME/bmo-context"
-REPO_CONTEXT_DIR="$HOME/.openclaw/workspace/bmo-stack/context"
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+HOST_CONTEXT_DIR="${BMO_HOST_CONTEXT_DIR:-$HOME/bmo-context}"
+WORKSPACE_DIR="${BMO_OPENCLAW_WORKSPACE_DIR:-$HOME/.openclaw/workspace/bmo-stack}"
+DRY_RUN=false
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --dry-run)
+      DRY_RUN=true
+      shift
+      ;;
+    *)
+      echo "Unknown option: $1"
+      echo "Usage: $0 [--dry-run]"
+      exit 1
+      ;;
+  esac
+done
 
 echo "=== BMO Context Reseed ==="
-echo "Syncing from host context to repo context..."
+echo "Repo root: $ROOT_DIR"
+echo "Host context: $HOST_CONTEXT_DIR"
+echo "Workspace dir: $WORKSPACE_DIR"
+echo "Dry run: $DRY_RUN"
+echo
 
-# Ensure repo context exists
-if [ ! -d "$REPO_CONTEXT_DIR" ]; then
-    echo "Error: Repo context directory not found: $REPO_CONTEXT_DIR"
-    exit 1
+run_step() {
+  local description="$1"
+  shift
+  echo "-> $description"
+  if [ "$DRY_RUN" = true ]; then
+    printf '   %q' "$@"
+    printf '\n'
+    return 0
+  fi
+  "$@"
+}
+
+if [ ! -d "$ROOT_DIR/context" ]; then
+  echo "Error: repo context directory not found under $ROOT_DIR/context"
+  exit 1
 fi
 
-# Sync from host to repo
-rsync -av --delete "$HOST_CONTEXT_DIR/" "$REPO_CONTEXT_DIR/"
-echo "Done."
+if [ "$DRY_RUN" = false ] && [ ! -d "$HOST_CONTEXT_DIR" ]; then
+  echo "Error: host context directory not found: $HOST_CONTEXT_DIR"
+  exit 1
+fi
 
-echo "=== End Reseed ==="
+if [ "$DRY_RUN" = true ] && [ ! -d "$HOST_CONTEXT_DIR" ]; then
+  echo "Warning: host context directory not found for dry run: $HOST_CONTEXT_DIR"
+fi
+
+if command -v python3 >/dev/null 2>&1; then
+  run_step "sync repo workspace from git and refresh host context" \
+    python3 "$ROOT_DIR/scripts/bmo-workspace-sync.py" \
+    --workspace-dir "$WORKSPACE_DIR" \
+    --host-context "$HOST_CONTEXT_DIR"
+else
+  echo "Warning: python3 not found; skipping bmo-workspace-sync.py"
+fi
+
+if command -v bash >/dev/null 2>&1; then
+  run_step "reseed OpenClaw host and worker workspaces" \
+    bash "$ROOT_DIR/scripts/sync-openclaw-workspaces.sh"
+else
+  echo "Warning: bash not found; skipping sync-openclaw-workspaces.sh"
+fi
+
+echo
+echo "Context reseed complete."

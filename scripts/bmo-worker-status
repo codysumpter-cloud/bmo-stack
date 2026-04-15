@@ -1,42 +1,81 @@
 #!/usr/bin/env bash
-# bmo-worker-status: One-command worker status check
+# bmo-worker-status: one-command worker and continuity status check
 
 set -euo pipefail
 
-HOST_CONTEXT_DIR="$HOME/bmo-context"
-TASK_STATE_FILE="$HOST_CONTEXT_DIR/TASK_STATE.md"
-WORK_IN_PROGRESS_FILE="$HOST_CONTEXT_DIR/WORK_IN_PROGRESS.md"
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+HOST_CONTEXT_DIR="${BMO_HOST_CONTEXT_DIR:-$HOME/bmo-context}"
+
+task_state_path() {
+  if [ -f "$ROOT_DIR/TASK_STATE.md" ]; then
+    echo "$ROOT_DIR/TASK_STATE.md"
+  elif [ -f "$HOST_CONTEXT_DIR/TASK_STATE.md" ]; then
+    echo "$HOST_CONTEXT_DIR/TASK_STATE.md"
+  fi
+}
+
+work_in_progress_path() {
+  if [ -f "$ROOT_DIR/WORK_IN_PROGRESS.md" ]; then
+    echo "$ROOT_DIR/WORK_IN_PROGRESS.md"
+  elif [ -f "$HOST_CONTEXT_DIR/WORK_IN_PROGRESS.md" ]; then
+    echo "$HOST_CONTEXT_DIR/WORK_IN_PROGRESS.md"
+  fi
+}
+
+print_state_block() {
+  local label="$1"
+  local file="$2"
+  echo "$label: $file"
+  grep -E '^(Last updated:|- Description:|- Active repo:|- Branch:|- Last successful step:|- Next intended step:|- Verification complete:|- Safe to resume:)' "$file" || true
+  echo
+}
 
 echo "=== BMO Worker Status ==="
+echo "Repo root: $ROOT_DIR"
 
-# Check if gateway is running
-if openclaw gateway status >/dev/null 2>&1; then
+if command -v openclaw >/dev/null 2>&1; then
+  if openclaw gateway status >/dev/null 2>&1; then
     echo "Gateway: running"
-else
-    echo "Gateway: not running"
-fi
+  else
+    echo "Gateway: not running or not reachable"
+  fi
 
-# Check agent status (current session)
-if openclaw status >/dev/null 2>&1; then
+  if openclaw status >/dev/null 2>&1; then
     echo "Agent: healthy"
+  else
+    echo "Agent: unhealthy or unavailable"
+  fi
 else
-    echo "Agent: unhealthy"
+  echo "Gateway: openclaw not installed on this machine"
+  echo "Agent: openclaw not installed on this machine"
 fi
 
-# Check latest checkpoint
-if [ -f "$TASK_STATE_FILE" ]; then
-    echo "Latest checkpoint:"
-    tail -10 "$TASK_STATE_FILE" | grep -E "^- [0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2} UTC" | tail -1
+if command -v openshell >/dev/null 2>&1; then
+  if openshell sandbox list 2>/dev/null | grep -q 'bmo-tron'; then
+    echo "Sandbox: bmo-tron present"
+  else
+    echo "Sandbox: bmo-tron not present"
+  fi
 else
-    echo "No task state file found"
+  echo "Sandbox: openshell not installed on this machine"
 fi
 
-# Check work in progress
-if [ -f "$WORK_IN_PROGRESS_FILE" ]; then
-    echo "Current work in progress:"
-    tail -10 "$WORK_IN_PROGRESS_FILE" | grep -E "^- [0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2} UTC" | tail -1
+echo
+
+TASK_STATE_FILE="$(task_state_path || true)"
+if [ -n "${TASK_STATE_FILE:-}" ]; then
+  print_state_block "Task state" "$TASK_STATE_FILE"
 else
-    echo "No work in progress file found"
+  echo "Task state: not found"
+  echo
+fi
+
+WORK_IN_PROGRESS_FILE="$(work_in_progress_path || true)"
+if [ -n "${WORK_IN_PROGRESS_FILE:-}" ]; then
+  print_state_block "Work in progress" "$WORK_IN_PROGRESS_FILE"
+else
+  echo "Work in progress: not found"
+  echo
 fi
 
 echo "=== End Status ==="

@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bmostack.dev/schemas/runtime/delegation-task.schema.json",
+  "title": "Runtime Delegation Task",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["taskId", "taskType", "objective", "input", "contextPackage", "workerProfileId", "budget", "approvalMode", "verifierRequired", "resultMerge", "requestedBy", "timeoutMs"],
+  "properties": {
+    "taskId": {"type": "string", "minLength": 1},
+    "parentRunId": {"type": "string"},
+    "parentTaskId": {"type": "string"},
+    "taskType": {"type": "string", "minLength": 1},
+    "objective": {"type": "string", "minLength": 1},
+    "input": {},
+    "contextPackage": {"type": "object", "additionalProperties": false, "required": ["mode", "refs", "ownershipBoundary", "canonicalStateOutsideWorker"], "properties": {"mode": {"type": "string", "enum": ["minimal", "task-scoped", "expanded"]}, "refs": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}, "ownershipBoundary": {"type": "string", "minLength": 1}, "canonicalStateOutsideWorker": {"type": "boolean"}, "inlineNotes": {"type": "array", "items": {"type": "string"}}}},
+    "workerProfileId": {"type": "string", "minLength": 1},
+    "budget": {"type": "object", "additionalProperties": false, "required": ["maxDelegationDepth", "maxRetriesPerTask", "maxChildrenPerTask", "maxTotalTasksPerRun", "maxToolCallsPerTask", "maxRuntimeSeconds"], "properties": {"maxDelegationDepth": {"type": "integer", "minimum": 0, "maximum": 4}, "maxRetriesPerTask": {"type": "integer", "minimum": 0, "maximum": 5}, "maxChildrenPerTask": {"type": "integer", "minimum": 0, "maximum": 10}, "maxTotalTasksPerRun": {"type": "integer", "minimum": 1, "maximum": 50}, "maxToolCallsPerTask": {"type": "integer", "minimum": 0, "maximum": 100}, "maxRuntimeSeconds": {"type": "integer", "minimum": 1, "maximum": 3600}}},
+    "approvalMode": {"type": "string", "enum": ["implicit-safe", "explicit-operator", "human-required"]},
+    "verifierRequired": {"type": "boolean"},
+    "resultMerge": {"type": "object", "additionalProperties": false, "required": ["strategy", "conflictMode", "hostOwnsFinalMerge"], "properties": {"strategy": {"type": "string", "enum": ["append-findings", "replace-draft", "merge-by-key", "operator-review"]}, "conflictMode": {"type": "string", "enum": ["escalate-to-host", "keep-both", "prefer-host", "prefer-worker"]}, "hostOwnsFinalMerge": {"type": "boolean"}}},
+    "requestedBy": {"type": "string", "minLength": 1},
+    "timeoutMs": {"type": "integer", "minimum": 1},
+    "permissionTier": {"type": "string", "enum": ["read-only", "draft-only", "repo-mutate", "network-read", "network-write"]}
+  }
+}

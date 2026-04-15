@@ -1,27 +1,51 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-# Script to process workflow JSON files and execute defined steps.
+PLAN="${1:-}"
 
-set -e  # Exit on any error
-
-# Function to process the workflow JSON file
-process_workflow() {
-    local json_file=$1
-    # Iterate through each defined step in the JSON
-    for step in $(jq -r '.steps[] | @base64' "$json_file"); do
-        _jq() {
-            echo ${step} | base64 --decode | jq -r ${1}
-        }
-
-        echo "Executing step: $(_jq '.name')"
-        eval "$(_jq '.command')"
-    done
+[ -n "$PLAN" ] || {
+  echo "Usage: bash scripts/skill_execute_plan.sh <plan.json>" >&2
+  exit 1
 }
 
-# Main execution
-if [[ -z "$1" ]]; then
-    echo "No JSON file given. Usage: $0 <workflow-file.json>"
-    exit 1
-fi
+[ -f "$PLAN" ] || {
+  echo "Plan not found: $PLAN" >&2
+  exit 1
+}
 
-process_workflow "$1"
+command -v jq >/dev/null 2>&1 || {
+  echo "Missing dependency: jq" >&2
+  exit 1
+}
+
+jq -e '.steps | type == "array" and length > 0' "$PLAN" >/dev/null 2>&1 || {
+  echo "Invalid plan: steps must be a non-empty array" >&2
+  exit 1
+}
+
+echo "[plan] executing $PLAN"
+
+step_count=0
+while IFS= read -r step; do
+  step_count=$((step_count + 1))
+
+  name="$(printf '%s' "$step" | jq -r '.name // empty')"
+  cmd="$(printf '%s' "$step" | jq -r '.run // empty')"
+
+  [ -n "$name" ] || {
+    echo "Invalid plan step #$step_count: missing name" >&2
+    exit 1
+  }
+
+  [ -n "$cmd" ] || {
+    echo "Invalid plan step '$name': missing run command" >&2
+    exit 1
+  }
+
+  echo "[step $step_count] $name"
+  echo "[cmd] $cmd"
+
+  bash -lc "$cmd"
+done < <(jq -c '.steps[]' "$PLAN")
+
+echo "[plan] complete ($step_count steps)"

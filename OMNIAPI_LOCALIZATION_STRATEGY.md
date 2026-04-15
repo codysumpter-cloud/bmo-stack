@@ -14,7 +14,7 @@ This document outlines the strategy for implementing OmniAPI as a fully local, t
 
 ### Phase 1: Foundation (Current State Assessment)
 - [x] Verify current Nemotron 3 Super model is available and working
-- [x] Document current model usage in bmo-stack and PrismBot
+- [x] Document current model usage in BeMore-stack and PrismBot
 - [x] Identify all points where the LLM is called (ollama.chat instances)
 - [x] Assess hardware requirements for local model training/inference
 

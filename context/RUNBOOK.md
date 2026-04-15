@@ -1,154 +1,112 @@
 # RUNBOOK
 
-Source of truth:
-- openshell sandbox list = live truth
-- nemoclaw list = cached state, may lie
-- `$CONTEXT_ROOT` (default: `./context` relative to repo root) = canonical project context
+## Source of truth
 
-## Council Routing Flow (Prismo → BMO → NEPTR)
+- `BeMore-stack` is the canonical operator and policy repo.
+- `openclaw` owns the concrete Telegram runtime and delivery path.
+- `prismtek-site` owns the public `prismtek.dev` Cloudflare Pages surface.
+- `context/` is the canonical repo context.
+- `openshell sandbox list` is the live sandbox truth when available.
+- MacBook OpenClaw runtime state under `~/.openclaw` and the iOS app's app-container `.openclaw` workspace are separate by default. Connect them only through an explicit gateway, pairing, or export/import path.
 
-1. **Task Intake**: BMO receives user message and identifies if specialist help is needed
-2. **Specialist Selection**: Prismo reviews request and delegates to appropriate specialist agents (Finn for implementation, Peppermint Butler for security, etc.)
-3. **Execution & Verification**: Specialist completes work in bmo-tron sandbox, then NEPTR performs verification before BMO claims completion
-4. **Reply**: BMO delivers final verified response to user
+## Restart recovery protocol
 
-### Verification Protocol (NEPTR-style)
-Before claiming any task is complete:
-- Run a basic sanity check on outputs/commands
-- Verify file changes exist and are correct
-- Confirm the solution actually addresses the original request
-- Only then does BMO report completion
+Start at `AGENTS.md` at the repo root.
+After that, read these in order:
 
-Useful checks:
-- openclaw config validate
-- openclaw channels status --probe
-- systemctl --user status openclaw-gateway.service --no-pager
-- openshell status
-- openshell sandbox list
-- docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
+1. `memory.md` in direct main-session work only
+2. `soul.md`
+3. `routines.md`
+4. `RESPONSE_GUIDE.md`
+5. `context/identity/AGENTS.md`
+6. `context/identity/SOUL.md`
+7. `context/identity/USER.md`
+8. `context/identity/IDENTITY.md`
+9. `context/SESSION_STATE.md`
+10. `context/SYSTEMMAP.md`
+11. `context/RUNBOOK.md`
+12. `context/BACKLOG.md`
+13. `context/skills/SKILLS.md`
+14. `skills/README.md`
+15. `memory/YYYY-MM-DD.md` for today and yesterday, when present
+16. `TASK_STATE.md`
+17. `WORK_IN_PROGRESS.md`
 
-Worker:
-- sandbox name: bmo-tron
-- use it for isolated commands, repo inspection, and risky work
-
-## Restart Recovery Protocol
-
-At every session start, read these files before answering any questions.
-`$CONTEXT_ROOT` defaults to `./context` relative to the repo root. If unset, use that path.
-
-1. `$CONTEXT_ROOT/identity/SOUL.md` — who you are
-2. `$CONTEXT_ROOT/identity/USER.md` — who you're helping
-3. `$CONTEXT_ROOT/identity/IDENTITY.md` — your persona
-4. `$CONTEXT_ROOT/SESSION_STATE.md` — current operating state
-5. `$CONTEXT_ROOT/SYSTEMMAP.md` — system topology
-6. `$CONTEXT_ROOT/RUNBOOK.md` — this file (operational procedures)
-7. `$CONTEXT_ROOT/BACKLOG.md` — pending work
-8. `memory/YYYY-MM-DD.md` (today + yesterday) — recent events
-9. `TASK_STATE.md` / `WORK_IN_PROGRESS.md` — check for interrupted work
-10. `MEMORY.md` — **main session only** (personal context; do not load in shared/group contexts)
+This ordering is authoritative only when it matches `AGENTS.md` and
+`context/identity/AGENTS.md`.
 
 Then:
-- **Check git status** of current repo before asking the user to restate anything
-- **Resume interrupted work** when safe
 
-Each checkpoint (recorded in TASK_STATE.md and WORK_IN_PROGRESS.md) must be made before long-running tasks, after major steps, before pushes, and after failed/interrupted operations, and must include:
-- Timestamp
-- Repo
-- Branch
-- Files touched
-- Last successful step
-- Next intended step
-- Verification complete (yes/no)
-- Manual steps remaining
-- Safe to resume (yes/no)
+- check `git status` before asking the user to restate context
+- read `context/continuity/live-status.json` when present for repo, website, and MacBook continuity
+- resume interrupted work when the checkpoint files say it is safe
+- use `skills/index.json` only when you need the machine-readable trigger or action map for a
+  repo-local skill
+- if the active checkout is a workspace mirror under `~/.openclaw/workspace`, refresh it before claiming repo files are missing:
+  - `python3 scripts/bmo-workspace-sync.py --workspace-dir ~/.openclaw/workspace/BeMore-stack --host-context ~/bmo-context`
+- for runtime routing tasks, inspect `python3 scripts/bmo-model-router.py --task "..."`
+- for website and public-chat handoff work, inspect `node scripts/bmo-site-caretaker.mjs`
+- for donor imports, inspect `context/skills/donor-ingest.skill.md` and `context/donors/BMO_FEATURE_CARRYOVER.md`
 
-## Worker Responsibility Split (Adventure Time Policy)
+## Checkpoint protocol
 
-BMO keeps:
-- talking to the user directly
-- reading `$CONTEXT_ROOT`
-- understanding intent
-- deciding whether a task needs a worker
-- synthesizing final answers
-- keeping replies coherent, useful, and usually one message
+Update `TASK_STATE.md` and `WORK_IN_PROGRESS.md`:
 
-Prismo keeps:
-- orchestration
-- specialist selection
-- limiting delegation to 1 primary + 1 secondary by default
-- conflict resolution
-- deciding when verification is required
-- protecting the big-picture architecture
+- before long-running tasks
+- after major steps
+- before pushes
+- after failed or interrupted operations
 
-Cosmic Owl should own:
-- GitHub watching
-- scheduled repo health checks
-- stale issue / PR review
-- dependency / workflow drift detection
-- maintenance reports
-- opening issues or draft PRs
+Each checkpoint should include:
 
-Moe should own:
-- branch work
-- repo repair
-- file patching
-- PR prep
-- repetitive codebase fixes
-- scaffolding and builder-style GitHub work
+- timestamp
+- repo
+- branch
+- files touched
+- last successful step
+- next intended step
+- verification complete (yes or no)
+- manual steps remaining
+- safe to resume (yes or no)
 
-NEPTR should own:
-- verification
-- sanity checks
-- file existence checks
-- command/result validation
-- completion gating before "done"
+## Verification protocol
 
-Lady Rainicorn should own:
-- Mac / WSL2 / Linux / VPS differences
-- Docker context differences
-- portability fixes
-- environment translation
+Before claiming work is complete:
 
-Peppermint Butler should own:
-- secrets
-- auth
-- tokens
-- permissions
-- destructive or risky operations
-- scary recovery paths
+- verify the owner path
+- verify the requested change exists
+- run the relevant checks
+- verify the delivery and output contract still matches runtime behavior
+- state blockers and caveats explicitly
 
-Princess Bubblegum should own:
-- runtime design
-- architecture
-- config structure
-- repo boundaries
-- long-term maintainability
+## Routine priority
 
-Finn should own:
-- action-heavy implementation
-- scripting
-- patches
-- build-the-thing execution
+Run these before ad hoc debugging when they fit:
 
-Jake should own:
-- simplification
-- de-complexity
-- easier alternative approaches
-- cutting unnecessary steps
+1. `make doctor-plus`
+2. `make worker-status`
+3. `make runtime-doctor`
+4. `make workspace-sync`
+5. `make site-caretaker`
+6. `make worker-ready`
 
-Marceline should own:
-- docs voice
-- naming cleanup
-- UX wording
-- readability / polish
+Use `make openclaw-boundary-doctor` when checking that the MacBook OpenClaw runtime remains isolated from the iOS app sandbox. Use `make openclaw-host-policy` to reapply the Telegram delivery policy that collects up to 20 inbound messages into one turn and avoids tiny outbound chunks.
 
-Simon should own:
-- context recovery
-- reading docs / prior work
-- reconstructing what already happened
+`make worker-ready` changes sandbox state, so prefer it after the status and routing checks above.
 
-Lemongrab should own:
-- final spec compliance audit only
-- contradiction detection
-- requirement mismatch detection
-EOF
+## Council routing flow
+
+1. BMO receives the task and identifies the real problem.
+2. Prismo decides whether specialist help is needed.
+3. Finn or Moe implements.
+4. Princess Bubblegum handles architecture concerns.
+5. Lady Rainicorn handles portability and environment differences.
+6. Peppermint Butler handles risky permissions and auth surfaces.
+7. Simon reconstructs prior context when continuity is weak.
+8. NEPTR verifies before BMO claims completion.
+
+## Worker split
+
+- Host-facing `main` stays on the host and owns user interaction.
+- `bmo-tron` is the dedicated sandbox worker for isolated execution.
+- Telegram belongs on the host-facing path unless a verified runtime contract says otherwise.

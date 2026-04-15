@@ -1,40 +1,63 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+
 import json
+import time
+from pathlib import Path
 
-class Skill:
-    def __init__(self, name, level, last_used):
-        self.name = name
-        self.level = level
-        self.last_used = last_used
+ROOT = Path(__file__).resolve().parent.parent
+REGISTRY = ROOT / "skills" / "index.json"
+MEMORY = ROOT / "skills" / "memory.json"
 
-    def is_unused(self, threshold):
-        return self.last_used < threshold
+DECAY_SECONDS = 60 * 60 * 24 * 3
 
-class SkillDecay:
-    def __init__(self, skills):
-        self.skills = skills
 
-    def prune_unused_skills(self, threshold):
-        self.skills = [skill for skill in self.skills if not skill.is_unused(threshold)]
+def load(p: Path) -> dict:
+    if not p.exists():
+        return {}
+    return json.loads(p.read_text(encoding="utf-8"))
 
-    def save_skills(self, filename):
-        with open(filename, 'w') as f:
-            json.dump([skill.__dict__ for skill in self.skills], f)
 
-    @classmethod
-    def load_skills(cls, filename):
-        with open(filename, 'r') as f:
-            skills_data = json.load(f)
-            skills = [Skill(**data) for data in skills_data]
-            return cls(skills)
+def save(p: Path, d: dict) -> None:
+    p.write_text(json.dumps(d, indent=2) + "\n", encoding="utf-8")
 
-# Usage Example
-skills = [
-    Skill('Python', 5, '2026-02-01'),
-    Skill('JavaScript', 4, '2026-01-15'),
-    Skill('C#', 3, '2025-12-20'),
-]
 
-skill_decay = SkillDecay(skills)
-threshold_date = '2026-03-01'  # Define a threshold date
-skill_decay.prune_unused_skills(threshold_date)
-skill_decay.save_skills('skills.json')
+def main() -> None:
+    registry = load(REGISTRY)
+    memory = load(MEMORY)
+
+    last_used: dict[str, float] = {}
+    for item in memory.get("history", []):
+        skill = item.get("skill")
+        ts = item.get("ts")
+        if skill and isinstance(ts, (int, float)):
+            last_used[skill] = max(last_used.get(skill, 0.0), float(ts))
+
+    now = time.time()
+    changed = False
+
+    for skill, meta in registry.get("skills", {}).items():
+        last = last_used.get(skill)
+        currently_decayed = bool(meta.get("decayed"))
+
+        if last is None:
+            continue
+
+        should_decay = (now - last) > DECAY_SECONDS
+        if should_decay and not currently_decayed:
+            meta["decayed"] = True
+            changed = True
+            print(f"Decayed {skill}")
+        elif not should_decay and currently_decayed:
+            meta.pop("decayed", None)
+            changed = True
+            print(f"Recovered {skill}")
+
+    if changed:
+        save(REGISTRY, registry)
+    else:
+        print("No decay changes")
+
+
+if __name__ == "__main__":
+    main()

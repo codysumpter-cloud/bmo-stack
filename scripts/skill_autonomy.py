@@ -29,7 +29,7 @@ def main() -> None:
     parser.add_argument("--stats", action="store_true", help="Print skill performance stats.")
     args = parser.parse_args()
 
-    validate = run([sys.executable, "scripts/validate-skills.py"])
+    validate = run(["node", "scripts/validate-skills.mjs"])
     echo_output(validate)
 
     if args.stats:
@@ -47,13 +47,13 @@ def main() -> None:
             "--apply",
         ])
         echo_output(apply_result)
-        validate_after = run([sys.executable, "scripts/validate-skills.py"])
+        validate_after = run(["node", "scripts/validate-skills.mjs"])
         echo_output(validate_after)
 
     if args.generate_skill:
         generate = run([sys.executable, "scripts/skill_generate.py"], check=False)
         echo_output(generate)
-        validate_after_generate = run([sys.executable, "scripts/validate-skills.py"])
+        validate_after_generate = run(["node", "scripts/validate-skills.mjs"])
         echo_output(validate_after_generate)
 
 

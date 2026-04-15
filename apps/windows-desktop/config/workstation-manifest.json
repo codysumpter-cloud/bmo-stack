@@ -1,0 +1,136 @@
+{
+  "version": 1,
+  "documentShortcuts": [
+    {
+      "id": "runbook",
+      "name": "Runbook",
+      "path": "context/RUNBOOK.md",
+      "description": "Canonical restart, checkpoint, and recovery protocol."
+    },
+    {
+      "id": "backlog",
+      "name": "Backlog",
+      "path": "context/BACKLOG.md",
+      "description": "Current BMO backlog and priority map."
+    },
+    {
+      "id": "task-state",
+      "name": "Task State",
+      "path": "TASK_STATE.md",
+      "description": "Current checkpoint and resume status for the repo."
+    },
+    {
+      "id": "work-in-progress",
+      "name": "Work In Progress",
+      "path": "WORK_IN_PROGRESS.md",
+      "description": "Current focus, risks, and next milestone."
+    },
+    {
+      "id": "windows-app",
+      "name": "Windows App Doc",
+      "path": "docs/WINDOWS_DESKTOP_APP.md",
+      "description": "Product framing and migration plan for the desktop app."
+    },
+    {
+      "id": "routines",
+      "name": "BMO Routines",
+      "path": "docs/BMO_ROUTINES.md",
+      "description": "Operator-facing explanation of the routine pack."
+    }
+  ],
+  "validationActions": [
+    {
+      "id": "validate-operating-system",
+      "name": "Validate operating system",
+      "command": "node scripts/validate-bmo-operating-system.mjs",
+      "description": "Verify startup, donor, and checkpoint files."
+    },
+    {
+      "id": "validate-routines",
+      "name": "Validate routines pack",
+      "command": "node scripts/bmo-routines.mjs validate",
+      "description": "Validate the machine-readable routine pack."
+    },
+    {
+      "id": "validate-skills",
+      "name": "Validate skills pack",
+      "command": "node scripts/validate-skills.mjs",
+      "description": "Validate the local skill registry and docs."
+    },
+    {
+      "id": "worker-status",
+      "name": "Worker status",
+      "command": "bash ./scripts/bmo-worker-status",
+      "description": "Check gateway, worker, and checkpoint health."
+    },
+    {
+      "id": "runtime-doctor",
+      "name": "Runtime doctor",
+      "command": "make runtime-doctor",
+      "description": "Validate runtime profile and launch assumptions."
+    },
+    {
+      "id": "doctor-plus",
+      "name": "Doctor plus",
+      "command": "make doctor-plus",
+      "description": "Run the broad host and runtime sanity check."
+    }
+  ],
+  "runtimeProfiles": [
+    {
+      "id": "dev",
+      "name": "Dev profile",
+      "command": "make runtime-profile-dev",
+      "description": "Apply the dev runtime profile."
+    },
+    {
+      "id": "snappy",
+      "name": "Snappy profile",
+      "command": "make runtime-profile-snappy",
+      "description": "Apply the snappy runtime profile."
+    },
+    {
+      "id": "robust",
+      "name": "Robust profile",
+      "command": "make runtime-profile-robust",
+      "description": "Apply the robust runtime profile."
+    }
+  ],
+  "skillActions": [
+    {
+      "skillId": "bootstrap-recovery",
+      "command": "make doctor-plus",
+      "description": "Recover broken bootstrap state or missing prerequisites."
+    },
+    {
+      "skillId": "context-sync",
+      "command": "make workspace-sync",
+      "description": "Refresh repo and workspace context alignment."
+    },
+    {
+      "skillId": "openclaw-agent-split",
+      "command": "bash ./scripts/bmo-worker-status",
+      "description": "Check host and worker routing state."
+    },
+    {
+      "skillId": "skills-access-diagnosis",
+      "command": "node scripts/skills-access-diagnosis.mjs",
+      "description": "Diagnose missing, blocked, or stuck skills."
+    },
+    {
+      "skillId": "telegram-routing",
+      "path": "skills/telegram-routing/README.md",
+      "description": "Review Telegram routing guidance before runtime changes."
+    },
+    {
+      "skillId": "browser-automation",
+      "path": "skills/browser-automation/README.md",
+      "description": "Review browser automation guidance before enabling it."
+    },
+    {
+      "skillId": "sandbox-debugging",
+      "path": "skills/sandbox-debugging/README.md",
+      "description": "Review sandbox debugging guidance before worker surgery."
+    }
+  ]
+}

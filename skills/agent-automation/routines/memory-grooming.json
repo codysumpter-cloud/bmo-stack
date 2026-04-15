@@ -1,0 +1,8 @@
+{
+  "name": "memory-grooming",
+  "description": "Groom memory files: summarize old ones, archive, and keep recent ones accessible",
+  "type": "grooming",
+  "agent": "bmo-tron",
+  "task": "Review memory directory, summarize files older than 7 days, and ensure quick access to recent memory",
+  "schedule": "0 9 * * *"
+}

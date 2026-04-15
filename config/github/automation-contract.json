@@ -1,0 +1,78 @@
+{
+  "version": 1,
+  "description": "Current GitHub automation contract for BMO stack.",
+  "legacy_workflows_absent": [
+    ".github/workflows/issue-to-pr.yml",
+    ".github/workflows/autonomy_v2.yml"
+  ],
+  "workers": [
+    {
+      "name": "Planner v3",
+      "workflow_file": ".github/workflows/issue-to-pr-v2.yml",
+      "workflow_name": "BMO Issue to PR v3",
+      "execution_surface": "github-hosted",
+      "required_strings": [
+        "autonomy:execute",
+        "github-issue-planner-v3.py",
+        "github-builtin-autonomy-executor.sh",
+        "github-neptr-verify.sh"
+      ]
+    },
+    {
+      "name": "Workspace Sync",
+      "workflow_file": ".github/workflows/workspace-sync-on-merge.yml",
+      "workflow_name": "BMO Workspace Sync on Merge",
+      "execution_surface": "self-hosted",
+      "runner_selector_repo_var": "BMO_WORKSPACE_SYNC_RUNS_ON",
+      "required_repo_vars": [
+        "BMO_WORKSPACE_SYNC_ENABLED",
+        "BMO_OPENCLAW_HOST_WORKSPACE",
+        "BMO_OPENCLAW_WORKER_WORKSPACE"
+      ],
+      "required_strings": [
+        "BMO_WORKSPACE_SYNC_ENABLED",
+        "BMO_OPENCLAW_HOST_WORKSPACE",
+        "BMO_OPENCLAW_WORKER_WORKSPACE",
+        "sync-openclaw-workspaces.sh"
+      ]
+    },
+    {
+      "name": "Continuity Publisher",
+      "workflow_file": ".github/workflows/publish-continuity.yml",
+      "workflow_name": "Publish continuity",
+      "execution_surface": "github-hosted",
+      "required_repo_vars": [
+        "PRISMTEK_CONTINUITY_URL"
+      ],
+      "required_strings": [
+        "scripts/bmo-continuity-report.mjs",
+        "PRISMTEK_CONTINUITY_URL",
+        "PRISMTEK_CONTINUITY_TOKEN"
+      ]
+    },
+    {
+      "name": "Cosmic Owl",
+      "workflow_file": ".github/workflows/github-caretaker.yml",
+      "workflow_name": "Cosmic Owl GitHub Caretaker",
+      "execution_surface": "github-hosted",
+      "required_strings": [
+        "github-maintenance-report.sh"
+      ]
+    },
+    {
+      "name": "Moe",
+      "workflow_file": ".github/workflows/moe-repair.yml",
+      "workflow_name": "Moe Repair Worker",
+      "execution_surface": "github-hosted",
+      "required_strings": [
+        "moe-open-pr.sh"
+      ]
+    }
+  ],
+  "docs": [
+    "docs/GITHUB_AUTOMATION.md",
+    "docs/GITHUB_AUTONOMY.md",
+    "docs/GITHUB_WORKERS.md",
+    "docs/CODESPACE_GITHUB_WORKER.md"
+  ]
+}

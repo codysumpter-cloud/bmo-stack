@@ -1,212 +1,110 @@
 # BMO Stack
 
-A portable setup for BMO / OpenClaw / worker environment.
+`BeMore-stack` is the operator, policy, and integration repository for BMO.
 
-## Architecture
+It is the canonical source for BMO startup context, council contracts, operator workflows, runtime
+runbooks, workspace sync, and cross-repo integration glue. It does not pretend to own every live
+surface in the broader system.
 
-- **Host OpenClaw**: Handles Telegram replies (runs on the host machine).
-- **Sandbox Worker**: Optional and disposable, managed via OpenShell/NemoClaw.
-- **Canonical Context**: Lives outside disposable sandboxes in `~/bmo-context` (mounted as `./context` in the repo).
-- **NemoClaw/OpenShell**: Provides the worker sandbox framework (included as a submodule).
-- **Council Runtime**: Prismo orchestrates, BMO is the front-facing agent, NEPTR verifies completion.
-- **Auxiliary Services**: Optional services (e.g., PostgreSQL) can be run via Docker Compose.
+## System boundaries
 
-## Directory Structure
+- `BeMore-stack`: operator workflows, startup context, council policy, GitHub automation, and local
+  integration glue
+- `openclaw`: live Telegram/runtime delivery behavior
+- `prismtek-site`: public-web `prismtek.dev` surface and site-backed APIs
 
-```
-bmo-stack/
-├── compose.yaml          # Docker Compose file (defines auxiliary services: PostgreSQL)
-├── .env.example          # Example environment variables
-├── Makefile              # Simple commands: make up, down, status, logs, doctor, sync-context*, worker-*, openclaw-*
-├── README.md             # This file
-├── scripts/
-│   ├── bootstrap-mac.sh  # macOS bootstrap
-│   ├── bootstrap-wsl.sh  # WSL2 bootstrap
-│   ├── bootstrap-linux.sh # Linux VPS / private cloud host bootstrap
-│   ├── common.sh         # Shared functions for bootstrap scripts
-│   └── sync-context.sh   # Sync context between host and repo
-├── config/
-│   └── omni-core.env.example # Example config for local-first operation
-├── context/
-│   ├── BOOTSTRAP.md
-│   ├── SESSION_STATE.md
-│   ├── SYSTEMMAP.md
-│   ├── RUNBOOK.md
-│   └── BACKLOG.md
-├── context/council/      # Council agent definitions (Prismo, Finn, Jake, etc.)
-├── deploy/
-│   ├── bmo-openclaw.service        # systemd service for OpenClaw gateway
-│   ├── bmo-storage-prune.service   # systemd service for storage pruning
-│   └── bmo-storage-prune.timer     # systemd timer for hourly pruning
-├── memory/
-│   └── decisions/
-│       └── README.md
-└── vendor/
-    └── nemoclaw/                 # NemoClaw/OpenShell submodule (worker framework)
-```
+This repo stays explicit about those ownership lines so operator claims remain honest.
 
-## What Runs Where
+## What this repo owns
 
-- **Host (bare metal or VM)**:
-  - OpenClaw gateway (handles Telegram)
-  - OpenShell / NemoClaw (for managing sandboxes)
-  - Your personal data and configuration (e.g., `~/.openclaw`)
-  - Prismo (chief orchestrator) and BMO (front-facing agent) run here
+- the BMO operating contract in `AGENTS.md`, `soul.md`, `memory.md`, and `routines.md`
+- council role definitions in `context/council/` and `config/council/`
+- operator plans, runbooks, continuity, and decision records in `context/`
+- workspace sync, runtime helpers, and maintenance scripts in `scripts/`
+- reusable operator skills in `skills/`
+- cross-repo donor, licensing, and integration documentation
 
-- **Worker Sandbox (optional, disposable)**:
-  - Created via `make worker-create` (or `openshell sandbox create --name bmo-tron`)
-  - Used for isolated commands, repo inspection, and risky work
-  - Should not hold important context; context is synced from `~/bmo-context`
-  - Runs the NemoClaw agent framework (from the `vendor/nemoclaw` submodule)
-  - Specialist agents (Finn, Peppermint Butler, etc.) execute here under Prismo's direction
-  - NEPTR performs verification before BMO claims completion
+## Quick start
 
-- **Auxiliary Services (optional, run via Docker Compose)**:
-  - PostgreSQL database (for worker sandbox persistence)
-  - Started with `make up`, stopped with `make down`
+Read these first:
 
-## Getting Started
+1. `AGENTS.md`
+2. `soul.md`
+3. `memory.md`
+4. `routines.md`
+5. `context/identity/AGENTS.md`
+6. `context/RUNBOOK.md`
+7. `TASK_STATE.md`
+8. `WORK_IN_PROGRESS.md`
 
-### Prerequisites
+Run the core validation path:
 
-- Docker Engine and Docker Compose v2 (via Docker Desktop or standalone)
-- OpenClaw installed on the host machine ([docs.openclaw.ai](https://docs.openclaw.ai))
-- Access to NVIDIA API key (for the AI model)
-
-### Bootstrap
-
-Choose the script for your platform:
-
-- **macOS**: `./scripts/bootstrap-mac.sh`
-- **WSL2**: `./scripts/bootstrap-wsl.sh`
-- **Linux VPS / private cloud host**: `./scripts/bootstrap-linux.sh`
-
-The script will:
-1. Check for Docker and OpenClaw.
-2. Copy `.env.example` to `.env` if needed.
-3. Provide next steps.
-
-### Using the Stack
-
-After bootstrapping:
-
-1. Edit `.env` to add your NVIDIA API key (and any other required keys, e.g., PostgreSQL password).
-2. Ensure OpenClaw is running on your host machine (or use `make openclaw-start`).
-3. Use `make up` to start auxiliary services (PostgreSQL).
-4. Manage the worker sandbox via make targets:
-   ```bash
-   # Create a worker sandbox (if not already created)
-   make worker-create
-
-   # Upload your OpenClaw config to the sandbox (so it can communicate with the gateway)
-   make worker-upload-config
-
-   # Now you can use the sandbox for isolated work
-   make worker-connect
-   ```
-   Or run the individual OpenShell commands directly.
-
-### Context Synchronization
-
-Keep your host `~/bmo-context` and the repo's `./context` in sync:
-
-- `make sync-context`          # Bidirectional sync (default)
-- `make sync-context-host-to-repo` # Host → Repo only
-- `make sync-context-repo-to-host` # Repo → Host only
-
-Or run the script directly: `./scripts/sync-context.sh [--host-to-repo|--repo-to-host]`
-
-### Makefile Commands
-
-- `make up` - Start auxiliary services (detached)
-- `make down` - Stop and remove auxiliary services
-- `make status` - Show status of auxiliary services
-- `make logs` - Follow logs of auxiliary services
-- `make sync-context` - Bidirectional context sync
-- `make sync-context-host-to-repo` - Sync host context to repo
-- `make sync-context-repo-to-host` - Sync repo context to host
-- `make doctor` - Check system prerequisites and context
-- `make worker-create` - Create the bmo-tron sandbox if it doesn't exist
-- `make worker-upload-config` - Upload OpenClaw config to the sandbox
-- `make worker-connect` - Attach to the sandbox shell
-- `make worker-status` - Check if the sandbox exists
-- `make openclaw-start` - Start the OpenClaw gateway on the host
-- `make openclaw-status` - Check OpenClaw gateway status
-
-### Keeping Context Synced
-
-The `context/` directory in this repo is a copy of your `~/bmo-context`.
-- After making changes to the context files in `~/bmo-context`, you can sync them to the repo with `make sync-context-host-to-repo`.
-- After making changes to the context files in the repo, you can sync them to the host with `make sync-context-repo-to-host`.
-- You can automate this with a cron job or use the provided scripts.
-
-## Important Notes
-
-- Secrets (like API keys) should be placed in `.env` (not committed) or in your host's OpenClaw config.
-- The `compose.yaml` defines a PostgreSQL service that is ready to use. It does not run the Telegram bot (that runs on the host) or the worker sandbox (managed by OpenShell).
-- The sandbox worker is managed by OpenShell on the host, not by Docker Compose. The compose file is for auxiliary services only.
-- The `vendor/nemoclaw` directory contains the NemoClaw/OpenShell submodule, which provides the worker sandbox framework. Do not modify this directory directly unless you intend to contribute back to the nemoclaw project.
-- Council agent definitions live in `context/council/` and are updated as the system evolves.
-
-## What Is Still Manual
-
-Despite the automation added via Makefile targets, the following steps remain manual (requiring user action or external setup):
-
-1. **Install prerequisites**: You must install Docker Engine + Compose v2 and OpenClaw on your host machine before running the bootstrap scripts.
-2. **Edit `.env`**: Set `NVIDIA_API_KEY` (required for the AI model) and optionally adjust PostgreSQL credentials (POSTGRES_PASSWORD, etc.). No default is provided for security reasons.
-3. **Start OpenClaw gateway**: Although we provide `make openclaw-start`, you must run it at least once (or configure it to start on boot) to handle Telegram.
-4. **Initial context**: The repo includes a copy of your `~/bmo-context` at the time of bootstrap. You must keep it in sync using the `make sync-context*` targets whenever you make changes in either location.
-5. **Worker sandbox lifecycle**: While we provide `make worker-create`, `worker-upload-config`, and `worker-connect`, you must run these commands (or the equivalent OpenShell commands) to set up and access the sandbox. The sandbox is not started automatically; you connect to it on demand.
-6. **Council agent definitions**: While the core agents (Prismo, BMO, NEPTR, Finn, etc.) are defined in `context/council/`, you may need to add or update specialist agents as your use case evolves.
-
-All other aspects (identity system, local‑first config, service templates, memory structure, shared bootstrap logic, nemoclaw submodule inclusion) are automated and ready to use. The repository is hardened and documented for immediate use across macOS, WSL2, and Linux hosts.
-## GitHub Caretaker Worker: Cosmic Owl
-
-This repository includes a GitHub Action that acts as a caretaker for the repo, following the Adventure Time worker naming policy.
-
-### What It Does
-- Runs on a daily schedule (02:00 UTC) and can be triggered manually via `workflow_dispatch`.
-- Checks key health metrics:
-  - Number of open issues (threshold: >10)
-  - Number of open pull requests (threshold: >5)
-  - Days since last commit (threshold: >14 days)
-- If any metric exceeds its threshold, it opens a GitHub issue titled "Cosmic Owl Maintenance Report: YYYY-MM-DD" with a short report.
-- If all metrics are within thresholds, it logs that no issue is needed (no spam).
-- Uses least-privilege permissions: `contents: read` and `issues: write`.
-- Does **not** push directly to the main branch by default; it prefers to open issues or pull requests for any needed changes.
-
-### What It Does Not Do
-- It does not automatically fix issues or apply changes (no direct pushes).
-- It does not comment on every issue or PR.
-- It does not perform complex analysis; it is a simple watchdog.
-- It does not require any secrets or tokens beyond the default `GITHUB_TOKEN`.
-
-### What Is Still Manual
-- Interpreting the reports and deciding on actions.
-- Triage of any opened issues.
-- Actual fixes, refactoring, or documentation improvements (these would be done by human maintainers or potentially delegated to other workers like Moe or Finn via manual workflows).
-- Adjusting thresholds or adding new checks (requires editing the workflow).
-
-### Sample Maintenance Report Format
-When an issue is opened, it follows this format:
-
-```
-## Cosmic Owl Maintenance Report
-
-**Date**: 2026-03-20
-
-### Metrics
-- Open Issues: 12 (threshold: >10)
-- Open Pull Requests: 3 (threshold: >5)
-- Days Since Last Commit: 2 (threshold: >14 days)
-
-⚠️ High number of open issues
+```bash
+make doctor
+make runtime-doctor
+make workspace-sync
+make worker-status
 ```
 
-(The above example would trigger because open issues > 10.)
+Useful follow-up commands:
 
-### Related Files
-- Worker definition: `context/council/COSMIC_OWL.md`
-- Naming policy and registry: `context/WORKER_NAMING_REGISTRY.md`
-- GitHub Action: `.github/workflows/github-caretaker.yml`
+```bash
+make doctor-plus
+make health-check
+make sync-context
+make project-snapshot
+make site-route-report
+make site-parity-report
+```
 
+## Repository map
+
+- `context/`: plans, council docs, continuity, site notes, and operating documents
+- `config/`: machine-readable council, GitHub, routine, and operator manifests
+- `scripts/`: runtime doctor, sync, bootstrap, recovery, and reporting helpers
+- `skills/`: repo-owned operator skill packs
+- `memory/`: persistent notes and decision trails
+- `docs/`: architecture, integration, upgrade, and licensing references
+
+## Runtime posture
+
+This repo is intentionally local-first and operator-visible.
+
+- Host OpenClaw handles Telegram-facing runtime behavior.
+- OpenShell and NemoClaw provide disposable worker sandboxes.
+- `BeMore-stack` provides the canonical operating environment, policy surface, and integration glue.
+- The iOS app uses its own app-container workspace. It must not read or mutate the MacBook `~/.openclaw` runtime unless Cody explicitly connects it through a gateway, pairing, or export/import path.
+
+Manual operator steps still exist:
+
+1. Install host prerequisites such as Docker, OpenClaw, OpenShell, and any local model/runtime dependencies.
+2. Configure `.env`, secrets, and runtime auth outside this repo.
+3. Merge and deploy `openclaw` changes when Telegram runtime behavior changes.
+4. Merge and deploy `prismtek-site` changes when public-web behavior changes.
+5. Restart or repoint live runtime owners when their deployment path requires it.
+
+## Source-of-truth rules
+
+- Do not claim Telegram runtime fixes from `BeMore-stack` alone unless the relevant `openclaw` path was changed and validated.
+- Do not claim `prismtek.dev` web-chat fixes from `BeMore-stack` alone unless the relevant `prismtek-site` path was changed and validated.
+- Do not patch vendored or donor paths first when the real owner is upstream.
+- Prefer machine-checkable manifests, validators, and runbooks over doc-only promises.
+- Use `make openclaw-boundary-doctor` to verify the MacBook OpenClaw/runtime boundary and `make openclaw-host-policy` to reapply the host Telegram delivery policy.
+
+## Licensing and provenance
+
+This repository is licensed under the Apache License 2.0.
+
+- See [LICENSE](./LICENSE) for the license text.
+- See [NOTICE](./NOTICE) for repository notice information.
+- See [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md) for tracked third-party provenance.
+- See [docs/LICENSE_MATRIX.md](./docs/LICENSE_MATRIX.md) for the current licensing posture across related repos.
+
+## Related references
+
+- `docs/UNIFIED_OPERATOR_APP.md`
+- `docs/ENTERPRISE_APP_FACTORY_BRIDGE.md`
+- `docs/PRIVATE_APP_REPO_INTEGRATION.md`
+- `docs/BMO_NATIVE_RUNTIME.md`
+- `docs/BMO_MYTHOS_LITE.md`
+- `docs/MISSION_CONTROL_BMO_STACK_SYNC.md`

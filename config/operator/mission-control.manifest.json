@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "manifest_id": "bmo-mission-control",
+  "surfaceName": "Mission Control",
+  "description": "Boring-first operator dashboard for founder workflows and always-on agent visibility.",
+  "panels": [
+    {"id": "active-agents", "name": "Active agents", "dataSource": "task_runs", "required": true},
+    {"id": "current-task", "name": "Current task", "dataSource": "task_runs", "required": true},
+    {"id": "last-success-failure", "name": "Last success / failure", "dataSource": "run_logs", "required": true},
+    {"id": "pending-review", "name": "Pending review items", "dataSource": "review_queue", "required": true},
+    {"id": "cost-usage", "name": "Token / cost usage", "dataSource": "cost_events", "required": true},
+    {"id": "memory-touched", "name": "Memory files touched", "dataSource": "memory_versions", "required": true},
+    {"id": "latest-artifacts", "name": "Latest artifacts", "dataSource": "run_artifacts", "required": true},
+    {"id": "blocked-runs", "name": "Blocked runs", "dataSource": "task_runs", "required": true},
+    {"id": "agent-heartbeats", "name": "Agent Heartbeats", "dataSource": "agent_heartbeats", "required": true},
+    {"id": "local-token-usage", "name": "Local Model Token Usage", "dataSource": "local_token_usage", "required": true},
+    {"id": "skill-execution-logs", "name": "Skill Execution Logs", "dataSource": "skill_execution_logs", "required": true}
+  ],
+  "reviewQueues": ["research", "content", "code", "quality", "operator"]
+}

@@ -1,15 +1,50 @@
-# USER.md - About Your Human
+# USER.md
 
-_Learn about the person you're helping. Update this as you go._
+About the human BMO is helping in this stack.
 
-- **Name:** Cody Sumpter
-- **What to call them:** Cody or Prismtek
-- **Pronouns:** (optional)
-- **Timezone:** UTC (update if different)
-- **Notes:** User is working on bmo-stack, developing BMO-tron agent, interested in local-first AI and omniAPI integration.
+- Name: Cody Sumpter
+- Preferred names: Cody or Prismtek
+- Timezone: America/Indianapolis
 
-## Context
+## Working preferences
 
-_(What do they care about? What projects are they working on? What annoys them? What makes them laugh? Build this over time.)_
+- Prefers reliable, practical systems over polished demos.
+- Wants fast iteration without fake completion.
+- Expects exact owner-path analysis for runtime and delivery bugs.
+- Cares about local-first control, operator trust, and maintainability.
+- Appreciates concise, high-signal communication.
+- Wants proof: changed code, relevant checks, and honest blockers.
+- Wants continuity and autonomy that survive restarts, sleeps, and handoffs.
+- Wants council members to be real, spawnable, and visible when they are being used.
+- Wants BMO to keep GitHub, local source repos, and runtime workspaces aligned instead of drifting quietly.
 
-They care about building a reliable, local-first AI assistant with agent council system. Working on integrating omniAPI as a local trainable LLM. Enjoys practical solutions and clear communication. Appreciates when complex systems are made simple and understandable.
+## Current repo realities
+
+- `BeMore-stack` is the canonical stack repo.
+- `openclaw` owns concrete Telegram runtime behavior.
+- `prismtek-site` owns the public `prismtek.dev` Pages surface.
+- `PrismBot` and `omni-bmo` are direct donor repos for missing features and operating patterns.
+
+## Product and system priorities
+
+- BMO should feel like a real operator system, not a thin wrapper around a model API.
+- Mission Control and related status surfaces should reflect real data and provenance.
+- Local-model capability matters, but not at the cost of breaking the default user-facing chat path.
+- The website should preserve a distinctive pixel-art identity instead of generic AI dashboard styling.
+
+## Things that annoy Cody
+
+- claiming success without proof
+- stopping at docs when runtime ownership is deeper
+- stale automation or drift between docs and reality
+- vague hand-waving around live behavior
+- hidden subagent behavior that makes it impossible to tell what actually happened
+- changes that only live on one machine and never make it back to source control when they should
+
+## Good defaults
+
+- show the highest-leverage fix first
+- be explicit about current state vs proposed state
+- prefer exact commands over general advice
+- keep risky operations non-destructive unless explicitly asked
+- if a fix is host-only, say so plainly and explain how durable it is

@@ -1,0 +1,44 @@
+{
+  "requestId": "security-review-openclaw-shell-ios-001",
+  "goal": "defensive-review",
+  "target": {
+    "kind": "repo",
+    "locator": "github.com/codysumpter-cloud/BeMore-stack/apps/openclaw-shell-ios",
+    "ref": "master",
+    "ownership": "owned"
+  },
+  "scope": {
+    "paths": [
+      "apps/openclaw-shell-ios/OpenClawShell",
+      "apps/openclaw-shell-ios/project.yml"
+    ],
+    "languages": ["swift"],
+    "excludePaths": ["apps/openclaw-shell-ios/BeMoreAgent.xcarchive"]
+  },
+  "constraints": {
+    "allowedActions": ["read", "build", "test", "static-scan", "triage", "patch-draft", "regression-test-draft"],
+    "forbiddenActions": ["public disclosure", "external exploitation", "merge without human approval"],
+    "network": "package-mirror-only"
+  },
+  "sandboxProfile": {
+    "isolation": "container",
+    "filesystem": "writable-copy",
+    "internet": false
+  },
+  "budget": {
+    "maxRuntimeMinutes": 90,
+    "maxLanes": 6,
+    "maxRetriesPerLane": 1
+  },
+  "requiredOutputs": ["risk-map", "finding-list", "review-summary"],
+  "approval": {
+    "prRequired": true,
+    "mergeRequired": true,
+    "disclosureRequired": true
+  },
+  "requestedBy": "operator",
+  "notes": [
+    "Prioritize parser, file import, and local model loading surfaces.",
+    "Return patch drafts only for reproduced issues."
+  ]
+}

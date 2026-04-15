@@ -1,0 +1,77 @@
+<!doctype html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #111111;
+      --panel: #1b1b1b;
+      --line: #2a2a2a;
+      --text: #f2f2f2;
+      --muted: #8a8a8a;
+      --accent: #4b8dff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 12px;
+      background: var(--panel);
+      border-bottom: 1px solid var(--line);
+      position: sticky;
+      top: 0;
+    }
+    .title { color: var(--muted); font-size: 12px; }
+    button {
+      appearance: none;
+      border: 1px solid var(--accent);
+      background: transparent;
+      color: var(--text);
+      padding: 8px 12px;
+      border-radius: 10px;
+      font: inherit;
+    }
+    textarea {
+      flex: 1;
+      width: 100%;
+      border: 0;
+      outline: none;
+      resize: none;
+      padding: 16px;
+      background: var(--bg);
+      color: var(--text);
+      font: 14px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+      white-space: pre;
+      tab-size: 2;
+    }
+  </style>
+</head>
+<body>
+  <div class="toolbar">
+    <div class="title">Editor shell — swap internals for Monaco later</div>
+    <button onclick="saveNow()">Save</button>
+  </div>
+  <textarea id="editor" spellcheck="false"></textarea>
+  <script>
+    const editor = document.getElementById('editor');
+    window.setEditorText = function(text) {
+      editor.value = text || '';
+    }
+    function saveNow() {
+      const message = { event: 'save', text: editor.value };
+      window.webkit?.messageHandlers?.editorBridge?.postMessage(message);
+    }
+  </script>
+</body>
+</html>

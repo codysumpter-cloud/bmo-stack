@@ -1,0 +1,140 @@
+{
+  "version": 1,
+  "description": "Machine-readable council and worker spawn contract for BMO.",
+  "strict_mode_file": "context/council/STRICT_MODE.md",
+  "default_spawn_policy": {
+    "primary_specialists": 1,
+    "secondary_specialists": 1,
+    "require_verifier": true
+  },
+  "council_seats": [
+    {
+      "name": "BMO",
+      "kind": "runtime",
+      "status": "active",
+      "spawnable": true,
+      "surface": "host",
+      "source_file": "context/council/BMO_TRON.md",
+      "default_trigger": "front-facing conversation and final synthesis"
+    },
+    {
+      "name": "Prismo",
+      "kind": "runtime",
+      "status": "active",
+      "spawnable": true,
+      "surface": "host",
+      "source_file": "context/council/PRISMO.md",
+      "default_trigger": "orchestration, delegation, and tie-breaks"
+    },
+    {
+      "name": "NEPTR",
+      "kind": "runtime",
+      "status": "active",
+      "spawnable": true,
+      "surface": "worker",
+      "source_file": "context/council/NEPTR.md",
+      "default_trigger": "verification before completion claims"
+    },
+    {
+      "name": "Princess Bubblegum",
+      "kind": "specialist",
+      "status": "active",
+      "spawnable": true,
+      "surface": "worker",
+      "source_file": "context/council/PRINCESS_BUBBLEGUM.md",
+      "default_trigger": "architecture, runtime design, and repo boundaries"
+    },
+    {
+      "name": "Finn",
+      "kind": "specialist",
+      "status": "active",
+      "spawnable": true,
+      "surface": "worker",
+      "source_file": "context/council/FINN.md",
+      "default_trigger": "implementation and action-heavy execution"
+    },
+    {
+      "name": "Jake",
+      "kind": "specialist",
+      "status": "active",
+      "spawnable": true,
+      "surface": "worker",
+      "source_file": "context/council/JAKE.md",
+      "default_trigger": "simplification and de-complexity"
+    },
+    {
+      "name": "Marceline",
+      "kind": "specialist",
+      "status": "active",
+      "spawnable": true,
+      "surface": "worker",
+      "source_file": "context/council/MARCELINE.md",
+      "default_trigger": "naming, docs voice, polish, and art direction"
+    },
+    {
+      "name": "Simon",
+      "kind": "specialist",
+      "status": "active",
+      "spawnable": true,
+      "surface": "worker",
+      "source_file": "context/council/SIMON.md",
+      "default_trigger": "context recovery and prior-work reconstruction"
+    },
+    {
+      "name": "Peppermint Butler",
+      "kind": "specialist",
+      "status": "active",
+      "spawnable": true,
+      "surface": "worker",
+      "source_file": "context/council/PEPPERMINT_BUTLER.md",
+      "default_trigger": "security, auth, tokens, and risky operations"
+    },
+    {
+      "name": "Lady Rainicorn",
+      "kind": "specialist",
+      "status": "active",
+      "spawnable": true,
+      "surface": "worker",
+      "source_file": "context/council/LADY_RAINICORN.md",
+      "default_trigger": "cross-platform and environment translation"
+    },
+    {
+      "name": "Lemongrab",
+      "kind": "specialist",
+      "status": "active",
+      "spawnable": true,
+      "surface": "worker",
+      "source_file": "context/council/LEMONGRAB.md",
+      "default_trigger": "final compliance and contradiction audit"
+    },
+    {
+      "name": "Flame Princess",
+      "kind": "specialist",
+      "status": "active",
+      "spawnable": true,
+      "surface": "worker",
+      "source_file": "context/council/FLAME_PRINCESS.md",
+      "default_trigger": "performance, stress, and instability analysis"
+    }
+  ],
+  "workers": [
+    {
+      "name": "Cosmic Owl",
+      "kind": "github-worker",
+      "status": "active",
+      "spawnable": true,
+      "surface": "github",
+      "source_file": "context/council/COSMIC_OWL.md",
+      "workflow_file": ".github/workflows/github-caretaker.yml"
+    },
+    {
+      "name": "Moe",
+      "kind": "github-worker",
+      "status": "active",
+      "spawnable": true,
+      "surface": "github",
+      "source_file": "context/council/MOE.md",
+      "workflow_file": ".github/workflows/moe-repair.yml"
+    }
+  ]
+}

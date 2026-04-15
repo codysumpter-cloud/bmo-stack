@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json.schemastore.org/partial-composer.json",
+  "security": {
+    "readDenylist": [
+      ".env",
+      ".env.*",
+      "**/.env",
+      "**/.env.*",
+      "secrets/**",
+      "**/*secret*",
+      "**/*credential*",
+      "**/*.pem",
+      "**/*.key",
+      "**/id_rsa",
+      "**/id_ed25519"
+    ]
+  },
+  "hooks": {
+    "postEdit": [
+      {
+        "name": "agent-post-edit-checks",
+        "command": "bash scripts/agent-post-edit-checks.sh"
+      }
+    ],
+    "sessionEnd": [
+      {
+        "name": "persist-runtime-report",
+        "command": "bash scripts/persist-runtime-report.sh"
+      }
+    ]
+  },
+  "runtimeUpgrade": {
+    "preferredWorkers": [
+      "runtime-upgrader",
+      "runtime-verifier"
+    ],
+    "resumableWork": {
+      "enabled": true,
+      "checkpointCommand": "python3 scripts/durable_task_runtime.py run-next",
+      "manualResumeCommand": "python3 scripts/durable_task_runtime.py resume --chat-id <chat_id>"
+    }
+  }
+}

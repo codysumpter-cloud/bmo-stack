@@ -1,10 +1,10 @@
 # Repo Consolidation Blueprint
 
-This document defines the sane path for consolidating the BMO ecosystem into `bmo-stack` without turning the repository into an unlicensed, untraceable blob.
+This document defines the sane path for consolidating the BMO ecosystem into `BeMore-stack` without turning the repository into an unlicensed, untraceable blob.
 
 ## Goal
 
-Turn `bmo-stack` into the canonical deployment and integration repo for the BMO platform while preserving:
+Turn `BeMore-stack` into the canonical deployment and integration repo for the BMO platform while preserving:
 
 - upstream attribution
 - license compliance
@@ -13,7 +13,7 @@ Turn `bmo-stack` into the canonical deployment and integration repo for the BMO 
 
 ## Canonical Roles
 
-### `bmo-stack`
+### `BeMore-stack`
 Runtime spine and deployment repo.
 
 It should own:
@@ -69,7 +69,7 @@ Do not paste large chunks into the platform without preserving attribution and l
 ## Recommended Repository Shape
 
 ```text
-bmo-stack/
+BeMore-stack/
   apps/
     mission-control/
     public-chat/
@@ -133,7 +133,7 @@ If code is copied from an AGPL repo into a previously permissive repo, the recei
 
 That means:
 - AGPL code from `PrismBot` must either stay isolated as its own component, or
-- `bmo-stack` must be relicensed in a way that is compatible with that combined work
+- `BeMore-stack` must be relicensed in a way that is compatible with that combined work
 
 ### 4. Separate platform from product from persona
 
@@ -149,7 +149,7 @@ That keeps enterprise deployments clean while still allowing strong BMO identity
 ### Phase 1 — Governance first
 
 Before copying more code:
-- finalize the license posture for `bmo-stack`
+- finalize the license posture for `BeMore-stack`
 - add third-party notices
 - document fork / vendor policy
 - create a feature registry with provenance
@@ -192,7 +192,7 @@ If the long-term goal is enterprise OpenClaw agent deployment, the platform need
 
 ## Immediate Next Moves
 
-1. Decide whether `bmo-stack` is becoming an AGPL repository or a mixed workspace with hard component boundaries.
+1. Decide whether `BeMore-stack` is becoming an AGPL repository or a mixed workspace with hard component boundaries.
 2. Keep `vendor/nemoclaw` as a tracked upstream/fork boundary.
 3. Treat `be-more-hailo` as a fork/reference source, not anonymous copy-paste fuel.
 4. Build the feature registry before large code migration.

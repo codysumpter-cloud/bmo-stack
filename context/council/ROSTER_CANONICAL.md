@@ -1,6 +1,6 @@
 # Canonical Public Council Roster
 
-This roster reflects the intended 12-seat public council for `bmo-stack`.
+This roster reflects the intended 12-seat public council for `BeMore-stack`.
 
 ## Seats
 

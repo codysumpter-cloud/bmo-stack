@@ -1,0 +1,70 @@
+{
+  "version": 1,
+  "pack_name": "bmo-core-routines",
+  "description": "High-value operational routines that BMO should reach for before ad hoc debugging.",
+  "routines": [
+    {
+      "name": "doctor-plus",
+      "command": "make doctor-plus",
+      "owner_surface": "host",
+      "purpose": "Run the broad host/runtime sanity check before deeper troubleshooting.",
+      "related_files": [
+        "Makefile",
+        "scripts/bot-health.sh"
+      ]
+    },
+    {
+      "name": "worker-status",
+      "command": "scripts/bmo-worker-status",
+      "owner_surface": "host",
+      "purpose": "Check gateway health, agent health, and the latest task checkpoint in one step before mutating worker state.",
+      "related_files": [
+        "scripts/bmo-worker-status",
+        "TASK_STATE.md",
+        "WORK_IN_PROGRESS.md"
+      ]
+    },
+    {
+      "name": "runtime-doctor",
+      "command": "make runtime-doctor",
+      "owner_surface": "host",
+      "purpose": "Validate the BMO runtime profile, launch assumptions, and output path.",
+      "related_files": [
+        "Makefile",
+        "scripts/bmo-runtime-doctor.sh"
+      ]
+    },
+    {
+      "name": "workspace-sync",
+      "command": "make workspace-sync",
+      "owner_surface": "host",
+      "purpose": "Refresh the repo-backed OpenClaw workspace mirror after merges or context drift.",
+      "related_files": [
+        "Makefile",
+        "scripts/bmo-workspace-sync.py",
+        "scripts/sync-openclaw-workspaces.sh"
+      ]
+    },
+    {
+      "name": "site-caretaker",
+      "command": "make site-caretaker",
+      "owner_surface": "site-donor",
+      "purpose": "Inventory the separate prismtek-site and prismtek-site-replica repos before claiming web parity or chat ownership.",
+      "related_files": [
+        "Makefile",
+        "scripts/bmo-site-caretaker.mjs",
+        "context/sites/prismtek.dev/CONTINUATION.md"
+      ]
+    },
+    {
+      "name": "worker-ready",
+      "command": "make worker-ready",
+      "owner_surface": "sandbox",
+      "purpose": "Create and seed the bmo-tron worker sandbox after status and routing checks are understood.",
+      "related_files": [
+        "Makefile",
+        "scripts/configure-openclaw-agents.sh"
+      ]
+    }
+  ]
+}

@@ -11,14 +11,14 @@ PLAN_DIR = ROOT / "workflows"
 TEMPLATES = {
     "diagnose-and-fix": {
         "steps": [
-            {"name": "detect", "run": "./scripts/skill-auto.sh --text \"{input}\""},
-            {"name": "recover", "run": "./scripts/skill-recover-learned.sh --apply --text \"{input}\""},
+            {"name": "detect", "run": "bash scripts/skill-auto.sh --text \"{input}\""},
+            {"name": "recover", "run": "bash scripts/skill-recover-learned.sh --apply --text \"{input}\""},
             {"name": "report", "run": "python3 scripts/skill_stats.py"},
         ]
     },
     "guarded-evolution": {
         "steps": [
-            {"name": "validate", "run": "python3 scripts/validate-skills.py"},
+            {"name": "validate", "run": "node scripts/validate-skills.mjs"},
             {"name": "confidence", "run": "python3 scripts/skill_confidence.py"},
             {"name": "health", "run": "python3 scripts/skill_health.py"},
             {"name": "decay", "run": "python3 scripts/skill_decay.py"},
@@ -26,48 +26,22 @@ TEMPLATES = {
     },
 }
 
-# 🔥 NEW: dynamic intent detection
-def choose_template(goal: str) -> str:
-    goal = goal.lower()
-
-    if any(k in goal for k in ["fix", "error", "fail", "not working", "broken"]):
-        return "diagnose-and-fix"
-
-    if any(k in goal for k in ["evolve", "optimize", "improve", "autonomy", "skills"]):
-        return "guarded-evolution"
-
-    # fallback
-    return "diagnose-and-fix"
-
-# 🔥 NEW: build dynamic plan
-def build_dynamic_plan(goal: str) -> dict:
-    template = choose_template(goal)
-    base = json.loads(json.dumps(TEMPLATES[template]))
-
-    for step in base["steps"]:
-        step["run"] = step["run"].replace("{input}", goal)
-
-    base["goal"] = goal
-    base["template_used"] = template
-    base["planner_mode"] = "dynamic"
-
-    return base
 
 def main() -> None:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--goal", required=True)
+    parser = argparse.ArgumentParser(description="Generate skill workflow plans.")
+    parser.add_argument("template", choices=sorted(TEMPLATES.keys()))
+    parser.add_argument("--input", default="")
     args = parser.parse_args()
 
     PLAN_DIR.mkdir(parents=True, exist_ok=True)
+    plan = json.loads(json.dumps(TEMPLATES[args.template]))
+    for step in plan["steps"]:
+        step["run"] = step["run"].replace("{input}", args.input)
 
-    plan = build_dynamic_plan(args.goal)
-
-    out = PLAN_DIR / "dynamic-plan.json"
+    out = PLAN_DIR / f"{args.template}.json"
     out.write_text(json.dumps(plan, indent=2) + "\n", encoding="utf-8")
+    print(f"Wrote plan to {out}")
 
-    print(f"[planner] goal: {args.goal}")
-    print(f"[planner] template: {plan['template_used']}")
-    print(f"[planner] wrote: {out}")
 
 if __name__ == "__main__":
     main()

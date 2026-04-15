@@ -7,7 +7,11 @@ MEMORY = ROOT / "skills" / "memory.json"
 
 
 def main():
-    data = json.loads(MEMORY.read_text())
+    if not MEMORY.exists():
+        print("No history yet")
+        return
+
+    data = json.loads(MEMORY.read_text(encoding="utf-8"))
     stats = {}
 
     for h in data.get("history", []):
@@ -19,6 +23,10 @@ def main():
             stats[s]["ok"] += 1
         else:
             stats[s]["fail"] += 1
+
+    if not stats:
+        print("No history yet")
+        return
 
     for skill, v in stats.items():
         total = v["ok"] + v["fail"]

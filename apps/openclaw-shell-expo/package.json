@@ -1,0 +1,22 @@
+{
+  "name": "openclaw-shell-expo",
+  "version": "0.1.0",
+  "private": true,
+  "main": "node_modules/expo/AppEntry.js",
+  "scripts": {
+    "start": "expo start",
+    "ios": "expo start --ios",
+    "android": "expo start --android",
+    "web": "expo start --web",
+    "doctor": "npx expo-doctor",
+    "fix-deps": "npx expo install --fix"
+  },
+  "dependencies": {
+    "expo": "~54.0.0",
+    "react": "19.1.0",
+    "react-native": "0.81.0"
+  },
+  "engines": {
+    "node": ">=20.19.0"
+  }
+}

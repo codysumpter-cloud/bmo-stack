@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bmostack.dev/schemas/runtime/delegation-result.schema.json",
+  "title": "Runtime Delegation Result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["taskId", "status", "output", "partialResult", "accessReport", "verificationEvidence", "artifactProvenance", "failure", "safeAction", "escalate"],
+  "properties": {
+    "taskId": {"type": "string", "minLength": 1},
+    "status": {"type": "string", "enum": ["ok", "partial", "timeout", "error", "blocked", "conflict"]},
+    "output": {},
+    "partialResult": {"type": "object", "additionalProperties": false, "required": ["available", "summary", "returnedEarly"], "properties": {"available": {"type": "boolean"}, "summary": {"type": "string", "minLength": 1}, "returnedEarly": {"type": "boolean"}, "missingPieces": {"type": "array", "items": {"type": "string"}}}},
+    "accessReport": {"$ref": "access-report.schema.json"},
+    "verificationEvidence": {"type": "object", "additionalProperties": false, "required": ["status", "verifier", "checks", "completionClaimAllowed"], "properties": {"status": {"type": "string", "enum": ["not-run", "passed", "failed", "partial"]}, "verifier": {"type": "string", "minLength": 1}, "checks": {"type": "array", "items": {"type": "object", "additionalProperties": false, "required": ["name", "kind", "status"], "properties": {"name": {"type": "string"}, "kind": {"type": "string", "enum": ["schema", "test", "smoke", "manual-review", "fixture", "contract"]}, "status": {"type": "string", "enum": ["passed", "failed", "partial", "not-run"]}, "evidenceRef": {"type": "string"}}}}, "completionClaimAllowed": {"type": "boolean"}}},
+    "artifactProvenance": {"type": "array", "items": {"type": "object", "additionalProperties": false, "required": ["artifactId", "artifactType", "producer", "path", "sourceTaskId"], "properties": {"artifactId": {"type": "string"}, "artifactType": {"type": "string", "enum": ["doc", "json", "log", "screenshot", "trace", "archive", "report", "media-intake"]}, "producer": {"type": "string"}, "path": {"type": "string"}, "sourceTaskId": {"type": "string"}, "derivedFrom": {"type": "array", "items": {"type": "string"}}}}},
+    "failure": {"type": "object", "additionalProperties": false, "required": ["category", "retryable", "summary"], "properties": {"category": {"type": "string", "enum": ["none", "blocked-access", "budget-exhausted", "validation-failed", "conflict", "tool-failure", "runtime-error", "policy-blocked"]}, "retryable": {"type": "boolean"}, "summary": {"type": "string"}, "detail": {"type": "string"}}},
+    "safeAction": {"type": "string", "minLength": 1},
+    "escalate": {"type": "boolean"}
+  }
+}

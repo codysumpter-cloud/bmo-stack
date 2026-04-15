@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bmostack.dev/schemas/runtime/security-review-finding.schema.json",
+  "title": "Security Review Finding",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "findingId",
+    "title",
+    "status",
+    "severity",
+    "confidence",
+    "target",
+    "summary",
+    "evidence"
+  ],
+  "properties": {
+    "findingId": {"type": "string", "minLength": 1},
+    "title": {"type": "string", "minLength": 1},
+    "status": {
+      "type": "string",
+      "enum": ["candidate", "reproduced", "false-positive", "patched", "deferred"]
+    },
+    "severity": {"type": "string", "enum": ["informational", "low", "medium", "high", "critical"]},
+    "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["locator"],
+      "properties": {
+        "locator": {"type": "string", "minLength": 1},
+        "ref": {"type": "string"}
+      }
+    },
+    "summary": {"type": "string", "minLength": 1},
+    "affectedPaths": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "rootCause": {"type": "string"},
+    "exploitability": {"type": "string", "enum": ["unknown", "low", "moderate", "high"]},
+    "evidence": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["kind", "locator"],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": ["log", "stack-trace", "crash-input", "repro-script", "test", "coverage", "patch-diff"]
+          },
+          "locator": {"type": "string", "minLength": 1},
+          "note": {"type": "string"}
+        }
+      }
+    },
+    "remediation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "status": {"type": "string", "enum": ["none", "drafted", "verified", "rejected"]},
+        "patchLocator": {"type": "string"},
+        "regressionTestLocator": {"type": "string"}
+      }
+    },
+    "operatorApprovalNeeded": {"type": "boolean"}
+  }
+}

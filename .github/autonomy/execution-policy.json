@@ -1,0 +1,20 @@
+{
+  "docs_root": "docs",
+  "builtin_apply_scopes": [],
+  "blocked_scopes": [
+    "runtime",
+    "delivery"
+  ],
+  "blocked_labels": [
+    "autonomy:needs-human",
+    "risk:high"
+  ],
+  "blocked_terms": [
+    "secret",
+    ".env",
+    "credential",
+    "token",
+    "vendor/",
+    "nemoclaw"
+  ]
+}

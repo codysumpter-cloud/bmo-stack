@@ -1,6 +1,6 @@
 # OpenClaw Agent Split Setup
 
-This guide fixes the two most common setup failures in the public `bmo-stack` flow:
+This guide fixes the two most common setup failures in the public `BeMore-stack` flow:
 
 1. the front-facing `main` agent accidentally ends up sandboxed
 2. Telegram gets routed to the worker instead of the host-facing agent

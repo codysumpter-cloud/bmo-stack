@@ -1,0 +1,47 @@
+name: Publish continuity
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  continuity:
+    runs-on: ubuntu-latest
+    env:
+      PRISMTEK_CONTINUITY_URL: ${{ vars.PRISMTEK_CONTINUITY_URL }}
+      PRISMTEK_CONTINUITY_TOKEN: ${{ secrets.PRISMTEK_CONTINUITY_TOKEN }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+
+      - name: Build continuity snapshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          args=(--surface repo --output workflows/bmo-continuity.json)
+          if [ -n "${PRISMTEK_CONTINUITY_URL:-}" ] && [ -n "${PRISMTEK_CONTINUITY_TOKEN:-}" ]; then
+            args+=(--publish)
+          fi
+          node scripts/bmo-continuity-report.mjs "${args[@]}"
+
+      - name: Write workflow summary
+        run: |
+          {
+            echo "## BMO continuity"
+            if [ -n "${PRISMTEK_CONTINUITY_URL:-}" ] && [ -n "${PRISMTEK_CONTINUITY_TOKEN:-}" ]; then
+              echo "- Continuity publish: enabled"
+            else
+              echo "- Continuity publish: skipped (missing PRISMTEK_CONTINUITY_URL or token)"
+            fi
+            echo "- Snapshot file: workflows/bmo-continuity.json"
+          } >> "$GITHUB_STEP_SUMMARY"

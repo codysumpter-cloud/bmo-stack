@@ -1,0 +1,22 @@
+{
+  "timestamp": "2026-04-09T07:30:00.323349",
+  "data": [
+    {
+      "skill": "unknown",
+      "component": "logs",
+      "log_file": "skill-execution-logs.out.log",
+      "last_executed": "2026-04-09T07:25:00.203725",
+      "age_hours": 0.1,
+      "status": "recent"
+    },
+    {
+      "skill": "summary",
+      "component": "collector",
+      "log_file": "skill_execution_logs.json",
+      "last_executed": "2026-04-09T07:30:00.323349",
+      "age_hours": 0,
+      "status": "active",
+      "total_skills_found": 1
+    }
+  ]
+}

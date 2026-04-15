@@ -1,21 +1,30 @@
 # HEARTBEAT.md
 
-# Short checklist for proactive checks (rotate through these 2-4 times per day):
+Use this file as the lightweight checklist for recurring background checks.
+Keep it short so heartbeat turns stay cheap and predictable.
 
-- [ ] Check for urgent unread messages (if applicable)
-- [ ] Check calendar for upcoming events (<2h)
-- [ ] Verify git status of bmo-stack repo
-- [ ] Run bmo-worker-status to check gateway and agent health
-- [ ] Review recent memory files for significant events
-- [ ] Check for any failed scripts or processes
+## Default cadence
 
-# When to reach out:
-- Important event or deadline approaching
-- Something interesting found worth sharing
-- Been >8h since last proactive message
+- Read this file at the interval defined by `HEARTBEAT_INTERVAL_MINUTES`.
+- Default when unset: 30 minutes.
+- Stay quiet and return `HEARTBEAT_OK` when nothing needs action.
 
-# When to stay quiet (HEARTBEAT_OK):
-- Late night (23:00-08:00) unless urgent
-- Human is clearly busy
-- Nothing new since last check
-- Just checked <30 minutes ago
+## Rotation checklist
+
+- [ ] GitHub: new issues or PRs needing action?
+- [ ] `TASK_STATE.md`: interrupted work to resume?
+- [ ] `WORK_IN_PROGRESS.md`: stale or blocked tasks?
+- [ ] `memory/YYYY-MM-DD.md`: write today's notes if missing?
+- [ ] Runtime or delivery: any obvious failures that need surfacing?
+
+## Surface immediately
+
+- NEPTR blocked completion
+- Council deadlock
+- Delivery failure that prevented a reply
+- A task marked not safe to resume
+
+## State file
+
+Recommended lightweight state file:
+`memory/heartbeat-state.json`

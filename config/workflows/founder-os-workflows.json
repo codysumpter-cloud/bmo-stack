@@ -1,0 +1,64 @@
+{
+  "version": 1,
+  "manifest_id": "bmo-founder-os-workflows",
+  "reviewPolicy": {
+    "humanApprovalRequiredBeforePosting": true,
+    "humanApprovalRequiredBeforeOpeningPr": true,
+    "humanApprovalRequiredBeforeMerging": true
+  },
+  "workflowTemplates": [
+    {
+      "id": "research-draft-human-approve",
+      "name": "Research -> Draft -> Human approve",
+      "stages": [
+        {"id": "research", "role": "researcher", "output": "research-brief"},
+        {"id": "draft", "role": "writer", "output": "draft"},
+        {"id": "review", "role": "ops-assistant", "output": "review-item"},
+        {"id": "approval", "role": "orchestrator", "output": "approval-decision"}
+      ]
+    },
+    {
+      "id": "trend-detect-content-brief",
+      "name": "Trend detect -> Content brief -> Draft post",
+      "stages": [
+        {"id": "trend-detect", "role": "trend-scout", "output": "signal-report"},
+        {"id": "research", "role": "researcher", "output": "context-brief"},
+        {"id": "content-brief", "role": "writer", "output": "content-brief"},
+        {"id": "review", "role": "growth-outreach", "output": "draft-post"}
+      ]
+    },
+    {
+      "id": "code-implement-review-approve-pr",
+      "name": "Code task -> Implement -> Review -> Human approve PR",
+      "stages": [
+        {"id": "plan", "role": "orchestrator", "output": "patch-plan"},
+        {"id": "implement", "role": "dev", "output": "implementation-artifact"},
+        {"id": "review", "role": "code-review", "output": "review-report"},
+        {"id": "verify", "role": "qa-monitor", "output": "verification-report"},
+        {"id": "approval", "role": "orchestrator", "output": "pr-review-item"}
+      ]
+    },
+    {
+      "id": "bug-monitor-reproduce-triage",
+      "name": "Bug monitor -> Reproduce -> Triage report",
+      "stages": [
+        {"id": "detect", "role": "qa-monitor", "output": "incident-signal"},
+        {"id": "reproduce", "role": "dev", "output": "repro-notes"},
+        {"id": "triage", "role": "qa-monitor", "output": "triage-report"},
+        {"id": "review", "role": "ops-assistant", "output": "review-item"}
+      ]
+    },
+    {
+      "id": "security-review-findings-patch-approve",
+      "name": "Security review -> Findings -> Patch -> Human approve",
+      "stages": [
+        {"id": "intake", "role": "orchestrator", "output": "security-review-request"},
+        {"id": "analyze", "role": "security-analyst", "output": "risk-map"},
+        {"id": "triage", "role": "security-triage", "output": "finding-list"},
+        {"id": "patch", "role": "dev", "output": "patch-draft"},
+        {"id": "verify", "role": "qa-monitor", "output": "verification-report"},
+        {"id": "approval", "role": "orchestrator", "output": "pr-review-item"}
+      ]
+    }
+  ]
+}
