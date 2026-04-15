@@ -96,6 +96,12 @@ jobs:
 
       - name: Generate Xcode project
         run: |
+          # Increment build number to prevent TestFlight upload failure
+          BUILD=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' OpenClawShell/Info.plist)
+          NEW_BUILD=$((BUILD + 1))
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $NEW_BUILD" OpenClawShell/Info.plist
+          echo "Incrementing build version from $BUILD to $NEW_BUILD"
+          
           test -f project.yml
           xcodegen generate
           test -d BeMoreAgent.xcodeproj

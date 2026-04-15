@@ -5,6 +5,7 @@ enum ProviderKind: String, Codable, CaseIterable, Identifiable {
     case ollama
     case huggingFace = "huggingface"
     case google
+    case xai
     case openRouter = "openrouter"
 
     var id: String { rawValue }
@@ -15,6 +16,7 @@ enum ProviderKind: String, Codable, CaseIterable, Identifiable {
         case .ollama: return "Ollama"
         case .huggingFace: return "Hugging Face"
         case .google: return "Google"
+        case .xai: return "xAI (Grok)"
         case .openRouter: return "OpenRouter"
         }
     }
@@ -25,6 +27,7 @@ enum ProviderKind: String, Codable, CaseIterable, Identifiable {
         case .ollama: return "http://localhost:11434"
         case .huggingFace: return "https://api-inference.huggingface.co"
         case .google: return "https://generativelanguage.googleapis.com"
+        case .xai: return "https://api.x.ai/v1"
         case .openRouter: return "https://openrouter.ai/api/v1"
         }
     }
@@ -35,6 +38,7 @@ enum ProviderKind: String, Codable, CaseIterable, Identifiable {
         case .ollama: return "Set the Ollama server URL"
         case .huggingFace: return "Paste a Hugging Face token"
         case .google: return "Paste a Google AI Studio / Gemini API key"
+        case .xai: return "Paste an xAI API key"
         case .openRouter: return "Paste an OpenRouter API key"
         }
     }
@@ -93,6 +97,11 @@ enum CloudModelCatalog {
             return [
                 CloudModel(provider: .google, slug: "gemini-2.5-pro", displayName: "Gemini 2.5 Pro", notes: "Strong reasoning model"),
                 CloudModel(provider: .google, slug: "gemini-2.5-flash", displayName: "Gemini 2.5 Flash", notes: "Fast lower-cost model")
+            ]
+        case .xai:
+            return [
+                CloudModel(provider: .xai, slug: "grok-beta", displayName: "Grok Beta", notes: "Latest xAI experimental model"),
+                CloudModel(provider: .xai, slug: "grok-2", displayName: "Grok 2", notes: "High-performance xAI model")
             ]
         case .openRouter:
             return [
