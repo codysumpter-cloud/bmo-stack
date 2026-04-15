@@ -61,7 +61,7 @@ After startup:
 
 ## Donor policy
 
-- `bmo-stack` is the canonical repo for stack policy, automation, routines, and operator workflow.
+- `BeMore-stack` is the canonical repo for stack policy, automation, routines, and operator workflow.
 - `PrismBot` is the policy and product donor.
 - `omni-bmo` is the runtime and ops donor.
 - `prismtek-site` is the content and public-web donor.

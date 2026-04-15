@@ -29,10 +29,10 @@
       ],
       "importedTemplates": [
         {
-          "id": "bmo-stack-full",
+          "id": "BeMore-stack-full",
           "name": "BMO Stack Full",
           "description": "Complete BMO Stack deployment with agent framework and local model support.",
-          "repoUrl": "https://github.com/codysumpter-cloud/bmo-stack",
+          "repoUrl": "https://github.com/codysumpter-cloud/BeMore-stack",
           "supportedModels": [
             "gemma4-e2b",
             "gemma4-2b",
@@ -126,7 +126,7 @@
       ],
       "integrationTargets": [
         "prismtek-site:/builder-studio/",
-        "bmo-stack:operator docs and manifests"
+        "BeMore-stack:operator docs and manifests"
       ],
       "guardrails": [
         "Do not treat localhost Express endpoints as production truth.",
@@ -195,7 +195,7 @@
       ],
       "integrationTargets": [
         "prismtek-site:/prism-agent/",
-        "bmo-stack:donor and operator docs"
+        "BeMore-stack:donor and operator docs"
       ],
       "guardrails": [
         "Do not adopt Firebase schema as the canonical stack persistence model.",

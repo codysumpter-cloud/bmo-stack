@@ -6,7 +6,7 @@ This repo tracks the desired operator contract for Cody's MacBook OpenClaw setup
 
 - Mac OpenClaw runtime state lives under `~/.openclaw`.
 - The iOS app workspace lives inside the app container at `Documents/OpenClawWorkspace/.openclaw`.
-- `bmo-stack` source files are the durable policy and automation source of truth.
+- `BeMore-stack` source files are the durable policy and automation source of truth.
 - The app must not read or write the Mac's `~/.openclaw` files directly.
 - The Mac runtime and app may interact only through an explicitly configured gateway, pairing, or manual export/import flow.
 

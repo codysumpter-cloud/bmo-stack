@@ -2,7 +2,7 @@
 
 ## Agent Upgrade Policy
 
-When performing runtime/stack upgrades in `bmo-stack`, agents must follow this policy:
+When performing runtime/stack upgrades in `BeMore-stack`, agents must follow this policy:
 
 1. **Ship small, reversible upgrades**
    - Keep each change minimal and traceable.

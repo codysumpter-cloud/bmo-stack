@@ -27,7 +27,7 @@ Add additive scaffolding only:
 - future in-place wiring into existing routines and validators still needs a follow-up pass
 
 ## Owner path
-- `bmo-stack`
+- `BeMore-stack`
 
 ## Files likely to change
 

@@ -2,7 +2,7 @@
 
 ## Canonical runtime
 
-`bmo-stack` is the only live runtime and operator control plane.
+`BeMore-stack` is the only live runtime and operator control plane.
 
 - **BMO** is the only front-facing agent.
 - **Council members** are internal subagents / role components.
@@ -32,7 +32,7 @@ Legacy names such as `PRISMBOT_API_TOKEN` are compatibility fallbacks only.
 
 ## Repo roles
 
-- `bmo-stack` = host runtime, orchestration, skills, autonomy, operator policy
+- `BeMore-stack` = host runtime, orchestration, skills, autonomy, operator policy
 - `omni-bmo` = local embodied runtime donor repo
 - `PrismBot` = archived workspace / product donor repo
 

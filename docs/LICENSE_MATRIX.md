@@ -6,7 +6,7 @@ This document records the currently observed license posture of repositories fee
 
 | Repository | Current role | Observed license state | Notes |
 |---|---|---:|---|
-| `codysumpter-cloud/bmo-stack` | Platform/runtime spine | Apache-2.0 | Root `LICENSE` and `NOTICE` added; preserve third-party provenance records |
+| `codysumpter-cloud/BeMore-stack` | Platform/runtime spine | Apache-2.0 | Root `LICENSE` and `NOTICE` added; preserve third-party provenance records |
 | `codysumpter-cloud/nemoclaw` | OpenShell / NemoClaw vendor fork | Apache-2.0 | Safe to vendor/fork with notice preservation |
 | `codysumpter-cloud/omni-bmo` | Embodied BMO / Pi runtime | MIT | Permissive, but preserve attribution and copyright notice |
 | `codysumpter-cloud/PrismBot` | Product/workspace/apps/core | AGPL-3.0 | Strong copyleft; combining code directly into platform changes downstream obligations |
@@ -29,7 +29,7 @@ That means:
 
 `PrismBot` is AGPL-3.0.
 
-If AGPL-covered code is merged into `bmo-stack` in a way that creates a combined derivative work, distribution and network-use obligations likely apply to the combined work.
+If AGPL-covered code is merged into `BeMore-stack` in a way that creates a combined derivative work, distribution and network-use obligations likely apply to the combined work.
 
 That is not automatically bad. In fact, it can be a strong signal of legitimacy and openness. But it must be deliberate.
 
@@ -50,7 +50,7 @@ Requirements still exist:
 Use this if the goal is one canonical open platform where product apps and platform runtime are intentionally combined.
 
 Implications:
-- add an AGPL-3.0 license to `bmo-stack`
+- add an AGPL-3.0 license to `BeMore-stack`
 - preserve Apache/MIT notices for vendored components
 - ensure the running network-facing surfaces provide required source availability
 - strongest community-aligned posture
@@ -61,7 +61,7 @@ Implications:
 Use this if the goal is enterprise adoption with cleaner commercial packaging options.
 
 Implications:
-- keep `bmo-stack` platform code under its own explicit license
+- keep `BeMore-stack` platform code under its own explicit license
 - keep AGPL code in separately distributed services/components
 - communicate between components over documented interfaces
 - avoid copying AGPL source into permissive/core packages unless the target is intentionally AGPL too
@@ -69,14 +69,14 @@ Implications:
 
 ## What still matters immediately
 
-1. Preserve third-party notices and provenance whenever donor or upstream code moves into `bmo-stack`.
-2. Keep `prismtek-site` and `bmo-stack` license posture aligned with their root `LICENSE` and `NOTICE` files.
+1. Preserve third-party notices and provenance whenever donor or upstream code moves into `BeMore-stack`.
+2. Keep `prismtek-site` and `BeMore-stack` license posture aligned with their root `LICENSE` and `NOTICE` files.
 3. Add a real license to `Prismtek.dev` if it is intended to be reused or contributed to.
 4. Record provenance for every migrated feature.
 
 ## Suggested default now
 
 Until a broader portfolio-wide licensing review is complete:
-- treat `bmo-stack` and `prismtek-site` as Apache-2.0 codebases with explicit provenance obligations
-- do not copy AGPL code from `PrismBot` into `bmo-stack`
+- treat `BeMore-stack` and `prismtek-site` as Apache-2.0 codebases with explicit provenance obligations
+- do not copy AGPL code from `PrismBot` into `BeMore-stack`
 - only integrate by documented interface or by explicit relicensing decision

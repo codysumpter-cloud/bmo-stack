@@ -10,7 +10,7 @@ This prototype is currently a **thin-slice wrapper** around the reference implem
 The `runtime_bootstrap.py` module acts as the explicit boundary. It resolves the path to the reference runtime, validates the environment, and provides the `BuddyAdapter` instance to the API server.
 
 ### Exit Plan
-To move toward true ownership by `bmo-stack`, the following steps are planned:
-1. **Native Implementation**: Develop a native `iBuddy` runtime implementation within `bmo-stack/runtime/native/`.
+To move toward true ownership by `BeMore-stack`, the following steps are planned:
+1. **Native Implementation**: Develop a native `iBuddy` runtime implementation within `BeMore-stack/runtime/native/`.
 2. **Bootstrap Pivot**: Update `runtime_bootstrap.py` to instantiate the native implementation instead of the reference adapter.
 3. **De-coupling**: Remove the reference-runtime bootstrap logic and the dependency on the `hermes-agent` repository entirely.

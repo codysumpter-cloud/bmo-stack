@@ -3,7 +3,7 @@
 ## Problem
 
 `prismtek.dev_mega-app` advanced after the earlier donor integration work and now includes a
-Firebase-backed auth and backend-services layer that is not yet represented in `bmo-stack`'s donor
+Firebase-backed auth and backend-services layer that is not yet represented in `BeMore-stack`'s donor
 manifests and docs.
 
 ## Smallest useful wedge
@@ -24,7 +24,7 @@ latest mega-app Firebase auth/data layer, backend blueprint entities, and the up
 
 ## Owner path
 
-`bmo-stack`
+`BeMore-stack`
 
 ## Files likely to change
 

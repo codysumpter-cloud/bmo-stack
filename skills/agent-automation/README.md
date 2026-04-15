@@ -47,7 +47,7 @@ Copy the example plist and modify:
     <key>ProgramArguments</key>
     <array>
         <string>/usr/bin/python3</string>
-        <string>/Users/prismtek/.openclaw/workspace/bmo-stack/skills/agent-automation/scripts/run_routine.py</string>
+        <string>/Users/prismtek/.openclaw/workspace/BeMore-stack/skills/agent-automation/scripts/run_routine.py</string>
         <string>--routine</string>
         <string>daily-agent-checkin</string>
     </array>
@@ -65,7 +65,7 @@ Copy the example plist and modify:
 ```
 
 ## Validation
-- Check logs in `~/bmo-stack/logs/agent-automation/`
+- Check logs in `~/BeMore-stack/logs/agent-automation/`
 - Verify that the expected agent interactions occurred in memory/TASK_STATE.md or similar
 - Ensure no duplicate runs (use lockfiles if necessary)
 

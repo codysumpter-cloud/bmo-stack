@@ -45,7 +45,7 @@ mcp/codex-bridge/
 2. Install the bridge dependencies:
 
    ```bash
-   cd -- /absolute/path/to/bmo-stack/mcp/codex-bridge || exit 1
+   cd -- /absolute/path/to/BeMore-stack/mcp/codex-bridge || exit 1
    npm install
    ```
 

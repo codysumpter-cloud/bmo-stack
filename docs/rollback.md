@@ -20,7 +20,7 @@ git reset --hard <pre_upgrade_commit_sha>
 
 ```bash
 git checkout -- CLAUDE.md .claude/settings.json .claude/agents/runtime-upgrader.md .claude/agents/runtime-verifier.md
-git checkout -- scripts/agent-post-edit-checks.sh scripts/persist-runtime-report.sh scripts/sync-upgrade-artifacts.sh scripts/sync-and-pr-bmo-stack.sh
+git checkout -- scripts/agent-post-edit-checks.sh scripts/persist-runtime-report.sh scripts/sync-upgrade-artifacts.sh scripts/sync-and-pr-BeMore-stack.sh
 git checkout -- docs/upgrade-plan.md docs/upgrade-results.md docs/rollback.md docs/MISSION_CONTROL_BMO_STACK_SYNC.md README.md
 ```
 

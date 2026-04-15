@@ -2,7 +2,7 @@
 
 ## Source of truth
 
-- `bmo-stack` is the canonical operator and policy repo.
+- `BeMore-stack` is the canonical operator and policy repo.
 - `openclaw` owns the concrete Telegram runtime and delivery path.
 - `prismtek-site` owns the public `prismtek.dev` Cloudflare Pages surface.
 - `context/` is the canonical repo context.
@@ -43,7 +43,7 @@ Then:
 - use `skills/index.json` only when you need the machine-readable trigger or action map for a
   repo-local skill
 - if the active checkout is a workspace mirror under `~/.openclaw/workspace`, refresh it before claiming repo files are missing:
-  - `python3 scripts/bmo-workspace-sync.py --workspace-dir ~/.openclaw/workspace/bmo-stack --host-context ~/bmo-context`
+  - `python3 scripts/bmo-workspace-sync.py --workspace-dir ~/.openclaw/workspace/BeMore-stack --host-context ~/bmo-context`
 - for runtime routing tasks, inspect `python3 scripts/bmo-model-router.py --task "..."`
 - for website and public-chat handoff work, inspect `node scripts/bmo-site-caretaker.mjs`
 - for donor imports, inspect `context/skills/donor-ingest.skill.md` and `context/donors/BMO_FEATURE_CARRYOVER.md`

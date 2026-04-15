@@ -5,7 +5,7 @@ Last updated: 2026-04-10 10:25 UTC
 ## Current status
 
 - Description: Keep PR #229 merge-ready while tightening the MacBook OpenClaw/iOS boundary and host Telegram delivery policy.
-- Active repo: `/Users/prismtek/bmo-stack`
+- Active repo: `/Users/prismtek/BeMore-stack`
 - Branch: `fix/openclaw-build18-agent-workspace-ux`
 - Last successful step: applied host OpenClaw delivery policy, added repo-side boundary/policy doctors, and verified PR #229 was clean before this follow-up patch.
 - Next intended step: run repo checks, commit, push, and confirm the PR checks restart on the new head.
@@ -16,7 +16,7 @@ Last updated: 2026-04-10 10:25 UTC
 - Safe to resume: true
 
 - 2026-04-09 19:13 UTC
-  - Repo: `/Users/taylor/development/bmo-stack`
+  - Repo: `/Users/taylor/development/BeMore-stack`
   - Branch: `codex/ios-shell-surfaces-a`
   - Files touched: none yet on this branch
   - Last successful step: access gate, baseline build, and baseline simulator verification passed on current `master`; current master already includes persisted tab management, buddy rename/active selection persistence, and Models route control.
@@ -26,7 +26,7 @@ Last updated: 2026-04-10 10:25 UTC
   - Safe to resume: true
 
 - 2026-04-09 19:33 UTC
-  - Repo: `/Users/taylor/development/bmo-stack`
+  - Repo: `/Users/taylor/development/BeMore-stack`
   - Branch: `codex/ios-shell-surfaces-a`
   - Files touched: Mission Control shell/docs plus repo-backed surface view
   - Last successful step: fetched `origin/master`, confirmed PR `#212` landed at `2026-04-09T18:53:22Z`, rebased onto build `13`, and restored the in-progress shell/doc changes cleanly
@@ -38,17 +38,17 @@ Last updated: 2026-04-10 10:25 UTC
 ## Recent checkpoints
 
 - 2026-04-07 10:39 UTC
-  - Repo: `/Users/prismtek/code/bmo-stack`
+  - Repo: `/Users/prismtek/code/BeMore-stack`
   - Branch: `fix/openclaw-shell-ios-local-build`
   - Files touched: `apps/openclaw-shell-ios/project.yml`, `apps/openclaw-shell-ios/OpenClawShell/Info.plist`, `apps/openclaw-shell-ios/OpenClawShell/RuntimeServices.swift`, `apps/openclaw-shell-ios/.gitignore`, `apps/openclaw-shell-ios/README.md`
-  - Last successful step: `xcodegen generate` plus `xcodebuild -project apps/openclaw-shell-ios/OpenClawShell.xcodeproj -scheme OpenClawShell -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' -derivedDataPath /Users/prismtek/code/bmo-stack/apps/openclaw-shell-ios/.build/DerivedData build` succeeded
+  - Last successful step: `xcodegen generate` plus `xcodebuild -project apps/openclaw-shell-ios/OpenClawShell.xcodeproj -scheme OpenClawShell -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' -derivedDataPath /Users/prismtek/code/BeMore-stack/apps/openclaw-shell-ios/.build/DerivedData build` succeeded
   - Next intended step: commit and push if the branch is clean after commit
   - Verification complete: true
   - Manual steps remaining: Apple team/bundle id selection and Developer Mode for direct iPhone install
   - Safe to resume: true
 
 - 2026-04-02 13:49 UTC
-  - Repo: `/workspace/bmo-stack`
+  - Repo: `/workspace/BeMore-stack`
   - Branch: `feat/durable-task-resume`
   - Files touched: durable runtime scripts, adapter, selftest, docs, policy files, Makefile, README
   - Last successful step: long-prompt normalization + checkpoint/resume + timeout recovery flows validated
@@ -58,7 +58,7 @@ Last updated: 2026-04-10 10:25 UTC
   - Safe to resume: true
 
 - 2026-04-02 13:39 UTC
-  - Repo: `/workspace/bmo-stack`
+  - Repo: `/workspace/BeMore-stack`
   - Branch: `feat/runtime-self-upgrade-hardening`
   - Files touched: runtime upgrade policy/settings/agents/scripts/docs plus README and checkpoint files
   - Last successful step: verification passed and commit `aff308e` created
@@ -68,9 +68,9 @@ Last updated: 2026-04-10 10:25 UTC
   - Safe to resume: true
 
 - 2026-04-02 13:37 UTC
-  - Repo: `/workspace/bmo-stack`
+  - Repo: `/workspace/BeMore-stack`
   - Branch: `feat/runtime-self-upgrade-hardening`
-  - Files touched: `CLAUDE.md`, `.claude/**`, `scripts/agent-post-edit-checks.sh`, `scripts/persist-runtime-report.sh`, `scripts/sync-upgrade-artifacts.sh`, `scripts/sync-and-pr-bmo-stack.sh`, `docs/upgrade-plan.md`, `docs/upgrade-results.md`, `docs/rollback.md`, `docs/MISSION_CONTROL_BMO_STACK_SYNC.md`, `README.md`
+  - Files touched: `CLAUDE.md`, `.claude/**`, `scripts/agent-post-edit-checks.sh`, `scripts/persist-runtime-report.sh`, `scripts/sync-upgrade-artifacts.sh`, `scripts/sync-and-pr-BeMore-stack.sh`, `docs/upgrade-plan.md`, `docs/upgrade-results.md`, `docs/rollback.md`, `docs/MISSION_CONTROL_BMO_STACK_SYNC.md`, `README.md`
   - Last successful step: implemented runtime self-upgrade policy and automation scaffolding
   - Next intended step: run verification and finalize PR artifacts
   - Verification complete: false
@@ -78,7 +78,7 @@ Last updated: 2026-04-10 10:25 UTC
   - Safe to resume: true
 
 - 2026-03-27 10:19 UTC
-  - Repo: `C:\Users\cody_\Git\bmo-stack`
+  - Repo: `C:\Users\cody_\Git\BeMore-stack`
   - Branch: `master`
   - Files touched: none locally; fast-forwarded from origin
   - Last successful step: pulled merged startup hardening from PR #114 into local `master`
@@ -88,7 +88,7 @@ Last updated: 2026-04-10 10:25 UTC
   - Safe to resume: true
 
 - 2026-03-27 10:45 UTC
-  - Repo: `C:\Users\cody_\Git\bmo-stack`
+  - Repo: `C:\Users\cody_\Git\BeMore-stack`
   - Branch: `master`
   - Files touched: `README.md`, `context/BACKLOG.md`, `Makefile`, `scripts/bmo-context-reseed`, `scripts/bmo-worker-status`
   - Last successful step: rewired the one-command reseed and worker-status surfaces into the operator path and refreshed the top-level docs to match the real repo
@@ -98,7 +98,7 @@ Last updated: 2026-04-10 10:25 UTC
   - Safe to resume: true
 
 - 2026-03-27 11:52 UTC
-  - Repo: `C:\Users\cody_\Git\bmo-stack`
+  - Repo: `C:\Users\cody_\Git\BeMore-stack`
   - Branch: `master`
   - Files touched: `apps/README.md`, `apps/windows-desktop/README.md`, `apps/windows-desktop/config/appsettings.example.json`, `apps/windows-desktop/config/workstation-manifest.json`, `apps/windows-desktop/launch.ps1`, `apps/windows-desktop/policies/capability-policy.example.json`, `apps/windows-desktop/src/BMO.Broker.ps1`, `apps/windows-desktop/src/BMO.Desktop.ps1`, `apps/windows-desktop/src/BMO.Workstation.ps1`, `docs/WINDOWS_DESKTOP_APP.md`
   - Last successful step: turned the Windows app into a real BMO workstation shell with task supervision, source control and diff views, routines and skills panels, validation actions, file editing, and smoke-testable packaging
@@ -108,7 +108,7 @@ Last updated: 2026-04-10 10:25 UTC
   - Safe to resume: true
 
 - 2026-03-28 13:29 UTC
-  - Repo: `C:\Users\cody_\Git\bmo-stack`
+  - Repo: `C:\Users\cody_\Git\BeMore-stack`
   - Branch: `master`
   - Files touched: `scripts/validate-bmo-operating-system.mjs`, `memory/2026-03-28.md`, `TASK_STATE.md`, `WORK_IN_PROGRESS.md`
   - Last successful step: isolated the red `ci` check on `master`, patched the date-sensitive validator bug, and validated the same repo-contract checks locally
@@ -118,7 +118,7 @@ Last updated: 2026-04-10 10:25 UTC
   - Safe to resume: true
 
 - 2026-03-28 13:36 UTC
-  - Repo: `C:\Users\cody_\Git\bmo-stack`
+  - Repo: `C:\Users\cody_\Git\BeMore-stack`
   - Branch: `master`
   - Files touched: `memory/2026-03-28.md`, `TASK_STATE.md`, `WORK_IN_PROGRESS.md`
   - Last successful step: confirmed PR `#123` merged and the follow-up `master` runs for `ci`, `codeql`, and `Publish continuity` all passed

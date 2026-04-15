@@ -2,7 +2,7 @@
 
 ## Goal
 
-Bring selective local runtime features into `bmo-stack` directly so BMO can run a lightweight local loop without depending on PrismBot as a runtime identity.
+Bring selective local runtime features into `BeMore-stack` directly so BMO can run a lightweight local loop without depending on PrismBot as a runtime identity.
 
 The native runtime now includes:
 

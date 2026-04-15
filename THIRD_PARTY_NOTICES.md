@@ -2,7 +2,7 @@
 
 This repository includes or tracks components from other projects.
 
-`bmo-stack` itself is licensed under Apache-2.0. This file records the external
+`BeMore-stack` itself is licensed under Apache-2.0. This file records the external
 license and provenance posture that still matters when features or patterns are
 carried across repos.
 

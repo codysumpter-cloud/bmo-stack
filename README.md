@@ -1,6 +1,6 @@
 # BMO Stack
 
-`bmo-stack` is the operator, policy, and integration repository for BMO.
+`BeMore-stack` is the operator, policy, and integration repository for BMO.
 
 It is the canonical source for BMO startup context, council contracts, operator workflows, runtime
 runbooks, workspace sync, and cross-repo integration glue. It does not pretend to own every live
@@ -8,7 +8,7 @@ surface in the broader system.
 
 ## System boundaries
 
-- `bmo-stack`: operator workflows, startup context, council policy, GitHub automation, and local
+- `BeMore-stack`: operator workflows, startup context, council policy, GitHub automation, and local
   integration glue
 - `openclaw`: live Telegram/runtime delivery behavior
 - `prismtek-site`: public-web `prismtek.dev` surface and site-backed APIs
@@ -72,7 +72,7 @@ This repo is intentionally local-first and operator-visible.
 
 - Host OpenClaw handles Telegram-facing runtime behavior.
 - OpenShell and NemoClaw provide disposable worker sandboxes.
-- `bmo-stack` provides the canonical operating environment, policy surface, and integration glue.
+- `BeMore-stack` provides the canonical operating environment, policy surface, and integration glue.
 - The iOS app uses its own app-container workspace. It must not read or mutate the MacBook `~/.openclaw` runtime unless Cody explicitly connects it through a gateway, pairing, or export/import path.
 
 Manual operator steps still exist:
@@ -85,8 +85,8 @@ Manual operator steps still exist:
 
 ## Source-of-truth rules
 
-- Do not claim Telegram runtime fixes from `bmo-stack` alone unless the relevant `openclaw` path was changed and validated.
-- Do not claim `prismtek.dev` web-chat fixes from `bmo-stack` alone unless the relevant `prismtek-site` path was changed and validated.
+- Do not claim Telegram runtime fixes from `BeMore-stack` alone unless the relevant `openclaw` path was changed and validated.
+- Do not claim `prismtek.dev` web-chat fixes from `BeMore-stack` alone unless the relevant `prismtek-site` path was changed and validated.
 - Do not patch vendored or donor paths first when the real owner is upstream.
 - Prefer machine-checkable manifests, validators, and runbooks over doc-only promises.
 - Use `make openclaw-boundary-doctor` to verify the MacBook OpenClaw/runtime boundary and `make openclaw-host-policy` to reapply the host Telegram delivery policy.

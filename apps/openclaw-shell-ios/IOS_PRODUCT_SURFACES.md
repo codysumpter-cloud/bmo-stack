@@ -1,7 +1,7 @@
 # iOS Product Surfaces
 
 This file is the current source of truth for what the BeMoreAgent iOS shell actually exposes from
-`bmo-stack`.
+`BeMore-stack`.
 
 ## Available inside iOS
 
@@ -63,7 +63,7 @@ Wrapped as an operational brief sourced from the repo runbook.
 
 Why:
 
-- release proof and upload posture are now part of the real `bmo-stack` workflow
+- release proof and upload posture are now part of the real `BeMore-stack` workflow
 - the app can expose the truth of the release path without trying to upload builds from the phone
 
 ### Pokemon Champions team builder backend spec

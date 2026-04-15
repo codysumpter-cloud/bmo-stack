@@ -6,10 +6,10 @@ Run one coherent BMO setup on a MacBook without pretending the old donor repos a
 
 ## Runtime ownership today
 
-- `bmo-stack` is the operator control plane, context source, and workspace-sync source.
+- `BeMore-stack` is the operator control plane, context source, and workspace-sync source.
 - `openclaw` is the live host runtime source that owns Telegram delivery behavior.
 - `/usr/local/lib/node_modules/openclaw` should resolve to the checked-out `~/code/openclaw` repo.
-- `~/.openclaw/workspace/bmo-stack` is a mirrored workspace for context and repo files. It is not the same thing as the live Telegram runtime code.
+- `~/.openclaw/workspace/BeMore-stack` is a mirrored workspace for context and repo files. It is not the same thing as the live Telegram runtime code.
 - BMO is the only front-facing agent.
 - Council members are internal subagents.
 
@@ -22,7 +22,7 @@ Run one coherent BMO setup on a MacBook without pretending the old donor repos a
 
 ```text
 ~/code/
-  bmo-stack/
+  BeMore-stack/
   openclaw/
   omni-bmo/        # optional donor/runtime bridge target
   PrismBot/        # optional archived reference copy
@@ -30,7 +30,7 @@ Run one coherent BMO setup on a MacBook without pretending the old donor repos a
 
 ## Daily operator flow
 
-From `bmo-stack`:
+From `BeMore-stack`:
 
 ```bash
 make doctor-plus
@@ -56,7 +56,7 @@ launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/cloud.codysumpter.bmo-wo
 launchctl kickstart -k gui/$(id -u)/cloud.codysumpter.bmo-workspace-sync
 ```
 
-That LaunchAgent runs `scripts/bmo-workspace-sync.py` at login and every 5 minutes by default, keeping `~/.openclaw/workspace/bmo-stack` aligned with the repo and syncing repo context into `~/bmo-context`.
+That LaunchAgent runs `scripts/bmo-workspace-sync.py` at login and every 5 minutes by default, keeping `~/.openclaw/workspace/BeMore-stack` aligned with the repo and syncing repo context into `~/bmo-context`.
 When the continuity URL and token are set, it also publishes the current MacBook/runtime snapshot to the site-wide continuity feed and mirrors the latest snapshot into `context/continuity/live-status.json` for the OpenClaw workspace.
 Use a real continuity token value here. Do not paste the placeholder string into your shell, or publish will fail with `Continuity write token is missing or invalid.`
 
@@ -79,7 +79,7 @@ make recover-bmo
 
 ## Integration rules
 
-- Keep new operator logic BMO-first in `bmo-stack`.
+- Keep new operator logic BMO-first in `BeMore-stack`.
 - Keep concrete Telegram/runtime delivery fixes in `openclaw`, then pull them onto the MacBook and restart the gateway.
 - Use PrismBot docs/scripts as migration references only.
 - Use `omni-bmo` helpers only through BMO bridge scripts unless there is a good reason not to.

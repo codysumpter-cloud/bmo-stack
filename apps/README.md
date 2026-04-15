@@ -1,6 +1,6 @@
 # Apps
 
-This directory holds user-facing applications built on top of `bmo-stack`.
+This directory holds user-facing applications built on top of `BeMore-stack`.
 
 Current app workspaces:
 

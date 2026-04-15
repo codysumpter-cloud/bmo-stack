@@ -1,6 +1,6 @@
 # BeMoreAgent iOS product architecture
 
-This document explains how the two native iOS subtrees currently fit together in `bmo-stack`.
+This document explains how the two native iOS subtrees currently fit together in `BeMore-stack`.
 
 ## Current native iOS apps
 

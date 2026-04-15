@@ -46,7 +46,7 @@ Restart recovery:
 - Read `memory/YYYY-MM-DD.md` for today and yesterday, then inspect `TASK_STATE.md` and `WORK_IN_PROGRESS.md`.
 - Inspect `git status` before asking the user to restate anything.
 - If operating from `~/.openclaw/workspace` or another mirror checkout, refresh the canonical workspace before claiming files are missing:
-  - `python3 scripts/bmo-workspace-sync.py --workspace-dir ~/.openclaw/workspace/bmo-stack --host-context ~/bmo-context`
+  - `python3 scripts/bmo-workspace-sync.py --workspace-dir ~/.openclaw/workspace/BeMore-stack --host-context ~/bmo-context`
 - For runtime routing work, inspect `scripts/bmo-model-router.py`.
 - For website migration or public-web caretaker work, inspect `scripts/bmo-site-caretaker.mjs`.
 - Resume interrupted work when safe.

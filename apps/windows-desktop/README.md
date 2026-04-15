@@ -1,6 +1,6 @@
 # BMO Windows Workstation
 
-This app is the current Windows-native BMO operator shell in `bmo-stack`.
+This app is the current Windows-native BMO operator shell in `BeMore-stack`.
 
 It is intentionally local-first and boring:
 

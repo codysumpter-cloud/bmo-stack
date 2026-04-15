@@ -1,6 +1,6 @@
 # Council Runtime
 
-This file defines the machine-checked public council runtime for `bmo-stack`.
+This file defines the machine-checked public council runtime for `BeMore-stack`.
 
 ## Public posture
 

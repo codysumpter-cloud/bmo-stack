@@ -17,5 +17,5 @@ Decide whether `/mission-control/` remains a proxy shell or becomes the explicit
 
 ## Blockers
 
-- `prismtek-site` is the public route owner, not `bmo-stack`
+- `prismtek-site` is the public route owner, not `BeMore-stack`
 - the donor repo cannot be checked out cleanly on Windows due invalid path characters in the static export

@@ -1,5 +1,5 @@
 mode: manual_review_only
-stack: bmo-stack
+stack: BeMore-stack
 contract_version: 2026-03-25.v1
 
 review_focus:

@@ -10,7 +10,7 @@ Import useful patterns from donor repos without creating source-of-truth drift.
 - `omni-bmo` = runtime and ops donor
 - `prismtek-site` = content and public-web donor
 
-`PrismBot` and `omni-bmo` are the direct lineage repos for `bmo-stack`.
+`PrismBot` and `omni-bmo` are the direct lineage repos for `BeMore-stack`.
 
 ## Procedure
 
@@ -21,7 +21,7 @@ Import useful patterns from donor repos without creating source-of-truth drift.
    - docs or acceptance criteria
    - public-web content or route inventory
 3. Check `context/donors/BMO_FEATURE_CARRYOVER.md` before inventing a new gap list.
-4. State where the change will land in `bmo-stack`.
+4. State where the change will land in `BeMore-stack`.
 5. State what is intentionally not imported.
 6. Prefer extracting contracts, response rules, validation patterns, and routines before copying implementation details.
 

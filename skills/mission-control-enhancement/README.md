@@ -29,7 +29,7 @@ The skill provides three scripts:
 Create launchd agents to run these scripts periodically (e.g., every 5 minutes) and output JSON files to the workflows directory.
 
 ### 4. Validate
-Check that the JSON files are being generated in `~/bmo-stack/workflows/` and that the mission control can read them.
+Check that the JSON files are being generated in `~/BeMore-stack/workflows/` and that the mission control can read them.
 
 ## Expected Data Format
 

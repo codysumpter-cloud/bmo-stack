@@ -177,7 +177,7 @@ jobs:
 
           plan = {
               "issue_number": 999,
-              "issue_url": "https://github.com/codysumpter-cloud/bmo-stack/issues/999",
+              "issue_url": "https://github.com/codysumpter-cloud/BeMore-stack/issues/999",
               "issue_title": "docs: sample issue",
               "issue_body": "Update `docs/example.md`",
               "summary": "Autonomy plan for issue #999: docs: sample issue",

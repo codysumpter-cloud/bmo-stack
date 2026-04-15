@@ -22,9 +22,9 @@ Observed from the donor repo `prismtek-site` on 2026-03-26:
 
 ## Practical meaning
 
-- `bmo-stack` owns the BMO runtime contract, operator docs, and handoff logic
+- `BeMore-stack` owns the BMO runtime contract, operator docs, and handoff logic
 - `prismtek-site` owns the public `prismtek.dev` route shell
-- the current public-web chat/application implementation is effectively behind `app.prismtek.dev`, not in `bmo-stack`
+- the current public-web chat/application implementation is effectively behind `app.prismtek.dev`, not in `BeMore-stack`
 - `prismtek-site-replica` did not show a BMO chat route in the inspected React source tree on 2026-03-26
 
 ## Do not claim this yet

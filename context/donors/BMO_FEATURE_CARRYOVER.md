@@ -12,7 +12,7 @@ This file tracks the highest-value features BMO should preserve from the donor l
 - `prismtek.dev_mega-app` contributes browser-first operator surface and app-factory catalog ideas.
 - `BMO-app` contributes BMO companion UX, creature concepts, and Kairos/Prismo world interaction ideas.
 
-## Imported into bmo-stack
+## Imported into BeMore-stack
 
 ### From PrismBot
 

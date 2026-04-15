@@ -1,6 +1,6 @@
 # Cosmic Owl Maintenance Report (Sample)
 
-- Repository: codysumpter-cloud/bmo-stack
+- Repository: codysumpter-cloud/BeMore-stack
 - Generated at: 2026-03-20T18:00:00Z
 - Open issues: 14
 - Open PRs: 2

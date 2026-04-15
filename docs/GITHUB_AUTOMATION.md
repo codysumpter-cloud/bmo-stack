@@ -1,6 +1,6 @@
 # GitHub Automation in BMO Stack
 
-This document explains the repository automation currently enabled in `bmo-stack` and what each piece does.
+This document explains the repository automation currently enabled in `BeMore-stack` and what each piece does.
 
 ## Current automation
 
@@ -31,7 +31,7 @@ Workflow file:
 
 ## 3. Cosmic Owl caretaker
 
-`bmo-stack` already includes the Cosmic Owl caretaker workflow.
+`BeMore-stack` already includes the Cosmic Owl caretaker workflow.
 
 It checks repository health and opens a maintenance issue when attention is needed based on issue count, open PR count, or repository staleness.
 
@@ -99,7 +99,7 @@ Recommended additional settings:
 
 ## Why this matters
 
-These automations make `bmo-stack` more durable by catching broken bootstrap changes early, surfacing security issues in workflow code, and reducing drift in GitHub Actions dependencies.
+These automations make `BeMore-stack` more durable by catching broken bootstrap changes early, surfacing security issues in workflow code, and reducing drift in GitHub Actions dependencies.
 
 The machine-readable automation contract lives in:
 

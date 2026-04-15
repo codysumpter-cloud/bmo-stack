@@ -1,6 +1,6 @@
 # BMO Stack Skills
 
-This directory defines reusable, task-scoped skill modules for `bmo-stack`.
+This directory defines reusable, task-scoped skill modules for `BeMore-stack`.
 
 The goal is to make common operational capabilities easy to discover, document, and reuse without forcing contributors to reverse-engineer shell scripts or scattered docs.
 
@@ -89,7 +89,7 @@ Each skill directory should contain a `README.md` with:
 
 ## Why this exists
 
-`bmo-stack` has meaningful operational logic spread across:
+`BeMore-stack` has meaningful operational logic spread across:
 
 - bootstrap scripts
 - OpenClaw agent configuration helpers

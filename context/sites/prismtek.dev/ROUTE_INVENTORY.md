@@ -41,7 +41,7 @@ The machine-readable source is `context/sites/prismtek.dev/ROUTES.json`.
 
 - `/mission-control/` currently exists in the donor site as the public web handoff surface for app access.
 - In `prismtek-site`, the HTML route redirects to `/my-account/`, and the Cloudflare Pages function proxies requests to `app.prismtek.dev`.
-- That means `bmo-stack` does not currently own the live `prismtek.dev` web chat implementation by itself.
+- That means `BeMore-stack` does not currently own the live `prismtek.dev` web chat implementation by itself.
 
 ## Execution rule
 
