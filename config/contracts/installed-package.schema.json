@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Installed Package",
+  "type": "object",
+  "required": ["kind", "id", "packageId", "packageVersion", "bindingId", "scope", "status", "config"],
+  "additionalProperties": false,
+  "properties": {
+    "kind": { "const": "installed-package" },
+    "id": { "type": "string" },
+    "packageId": { "type": "string" },
+    "packageVersion": { "type": "string" },
+    "bindingId": { "type": "string" },
+    "scope": { "enum": ["user", "workspace", "project", "repo"] },
+    "status": { "enum": ["installed", "disabled", "error"] },
+    "config": { "type": "object" }
+  }
+}

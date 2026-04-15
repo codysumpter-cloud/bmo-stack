@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Buddy Binding",
+  "type": "object",
+  "required": ["kind", "apiVersion", "id", "version", "metadata", "binding", "persona", "permissions", "ui", "runtimeRules"],
+  "additionalProperties": false,
+  "properties": {
+    "kind": { "const": "buddy-binding" },
+    "apiVersion": { "const": "buddy.prismtek/v1" },
+    "id": { "type": "string" },
+    "version": { "type": "string" },
+    "metadata": { "type": "object" },
+    "binding": { "type": "object" },
+    "persona": { "type": "object" },
+    "permissions": { "type": "object" },
+    "ui": { "type": "object" },
+    "config": { "type": "object" },
+    "runtimeRules": {
+      "type": "object",
+      "required": ["planner", "policyNamespace", "routeNamespace"],
+      "properties": {
+        "planner": { "const": "shared-buddy-runtime" },
+        "policyNamespace": { "const": "shared/global" },
+        "routeNamespace": { "const": "shared/global" }
+      }
+    }
+  }
+}
