@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bemore.dev/contracts/pokemon-champions/team-build-response.schema.json",
+  "title": "Pokemon Champions Team Build Response",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["snapshot", "team", "replacements", "strategy", "warnings"],
+  "properties": {
+    "snapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["snapshotId", "regulationId", "battleMode", "checkedAt", "sourceConfidence"],
+      "properties": {
+        "snapshotId": { "type": "string", "minLength": 1 },
+        "regulationId": { "type": "string", "minLength": 1 },
+        "battleMode": { "type": "string", "enum": ["singles", "doubles"] },
+        "checkedAt": { "type": "string", "format": "date-time" },
+        "sourceConfidence": { "type": "string", "enum": ["official_only", "official_plus_curated", "mixed_with_uncertainty"] }
+      }
+    },
+    "team": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "score", "slots"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "score": { "type": "number" },
+        "archetype": { "type": "string" },
+        "whyChosen": { "type": "array", "items": { "type": "string" } },
+        "bestLeads": { "type": "array", "items": { "type": "string" } },
+        "openingPlan": { "type": "array", "items": { "type": "string" } },
+        "winConditions": { "type": "array", "items": { "type": "string" } },
+        "badMatchups": { "type": "array", "items": { "type": "string" } },
+        "slots": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 6,
+          "items": { "$ref": "common.schema.json#/$defs/pokemonSet" }
+        }
+      }
+    },
+    "replacements": {
+      "type": "array",
+      "items": { "$ref": "common.schema.json#/$defs/replacementSuggestion" }
+    },
+    "strategy": { "$ref": "common.schema.json#/$defs/strategyPlan" },
+    "warnings": {
+      "type": "array",
+      "items": { "$ref": "common.schema.json#/$defs/warning" }
+    }
+  }
+}
