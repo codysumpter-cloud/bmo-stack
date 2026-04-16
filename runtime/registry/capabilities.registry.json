@@ -1,0 +1,51 @@
+{
+  "registryVersion": "0.1.0",
+  "ownerRepo": "BeMore-stack",
+  "skills": [
+    "runtime/skills/pokemon-team-builder/skill.package.json"
+  ],
+  "apps": [],
+  "bindings": [],
+  "permissions": {
+    "workspace.read": {
+      "description": "Read runtime-owned skill state and prior artifacts.",
+      "approval": "none"
+    },
+    "workspace.write": {
+      "description": "Persist runtime-owned skill state.",
+      "approval": "run"
+    },
+    "artifact.write": {
+      "description": "Write user-visible JSON, Markdown, or text artifacts.",
+      "approval": "run"
+    },
+    "event.emit": {
+      "description": "Emit runtime events to iBeMore supervision surfaces.",
+      "approval": "none"
+    }
+  },
+  "handlers": {
+    "runtime.skills.pokemon_team_builder.handler": {
+      "ownerRepo": "BeMore-stack",
+      "entrypoint": "python3 -m runtime.skills.pokemon_team_builder.handler",
+      "capabilities": [
+        "team.generate",
+        "team.edit",
+        "team.analyze",
+        "team.export",
+        "artifact.persist",
+        "session.resume"
+      ]
+    }
+  },
+  "installStatus": {
+    "pokemon-team-builder": "available"
+  },
+  "uiHooks": {
+    "pokemon-team-builder": {
+      "surface": "iBeMore.skillDiscovery",
+      "route": "ibemore://apps/pokemon-team-builder"
+    }
+  }
+}
+

@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bemore.dev/runtime/skills/pokemon-team-builder/input.schema.json",
+  "title": "Pokemon Team Builder Input",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "goal": { "type": "string" },
+    "format": { "type": "string", "enum": ["Singles", "Doubles", "Story Run", "Draft League"] },
+    "strategy": { "type": "string" },
+    "mustInclude": { "type": ["string", "array"], "items": { "type": "string" } },
+    "avoid": { "type": ["string", "array"], "items": { "type": "string" } },
+    "editRequest": { "type": "string" },
+    "existingTeam": {
+      "type": "array",
+      "items": { "type": "string" },
+      "maxItems": 6
+    },
+    "artifactDir": { "type": "string" }
+  }
+}
+

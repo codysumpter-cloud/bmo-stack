@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bemore.dev/runtime/skills/pokemon-team-builder/output.schema.json",
+  "title": "Pokemon Team Builder Output",
+  "type": "object",
+  "required": ["summary", "team", "analysis", "artifacts", "events"],
+  "properties": {
+    "summary": { "type": "string" },
+    "team": { "type": "array", "items": { "type": "object" }, "minItems": 6, "maxItems": 6 },
+    "analysis": { "type": "object" },
+    "artifacts": { "type": "array", "items": { "type": "string" } },
+    "events": { "type": "array", "items": { "type": "object" } }
+  }
+}
+
