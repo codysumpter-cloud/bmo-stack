@@ -215,6 +215,54 @@
         "turn this into a proper prompt"
       ],
       "default_action": "dispatch"
+    },
+    "pokemon-champions-team-lab": {
+      "actions": [
+        "audit",
+        "build",
+        "spec"
+      ],
+      "triggers": [
+        "pokemon champions team audit",
+        "champions legality check",
+        "legal check this team",
+        "best-fit champions build",
+        "pokemon champions team lab"
+      ],
+      "default_action": "audit"
+    },
+    "pokemon-champions-builder-architect": {
+      "actions": [
+        "prd",
+        "architecture",
+        "api",
+        "ux",
+        "plan"
+      ],
+      "triggers": [
+        "pokemon champions builder architect",
+        "team builder prd",
+        "deterministic legality engine",
+        "snapshot driven builder",
+        "builder architecture"
+      ],
+      "default_action": "architecture"
+    },
+    "pokemon-champions-builder-generator": {
+      "actions": [
+        "prd",
+        "api-spec",
+        "swiftui-arch",
+        "json-schema-only"
+      ],
+      "triggers": [
+        "write the prd",
+        "make the api spec",
+        "design the swiftui architecture",
+        "json schema only",
+        "pokemon champions generator"
+      ],
+      "default_action": "prd"
     }
   }
 }
