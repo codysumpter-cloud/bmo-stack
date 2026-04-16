@@ -1,0 +1,17 @@
+{
+  "format": "doubles",
+  "regulationId": "champions-mvp-local-v1",
+  "snapshotId": "champions-mvp-local-v1",
+  "lockedPokemon": [
+    "Palafin",
+    "Dragonite"
+  ],
+  "stylePreference": "pivot",
+  "riskTolerance": "stable",
+  "goal": "ladder",
+  "dislikedPokemon": [
+    "Incineroar"
+  ],
+  "notes": "Build a best-fit Doubles team around Palafin and Dragonite with practical swap suggestions and a clear play plan.",
+  "requestedAlternatives": 1
+}
