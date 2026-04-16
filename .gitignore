@@ -1,4 +1,6 @@
 *.code-workspace
+__pycache__/
+*.py[cod]
 context/continuity/live-status.json
 workflows/bmo-continuity.json
 workflows/bmo-workspace-sync.json
