@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bemore.dev/contracts/capabilities/buddy-binding.schema.json",
+  "title": "BeMore Buddy Binding",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "bindingId",
+    "buddyId",
+    "targetKind",
+    "targetId",
+    "role",
+    "permissionsScope",
+    "eventRules",
+    "artifactOwnership",
+    "resume",
+    "constraints"
+  ],
+  "properties": {
+    "bindingId": { "type": "string" },
+    "buddyId": { "type": "string" },
+    "targetKind": { "type": "string", "enum": ["skill", "app"] },
+    "targetId": { "type": "string" },
+    "role": { "type": "string" },
+    "status": { "type": "string", "enum": ["proposed", "active", "paused", "revoked"] },
+    "permissionsScope": {
+      "type": "array",
+      "items": { "type": "string" },
+      "uniqueItems": true
+    },
+    "eventRules": {
+      "type": "object",
+      "properties": {
+        "emit": { "type": "array", "items": { "type": "string" } },
+        "approvalRequiredFor": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "artifactOwnership": {
+      "type": "object",
+      "required": ["owner", "attribution"],
+      "properties": {
+        "owner": { "type": "string", "enum": ["runtime-session"] },
+        "attribution": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "resume": {
+      "type": "object",
+      "properties": {
+        "sessionId": { "type": "string" },
+        "latestEventSequence": { "type": "integer", "minimum": 0 },
+        "artifactRefs": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "constraints": {
+      "type": "object",
+      "required": ["noProviderOverride", "noMiniRuntime", "noHiddenService"],
+      "properties": {
+        "noProviderOverride": { "type": "boolean", "const": true },
+        "noMiniRuntime": { "type": "boolean", "const": true },
+        "noHiddenService": { "type": "boolean", "const": true }
+      }
+    }
+  }
+}
+
