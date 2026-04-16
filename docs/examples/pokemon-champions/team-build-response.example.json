@@ -1,0 +1,139 @@
+{
+  "snapshot": {
+    "snapshotId": "champions-mvp-local-v1",
+    "regulationId": "mvp-local",
+    "battleMode": "singles",
+    "checkedAt": "2026-04-16T00:00:00Z",
+    "sourceConfidence": "mixed_with_uncertainty"
+  },
+  "team": {
+    "name": "Balanced Pivot Offense",
+    "score": 87.4,
+    "archetype": "balanced pivot offense",
+    "whyChosen": [
+      "Palafin provides pivot pressure and fast cleanup.",
+      "Dragonite preserves a secondary physical win condition.",
+      "Bellibolt and Garganacl give the team a real defensive glue core."
+    ],
+    "bestLeads": ["Palafin", "Bellibolt"],
+    "openingPlan": [
+      "Pivot early with Flip Turn, Volt Switch, or U-turn.",
+      "Force chip with Salt Cure and preserve the late-game cleaner."
+    ],
+    "winConditions": [
+      "Palafin cleanup after chip.",
+      "Dragonite endgame once faster checks are softened."
+    ],
+    "badMatchups": [
+      "Strong Electric tempo cores",
+      "Dedicated status stall"
+    ],
+    "slots": [
+      {
+        "species": "Palafin",
+        "ability": "Unconfirmed",
+        "item": "Unconfirmed",
+        "nature": "Unconfirmed",
+        "trainingDirection": "max Attack, max Speed",
+        "moves": ["Jet Punch", "Wave Crash", "Flip Turn", "Close Combat"],
+        "roleTag": "pivot",
+        "legality": "unconfirmed",
+        "notes": "Preserves the locked ace and keeps the team’s original pivot-cleaner identity."
+      },
+      {
+        "species": "Bellibolt",
+        "ability": "Unconfirmed",
+        "item": "Unconfirmed",
+        "nature": "Unconfirmed",
+        "trainingDirection": "max HP, high Defense",
+        "moves": ["Thunderbolt", "Volt Switch", "Acid Spray", "Slack Off"],
+        "roleTag": "glue",
+        "legality": "unconfirmed",
+        "notes": "Glues the defensive backbone and gives the team a practical Electric check."
+      },
+      {
+        "species": "Garganacl",
+        "ability": "Unconfirmed",
+        "item": "Unconfirmed",
+        "nature": "Unconfirmed",
+        "trainingDirection": "max HP, high Sp. Def",
+        "moves": ["Salt Cure", "Recover", "Body Press", "Stealth Rock"],
+        "roleTag": "rocker",
+        "legality": "unconfirmed",
+        "notes": "Provides long-game progress and practical chip pressure."
+      },
+      {
+        "species": "Hisuian Zoroark",
+        "ability": "Unconfirmed",
+        "item": "Unconfirmed",
+        "nature": "Unconfirmed",
+        "trainingDirection": "max Sp. Atk, max Speed",
+        "moves": ["Nasty Plot", "Shadow Ball", "Flamethrower", "Grass Knot"],
+        "roleTag": "breaker",
+        "legality": "unconfirmed",
+        "notes": "Keeps the weird pressure identity without turning the whole team into Ghost pile-up."
+      },
+      {
+        "species": "Meowscarada",
+        "ability": "Unconfirmed",
+        "item": "Unconfirmed",
+        "nature": "Unconfirmed",
+        "trainingDirection": "max Attack, max Speed",
+        "moves": ["Flower Trick", "Knock Off", "U-turn", "Triple Axel"],
+        "roleTag": "pivot",
+        "legality": "unconfirmed",
+        "notes": "Adds fast Grass/Dark utility and improves pivot overlap."
+      },
+      {
+        "species": "Dragonite",
+        "ability": "Unconfirmed",
+        "item": "Unconfirmed",
+        "nature": "Unconfirmed",
+        "trainingDirection": "max Attack, max Speed",
+        "moves": ["Dragon Dance", "Extreme Speed", "Earthquake", "Dual Wingbeat"],
+        "roleTag": "wincon",
+        "legality": "unconfirmed",
+        "notes": "Preserves the second physical closer and helps keep the team stable."
+      }
+    ]
+  },
+  "replacements": [
+    {
+      "slotIndex": 1,
+      "reason": "Improves Ground matchup and long-game consistency if Bellibolt underperforms in the target snapshot.",
+      "preservesIntent": "Keeps a bulky pivot and Electric check slot.",
+      "options": [
+        {
+          "species": "Rotom-Wash",
+          "ability": "Unconfirmed",
+          "item": "Unconfirmed",
+          "nature": "Unconfirmed",
+          "trainingDirection": "bulky pivot",
+          "moves": ["Hydro Pump", "Volt Switch", "Will-O-Wisp", "Protect"],
+          "roleTag": "pivot"
+        }
+      ],
+      "tradeoff": "You gain cleaner defensive utility but lose Bellibolt’s Acid Spray support."
+    }
+  ],
+  "strategy": {
+    "archetype": "balanced pivot offense",
+    "bestLeads": ["Palafin", "Bellibolt"],
+    "openingPlan": ["Pivot early", "Chip key walls", "Preserve cleaner"],
+    "midgamePlan": ["Use pivots to bring in breakers safely", "Force progress with Salt Cure and Knock Off pressure"],
+    "winConditions": ["Palafin cleanup", "Dragonite endgame"],
+    "dangerZones": ["Fast Electric offense", "Dedicated status stall", "Rocky Helmet punishment"]
+  },
+  "warnings": [
+    {
+      "code": "mvp_snapshot",
+      "message": "This example is built from the bundled MVP snapshot, not a full live Champions legality table.",
+      "severity": "warning"
+    },
+    {
+      "code": "set_templates_unconfirmed",
+      "message": "Abilities, items, and exact legality remain unconfirmed until verified Champions set templates are added.",
+      "severity": "warning"
+    }
+  ]
+}
