@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "{{Schema Package Name}}",
+  "type": "object",
+  "properties": {
+    "snapshot_id": { "type": "string" },
+    "request": { "$ref": "#/$defs/BuildRequest" },
+    "response": { "$ref": "#/$defs/BuildResponse" }
+  },
+  "required": ["snapshot_id", "request", "response"],
+  "$defs": {
+    "BuildRequest": { "type": "object" },
+    "BuildResponse": { "type": "object" },
+    "Warning": { "type": "object" },
+    "ReplacementSuggestion": { "type": "object" }
+  }
+}

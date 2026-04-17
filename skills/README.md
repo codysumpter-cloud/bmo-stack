@@ -73,6 +73,12 @@ It is meant to make a focused workflow easier to execute correctly.
   - read arbitrary user-provided links/files/media with best-effort fallbacks (web fetch, browser relay, yt-dlp, ffmpeg keyframes), then return actionable summaries and blockers
 - `video-review/`
   - review and summarize online videos (especially YouTube) by extracting transcript + keyframes with local tools
+- `pokemon-champions-team-lab/`
+  - Hermes-ready live format team audit and legality-checking pack for Pokémon Champions
+- `pokemon-champions-builder-architect/`
+  - Hermes-ready deterministic builder/product architecture pack for Champions team-builder systems
+- `pokemon-champions-builder-generator/`
+  - Hermes-ready deliverables pack for PRDs, API specs, SwiftUI architecture, and JSON-schema-only contracts
 
 ## Suggested skill format
 

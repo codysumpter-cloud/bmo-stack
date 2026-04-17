@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PokemonChampionsTeamAuditOutput",
+  "type": "object",
+  "required": ["snapshot", "teams"],
+  "properties": {
+    "snapshot": {
+      "type": "object",
+      "required": ["date_checked", "sources_used", "confidence"],
+      "properties": {
+        "date_checked": { "type": "string" },
+        "sources_used": { "type": "array", "items": { "type": "string" } },
+        "active_regulation": { "type": "string" },
+        "confidence": { "type": "string", "enum": ["high", "medium", "low"] },
+        "uncertainties": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "teams": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["team_name", "format", "final_roster"],
+        "properties": {
+          "team_name": { "type": "string" },
+          "format": { "type": "string" },
+          "final_roster": { "type": "array", "items": { "type": "object" }, "minItems": 1 },
+          "improvements": { "type": "array", "items": { "type": "string" } },
+          "risks": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    }
+  }
+}
