@@ -22,6 +22,7 @@ This repo stays explicit about those ownership lines so operator claims remain h
 - operator plans, runbooks, continuity, and decision records in `context/`
 - workspace sync, runtime helpers, and maintenance scripts in `scripts/`
 - reusable operator skills in `skills/`
+- the repo-local Codex bridge in `mcp/codex-bridge/`
 - cross-repo donor, licensing, and integration documentation
 
 ## Quick start
@@ -63,8 +64,15 @@ make site-parity-report
 - `config/`: machine-readable council, GitHub, routine, and operator manifests
 - `scripts/`: runtime doctor, sync, bootstrap, recovery, and reporting helpers
 - `skills/`: repo-owned operator skill packs
+- `mcp/codex-bridge/`: isolated Codex CLI dispatch into per-run git worktrees with structured artifacts
 - `memory/`: persistent notes and decision trails
 - `docs/`: architecture, integration, upgrade, and licensing references
+
+## Product adapter boundary
+
+`prismtek-apps` may present Buddy Studio, memory review, and Codex task controls to end users, but
+it should consume the posture, council contracts, skills manifests, and Codex execution path defined
+here instead of inventing a second agent system.
 
 ## Runtime posture
 

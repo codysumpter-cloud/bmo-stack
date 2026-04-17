@@ -29,6 +29,8 @@ mcp/codex-bridge/
 │       └── .gitkeep
 ├── server/
 │   ├── index.js
+│   ├── bin/
+│   │   └── dispatchCodexTaskCli.js
 │   ├── lib/
 │   │   └── bridge.js
 │   └── tools/
@@ -135,6 +137,13 @@ Typical contents:
 
 - Codex CLI must already be installed and authenticated.
 - Dispatch is synchronous right now. `dispatch_codex_task` blocks until `codex exec` exits.
+- Approval mode mapping is tied to the installed Codex CLI:
+  - `suggest` => `codex exec --json -s read-only`
+  - `auto_edit` => `codex exec --json -s workspace-write`
+  - `full_auto` => `codex exec --json --full-auto`
+- App adapters that need immediate `run_id` handoff can spawn `server/bin/dispatchCodexTaskCli.js`
+  with a caller-supplied `--run-id`, then poll the same `status.json` and `result.json` surfaces.
 - Worktrees are intentionally left in place for manual review and cleanup.
 - The bridge does not manage concurrent queues; each dispatch is independent.
-- In `suggest` mode, Codex may leave you with proposals or minimal file changes rather than directly applying edits.
+- In `suggest` mode, the bridge runs Codex in an explicit read-only sandbox.
+- In `auto_edit` mode, the bridge runs Codex in `workspace-write` without `--full-auto`, which preserves a lighter-touch path than full auto when the installed CLI supports it.

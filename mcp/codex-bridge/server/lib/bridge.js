@@ -126,11 +126,11 @@ export function getRunPaths(runId) {
 export function approvalModeToFlag(mode) {
   switch (mode) {
     case "suggest":
-      return "--suggest";
+      return ["-s", "read-only"];
     case "auto_edit":
-      return "--auto-edit";
+      return ["-s", "workspace-write"];
     case "full_auto":
-      return "--full-auto";
+      return ["--full-auto"];
     default:
       throw new Error(`unsupported approval_mode: ${mode}`);
   }
