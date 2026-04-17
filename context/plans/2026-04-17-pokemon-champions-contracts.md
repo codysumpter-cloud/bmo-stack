@@ -1,5 +1,8 @@
 # Plan: Pokemon Champions Team Builder Contracts
 
+## Problem
+The Pokemon Team Builder skill already exists in BeMore-stack, but it lacks a canonical contract layer for versioned format snapshots, builder requests/responses, audit-mode requests/responses, and a stable endpoint specification. This makes it difficult to maintain versioned legality and integrate with UI surfaces consistently.
+
 ## Objective
 Establish a canonical contract layer for the Pokemon Champions Team Builder skill to ensure versioned format snapshots, stable request/response structures, and a machine-readable endpoint specification.
 
