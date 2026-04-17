@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bemore.dev/contracts/pokemon-champions/team-audit-response.schema.json",
+  "title": "Pokemon Champions Team Audit Response",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["currentFormatSnapshot", "teamAudits", "ranking", "repeatableFramework"],
+  "properties": {
+    "currentFormatSnapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dateChecked", "sourcesUsed", "activeRegulation", "keyLegalityNotes", "keyMetaNotes", "confidence", "unresolvedUncertainties"],
+      "properties": {
+        "dateChecked": { "type": "string", "format": "date-time" },
+        "sourcesUsed": {
+          "type": "array",
+          "items": { "$ref": "common.schema.json#/$defs/sourceRef" }
+        },
+        "activeRegulation": { "type": "string" },
+        "keyLegalityNotes": { "type": "array", "items": { "type": "string" } },
+        "keyMetaNotes": { "type": "array", "items": { "type": "string" } },
+        "confidence": { "type": "string" },
+        "unresolvedUncertainties": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "teamAudits": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["teamName", "format", "originalConceptSummary", "legalityAudit", "structuralDiagnosis", "keepChangeDecisions", "refinedTeam", "whyBetter", "pilotNotes", "threatChecklist", "biggestImprovements", "biggestRemainingRisks", "easierAlternativeBuild"],
+        "properties": {
+          "teamName": { "type": "string" },
+          "format": { "type": "string", "enum": ["singles", "doubles"] },
+          "originalConceptSummary": { "type": "string" },
+          "legalityAudit": { "type": "array", "items": { "type": "string" } },
+          "structuralDiagnosis": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["roleCompression", "speedControl", "defensiveBackbone", "pivoting", "winConditions", "matchupWeaknesses", "redundancyOrAntiSynergy"],
+            "properties": {
+              "roleCompression": { "type": "string" },
+              "speedControl": { "type": "string" },
+              "defensiveBackbone": { "type": "string" },
+              "pivoting": { "type": "string" },
+              "winConditions": { "type": "string" },
+              "matchupWeaknesses": { "type": "array", "items": { "type": "string" } },
+              "redundancyOrAntiSynergy": { "type": "array", "items": { "type": "string" } }
+            }
+          },
+          "keepChangeDecisions": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["stays", "changes", "why"],
+            "properties": {
+              "stays": { "type": "array", "items": { "type": "string" } },
+              "changes": { "type": "array", "items": { "type": "string" } },
+              "why": { "type": "array", "items": { "type": "string" } }
+            }
+          },
+          "refinedTeam": { "$ref": "common.schema.json#/$defs/teamSummary" },
+          "whyBetter": { "type": "string" },
+          "pilotNotes": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["bestLeads", "midgamePlan", "endgameRoutes"],
+            "properties": {
+              "bestLeads": { "type": "array", "items": { "type": "string" } },
+              "midgamePlan": { "type": "array", "items": { "type": "string" } },
+              "endgameRoutes": { "type": "array", "items": { "type": "string" } }
+            }
+          },
+          "threatChecklist": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["stillHates", "playAround"],
+            "properties": {
+              "stillHates": { "type": "array", "items": { "type": "string" } },
+              "playAround": { "type": "array", "items": { "type": "string" } }
+            }
+          },
+          "biggestImprovements": { "type": "array", "minItems": 3, "maxItems": 3, "items": { "type": "string" } },
+          "biggestRemainingRisks": { "type": "array", "minItems": 3, "maxItems": 3, "items": { "type": "string" } },
+          "easierAlternativeBuild": { "$ref": "common.schema.json#/$defs/teamSummary" }
+        }
+      }
+    },
+    "ranking": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["bestOverall", "bestForConsistentPlay", "bestDoublesBuild", "mostFunWhileStillReal"],
+      "properties": {
+        "bestOverall": { "type": "string" },
+        "bestForConsistentPlay": { "type": "string" },
+        "bestDoublesBuild": { "type": "string" },
+        "mostFunWhileStillReal": { "type": "string" },
+        "justifications": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "repeatableFramework": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["whatChangedFromOriginal", "howToRerunNextMonth", "futureChecklist"],
+      "properties": {
+        "whatChangedFromOriginal": { "type": "array", "items": { "type": "string" } },
+        "howToRerunNextMonth": { "type": "array", "items": { "type": "string" } },
+        "futureChecklist": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}

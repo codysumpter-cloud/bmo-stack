@@ -1,0 +1,27 @@
+{
+  "checkedAt": "2026-04-16T12:00:00Z",
+  "strictOfficialFirst": true,
+  "teams": [
+    {
+      "teamName": "Balanced Pivot Offense",
+      "format": "singles",
+      "preserveIdentity": true,
+      "styleNotes": "Keep the weird pressure from Hisuian Zoroark but make the team more stable.",
+      "rawPaste": "Palafin\nJet Punch / Wave Crash / Flip Turn / Close Combat\n\nBellibolt\nThunderbolt / Volt Switch / Acid Spray / Slack Off\n\nGarganacl\nSalt Cure / Recover / Body Press / Stealth Rock\n\nHisuian Zoroark\nNasty Plot / Hyper Voice / Bitter Malice / Flamethrower\n\nMeowscarada\nFlower Trick / Knock Off / U-turn / Triple Axel\n\nDragonite\nDragon Dance / Extreme Speed / Earthquake / Dual Wingbeat"
+    },
+    {
+      "teamName": "Mega Scovillain Room Balance",
+      "format": "doubles",
+      "preserveIdentity": true,
+      "styleNotes": "Keep the room balance identity, but explicitly flag any unsupported Mega if not currently legal.",
+      "rawPaste": "Scovillain -> Mega Scovillain\nHeat Wave / Giga Drain / Spicy Extract / Protect\n\nWyrdeer\nTrick Room / Psyshield Bash / Megahorn / Protect\n\nMaushold\nFollow Me / Encore / Super Fang / Protect\n\nRhyperior\nHigh Horsepower / Rock Slide / Ice Punch / Protect\n\nSylveon\nHyper Voice / Mystical Fire / Helping Hand / Protect\n\nUmbreon\nFoul Play / Snarl / Yawn / Protect"
+    },
+    {
+      "teamName": "Snow Pivot Brawl",
+      "format": "doubles",
+      "preserveIdentity": true,
+      "styleNotes": "Keep the snow pivot idea, but replace any unsupported custom Mega with the closest real option.",
+      "rawPaste": "Aurorus\nBlizzard / Freeze-Dry / Earth Power / Protect\n\nCrabominable -> Mega Crabominable\nClose Combat / Ice Hammer / Knock Off / Protect\n\nSlowking\nChilly Reception / Scald / Psychic / Trick Room\n\nAppletun\nApple Acid / Dragon Pulse / Recover / Leech Seed\n\nCeruledge\nBitter Blade / Shadow Sneak / Swords Dance / Protect\n\nManectric\nThunderbolt / Volt Switch / Snarl / Protect"
+    }
+  ]
+}
