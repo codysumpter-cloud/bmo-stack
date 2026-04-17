@@ -1,24 +1,25 @@
-# Plan: Pokemon Champions Team Builder Contracts
-
 ## Problem
+
 The Pokemon Team Builder skill already exists in BeMore-stack, but it lacks a canonical contract layer for versioned format snapshots, builder requests/responses, audit-mode requests/responses, and a stable endpoint specification. This makes it difficult to maintain versioned legality and integrate with UI surfaces consistently.
 
-## Objective
-Establish a canonical contract layer for the Pokemon Champions Team Builder skill to ensure versioned format snapshots, stable request/response structures, and a machine-readable endpoint specification.
+## Smallest useful wedge
 
-## Tasks
-- [x] Define `common.schema.json` for shared types.
-- [x] Define `format-snapshot.schema.json` for versioned data snapshots.
-- [x] Define `team-build-request.schema.json` and `team-build-response.schema.json`.
-- [x] Define `team-audit-request.schema.json` and `team-audit-response.schema.json`.
-- [x] Create OpenAPI 3.0 spec at `docs/api/pokemon-champions-team-builder.openapi.yaml`.
-- [x] Implement `scripts/validate-pokemon-team-builder-contracts.mjs` for schema validation.
-- [x] Document the contract surface in `docs/POKEMON_CHAMPIONS_TEAM_BUILDER_CONTRACTS.md`.
+Establish a contract-first surface for the Pokemon Champions Team Builder skill by adding schemas, an OpenAPI spec, and validation logic.
 
-## Verification
-- [x] Run `node scripts/validate-pokemon-team-builder-contracts.mjs` to ensure all schemas are valid.
-- [x] Verify that the endpoint spec is valid OpenAPI.
-- [x] Ensure the `readiness` CI check passes.
+This wedge should:
+- Define `common`, `snapshot`, `request`, and `response` schemas in `contracts/pokemon-champions/`.
+- Create a stable endpoint spec in `docs/api/pokemon-champions-team-builder.openapi.yaml`.
+- Implement a validation script in `scripts/validate-pokemon-team-builder-contracts.mjs`.
+- Document the surface in `docs/POKEMON_CHAMPIONS_TEAM_BUILDER_CONTRACTS.md`.
+- satisfy the repository's `readiness` check via a valid plan file and PR body.
 
-## Rollback
+## Verification plan
+
+- Run `node scripts/validate-pokemon-team-builder-contracts.mjs` to ensure all schemas are valid.
+- Verify that the endpoint spec is valid OpenAPI.
+- Confirm that the `readiness` CI check passes on the PR.
+
+## Rollback plan
+
 - Revert the commit adding the `contracts/pokemon-champions/` directory and associated docs/scripts.
+- Remove the plan file from `context/plans/`.
