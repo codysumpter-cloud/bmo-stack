@@ -201,9 +201,14 @@ struct ChatView: View {
     }
 
     private var canSend: Bool {
-        !appState.chatStore.isGenerating &&
-        !prompt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
-        (appState.selectedProviderAccount != nil || (appState.selectedInstalledModel != nil && !appState.usesStubRuntime))
+        let trimmedPrompt = prompt.trimmingCharacters(in: .whitespacesAndNewlines)
+        return !appState.chatStore.isGenerating &&
+        !trimmedPrompt.isEmpty &&
+        (
+            BuddyIntroCopy.response(for: trimmedPrompt, buddyName: store.activeBuddy?.displayName ?? "Buddy") != nil ||
+            appState.selectedProviderAccount != nil ||
+            (appState.selectedInstalledModel != nil && !appState.usesStubRuntime)
+        )
     }
 
     private var chatScopedActions: [OpenClawActionRecord] {
@@ -220,7 +225,7 @@ struct ChatView: View {
         if let model = appState.selectedInstalledModel {
             return appState.usesStubRuntime ? "Local model selected, runtime not included in this build" : "\(store.activeBuddy?.displayName ?? "Buddy") on-device • \(model.displayName)"
         }
-        return "Route not configured. Link a cloud provider to chat in this build."
+        return "Ask what Buddy can do, or link a cloud provider for open-ended live chat."
     }
 
     private var buddyChatSubtitle: String {

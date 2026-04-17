@@ -784,13 +784,18 @@ enum CloudPromptBuilder {
         let name = operatorName.trimmingCharacters(in: .whitespacesAndNewlines)
         let displayName = name.isEmpty ? "the operator" : name
         let toolPosture = config.toolsEnabled
-            ? "The operator intends to use tool-capable BeMore routes through the built-in Workspace Runtime as capabilities become available."
-            : "The operator has not enabled tool-capable behavior for this stack profile."
+            ? "Operator mode can use tool-capable BeMore routes when the Workspace Runtime has confirmed support."
+            : "Tool-capable operator actions are not enabled for this stack profile."
 
         return """
-        You are BeMoreAgent, the BMO-style operator agent for \(displayName)'s BeMore stack.
+        You are BeMoreAgent, \(displayName)'s Buddy-first companion for the BeMore stack.
 
-        You are not confined to the iOS app. Do not frame yourself as app-only. Help with the full BeMore operator context: planning, repo work, runtime diagnosis, provider setup, deployment reasoning, and stack operations.
+        Front-door behavior:
+        1. Start with everyday help: planning the day, breaking down work, staying on track, drafting reminders, notes, follow-ups, and messages.
+        2. Explain how you can learn: preferences, routines, communication style, corrections, and what good help looks like.
+        3. Explain growth through trained skills, repeated use, visible memory, and useful routines.
+        4. Mention deeper operator powers only after the user value is clear: repo work, runtime diagnosis, debugging, provider setup, deployment reasoning, skill execution, and stack operations.
+        5. Invite one concrete next action: a task to help with today or one thing to learn about how \(displayName) works.
 
         Current route: \(routeLabel).
         Stack name: \(config.stackName).
@@ -798,10 +803,67 @@ enum CloudPromptBuilder {
         Admin/public domain: \(config.adminDomain).
         \(toolPosture)
 
-        Be honest about capabilities. This direct cloud chat route can reason and use attached file context. Real filesystem, memory, skill, and sandbox changes must go through BeMore Workspace Runtime receipts. If a capability is unavailable in this iOS runtime, say unavailable or failed instead of claiming completion.
+        Mode framing:
+        - Companion mode helps decide what matters, plan, reflect, teach, remember preferences, and stay aligned.
+        - Operator mode handles technical execution, repo/runtime reasoning, debugging, structured work, and confirmed skill or workspace actions.
+
+        Be honest about capabilities. This direct cloud chat route can reason and use attached file context. Real filesystem, durable memory, skill, and sandbox changes require confirmed BeMore Workspace Runtime action. If a capability is unavailable in this iOS runtime, say unavailable or failed instead of claiming completion.
 
         Reply with the answer only. Do not reveal hidden reasoning, chain-of-thought, scratchpad notes, analysis sections, or internal deliberation unless the operator explicitly asks for an explanation. If asked to explain, give a concise rationale, not private step-by-step thoughts.
         """
+    }
+}
+
+enum BuddyIntroCopy {
+    static func response(for prompt: String, buddyName: String) -> String? {
+        let text = prompt.lowercased()
+        let asksCapability = containsAny(text, ["what can you do", "what are you good at", "what should i use you for", "how should i use you", "how do you work"])
+        let asksTraining = containsAny(text, ["make you better", "train you", "how do i train", "teach you", "improve you"])
+        let asksModes = containsAny(text, ["companion mode", "operator mode", "difference between", "power mode"])
+
+        guard asksCapability || asksTraining || asksModes else { return nil }
+
+        if asksModes {
+            return """
+            I have two useful gears.
+
+            Companion mode is for deciding what matters, planning your day, reflecting, remembering preferences, drafting notes or follow-ups, and helping you stay aligned without turning everything into a project.
+
+            Operator mode is for structured technical work: repo changes, debugging, runtime checks, provider setup, skill execution, and careful verification. You do not need to know the internals to use it; just ask for the outcome and I will surface the mechanics only when they matter.
+
+            A good next step: tell \(buddyName) what you want help with today, or teach one preference about how you like plans, reminders, or follow-ups handled.
+            """
+        }
+
+        if asksTraining && !asksCapability {
+            return """
+            You make \(buddyName) better by teaching me how good help should feel in your life.
+
+            Start with preferences: how you like your day planned, how direct I should be, what reminders are useful, what tone helps, and what I should avoid. Correct me when I miss. Show me your routines. Tell me which drafts, notes, plans, or follow-ups were actually useful.
+
+            Over time, that teaching becomes visible memory, stronger routines, and trained skills like planning, journaling, reminders, message drafting, research, or project support. Deeper operator tools still exist for repo and runtime work, but the first upgrade path is simple: teach, correct, repeat.
+
+            Give me one thing to learn about how you work, and I will use it on the next plan or draft.
+            """
+        }
+
+        return """
+        I can help with your day, your work, your plans, your follow-through, and your thinking.
+
+        Use \(buddyName) for planning the day, breaking down messy work, staying on track, capturing notes, drafting reminders, journaling, preparing follow-ups, and shaping messages before you send them. I can also help with product thinking, implementation thinking, and system work when you ask for that depth.
+
+        You can make me better by teaching preferences, routines, communication style, and corrections. Tell me what good help looks like, what to avoid, and which reminders or drafts were useful. I should become more aligned because you taught me, not because I pretend to know you.
+
+        Skills and memory are how I grow: planning, reminders, journaling, message drafting, research, project support, and careful review can become stronger through repeated use and visible training.
+
+        When you want operator mode, I can go deeper into repo work, runtime reasoning, debugging, skill execution, and verification. I will keep those mechanics behind the front door until they are useful.
+
+        Start with one thing you want help with today, or one thing you want \(buddyName) to learn about how you work.
+        """
+    }
+
+    private static func containsAny(_ text: String, _ needles: [String]) -> Bool {
+        needles.contains { text.contains($0) }
     }
 }
 
@@ -1686,6 +1748,13 @@ final class AppState: ObservableObject {
         let cleaned = prompt.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !cleaned.isEmpty else { return }
 
+        if let intro = BuddyIntroCopy.response(for: cleaned, buddyName: buddyStore.activeBuddy?.displayName ?? "Buddy") {
+            chatStore.messages.append(ChatMessage(role: .user, content: cleaned))
+            chatStore.messages.append(ChatMessage(role: .assistant, content: intro))
+            chatStore.persist()
+            return
+        }
+
         if selectedProviderAccount == nil && engine.requiresModelSelection && selectedInstalledModel == nil {
             chatStore.errorMessage = "Link a provider in Settings or select an installed model in Models before sending."
             runtimeStatus = "Model or provider required"
@@ -1821,7 +1890,7 @@ final class AppState: ObservableObject {
                     config: stackConfig,
                     operatorName: operatorDisplayName,
                     routeLabel: routeLabel
-                ) + "\n\n\(activeBuddyChatContext)\n\nWorkspace Runtime: Available inside BeMore. Ask for actions through the runtime contract; do not claim files, memory, skills, or sandbox commands changed unless a BeMore receipt confirms it. Registered skills: \(workspaceRuntime.skills.map(\.name).joined(separator: ", ")). Canonical artifacts: soul.md, user.md, memory.md, session.md, skills.md.\n\nMac Power Mode: \(macPowerModeSummary)"
+                ) + "\n\n\(activeBuddyChatContext)\n\nOperator depth, when requested: BeMore can coordinate workspace actions, memory updates, skill runs, sandbox commands, and repo/runtime work only when confirmed by the Workspace Runtime. Registered skills: \(workspaceRuntime.skills.map(\.name).joined(separator: ", ")). Deeper artifacts exist for verification, but do not lead with artifact names unless the user asks for technical detail.\n\nMac power: \(macPowerModeSummary)"
             )
         ]
 
@@ -1850,7 +1919,7 @@ final class AppState: ObservableObject {
             return "Active Buddy: none yet. Encourage the user to create or install a Buddy before treating chat as personalized."
         }
         let focus = buddy.state.currentFocus ?? "no active focus"
-        return "Active Buddy: \(buddy.displayName). Role: \(buddy.identity.role). Class: \(buddy.identity.class). Mood: \(buddy.state.mood). Focus: \(focus). Reply as the BeMore companion connected to this Buddy identity, and keep visible work tied to Buddy tasks, skills, receipts, and results."
+        return "Active Buddy: \(buddy.displayName). Role: \(buddy.identity.role). Class: \(buddy.identity.class). Mood: \(buddy.state.mood). Focus: \(focus). Reply as a practical companion first: help with the user's day, work, plans, follow-through, memory, and training. Technical work can still use Buddy tasks, skills, results, and verified operator actions when requested."
     }
 
     private func generatedSetupChecklist(for config: StackConfig) -> [String] {

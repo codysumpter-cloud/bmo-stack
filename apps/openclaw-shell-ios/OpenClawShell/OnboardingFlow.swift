@@ -97,16 +97,16 @@ struct OnboardingFlow: View {
                 .foregroundColor(BMOTheme.textPrimary)
                 .multilineTextAlignment(.center)
 
-            Text("Start with a Buddy. Runtime pairing, models, and power mode come after your companion has an identity.")
+            Text("Start with a Buddy you can name, teach, and use for real daily help. Deeper setup can wait until you need it.")
                 .font(.body)
                 .foregroundColor(BMOTheme.textSecondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, BMOTheme.spacingXL)
 
             VStack(alignment: .leading, spacing: 10) {
-                featureRow("Choose the Buddy who will be with you on Home, Chat, Skills, and Results")
-                featureRow("Name them and set their first focus")
-                featureRow("Add Mac power mode later when you want a stronger runtime")
+                featureRow("Choose the Buddy who will help with your day, work, notes, and follow-through")
+                featureRow("Name them and teach the first thing you want help with")
+                featureRow("Add operator power later when you want repo, runtime, or skill execution help")
             }
             .padding(.horizontal, BMOTheme.spacingXL)
 
@@ -155,7 +155,7 @@ struct OnboardingFlow: View {
         ScrollView {
             VStack(alignment: .leading, spacing: BMOTheme.spacingLG) {
                 Spacer().frame(height: BMOTheme.spacingXL)
-                onboardingTitle("Name your Buddy", subtitle: "Give your companion the name you want to see on Home, Chat, tasks, training, and receipts.")
+                onboardingTitle("Name your Buddy", subtitle: "Give your companion the name you want to see in plans, chats, tasks, and training.")
                 labeledField(title: "Buddy name", text: $buddyName, placeholder: selectedTemplate?.name ?? "Buddy")
                 selectedBuddyPreview
                 navButtons(back: .chooseBuddy, next: .focusBuddy, canProceed: !trimmed(buddyName).isEmpty)
@@ -168,13 +168,13 @@ struct OnboardingFlow: View {
         ScrollView {
             VStack(alignment: .leading, spacing: BMOTheme.spacingLG) {
                 Spacer().frame(height: BMOTheme.spacingXL)
-                onboardingTitle("Pick your Buddy's first focus", subtitle: "This sets the first use-case BeMore reinforces after onboarding. You can change it later.")
+                onboardingTitle("Pick your Buddy's first focus", subtitle: "Choose the first kind of help you want Buddy to practice. You can change it later.")
                 labeledField(title: "First focus", text: $buddyFocus, placeholder: selectedTemplate?.canonicalRole ?? "Help me finish the next useful step")
                 VStack(alignment: .leading, spacing: 10) {
                     Text("How this will show up")
                         .font(.headline)
                         .foregroundColor(BMOTheme.textPrimary)
-                    Text("\(fallback(buddyName, defaultValue: selectedTemplate?.name ?? "Buddy")) will open on Home with this focus, carry it into Chat, and use it as the default for the first check-ins and receipts.")
+                    Text("\(fallback(buddyName, defaultValue: selectedTemplate?.name ?? "Buddy")) will use this focus on Home, in Chat, and in the first check-ins so the experience starts personal.")
                         .font(.subheadline)
                         .foregroundColor(BMOTheme.textSecondary)
                 }
@@ -190,7 +190,7 @@ struct OnboardingFlow: View {
         ScrollView {
             VStack(alignment: .leading, spacing: BMOTheme.spacingLG) {
                 Spacer().frame(height: BMOTheme.spacingXL)
-                onboardingTitle("Power mode is optional", subtitle: "BeMore can start as your Buddy on iPhone. Pairing Mac and route setup are stronger-mode choices, not the first thing you have to understand.")
+                onboardingTitle("Mode choice is optional", subtitle: "Begin in companion mode on iPhone. Operator setup is there when you want deeper technical work, not something you need to learn first.")
 
                 VStack(spacing: 12) {
                     ForEach(BuddyPowerMode.allCases) { mode in
@@ -221,7 +221,7 @@ struct OnboardingFlow: View {
                 }
                 .padding(.horizontal, BMOTheme.spacingLG)
 
-                toggleCard(icon: "macbook.and.iphone", title: "Pair with Mac later", subtitle: "Keep Mac runtime pairing available after you land on Buddy Home.", isOn: $config.installDesktopNode)
+                toggleCard(icon: "macbook.and.iphone", title: "Pair with Mac later", subtitle: "Keep deeper operator tools available after you land on Buddy Home.", isOn: $config.installDesktopNode)
                     .padding(.horizontal, BMOTheme.spacingLG)
                 toggleCard(icon: "bell.badge", title: "Buddy notifications", subtitle: "Allow BeMore to remind you about Buddy tasks, results, and check-ins when enabled.", isOn: $config.enableNotifications)
                     .padding(.horizontal, BMOTheme.spacingLG)
@@ -234,12 +234,12 @@ struct OnboardingFlow: View {
                         labeledField(title: "Public domain", text: $config.adminDomain, placeholder: "example.com")
                             .textInputAutocapitalization(.never)
                             .autocorrectionDisabled()
-                        toggleCard(icon: "wrench.and.screwdriver", title: "Tools", subtitle: "Allow tool and API actions when the connected runtime supports them.", isOn: $config.toolsEnabled)
-                        toggleCard(icon: "brain", title: "Memory", subtitle: "Persist Buddy and operator context locally on device.", isOn: $config.memoryEnabled)
+                        toggleCard(icon: "wrench.and.screwdriver", title: "Operator tools", subtitle: "Allow technical actions when the connected runtime supports and confirms them.", isOn: $config.toolsEnabled)
+                        toggleCard(icon: "brain", title: "Memory", subtitle: "Let Buddy keep local preferences, routines, and useful context on this device.", isOn: $config.memoryEnabled)
                     }
                     .padding(.top, BMOTheme.spacingMD)
                 } label: {
-                    Text("Advanced runtime setup")
+                    Text("Advanced operator setup")
                         .font(.headline)
                         .foregroundColor(BMOTheme.textPrimary)
                 }
@@ -309,7 +309,7 @@ struct OnboardingFlow: View {
                     .font(.system(size: 28, weight: .bold))
                     .foregroundColor(BMOTheme.textPrimary)
 
-                Text("You’ll land on Buddy Home. Chat, Skills, Results, and Mac power mode all point back to this active Buddy.")
+                Text("You’ll land on Buddy Home. Chat, skills, results, and optional operator power all point back to this active Buddy.")
                     .font(.subheadline)
                     .foregroundColor(BMOTheme.textSecondary)
                     .multilineTextAlignment(.center)
@@ -344,7 +344,7 @@ struct OnboardingFlow: View {
         let steps = [
             (0.25, "Creating \(name) as your active Buddy"),
             (0.50, "Linking Buddy to Home, Chat, Skills, and Results"),
-            (0.75, config.installDesktopNode ? "Keeping Mac power mode available as an optional upgrade" : "Starting in phone-first mode"),
+            (0.75, config.installDesktopNode ? "Keeping deeper Mac operator tools available for later" : "Starting in phone-first companion mode"),
             (1.0, "Preparing your Buddy-first BeMore shell")
         ]
         for (index, (progress, message)) in steps.enumerated() {
@@ -552,12 +552,12 @@ struct OnboardingFlow: View {
         var items = ["Keep \(fallback(buddyName, defaultValue: selectedTemplate?.name ?? "Buddy")) active on Home, Chat, Skills, and Results."]
         items.append("Start in \(selectedPowerMode.title.lowercased()) so the first-run shell matches your comfort level.")
         if config.installDesktopNode {
-            items.append("Pair a BeMore Mac runtime when you want workspace execution, diffs, artifacts, and receipts from your desktop.")
+            items.append("Pair BeMore Mac when you want repo work, debugging, workspace actions, and deeper verification from your desktop.")
         }
         if config.toolsEnabled {
-            items.append("Enable only the tools you want this Buddy to use through the connected runtime.")
+            items.append("Enable only the operator tools you want Buddy to use after the connected runtime confirms support.")
         }
-        items.append("Use Pricing to compare free Buddy slots, Plus runtime capacity, and Council/marketplace access before upgrading.")
+        items.append("Use Pricing to compare free Buddy slots, Plus capacity, and Council/marketplace access before upgrading.")
         return items
     }
 

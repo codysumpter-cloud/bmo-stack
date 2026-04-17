@@ -144,7 +144,7 @@ struct MissionControlView: View {
             }
 
             if status.recentChanges.isEmpty {
-                Text("Run a Buddy action, skill, or Mac inspection to create the next receipt-backed result.")
+                Text("Run a Buddy action, skill, or Mac inspection to create the next visible result.")
                     .font(.caption)
                     .foregroundColor(BMOTheme.textTertiary)
             } else {
