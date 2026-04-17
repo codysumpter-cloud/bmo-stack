@@ -123,7 +123,7 @@ final class AppStateRuntimeTests: XCTestCase {
         XCTAssertNil(appState.chatReturnTab)
     }
 
-    func testCloudSystemPromptDoesNotConfineAgentToAppOnly() {
+    func testCloudSystemPromptLeadsWithCompanionValueBeforeOperatorDepth() {
         var config = StackConfig.default
         config.stackName = "BeMoreAgent"
         config.gatewayURL = "https://gateway.example.test"
@@ -136,11 +136,31 @@ final class AppStateRuntimeTests: XCTestCase {
             routeLabel: "OpenAI using gpt-4.1"
         )
 
-        XCTAssertTrue(prompt.contains("not confined to the iOS app"))
-        XCTAssertTrue(prompt.contains("full BeMore operator context"))
-        XCTAssertTrue(prompt.contains("Workspace Runtime receipts"))
+        XCTAssertTrue(prompt.contains("Buddy-first companion"))
+        XCTAssertTrue(prompt.contains("Start with everyday help"))
+        XCTAssertTrue(prompt.contains("Companion mode helps decide what matters"))
+        XCTAssertTrue(prompt.contains("Operator mode handles technical execution"))
+        XCTAssertTrue(prompt.contains("repo work"))
+        XCTAssertTrue(prompt.contains("confirmed BeMore Workspace Runtime action"))
         XCTAssertTrue(prompt.contains("Do not reveal hidden reasoning"))
         XCTAssertFalse(prompt.contains("only perform functions inside the app"))
+        XCTAssertFalse(prompt.contains("Canonical artifacts"))
+    }
+
+    func testBuddyIntroCopyAnswersCapabilitiesWithTrainingBeforeRuntimeMechanics() {
+        let reply = BuddyIntroCopy.response(
+            for: "What can you do for me and how can I make you better?",
+            buddyName: "Prism"
+        )
+
+        XCTAssertNotNil(reply)
+        XCTAssertTrue(reply!.contains("planning the day"))
+        XCTAssertTrue(reply!.contains("teaching preferences"))
+        XCTAssertTrue(reply!.contains("Skills and memory are how I grow"))
+        XCTAssertTrue(reply!.contains("operator mode"))
+        XCTAssertTrue(reply!.contains("Start with one thing"))
+        XCTAssertFalse(reply!.localizedCaseInsensitiveContains("canonical artifacts"))
+        XCTAssertFalse(reply!.localizedCaseInsensitiveContains("receipts"))
     }
 
     func testAgentReplySanitizerRemovesThoughtBlocks() {
@@ -274,7 +294,12 @@ private final class FakeLocalLLMEngine: LocalLLMEngine {
         isRuntimeReady = config != nil && supportsLocalModels
     }
 
-    func generate(prompt: String, fileContexts: [WorkspaceFile], chatHistory: [ChatMessage]) async throws -> String {
+    func generate(
+        prompt: String,
+        fileContexts: [WorkspaceFile],
+        chatHistory: [ChatMessage],
+        activeStack: CompiledStack?
+    ) async throws -> String {
         "ok"
     }
 }

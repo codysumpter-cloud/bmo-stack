@@ -93,7 +93,7 @@ struct ChatTabView: View {
                     }
                 }
                 .buttonStyle(.borderedProminent)
-                .disabled(appState.chatStore.isGenerating || prompt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || (!appState.usesStubRuntime && appState.selectedInstalledModel == nil))
+                .disabled(!canSend)
             }
 
             HStack {
@@ -138,6 +138,15 @@ struct ChatTabView: View {
     }
 
     private var fallbackPlaceholder: String {
-        appState.usesStubRuntime ? "Try the shell UI (stub runtime active)" : "Ask your local model"
+        appState.usesStubRuntime ? "Ask what Buddy can do, or link chat for more" : "Ask your Buddy"
+    }
+
+    private var canSend: Bool {
+        let trimmedPrompt = prompt.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !appState.chatStore.isGenerating, !trimmedPrompt.isEmpty else { return false }
+        if BuddyIntroCopy.response(for: trimmedPrompt, buddyName: appState.buddyStore.activeBuddy?.displayName ?? "Buddy") != nil {
+            return true
+        }
+        return appState.usesStubRuntime || appState.selectedInstalledModel != nil || appState.selectedProviderAccount != nil
     }
 }

@@ -353,11 +353,11 @@ enum BuddyPowerMode: String, Codable, CaseIterable, Hashable, Identifiable {
     var subtitle: String {
         switch self {
         case .gentle:
-            return "Keep the shell simple and put Buddy guidance first."
+            return "Keep the experience calm: planning, reminders, notes, and teaching Buddy what helps."
         case .balanced:
-            return "Show the normal Buddy, workspace, and results flow."
+            return "Keep Buddy, chat, skills, and results visible without making setup feel heavy."
         case .turbo:
-            return "Keep advanced runtime setup and Mac power surfaces close."
+            return "Keep deeper operator tools close for repo, runtime, debugging, and skill work."
         }
     }
 

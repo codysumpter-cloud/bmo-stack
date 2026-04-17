@@ -47,7 +47,7 @@ struct SkillsView: View {
                 Spacer()
                 StatusBadge(label: "\(appState.workspaceRuntime.skills.count) registered", color: BMOTheme.accent)
             }
-            Text("Skills run through the same receipt-backed BeMore workspace runtime used by Buddy, mobile actions, and Mac pairing.")
+            Text("Skills are practical abilities Buddy can learn, equip, and use for planning, review, building, and deeper operator work when you ask for it.")
                 .font(.subheadline)
                 .foregroundColor(BMOTheme.textSecondary)
         }

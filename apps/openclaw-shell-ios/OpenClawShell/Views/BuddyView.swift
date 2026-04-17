@@ -68,7 +68,7 @@ struct BuddyView: View {
                     Text(buddy.displayName)
                         .font(.system(size: 30, weight: .bold))
                         .foregroundColor(BMOTheme.textPrimary)
-                    Text(template?.onboardingCopy ?? "\(buddy.displayName) is the active companion for chat, skills, tasks, receipts, and results.")
+                    Text(template?.onboardingCopy ?? "\(buddy.displayName) helps with your day, your work, your follow-through, and the routines you teach over time.")
                         .font(.subheadline)
                         .foregroundColor(BMOTheme.textSecondary)
                 }
@@ -117,7 +117,7 @@ struct BuddyView: View {
 
             BuddyAsciiView(buddy: buddy, template: template, mood: buddyMood(for: buddy))
 
-            Text(template?.onboardingCopy ?? "Buddy profile is ready for the BeMore runtime.")
+            Text(template?.onboardingCopy ?? "Buddy is ready to help with planning, notes, follow-through, and skills you train over time.")
                 .font(.subheadline)
                 .foregroundColor(BMOTheme.textSecondary)
 
@@ -212,7 +212,7 @@ struct BuddyView: View {
                 .foregroundColor(BMOTheme.textPrimary)
 
             if events.isEmpty {
-                Text("No runtime events recorded yet. Install, personalize, check in, or train to start the event stream.")
+                Text("No activity yet. Install, personalize, check in, or train Buddy to start building useful history.")
                     .font(.subheadline)
                     .foregroundColor(BMOTheme.textSecondary)
             } else {
@@ -249,7 +249,7 @@ struct BuddyView: View {
                     Text("Discover Buddies")
                         .font(.headline)
                         .foregroundColor(BMOTheme.textPrimary)
-                    Text("A curated Buddy marketplace beta. Install starter Buddies now; premium creator Buddies can live here when billing is ready.")
+                    Text("Try starter Buddies with different strengths. Pick the one that feels useful for how you plan, work, remember, or create.")
                         .font(.subheadline)
                         .foregroundColor(BMOTheme.textSecondary)
                 }
@@ -311,7 +311,7 @@ struct BuddyView: View {
                     Text("My Buddy Roster")
                         .font(.headline)
                         .foregroundColor(BMOTheme.textPrimary)
-                    Text("Owned Buddies stay separate from marketplace templates. Equip one active Buddy at a time.")
+                    Text("Keep a small roster of Buddies with different strengths. Equip the one you want helping right now.")
                         .font(.caption)
                         .foregroundColor(BMOTheme.textSecondary)
                 }
@@ -372,7 +372,7 @@ struct BuddyView: View {
             Text("Training and Plans")
                 .font(.headline)
                 .foregroundColor(BMOTheme.textPrimary)
-            Text("Training grows your active Buddy. Pricing controls future Buddy slots, premium marketplace access, and higher runtime capacity.")
+            Text("Training teaches Buddy what better help looks like. Use Chat for a real task, or Pricing when you want more Buddy slots and higher capacity.")
                 .font(.subheadline)
                 .foregroundColor(BMOTheme.textSecondary)
             HStack {
@@ -394,7 +394,7 @@ struct BuddyView: View {
             Text("No Buddy Installed Yet")
                 .font(.headline)
                 .foregroundColor(BMOTheme.textPrimary)
-            Text("Install a starter Buddy to create a local companion, start the Buddy event stream, and keep receipt-backed continuity.")
+            Text("Install a starter Buddy to begin with a companion you can name, teach, train, and rely on for everyday follow-through.")
                 .font(.subheadline)
                 .foregroundColor(BMOTheme.textSecondary)
         }
