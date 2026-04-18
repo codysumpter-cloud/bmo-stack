@@ -2,6 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://bemore.dev/contracts/pokemon-champions/common.schema.json",
   "title": "Pokemon Champions Common Contracts",
+  "type": "object",
   "$defs": {
     "sourceRef": {
       "type": "object",
