@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bemore.dev/contracts/pokemon-champions/team-build-request.schema.json",
+  "title": "Pokemon Champions Team Build Request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format",
+    "regulationId",
+    "snapshotId"
+  ],
+  "properties": {
+    "format": {
+      "type": "string",
+      "enum": [
+        "singles",
+        "doubles"
+      ]
+    },
+    "regulationId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "snapshotId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "lockedPokemon": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "stylePreference": {
+      "type": "string",
+      "minLength": 1
+    },
+    "riskTolerance": {
+      "type": "string"
+    },
+    "goal": {
+      "type": "string",
+      "minLength": 1
+    },
+    "dislikedPokemon": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "notes": {
+      "type": "string"
+    }
+  }
+}
