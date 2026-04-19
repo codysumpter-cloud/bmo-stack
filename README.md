@@ -6,10 +6,16 @@ It is the canonical source for BMO startup context, council contracts, operator 
 runbooks, workspace sync, and cross-repo integration glue. It does not pretend to own every live
 surface in the broader system.
 
+It does not own the iPhone app's core lovable Buddy loop. `prismtek-apps` now owns the standalone
+phone-first Buddy product surface: care, training, customization, collection, sparring, and
+trade-ready Buddy packages. `BeMore-stack` remains the deeper operator/runtime truth behind that
+product when the app needs posture, contracts, or integration depth.
+
 ## System boundaries
 
 - `BeMore-stack`: operator workflows, startup context, council policy, GitHub automation, and local
   integration glue
+- `prismtek-apps`: shipped product UX, including the standalone iPhone Buddy companion experience
 - `openclaw`: live Telegram/runtime delivery behavior
 - `prismtek-site`: public-web `prismtek.dev` surface and site-backed APIs
 
