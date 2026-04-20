@@ -32,7 +32,7 @@ Do not change the council roster, spawn manifest membership, or runtime code in 
 
 ## Owner path
 
-`bmo-stack` source repo documentation and behavior-contract files.
+`BeMore-stack` source repo documentation and behavior-contract files.
 
 ## Files likely to change
 

@@ -1,6 +1,6 @@
 # Improvement Roadmap
 
-This roadmap focuses on practical improvements for the public `bmo-stack` build.
+This roadmap focuses on practical improvements for the public `BeMore-stack` build.
 
 ## Priority 1 — Remove obvious repo contradictions
 

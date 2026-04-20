@@ -1,6 +1,6 @@
 # Browser Automation Profile
 
-This document defines an optional browser-automation profile for `bmo-stack`.
+This document defines an optional browser-automation profile for `BeMore-stack`.
 
 ## Goal
 

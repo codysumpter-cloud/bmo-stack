@@ -1,5 +1,5 @@
 {
-  "name": "@bmo-stack/codex-bridge",
+  "name": "@BeMore-stack/codex-bridge",
   "private": true,
   "version": "0.1.0",
   "description": "Local MCP bridge for dispatching Codex CLI tasks from BMO workflows.",

@@ -1,6 +1,6 @@
 # Edition Strategy
 
-`bmo-stack` is the public-facing platform repository for the BMO ecosystem.
+`BeMore-stack` is the public-facing platform repository for the BMO ecosystem.
 
 It exists to show the real product shape, the real architecture, and the real personality of the system without exposing private customer overlays.
 

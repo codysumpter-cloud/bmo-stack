@@ -1,9 +1,9 @@
 # NVIDIA Blueprint Integration Map
 
 This document turns the current NVIDIA utility list into a concrete ownership map
-for `bmo-stack`.
+for `BeMore-stack`.
 
-`bmo-stack` is the consumer/local operator stack. It should use NVIDIA utilities
+`BeMore-stack` is the consumer/local operator stack. It should use NVIDIA utilities
 where they strengthen:
 
 - local assistant UX
@@ -28,7 +28,7 @@ AI-factory, and enterprise service orchestration belong primarily in
 
 ## Ownership map
 
-| Utility | How `bmo-stack` should use it | Initial surface | Mode |
+| Utility | How `BeMore-stack` should use it | Initial surface | Mode |
 | --- | --- | --- | --- |
 | Nemotron Voice Agent | Voice input/output mode for BMO desktop and local host runtime | `apps/windows-desktop/` and future host sidecar | external service / optional local sidecar |
 | PDF to Podcast | Turn docs, PDFs, and knowledge packets into audio output for operator workflows | utility action in desktop app / content pipeline | external service |
@@ -42,7 +42,7 @@ AI-factory, and enterprise service orchestration belong primarily in
 | Telco-Network-Configuration | Pattern/input source for telco specialist workflows; runtime belongs elsewhere | external specialist handoff | remote service |
 | VIAVI ES blueprint / RSG | Pattern/input source for telco / RSG workflows; runtime belongs elsewhere | external specialist handoff | remote service |
 
-## Immediate bmo-stack tasks
+## Immediate BeMore-stack tasks
 
 1. Add shared NVIDIA environment examples and toggles.
 2. Keep Windows desktop app ready to call external blueprint services over HTTP.
@@ -65,5 +65,5 @@ including voice, podcast, and safety surfaces.
 
 It should **not** be treated as the place to fully implement every enterprise or
 vertical NVIDIA blueprint. Those should land in focused follow-up PRs, with
-`automindlab-stack` owning enterprise runtimes and `bmo-stack` consuming them
+`automindlab-stack` owning enterprise runtimes and `BeMore-stack` consuming them
 through explicit adapters.

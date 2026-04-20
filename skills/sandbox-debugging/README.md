@@ -8,7 +8,7 @@ Diagnose and fix issues where the OpenClaw sandbox worker (`bmo-tron`) is miscon
 
 - `openclaw` owns live sandbox policy and routing behavior
 - `openshell` owns sandbox inventory and lifecycle truth
-- `bmo-stack` owns the worker-status helper and recovery scripts
+- `BeMore-stack` owns the worker-status helper and recovery scripts
 
 ## When to use
 

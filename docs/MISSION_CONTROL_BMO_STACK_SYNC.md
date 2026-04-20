@@ -13,7 +13,7 @@ Provide a safe, repeatable path to copy runtime-upgrade artifacts between repos 
 - `scripts/agent-post-edit-checks.sh`
 - `scripts/persist-runtime-report.sh`
 - `scripts/sync-upgrade-artifacts.sh`
-- `scripts/sync-and-pr-bmo-stack.sh`
+- `scripts/sync-and-pr-BeMore-stack.sh`
 - `docs/upgrade-plan.md`
 - `docs/upgrade-results.md`
 - `docs/rollback.md`
@@ -30,7 +30,7 @@ bash scripts/sync-upgrade-artifacts.sh --target /path/to/target/repo
 ### Sync + branch + commit + push + PR attempt
 
 ```bash
-bash scripts/sync-and-pr-bmo-stack.sh \
+bash scripts/sync-and-pr-BeMore-stack.sh \
   --target-dir /path/to/target/repo \
   --repo-url https://github.com/ORG/REPO.git \
   --base main

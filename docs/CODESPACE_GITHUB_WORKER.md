@@ -61,12 +61,12 @@ Repo variable setup:
 cp config/github/codespace-admin.env.example config/github/codespace-admin.env
 $EDITOR config/github/codespace-admin.env
 bash scripts/codespace-github-admin.sh set-vars
-gh variable list --repo codysumpter-cloud/bmo-stack
+gh variable list --repo codysumpter-cloud/BeMore-stack
 ```
 
 Dry-run workflow dispatch for an existing issue:
 
 ```bash
 bash scripts/codespace-github-admin.sh run-dry-run 100
-gh run list --repo codysumpter-cloud/bmo-stack --workflow "BMO Issue to PR v3" --limit 5
+gh run list --repo codysumpter-cloud/BeMore-stack --workflow "BMO Issue to PR v3" --limit 5
 ```

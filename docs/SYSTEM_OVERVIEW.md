@@ -1,10 +1,10 @@
 # BMO Stack System Overview
 
-This document describes the current public `bmo-stack` system at a high level.
+This document describes the current public `BeMore-stack` system at a high level.
 
 ## Purpose
 
-`bmo-stack` is the public-facing platform repository for BMO.
+`BeMore-stack` is the public-facing platform repository for BMO.
 
 It is intended to be:
 - community-readable

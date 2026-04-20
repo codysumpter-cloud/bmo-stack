@@ -1,6 +1,6 @@
 # Fork and Vendor Policy
 
-This policy defines how `bmo-stack` should consume upstream repositories and related internal repositories.
+This policy defines how `BeMore-stack` should consume upstream repositories and related internal repositories.
 
 ## Principles
 
@@ -49,7 +49,7 @@ Each imported app, service, package, or profile should record:
 - source repository
 - source path
 - source license
-- target path in `bmo-stack`
+- target path in `BeMore-stack`
 - whether it is copied, vendored, or integrated by interface
 - owner or maintainer
 - sync strategy
@@ -64,7 +64,7 @@ When you modify vendored or forked code:
 
 ## Third-party notices
 
-`bmo-stack` should include a top-level `THIRD_PARTY_NOTICES.md` with:
+`BeMore-stack` should include a top-level `THIRD_PARTY_NOTICES.md` with:
 - upstream project name
 - upstream URL
 - license
@@ -74,7 +74,7 @@ When you modify vendored or forked code:
 ## Red flags
 
 Do not:
-- copy code from an unlicensed repository into `bmo-stack`
+- copy code from an unlicensed repository into `BeMore-stack`
 - remove original copyright notices
 - hide the origin of upstream-derived code
 - merge AGPL code into permissive code by accident

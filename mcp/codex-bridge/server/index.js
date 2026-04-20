@@ -29,7 +29,10 @@ server.tool(
     repo_path: z.string().describe("Absolute path to the target git repository."),
     task_brief: z.string().describe("The task prompt to send to Codex."),
     target_branch: z.string().optional().describe("Optional branch name. If omitted, the bridge generates one."),
-    approval_mode: z.enum(["suggest", "auto_edit", "full_auto"]).optional().describe("Codex approval mode. Defaults to suggest."),
+    approval_mode: z
+      .enum(["suggest", "auto_edit", "full_auto"])
+      .optional()
+      .describe("Codex execution mode. suggest=read-only sandbox, auto_edit=workspace-write sandbox, full_auto=Codex --full-auto."),
     model: z.string().optional().describe("Optional Codex model override, for example codex-mini-latest or gpt-5-codex.")
   },
   async (args) => asToolResult(await dispatchCodexTask(args))

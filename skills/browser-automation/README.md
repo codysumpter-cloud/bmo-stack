@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Explain when `bmo-stack` should use browser or UI automation and keep that work
+Explain when `BeMore-stack` should use browser or UI automation and keep that work
 isolated from the default conversational agent path.
 
 ## When to use

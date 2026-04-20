@@ -1,8 +1,8 @@
-# claw-code integration for bmo-stack
+# claw-code integration for BeMore-stack
 
 ## Problem
 
-`bmo-stack` did not have a concrete, repo-local way to install and run the community `claw-code` harness from inside the stack.
+`BeMore-stack` did not have a concrete, repo-local way to install and run the community `claw-code` harness from inside the stack.
 
 ## Smallest useful wedge
 
@@ -26,7 +26,7 @@ Add only additive integration files:
 
 ## Owner path
 
-- `bmo-stack`
+- `BeMore-stack`
 
 ## Files likely to change
 

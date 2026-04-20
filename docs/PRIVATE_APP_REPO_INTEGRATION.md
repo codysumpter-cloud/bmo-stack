@@ -7,7 +7,7 @@ into the current stack without treating either donor repo as the new runtime sou
 
 ## Current decision
 
-- `bmo-stack` remains the canonical runtime and operator-policy repo.
+- `BeMore-stack` remains the canonical runtime and operator-policy repo.
 - `prismtek-site` remains the live public-web deploy source for `prismtek.dev`.
 - `prismtek.dev_mega-app` is an operator-surface and app-factory donor.
 - `BMO-app` is a companion UX and BMO-world donor.
@@ -27,7 +27,7 @@ Current donor sources:
 Imported concepts:
 
 - app-factory templates:
-  - `bmo-stack-full`
+  - `BeMore-stack-full`
   - `prismtek-site-pro`
   - `bmo-agent`
   - `openclaw-harness`
@@ -125,7 +125,7 @@ Imported concepts:
 
 ## Integration targets
 
-### In `bmo-stack`
+### In `BeMore-stack`
 
 - track donor roles in `context/donors/DONORS.yaml`
 - preserve imported ideas in `context/donors/BMO_FEATURE_CARRYOVER.md`

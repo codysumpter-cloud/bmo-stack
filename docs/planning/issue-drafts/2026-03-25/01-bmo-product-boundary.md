@@ -8,7 +8,7 @@ docs, architecture, bmo, priority:P0
 
 ## Summary
 
-Create a clear product boundary document for `bmo-stack` so future changes stay aligned with its intended role as a local-first personal/family agent stack.
+Create a clear product boundary document for `BeMore-stack` so future changes stay aligned with its intended role as a local-first personal/family agent stack.
 
 ## Problem
 

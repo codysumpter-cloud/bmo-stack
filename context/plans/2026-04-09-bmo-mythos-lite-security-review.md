@@ -2,7 +2,7 @@
 
 ## Problem
 
-`bmo-stack` did not have a concrete contract for the defensive security-review pipeline we discussed: intake, sandboxed analysis lanes, finding records, and machine-readable events for triage and patch review.
+`BeMore-stack` did not have a concrete contract for the defensive security-review pipeline we discussed: intake, sandboxed analysis lanes, finding records, and machine-readable events for triage and patch review.
 
 ## Smallest useful wedge
 
@@ -17,7 +17,7 @@ Add only additive planning and contract files:
 ## Assumptions
 
 - this wedge should stay defensive, local-first, and human-supervised
-- `bmo-stack` owns the planning and contract surface, not a live exploit runtime
+- `BeMore-stack` owns the planning and contract surface, not a live exploit runtime
 - additive docs and schemas are safer than shipping autonomous scanners in the same PR
 
 ## Risks
@@ -28,7 +28,7 @@ Add only additive planning and contract files:
 
 ## Owner path
 
-- `bmo-stack`
+- `BeMore-stack`
 
 ## Files likely to change
 

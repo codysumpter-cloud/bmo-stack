@@ -7,7 +7,7 @@ Ensure Telegram messages are handled by the correct agent (`main`).
 ## Owner path
 
 - `openclaw` owns the live Telegram binding and delivery behavior
-- `bmo-stack` owns the recovery guidance and the agent-split helper script
+- `BeMore-stack` owns the recovery guidance and the agent-split helper script
 
 ## When to use
 

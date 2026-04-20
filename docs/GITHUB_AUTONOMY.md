@@ -1,6 +1,6 @@
 # GitHub Autonomy for BMO
 
-This document defines the GitHub-first execution model for `bmo-stack`.
+This document defines the GitHub-first execution model for `BeMore-stack`.
 
 ## Goal
 

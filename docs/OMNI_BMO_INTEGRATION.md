@@ -2,7 +2,7 @@
 
 ## Goal
 
-Run `omni-bmo` on the same MacBook while keeping `bmo-stack` as the canonical host/orchestration layer.
+Run `omni-bmo` on the same MacBook while keeping `BeMore-stack` as the canonical host/orchestration layer.
 
 This bridge does **not** make PrismBot a runtime dependency.
 
@@ -11,11 +11,11 @@ It gives you a clean way to:
 - sync `omni-bmo`
 - check readiness
 - provide a shared BMO-first env contract
-- launch `omni-bmo` from the `bmo-stack` workspace
+- launch `omni-bmo` from the `BeMore-stack` workspace
 
 ## Repo roles
 
-- `bmo-stack` = canonical host/runtime/orchestration stack
+- `BeMore-stack` = canonical host/runtime/orchestration stack
 - `omni-bmo` = donor repo for local embodied runtime features
 - `PrismBot` = archived donor repo only
 
@@ -82,7 +82,7 @@ Legacy names such as `PRISMBOT_API_TOKEN` are fallback-only compatibility bridge
 
 ## Recommended operator flow
 
-- keep `bmo-stack` as the source of truth
+- keep `BeMore-stack` as the source of truth
 - use PrismBot and `omni-bmo` as donor repos only
 - use helper scripts here to verify and launch `omni-bmo`
 - only add tighter integration after the bridge is stable

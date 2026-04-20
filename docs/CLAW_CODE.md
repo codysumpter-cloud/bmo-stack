@@ -1,4 +1,4 @@
-# claw-code in `bmo-stack`
+# claw-code in `BeMore-stack`
 
 This repo now has a local integration surface for the community `claw-code` harness rewrite.
 

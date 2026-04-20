@@ -2,7 +2,7 @@
 
 Critical:
 
-1. Keep runtime owner paths honest across `bmo-stack`, `openclaw`, and `prismtek-site`.
+1. Keep runtime owner paths honest across `BeMore-stack`, `openclaw`, and `prismtek-site`.
 2. Make BMO usable as a real public chat surface on `prismtek.dev` through the correct `prismtek-site` owner path.
 3. Keep GitHub automation, workspace sync, and launchd/runtime docs aligned with the live scripts and workflows.
 4. Keep Telegram delivery and `/exec` validation tied to the real `openclaw` runtime owner path.

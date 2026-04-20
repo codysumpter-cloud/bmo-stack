@@ -1,8 +1,8 @@
-# OMX + NVIDIA NIM coding wedge for bmo-stack
+# OMX + NVIDIA NIM coding wedge for BeMore-stack
 
 ## Problem
 
-`bmo-stack` did not have a single Mission Control-friendly repo-local path for using OMX as the orchestration shell while routing open-source Codex CLI through NVIDIA NIM and keeping `claw-code` available as supporting harness context.
+`BeMore-stack` did not have a single Mission Control-friendly repo-local path for using OMX as the orchestration shell while routing open-source Codex CLI through NVIDIA NIM and keeping `claw-code` available as supporting harness context.
 
 ## Smallest useful wedge
 

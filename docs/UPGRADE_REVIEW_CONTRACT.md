@@ -1,6 +1,6 @@
 # BMO Manual Upgrade Review Contract
 
-This document defines how `bmo-stack` should review and adopt useful improvements from external sources without coupling itself to any parent repo or downstream repo.
+This document defines how `BeMore-stack` should review and adopt useful improvements from external sources without coupling itself to any parent repo or downstream repo.
 
 ## Goals
 

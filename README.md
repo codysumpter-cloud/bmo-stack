@@ -1,15 +1,21 @@
 # BMO Stack
 
-`bmo-stack` is the operator, policy, and integration repository for BMO.
+`BeMore-stack` is the operator, policy, and integration repository for BMO.
 
 It is the canonical source for BMO startup context, council contracts, operator workflows, runtime
 runbooks, workspace sync, and cross-repo integration glue. It does not pretend to own every live
 surface in the broader system.
 
+It does not own the iPhone app's core lovable Buddy loop. `prismtek-apps` now owns the standalone
+phone-first Buddy product surface: care, training, customization, collection, sparring, and
+trade-ready Buddy packages. `BeMore-stack` remains the deeper operator/runtime truth behind that
+product when the app needs posture, contracts, or integration depth.
+
 ## System boundaries
 
-- `bmo-stack`: operator workflows, startup context, council policy, GitHub automation, and local
+- `BeMore-stack`: operator workflows, startup context, council policy, GitHub automation, and local
   integration glue
+- `prismtek-apps`: shipped product UX, including the standalone iPhone Buddy companion experience
 - `openclaw`: live Telegram/runtime delivery behavior
 - `prismtek-site`: public-web `prismtek.dev` surface and site-backed APIs
 
@@ -22,6 +28,7 @@ This repo stays explicit about those ownership lines so operator claims remain h
 - operator plans, runbooks, continuity, and decision records in `context/`
 - workspace sync, runtime helpers, and maintenance scripts in `scripts/`
 - reusable operator skills in `skills/`
+- the repo-local Codex bridge in `mcp/codex-bridge/`
 - cross-repo donor, licensing, and integration documentation
 
 ## Quick start
@@ -63,8 +70,15 @@ make site-parity-report
 - `config/`: machine-readable council, GitHub, routine, and operator manifests
 - `scripts/`: runtime doctor, sync, bootstrap, recovery, and reporting helpers
 - `skills/`: repo-owned operator skill packs
+- `mcp/codex-bridge/`: isolated Codex CLI dispatch into per-run git worktrees with structured artifacts
 - `memory/`: persistent notes and decision trails
 - `docs/`: architecture, integration, upgrade, and licensing references
+
+## Product adapter boundary
+
+`prismtek-apps` may present Buddy Studio, memory review, and Codex task controls to end users, but
+it should consume the posture, council contracts, skills manifests, and Codex execution path defined
+here instead of inventing a second agent system.
 
 ## Runtime posture
 
@@ -72,7 +86,7 @@ This repo is intentionally local-first and operator-visible.
 
 - Host OpenClaw handles Telegram-facing runtime behavior.
 - OpenShell and NemoClaw provide disposable worker sandboxes.
-- `bmo-stack` provides the canonical operating environment, policy surface, and integration glue.
+- `BeMore-stack` provides the canonical operating environment, policy surface, and integration glue.
 - The iOS app uses its own app-container workspace. It must not read or mutate the MacBook `~/.openclaw` runtime unless Cody explicitly connects it through a gateway, pairing, or export/import path.
 
 Manual operator steps still exist:
@@ -85,8 +99,8 @@ Manual operator steps still exist:
 
 ## Source-of-truth rules
 
-- Do not claim Telegram runtime fixes from `bmo-stack` alone unless the relevant `openclaw` path was changed and validated.
-- Do not claim `prismtek.dev` web-chat fixes from `bmo-stack` alone unless the relevant `prismtek-site` path was changed and validated.
+- Do not claim Telegram runtime fixes from `BeMore-stack` alone unless the relevant `openclaw` path was changed and validated.
+- Do not claim `prismtek.dev` web-chat fixes from `BeMore-stack` alone unless the relevant `prismtek-site` path was changed and validated.
 - Do not patch vendored or donor paths first when the real owner is upstream.
 - Prefer machine-checkable manifests, validators, and runbooks over doc-only promises.
 - Use `make openclaw-boundary-doctor` to verify the MacBook OpenClaw/runtime boundary and `make openclaw-host-policy` to reapply the host Telegram delivery policy.

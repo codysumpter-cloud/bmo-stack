@@ -1,6 +1,6 @@
 # BMO Mythos-lite
 
-`bmo-stack` can mimic the useful shape of a Mythos-style system without pretending to ship a frontier offensive model.
+`BeMore-stack` can mimic the useful shape of a Mythos-style system without pretending to ship a frontier offensive model.
 
 This document defines a defensive, local-first security-review pipeline for BMO.
 
@@ -14,7 +14,7 @@ This document defines a defensive, local-first security-review pipeline for BMO.
 
 - not an autonomous exploit platform
 - not an internet-wide scanner
-- not a claim that `bmo-stack` already has a finished Glasswing-style runtime
+- not a claim that `BeMore-stack` already has a finished Glasswing-style runtime
 - not permission to disclose findings or patch live systems without human review
 
 ## Canonical contracts

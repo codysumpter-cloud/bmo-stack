@@ -1,4 +1,4 @@
-# Runtime Self-Upgrade Port Plan (bmo-stack)
+# Runtime Self-Upgrade Port Plan (BeMore-stack)
 
 Date: 2026-04-02
 Owner: BMO runtime-and-stack upgrader
@@ -6,7 +6,7 @@ Branch: feat/runtime-self-upgrade-hardening
 
 ## Objective
 
-Port/adapt the safe runtime self-upgrade loop and sync automation behavior from `prismtek-site` commit range `34d9f30..3e5ed7c` into `bmo-stack` with small, reversible, auditable changes.
+Port/adapt the safe runtime self-upgrade loop and sync automation behavior from `prismtek-site` commit range `34d9f30..3e5ed7c` into `BeMore-stack` with small, reversible, auditable changes.
 
 ## Source and constraints
 
@@ -15,7 +15,7 @@ Port/adapt the safe runtime self-upgrade loop and sync automation behavior from 
   - `d21fe1d` BMO-stack AI operating playbook
   - `0516c7f` sync workflow + post-edit hardening
   - `4e80643` faster post-edit validation tuning
-  - `3e5ed7c` automated bmo-stack sync + PR helper
+  - `3e5ed7c` automated BeMore-stack sync + PR helper
 - Current environment cannot read the donor repository without GitHub credentials, so this port preserves the requested behavior contract and documents compatibility assumptions in results.
 - Security and approvals are preserved: no deploy credential or publish-policy mutation.
 
@@ -44,7 +44,7 @@ Port/adapt the safe runtime self-upgrade loop and sync automation behavior from 
   - `scripts/agent-post-edit-checks.sh`
   - `scripts/persist-runtime-report.sh`
   - `scripts/sync-upgrade-artifacts.sh`
-  - `scripts/sync-and-pr-bmo-stack.sh`
+  - `scripts/sync-and-pr-BeMore-stack.sh`
 - Add/refresh docs:
   - `docs/upgrade-results.md` (append-only records)
   - `docs/rollback.md` (exact rollback commands)
@@ -67,7 +67,7 @@ Port/adapt the safe runtime self-upgrade loop and sync automation behavior from 
   - docs presence checks using shell assertions
 - Sync helper safe-failure path:
   - `BMO_SYNC_REMOTE=/tmp/does-not-exist bash scripts/sync-upgrade-artifacts.sh`
-  - `bash scripts/sync-and-pr-bmo-stack.sh --dry-run`
+  - `bash scripts/sync-and-pr-BeMore-stack.sh --dry-run`
 
 ## Rollback strategy
 

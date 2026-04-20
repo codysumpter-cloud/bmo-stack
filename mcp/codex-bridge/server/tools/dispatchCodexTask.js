@@ -51,7 +51,11 @@ function extractText(value, depth = 0) {
       }
     }
 
-    for (const nested of Object.values(value)) {
+    const ignoredKeys = new Set(["type", "status", "id"]);
+    for (const [key, nested] of Object.entries(value)) {
+      if (ignoredKeys.has(key)) {
+        continue;
+      }
       const found = extractText(nested, depth + 1);
       if (found) {
         return found;
@@ -103,7 +107,8 @@ export async function dispatchCodexTask({
   task_brief: taskBrief,
   target_branch: requestedBranch,
   approval_mode: approvalMode = "suggest",
-  model = null
+  model = null,
+  run_id: requestedRunId = null
 }) {
   if (!taskBrief || !String(taskBrief).trim()) {
     throw new Error("task_brief is required");
@@ -120,7 +125,7 @@ export async function dispatchCodexTask({
     throw new Error(`target_branch already exists locally: ${targetBranch}`);
   }
 
-  const runId = makeRunId();
+  const runId = requestedRunId || makeRunId();
   const runPaths = getRunPaths(runId);
   await fs.mkdir(runPaths.runDir, { recursive: true });
 
@@ -171,7 +176,7 @@ export async function dispatchCodexTask({
     return failure;
   }
 
-  const codexArgs = ["exec", "--json", approvalModeToFlag(approvalMode)];
+  const codexArgs = ["exec", "--json", ...approvalModeToFlag(approvalMode)];
   if (model) {
     codexArgs.push("-m", model);
   }
@@ -205,7 +210,12 @@ export async function dispatchCodexTask({
       if (parsed?.usage) {
         usage = parsed.usage;
       }
-      if (parsed?.type === "agent_message" || parsed?.type === "task_complete" || parsed?.type === "turn.completed") {
+      const isAgentMessageEvent =
+        parsed?.type === "agent_message" ||
+        parsed?.type === "task_complete" ||
+        (parsed?.type === "item.completed" && parsed?.item?.type === "agent_message");
+
+      if (isAgentMessageEvent) {
         const extracted = extractText(parsed);
         if (extracted) {
           finalAgentMessage = extracted;

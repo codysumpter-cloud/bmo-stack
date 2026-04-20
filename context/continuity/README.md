@@ -2,7 +2,7 @@
 
 This directory is the shared continuity surface between:
 
-- the canonical `bmo-stack` repo
+- the canonical `BeMore-stack` repo
 - the MacBook OpenClaw workspace
 - public Prismtek web Mission Control
 - Codex/operator sessions that need the latest live state quickly

@@ -278,7 +278,7 @@ Phase 1 should prove the desktop product shape, not the full dream.
 - downloadable tool packs
 - model download manager
 - optional cloud routing
-- import existing `bmo-stack` context and memory
+- import existing `BeMore-stack` context and memory
 
 ### Phase 3
 

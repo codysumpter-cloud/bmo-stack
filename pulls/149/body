@@ -1,0 +1,35 @@
+Supersedes #148 after cleaning up a stale, diverged branch.
+
+## Task contract
+- **Goal:** Add localhost-only OpenClaw status bridge for Mission Control integration
+- **Why:** Enable Mission Control to monitor OpenClaw status via HTTP endpoints
+- **How:** 
+  - Add status_publisher.py script that serves /status and /healthz endpoints
+  - Add runbook and documentation for operator surface
+  - Keep changes focused to bridge files only
+- **Verification:** 
+  - Script runs without errors
+  - Endpoints return expected JSON format
+  - Graceful degradation when openclaw status unavailable
+  - Verification: yes
+  - Rollback: yes
+
+## What changed
+- Adds a localhost-only OpenClaw status bridge for Mission Control integration
+- Adds bridge runbook and operator-surface docs/manifest
+- Keeps the diff focused to the intended bridge files only
+
+## Notes
+- Branch was rebased onto current `master`
+- Dropped stale unrelated history that had accumulated on the previous PR branch
+- `status_publisher.py` now degrades gracefully when `openclaw status --json` is unavailable or invalid, instead of returning a server error
+- Adds `/healthz` alongside `/status`
+
+## Plan: context/plans/2026-03-31-planning-verification-foundation.md
+
+## Included files
+- `context/openclaw-bridge/RUNBOOK.md`
+- `docs/ENTERPRISE_APP_FACTORY_BRIDGE.md`
+- `docs/UNIFIED_OPERATOR_APP.md`
+- `operator-surface.manifest.json`
+- `scripts/openclaw/status_publisher.py`

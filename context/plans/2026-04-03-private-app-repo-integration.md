@@ -12,7 +12,7 @@ and the current stack has no durable record of what should be imported versus ex
 
 ## Smallest useful wedge
 
-Add donor and operator-surface documentation plus a machine-readable manifest in `bmo-stack` that:
+Add donor and operator-surface documentation plus a machine-readable manifest in `BeMore-stack` that:
 
 - records both repos as active private donors
 - preserves the useful imported concepts
@@ -22,7 +22,7 @@ Do not import donor runtime code or replace canonical stack ownership in this we
 
 ## Assumptions
 
-- `bmo-stack` should remain the canonical runtime and operator-policy repo.
+- `BeMore-stack` should remain the canonical runtime and operator-policy repo.
 - The immediate need is durable donor mapping, not a wholesale code merge.
 - `prismtek-site` will carry the web-facing UI integration separately.
 
@@ -34,7 +34,7 @@ Do not import donor runtime code or replace canonical stack ownership in this we
 
 ## Owner path
 
-`bmo-stack` donor docs, operator docs, and operator manifest files.
+`BeMore-stack` donor docs, operator docs, and operator manifest files.
 
 ## Files likely to change
 

@@ -1,6 +1,6 @@
 # Portable Paperclip Control-Plane Plan
 
-This document records how `bmo-stack` should mirror the new control-plane primitives being added to `automindlab-stack`.
+This document records how `BeMore-stack` should mirror the new control-plane primitives being added to `automindlab-stack`.
 
 ## Goal
 

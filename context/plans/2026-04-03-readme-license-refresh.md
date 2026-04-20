@@ -2,7 +2,7 @@
 
 ## Problem
 
-`bmo-stack` needs an explicit top-level license and a cleaner, more professional root landing page
+`BeMore-stack` needs an explicit top-level license and a cleaner, more professional root landing page
 that explains ownership boundaries, quick start expectations, and provenance clearly.
 
 ## Smallest useful wedge
@@ -12,7 +12,7 @@ existing licensing/provenance docs so they match the new explicit license postur
 
 ## Assumptions
 
-- Apache 2.0 is the intended default license posture for `bmo-stack`.
+- Apache 2.0 is the intended default license posture for `BeMore-stack`.
 - Existing donor and provenance docs remain the deeper source material.
 
 ## Risks
@@ -22,7 +22,7 @@ existing licensing/provenance docs so they match the new explicit license postur
 
 ## Owner path
 
-`bmo-stack`
+`BeMore-stack`
 
 ## Files likely to change
 

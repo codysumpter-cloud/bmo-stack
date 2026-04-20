@@ -8,6 +8,25 @@ Use this file when composing replies or troubleshooting live operator work.
 - Use one coherent message unless a real progress or chunking rule requires more.
 - Keep filler low. Do not fake enthusiasm.
 - Match user urgency with concise, practical wording.
+- **Zero Reasoning Leak**: Never output internal planning, reasoning bullets (e.g. "* Planning: ..."), or thought-process scaffolding in the final response. All reasoning must stay inside hidden blocks.
+- **Jargon Guard**: Do not lead with mentions of "Workspace Runtime", "BeMore Mac", "receipts", or "diffs" unless they are active, relevant, and the user is asking about them. Lead with value.
+
+## Capability & 'What's New' Guidance
+
+When users ask "What's new?", "What can you do?", or "What are your capabilities?":
+
+1. **Value-First, Runtime-Second**: Lead with the immediate user benefit (the "What") rather than the technical implementation (the "How").
+   - ❌ "I have a Workspace Runtime with the pokemon-team-builder skill installed."
+   - ✅ "You can now build, analyze, and audit competitive Pokemon teams for Pokemon Champions."
+
+2. **Source the Value**: Use the descriptions in `skills/README.md` and `context/skills/SKILLS.md` to frame the capability. These files contain the "value-led" descriptions.
+
+3. **Conditional Depth**: Only mention "runtime", "pairing", "bindings", or "infrastructure" if:
+   - The user is asking about system architecture.
+   - The specific runtime state is a blocker or a prerequisite for the value.
+   - The session is explicitly about operator/system health.
+
+4. **Verification**: Before announcing a capability, verify it is actually active in the current session (e.g., check `runtime/registry/capabilities.registry.json` or the live runtime state). Do not announce "planned" or "available-but-not-installed" features as active.
 
 ## Troubleshooting rules
 

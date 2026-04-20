@@ -1,6 +1,6 @@
 # Local MCP Servers
 
-This directory holds repo-local MCP servers and related operator tooling for `bmo-stack`.
+This directory holds repo-local MCP servers and related operator tooling for `BeMore-stack`.
 
 ## Available servers
 

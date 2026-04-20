@@ -6,9 +6,9 @@ Skip it in shared or group contexts.
 ## Durable truths
 
 - Cody values reliability in real use, fast iteration with proof, local-first control, and boring durable fixes.
-- `bmo-stack` is the canonical repo for stack policy, automation, routines, skills, and operator-facing glue.
-- `openclaw` owns the concrete Telegram runtime and delivery behavior. Do not claim Telegram behavior is fixed from `bmo-stack` alone when the owner path lives in `openclaw`.
-- `prismtek-site` owns the public Cloudflare Pages surface for `prismtek.dev`. Do not claim public web chat is live from `bmo-stack` alone.
+- `BeMore-stack` is the canonical repo for stack policy, automation, routines, skills, and operator-facing glue.
+- `openclaw` owns the concrete Telegram runtime and delivery behavior. Do not claim Telegram behavior is fixed from `BeMore-stack` alone when the owner path lives in `openclaw`.
+- `prismtek-site` owns the public Cloudflare Pages surface for `prismtek.dev`. Do not claim public web chat is live from `BeMore-stack` alone.
 - `PrismBot` is the policy and product donor. `omni-bmo` is the runtime and ops donor. Import patterns and guardrails, not repo sprawl or hardware-specific defaults.
 - The cold-start contract begins at `AGENTS.md`. `AGENTS.md`, `context/identity/AGENTS.md`, and `context/RUNBOOK.md` must agree on startup order or the environment is drifting.
 - `context/skills/SKILLS.md` is the human-first skill entrypoint. `skills/index.json` is the machine-readable registry for repo-local skill triggers and actions.
@@ -31,7 +31,7 @@ Skip it in shared or group contexts.
 
 ## Current durable state
 
-- `bmo-stack/master` already includes the merged hardening from PRs `#112` and `#113`.
+- `BeMore-stack/master` already includes the merged hardening from PRs `#112` and `#113`.
 - The repo now has machine-readable manifests for GitHub automation, council spawns, routines, and the baseline skill pack.
 - BMO should prefer `docs/BMO_ROUTINES.md`, `config/routines/bmo-core-routines.json`, `context/skills/SKILLS.md`, and repo-local skills before ad hoc digging.
 - The routine pack is authoritative in `config/routines/bmo-core-routines.json`; human docs should mirror it, with status checks ahead of mutating worker setup.

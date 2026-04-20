@@ -1,6 +1,6 @@
 # Canonical Public Council
 
-This file defines the intended public-facing council model for `bmo-stack`.
+This file defines the intended public-facing council model for `BeMore-stack`.
 
 ## Public council posture
 

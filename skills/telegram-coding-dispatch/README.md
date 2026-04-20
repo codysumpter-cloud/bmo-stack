@@ -17,7 +17,7 @@ without requiring the user to type a perfect prompt.
 
 - Telegram delivery and runtime ownership still live in `openclaw`.
 - This repo owns the reusable skill, dispatch helper, brief normalization pattern, and local run artifacts.
-- Use this skill after syncing `bmo-stack` skills into the relevant OpenClaw workspace.
+- Use this skill after syncing `BeMore-stack` skills into the relevant OpenClaw workspace.
 
 ## What BMO should do
 
@@ -43,7 +43,7 @@ python3 scripts/bmo_telegram_coding_dispatch.py doctor
 ```bash
 python3 scripts/bmo_telegram_coding_dispatch.py brief \
   --request "make the mission control page show my agent runs" \
-  --repo /absolute/path/to/bmo-stack \
+  --repo /absolute/path/to/BeMore-stack \
   --use-claw-context
 ```
 
@@ -52,7 +52,7 @@ python3 scripts/bmo_telegram_coding_dispatch.py brief \
 ```bash
 python3 scripts/bmo_telegram_coding_dispatch.py dispatch \
   --request "make the mission control page show my agent runs" \
-  --repo /absolute/path/to/bmo-stack \
+  --repo /absolute/path/to/BeMore-stack \
   --backend auto \
   --approval-mode suggest \
   --use-claw-context

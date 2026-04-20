@@ -6,7 +6,7 @@ Ensure workspace context files are correctly copied and injected into OpenClaw.
 
 ## Owner path
 
-- `bmo-stack/context/` is the repo-local context copy
+- `BeMore-stack/context/` is the repo-local context copy
 - `~/bmo-context` is the persistent host mirror when present
 - `scripts/bmo-workspace-sync.py` owns workspace refresh for OpenClaw mirrors
 
@@ -26,7 +26,7 @@ openclaw agents set-identity --workspace ~/.openclaw/workspace --from-identity
 If you need the explicit mirror command:
 
 ```bash
-python3 scripts/bmo-workspace-sync.py --workspace-dir ~/.openclaw/workspace/bmo-stack --host-context ~/bmo-context
+python3 scripts/bmo-workspace-sync.py --workspace-dir ~/.openclaw/workspace/BeMore-stack --host-context ~/bmo-context
 ```
 
 ## Expected state

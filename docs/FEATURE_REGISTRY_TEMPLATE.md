@@ -1,6 +1,6 @@
 # Feature Registry Template
 
-Use this registry to track every feature that should land in `bmo-stack`.
+Use this registry to track every feature that should land in `BeMore-stack`.
 
 | Feature | Source repo | Source path | Source license | Target module | Delivery mode | Profile(s) | Status | Notes |
 |---|---|---|---|---|---|---|---|---|
@@ -16,11 +16,11 @@ Use this registry to track every feature that should land in `bmo-stack`.
 | Vision hooks | `omni-bmo` and `be-more-hailo` | camera / vision code | MIT | `services/vision` | modular import | `pi-local`, `pi-hailo` | planned | separate local vs Hailo backends |
 | Hailo profile | `be-more-hailo` | core, web UI, setup | MIT | `profiles/pi-hailo` | fork + documented adaptation | `pi-hailo` | planned | preserve attribution and upstream link |
 | Timers / media / game loops | `be-more-hailo` | runtime features | MIT | `services/timers-media` | modular import | `pi-hailo`, `pi-local` | planned | implement behind shared contracts |
-| Council runtime | `bmo-stack` | `context/council` | no top-level repo license yet | `packages/council-runtime` | native | all | in progress | add explicit platform license first |
+| Council runtime | `BeMore-stack` | `context/council` | no top-level repo license yet | `packages/council-runtime` | native | all | in progress | add explicit platform license first |
 
 ## Delivery mode definitions
 
-- `native` — implemented directly in `bmo-stack`
+- `native` — implemented directly in `BeMore-stack`
 - `modular import` — code imported with provenance preserved
 - `service boundary` — integrated as separate deployable component
 - `fork + documented adaptation` — maintained from an upstream fork

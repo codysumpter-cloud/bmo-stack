@@ -3,7 +3,7 @@
   "goal": "defensive-review",
   "target": {
     "kind": "repo",
-    "locator": "github.com/codysumpter-cloud/bmo-stack/apps/openclaw-shell-ios",
+    "locator": "github.com/codysumpter-cloud/BeMore-stack/apps/openclaw-shell-ios",
     "ref": "master",
     "ownership": "owned"
   },

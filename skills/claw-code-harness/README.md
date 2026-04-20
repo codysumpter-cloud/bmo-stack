@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Use the community `claw-code` harness as an auxiliary analysis surface inside `bmo-stack` when you want a quick manifest, command inventory, tool inventory, or parity-oriented read on the current `claw-code` workspace.
+Use the community `claw-code` harness as an auxiliary analysis surface inside `BeMore-stack` when you want a quick manifest, command inventory, tool inventory, or parity-oriented read on the current `claw-code` workspace.
 
 ## When to use it
 
@@ -34,7 +34,7 @@ Do not use this skill to override BMO source-of-truth docs or runtime ownership.
    ```
 
 4. Translate useful findings back into BMO-owned language, contracts, and files.
-5. Keep all final claims grounded in `bmo-stack` owner paths.
+5. Keep all final claims grounded in `BeMore-stack` owner paths.
 
 ## Guardrails
 

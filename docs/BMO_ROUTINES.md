@@ -32,7 +32,7 @@ node scripts/bmo-routines.mjs show worker-status
 
 ## Why this exists
 
-`bmo-stack` already had useful commands, but they were spread across the `Makefile`, shell scripts, and docs.
+`BeMore-stack` already had useful commands, but they were spread across the `Makefile`, shell scripts, and docs.
 
 This file and the routine pack make the important routines:
 

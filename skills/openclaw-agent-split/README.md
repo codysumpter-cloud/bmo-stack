@@ -9,7 +9,7 @@ Defines the intended architecture:
 ## Owner path
 
 - `openclaw` owns the live agent config and Telegram binding
-- `bmo-stack` owns the desired topology, bootstrap files, and `scripts/configure-openclaw-agents.sh`
+- `BeMore-stack` owns the desired topology, bootstrap files, and `scripts/configure-openclaw-agents.sh`
 
 ## When to use
 
@@ -52,7 +52,7 @@ openclaw agents set-identity --workspace ~/.openclaw/workspace --from-identity
 
 - `openclaw agents bindings` shows Telegram on `main`
 - `openclaw sandbox explain` shows `main` with sandbox off and `bmo-tron` with sandbox all
-- if delivery still fails after the split is correct, continue in the live `openclaw` owner path instead of claiming success from `bmo-stack` alone
+- if delivery still fails after the split is correct, continue in the live `openclaw` owner path instead of claiming success from `BeMore-stack` alone
 
 ## Common failure modes
 

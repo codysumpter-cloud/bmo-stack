@@ -1,11 +1,11 @@
 # One-Shot Install Guide
 
-This guide provides single-command install paths for the public `bmo-stack` build.
+This guide provides single-command install paths for the public `BeMore-stack` build.
 
 ## What the installers do
 
 The one-shot installers:
-- download or update `bmo-stack`
+- download or update `BeMore-stack`
 - create `.env` from `.env.example` if needed
 - detect a local Nemotron profile that fits the machine
 - write `config/local-model.auto.env`
@@ -19,13 +19,13 @@ They choose and record the recommended profile first so the host is not surprise
 Run:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/codysumpter-cloud/bmo-stack/master/scripts/install-oneclick.sh | bash
+curl -fsSL https://raw.githubusercontent.com/codysumpter-cloud/BeMore-stack/master/scripts/install-oneclick.sh | bash
 ```
 
 Optional custom install directory:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/codysumpter-cloud/bmo-stack/master/scripts/install-oneclick.sh | BMO_STACK_DIR="$HOME/.bmo-stack" bash
+curl -fsSL https://raw.githubusercontent.com/codysumpter-cloud/BeMore-stack/master/scripts/install-oneclick.sh | BMO_STACK_DIR="$HOME/.BeMore-stack" bash
 ```
 
 ## Windows (PowerShell)
@@ -33,7 +33,7 @@ curl -fsSL https://raw.githubusercontent.com/codysumpter-cloud/bmo-stack/master/
 Run:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -Command "& ([scriptblock]::Create((Invoke-WebRequest -UseBasicParsing https://raw.githubusercontent.com/codysumpter-cloud/bmo-stack/master/scripts/install-oneclick.ps1).Content))"
+powershell -ExecutionPolicy Bypass -Command "& ([scriptblock]::Create((Invoke-WebRequest -UseBasicParsing https://raw.githubusercontent.com/codysumpter-cloud/BeMore-stack/master/scripts/install-oneclick.ps1).Content))"
 ```
 
 ## Local model sizing rules
@@ -60,20 +60,20 @@ The public install path keeps model selection conservative and machine-aware.
 Recommended next steps:
 
 ```bash
-cd ~/.bmo-stack
+cd ~/.BeMore-stack
 make doctor || true
 ```
 
 Review the selected model profile:
 
 ```bash
-cat ~/.bmo-stack/config/local-model.auto.env
+cat ~/.BeMore-stack/config/local-model.auto.env
 ```
 
 On Windows, inspect:
 
 ```powershell
-Get-Content "$env:USERPROFILE\.bmo-stack\config\local-model.auto.env"
+Get-Content "$env:USERPROFILE\.BeMore-stack\config\local-model.auto.env"
 ```
 
 ## Important notes

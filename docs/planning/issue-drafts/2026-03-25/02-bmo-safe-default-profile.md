@@ -8,7 +8,7 @@ runtime, profiles, safety, bmo, priority:P0
 
 ## Summary
 
-Add a safe default runtime profile for `bmo-stack` that favors local-first operation and disables risky capabilities unless explicitly enabled.
+Add a safe default runtime profile for `BeMore-stack` that favors local-first operation and disables risky capabilities unless explicitly enabled.
 
 ## Problem
 
