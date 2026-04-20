@@ -8,6 +8,6 @@ Remove the duplicate declaration from BuddyAsciiView.swift.
 1. Remove the duplicate declaration from BuddyAsciiView.swift.
 2. Verify that the project builds successfully.
 
-## Verification
+## Verification plan
 - Run local build.
 - Ensure CI 'Generate and build BeMoreAgent' passes.
