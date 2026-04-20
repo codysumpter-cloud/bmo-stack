@@ -11,3 +11,6 @@ Remove the duplicate declaration from BuddyAsciiView.swift.
 ## Verification plan
 - Run local build.
 - Ensure CI 'Generate and build BeMoreAgent' passes.
+
+## Rollback plan
+Revert the commit that removed the declaration from BuddyAsciiView.swift if it causes regressions in ASCII view rendering.
