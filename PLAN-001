@@ -1,4 +1,10 @@
-Plan to resolve BuddyAnimationMood redeclaration:
-1. Identify duplicate declarations of BuddyAnimationMood.
-2. Remove declaration from BuddyAsciiView.swift.
-3. Verify build passes locally and in CI.
+## Problem
+BuddyAnimationMood is declared in both BuddyAsciiView.swift and BuddyVisualModels.swift, causing a compiler error for redeclaration.
+
+## Plan
+1. Remove the duplicate declaration from BuddyAsciiView.swift.
+2. Verify that the project builds successfully.
+
+## Verification
+- Run local build.
+- Ensure CI 'Generate and build BeMoreAgent' passes.
