@@ -2,6 +2,7 @@ import SwiftUI
 
 struct MissionControlView: View {
     @EnvironmentObject private var appState: AppState
+    @ObservedObject var store: BuddyProfileStore
     @State private var selectedSurface: RepoSurface?
     @State private var lastReceipt: OpenClawReceipt?
     @State private var sandboxCommand = "ls"
@@ -10,17 +11,14 @@ struct MissionControlView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: BMOTheme.spacingMD) {
-                    headerCard
+                    buddyHomeCard
+                    primaryFlowCard
                     if let lastReceipt {
                         ActionReceiptCard(receipt: lastReceipt)
                     }
-                    openClawDashboardCard
-                    stackContractCard
-                    routeCard
-                    metricsCard
-                    providerCard
-                    shellCard
-                    stackSurfacesCard
+                    taskAndResultsCard
+                    skillsCard
+                    macPowerCard
                 }
                 .padding(.horizontal, BMOTheme.spacingMD)
                 .padding(.bottom, BMOTheme.spacingXL)
@@ -29,7 +27,7 @@ struct MissionControlView: View {
             .navigationTitle("")
             .toolbar {
                 ToolbarItem(placement: .principal) {
-                    Text("Mission Control")
+                    Text("Buddy Home")
                         .font(.headline)
                         .foregroundColor(BMOTheme.textPrimary)
                 }
@@ -39,64 +37,95 @@ struct MissionControlView: View {
             .sheet(item: $selectedSurface) { surface in
                 RepoSurfaceDetailView(surface: surface)
             }
+            .onAppear {
+                appState.workspaceRuntime.refreshMetadata()
+                store.load(for: appState.stackConfig)
+            }
         }
     }
 
-    private var headerCard: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(appState.operatorDisplayName)
-                        .font(.system(size: 28, weight: .bold))
+    private var buddyHomeCard: some View {
+        let status = appState.buddyRuntimeStatus
+        let buddy = store.activeBuddy
+        return VStack(alignment: .leading, spacing: BMOTheme.spacingMD) {
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("My Buddy")
+                        .font(.caption.weight(.semibold))
+                        .foregroundColor(BMOTheme.textTertiary)
+                    Text(buddy?.displayName ?? "Choose your Buddy")
+                        .font(.system(size: 30, weight: .bold))
                         .foregroundColor(BMOTheme.textPrimary)
-                    Text("OpenClaw mobile operator shell")
+                    Text(homeSubtitle(for: buddy))
                         .font(.subheadline)
                         .foregroundColor(BMOTheme.textSecondary)
                 }
                 Spacer()
-                StatusBadge(label: appState.activeRouteModeLabel, color: appState.selectedProviderAccount != nil ? BMOTheme.success : (appState.selectedInstalledModel != nil ? BMOTheme.accent : BMOTheme.warning))
+                StatusBadge(label: buddy == nil ? "Needs Buddy" : status.runtimeAvailable ? "Ready" : "Phone-first", color: buddy == nil ? BMOTheme.warning : status.runtimeAvailable ? BMOTheme.success : BMOTheme.accent)
             }
 
-            Text(appState.operatorSummary)
-                .font(.subheadline)
-                .foregroundColor(BMOTheme.textSecondary)
+            BuddyAsciiView(buddy: buddy, template: buddy.flatMap { store.contracts?.templateForInstance($0) }, mood: buddyMood(for: status, buddy: buddy))
+
+            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
+                dashboardMetric("Owned", value: "\(store.installedBuddies.count)", icon: "person.2.fill")
+                dashboardMetric("Skills", value: "\(status.registeredSkillCount)", icon: "sparkles.rectangle.stack")
+                dashboardMetric("Receipts", value: "\(status.recentChanges.count)", icon: "checklist.checked")
+                dashboardMetric("Mac", value: appState.macRuntimeSnapshot == nil ? "pair" : "live", icon: "macbook.and.iphone")
+            }
         }
         .bmoCard()
     }
 
-    private var openClawDashboardCard: some View {
+    private var primaryFlowCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Start with Buddy")
+                .font(.headline)
+                .foregroundColor(BMOTheme.textPrimary)
+            Text("Talk to your active Buddy, train them, run a skill, or inspect the latest result. Runtime setup stays secondary until you ask for more power.")
+                .font(.subheadline)
+                .foregroundColor(BMOTheme.textSecondary)
+
+            HStack(spacing: 8) {
+                Button("Chat with \(store.activeBuddy?.displayName ?? "Buddy")") {
+                    appState.openChat(from: .missionControl)
+                }
+                .buttonStyle(BMOButtonStyle())
+
+                Button("Train Buddy") {
+                    appState.selectedTab = .buddy
+                }
+                .buttonStyle(BMOButtonStyle(isPrimary: false))
+            }
+
+            HStack(spacing: 8) {
+                Button("Discover") {
+                    appState.selectedTab = .buddy
+                }
+                .buttonStyle(BMOButtonStyle(isPrimary: false))
+
+                Button("Plans") {
+                    appState.selectedTab = .pricing
+                }
+                .buttonStyle(BMOButtonStyle(isPrimary: false))
+            }
+        }
+        .bmoCard()
+    }
+
+    private var taskAndResultsCard: some View {
         let status = appState.buddyRuntimeStatus
         return VStack(alignment: .leading, spacing: 12) {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("OpenClaw Dashboard")
+                    Text("\(store.activeBuddy?.displayName ?? "Buddy")'s next result")
                         .font(.headline)
                         .foregroundColor(BMOTheme.textPrimary)
-                    Text("One view for route, runtime, artifacts, skills, files, and receipts.")
+                    Text("Receipt-backed work is the proof surface on iPhone too.")
                         .font(.caption)
                         .foregroundColor(BMOTheme.textSecondary)
                 }
                 Spacer()
-                StatusBadge(label: status.runtimeAvailable ? "Online" : "Needs setup", color: status.runtimeAvailable ? BMOTheme.success : BMOTheme.warning)
-            }
-
-            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
-                dashboardMetric("Artifacts", value: "\(appState.workspaceRuntime.artifacts.count)", icon: "doc.richtext")
-                dashboardMetric("Skills", value: "\(appState.workspaceRuntime.skills.count)", icon: "sparkles.rectangle.stack")
-                dashboardMetric("Files", value: "\(appState.workspaceStore.files.count)", icon: "folder")
-                dashboardMetric("Failures", value: "\(status.failedActions.count)", icon: "exclamationmark.triangle")
-            }
-
-            HStack(spacing: 8) {
-                Button("Regenerate Core") {
-                    lastReceipt = appState.regenerateArtifacts(target: "all")
-                }
-                .buttonStyle(BMOButtonStyle(isPrimary: false))
-
-                Button("Open Skills") {
-                    appState.selectedTab = .skills
-                }
-                .buttonStyle(BMOButtonStyle(isPrimary: false))
+                StatusBadge(label: "\(status.failedActions.count) blocked", color: status.failedActions.isEmpty ? BMOTheme.success : BMOTheme.warning)
             }
 
             HStack(spacing: 8) {
@@ -113,96 +142,66 @@ struct MissionControlView: View {
                 }
                 .buttonStyle(BMOButtonStyle())
             }
-        }
-        .bmoCard()
-    }
 
-    private var stackContractCard: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("Stack contract")
-                .font(.subheadline)
-                .fontWeight(.semibold)
-                .foregroundColor(BMOTheme.textSecondary)
-
-            detailRow("Mode", value: appState.stackConfig.deploymentMode.title)
-            detailRow("Runtime endpoint", value: appState.stackConfig.gatewayURL)
-            detailRow("Role", value: appState.stackConfig.role)
-            detailRow("Goal", value: appState.stackConfig.goal)
-            detailRow("Node on iPhone", value: appState.stackConfig.installNodeOnThisPhone ? "Expected" : "Not expected")
-            detailRow("Desktop/server node", value: appState.stackConfig.installDesktopNode ? "Expected" : "Optional")
-        }
-        .bmoCard()
-    }
-
-    private var routeCard: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("Route control")
-                .font(.subheadline)
-                .fontWeight(.semibold)
-                .foregroundColor(BMOTheme.textSecondary)
-
-            detailRow("Active route", value: appState.activeRouteTitle)
-            detailRow("Target", value: appState.activeRouteDetail)
-            detailRow("Health", value: appState.routeHealthSummary)
-        }
-        .bmoCard()
-    }
-
-    private var metricsCard: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("Live local state")
-                .font(.subheadline)
-                .fontWeight(.semibold)
-                .foregroundColor(BMOTheme.textSecondary)
-
-            detailRow("Workspace", value: appState.workspaceStatusSummary)
-            detailRow("Messages", value: "\(appState.chatStore.messages.count)")
-            detailRow("Installed models", value: "\(appState.modelStore.installedModels.count)")
-            detailRow("Persistence", value: appState.persistenceSummary)
-        }
-        .bmoCard()
-    }
-
-    private var providerCard: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("Providers")
-                .font(.subheadline)
-                .fontWeight(.semibold)
-                .foregroundColor(BMOTheme.textSecondary)
-
-            ForEach(ProviderKind.allCases) { provider in
-                let account = appState.providerStore.account(for: provider)
-                detailRow(provider.displayName, value: account.isEnabled ? account.modelSlug : "Not linked")
+            if status.recentChanges.isEmpty {
+                Text("Run a Buddy action, skill, or Mac inspection to create the next visible result.")
+                    .font(.caption)
+                    .foregroundColor(BMOTheme.textTertiary)
+            } else {
+                ForEach(Array(status.recentChanges.prefix(3)), id: \.id) { event in
+                    detailRow(event.type, value: event.message)
+                }
             }
         }
         .bmoCard()
     }
 
-    private var shellCard: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("Shell tabs")
+    private var skillsCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("Buddy skills")
+                    .font(.headline)
+                    .foregroundColor(BMOTheme.textPrimary)
+                Spacer()
+                StatusBadge(label: "\(appState.workspaceRuntime.skills.count) registered", color: BMOTheme.accent)
+            }
+            Text("Skills make Buddy more useful: they produce artifacts, receipts, and task context rather than decorative shortcuts.")
                 .font(.subheadline)
-                .fontWeight(.semibold)
                 .foregroundColor(BMOTheme.textSecondary)
+            Button("Open Skills") {
+                appState.selectedTab = .skills
+            }
+            .buttonStyle(BMOButtonStyle(isPrimary: false))
+        }
+        .bmoCard()
+    }
 
-            Text(appState.orderedVisibleTabs.map(\.title).joined(separator: " • "))
+    private var macPowerCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("Mac power mode")
+                    .font(.headline)
+                    .foregroundColor(BMOTheme.textPrimary)
+                Spacer()
+                StatusBadge(label: appState.macRuntimeSnapshot == nil ? "Not paired" : "Paired", color: appState.macRuntimeSnapshot == nil ? BMOTheme.warning : BMOTheme.success)
+            }
+            Text(appState.macPowerModeSummary)
                 .font(.subheadline)
-                .foregroundColor(BMOTheme.textPrimary)
-            Text("Manage tab order in Settings. Mission Control stays the stable landing surface for stack health and route truth.")
-                .font(.caption)
-                .foregroundColor(BMOTheme.textTertiary)
+                .foregroundColor(BMOTheme.textSecondary)
+            Button("Inspect Mac runtime") {
+                Task { await appState.refreshMacRuntimeSnapshot() }
+            }
+            .buttonStyle(BMOButtonStyle(isPrimary: false))
         }
         .bmoCard()
     }
 
     private var stackSurfacesCard: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("BMO Stack Surfaces")
-                .font(.subheadline)
-                .fontWeight(.semibold)
-                .foregroundColor(BMOTheme.textSecondary)
-
-            Text("These briefs are bundled from real repo docs so the iOS shell can expose meaningful stack surfaces without pretending to reimplement the whole desktop operator stack.")
+            Text("Reference surfaces")
+                .font(.headline)
+                .foregroundColor(BMOTheme.textPrimary)
+            Text("Repo briefs stay available as supporting context, but Buddy Home is now the product center.")
                 .font(.caption)
                 .foregroundColor(BMOTheme.textTertiary)
 
@@ -220,9 +219,6 @@ struct MissionControlView: View {
                                 .font(.caption)
                                 .multilineTextAlignment(.leading)
                                 .foregroundColor(BMOTheme.textSecondary)
-                            Text(surface.sourcePath)
-                                .font(.caption2)
-                                .foregroundColor(BMOTheme.textTertiary)
                         }
 
                         Spacer()
@@ -236,12 +232,44 @@ struct MissionControlView: View {
                     }
                     .padding(12)
                     .background(BMOTheme.backgroundSecondary)
-                    .clipShape(RoundedRectangle(cornerRadius: BMOTheme.radiusMedium, style: .continuous))
+                    .clipShape(RoundedRectangle(cornerRadius: BMOTheme.radiusSmall, style: .continuous))
                 }
                 .buttonStyle(.plain)
             }
         }
         .bmoCard()
+    }
+
+    private func buddyMood(for status: BuddyRuntimeStatus, buddy: BuddyInstance?) -> BuddyAnimationMood {
+        if let buddy {
+            switch buddy.state.mood.lowercased() {
+            case "happy", "excited":
+                return .happy
+            case "working":
+                return .working
+            case "thinking":
+                return .thinking
+            case "sleepy", "tired":
+                return .sleepy
+            case "needsattention", "needs attention", "stressed":
+                return .needsAttention
+            default:
+                break
+            }
+        }
+        if !status.failedActions.isEmpty { return .needsAttention }
+        if appState.macRuntimeSnapshot?.processes.contains(where: { $0.status == "running" }) == true { return .working }
+        if status.recentChanges.isEmpty && appState.workspaceStore.files.isEmpty { return .sleepy }
+        if !status.recentChanges.isEmpty { return .happy }
+        return status.runtimeAvailable ? .idle : .thinking
+    }
+
+    private func homeSubtitle(for buddy: BuddyInstance?) -> String {
+        guard let buddy else {
+            return "Create or install a Buddy before setup details take over the product."
+        }
+        let focus = buddy.state.currentFocus ?? "ready for the next useful step"
+        return "\(buddy.identity.role) • \(focus)"
     }
 
     private func detailRow(_ label: String, value: String) -> some View {

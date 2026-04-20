@@ -1,0 +1,103 @@
+{
+  "version": "mvp-local-v1",
+  "pokemon": [
+    {
+      "name": "Pikachu",
+      "types": ["Electric"],
+      "roles": ["speed-control", "utility-support"],
+      "styleTags": ["fast", "pivot", "mascot"],
+      "recommendedMoves": ["Thunderbolt", "Volt Switch", "Nuzzle", "Protect"],
+      "notes": "Fast utility Electric pick that pressures Water and Flying types."
+    },
+    {
+      "name": "Charizard",
+      "types": ["Fire", "Flying"],
+      "roles": ["special-attacker", "late-game-cleaner"],
+      "styleTags": ["offense", "sun", "setup"],
+      "recommendedMoves": ["Flamethrower", "Air Slash", "Dragon Pulse", "Protect"],
+      "notes": "Fire/Flying pressure with cleaner potential, but needs Rock coverage support."
+    },
+    {
+      "name": "Venusaur",
+      "types": ["Grass", "Poison"],
+      "roles": ["utility-support", "bulky-pivot"],
+      "styleTags": ["balance", "status", "sun"],
+      "recommendedMoves": ["Giga Drain", "Sludge Bomb", "Sleep Powder", "Protect"],
+      "notes": "Bulky Grass/Poison support that patches Water and Fairy pressure."
+    },
+    {
+      "name": "Blastoise",
+      "types": ["Water"],
+      "roles": ["bulky-pivot", "utility-support"],
+      "styleTags": ["balance", "bulky", "support"],
+      "recommendedMoves": ["Hydro Pump", "Ice Beam", "Rapid Spin", "Protect"],
+      "notes": "Reliable Water pivot with utility and Ice coverage."
+    },
+    {
+      "name": "Gengar",
+      "types": ["Ghost", "Poison"],
+      "roles": ["special-attacker", "disruption"],
+      "styleTags": ["fast", "offense", "status"],
+      "recommendedMoves": ["Shadow Ball", "Sludge Bomb", "Will-O-Wisp", "Protect"],
+      "notes": "Fast special attacker with disruptive status options."
+    },
+    {
+      "name": "Dragonite",
+      "types": ["Dragon", "Flying"],
+      "roles": ["physical-breaker", "late-game-cleaner"],
+      "styleTags": ["setup", "priority", "bulky-offense"],
+      "recommendedMoves": ["Dragon Claw", "Extreme Speed", "Earthquake", "Protect"],
+      "notes": "Bulky offensive centerpiece with strong endgame potential."
+    },
+    {
+      "name": "Lucario",
+      "types": ["Fighting", "Steel"],
+      "roles": ["physical-breaker", "late-game-cleaner"],
+      "styleTags": ["offense", "priority", "steel"],
+      "recommendedMoves": ["Close Combat", "Meteor Mash", "Extreme Speed", "Protect"],
+      "notes": "Fighting/Steel attacker that helps into Rock, Ice, Dark, and Fairy."
+    },
+    {
+      "name": "Garchomp",
+      "types": ["Dragon", "Ground"],
+      "roles": ["physical-breaker", "electric-check"],
+      "styleTags": ["offense", "ground", "speed"],
+      "recommendedMoves": ["Earthquake", "Dragon Claw", "Rock Slide", "Protect"],
+      "notes": "Ground-type breaker and Electric immunity, weak to Ice."
+    },
+    {
+      "name": "Rotom-Wash",
+      "types": ["Electric", "Water"],
+      "roles": ["bulky-pivot", "utility-support"],
+      "styleTags": ["balance", "pivot", "electric-check"],
+      "recommendedMoves": ["Hydro Pump", "Thunderbolt", "Volt Switch", "Will-O-Wisp"],
+      "notes": "Bulky pivot that compresses Water/Electric pressure and utility."
+    },
+    {
+      "name": "Corviknight",
+      "types": ["Flying", "Steel"],
+      "roles": ["bulky-pivot", "utility-support"],
+      "styleTags": ["bulky", "pivot", "defense"],
+      "recommendedMoves": ["Brave Bird", "Body Press", "Roost", "U-turn"],
+      "notes": "Durable Flying/Steel pivot that helps into Ground, Fairy, and Grass."
+    },
+    {
+      "name": "Togekiss",
+      "types": ["Fairy", "Flying"],
+      "roles": ["utility-support", "special-attacker"],
+      "styleTags": ["support", "redirection", "fairy"],
+      "recommendedMoves": ["Air Slash", "Dazzling Gleam", "Follow Me", "Protect"],
+      "notes": "Supportive Fairy/Flying pick with pressure into Dragon and Fighting."
+    },
+    {
+      "name": "Snorlax",
+      "types": ["Normal"],
+      "roles": ["bulky-pivot", "win-condition"],
+      "styleTags": ["bulky", "setup", "slow"],
+      "recommendedMoves": ["Body Slam", "Heavy Slam", "Rest", "Protect"],
+      "notes": "Very bulky neutral sponge and slow win-condition candidate."
+    }
+  ],
+  "roleTargets": ["speed-control", "physical-breaker", "special-attacker", "bulky-pivot", "utility-support", "late-game-cleaner"]
+}
+

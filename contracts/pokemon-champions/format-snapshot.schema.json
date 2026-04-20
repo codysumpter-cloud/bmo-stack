@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bemore.dev/contracts/pokemon-champions/format-snapshot.schema.json",
+  "title": "Pokemon Champions Format Snapshot",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "formatId",
+    "checkedAt",
+    "sourceConfidence",
+    "battleMode",
+    "officialSources",
+    "secondarySources",
+    "season",
+    "regulation",
+    "legalPokemon",
+    "legalForms",
+    "legalMegas",
+    "legalItems",
+    "legalMoves",
+    "bannedElements",
+    "teamConstraints",
+    "metaNotes",
+    "topArchetypes",
+    "topThreats",
+    "uncertainties"
+  ],
+  "properties": {
+    "formatId": { "type": "string", "minLength": 1 },
+    "checkedAt": { "type": "string", "format": "date-time" },
+    "sourceConfidence": {
+      "type": "string",
+      "enum": ["official_only", "official_plus_curated", "mixed_with_uncertainty"]
+    },
+    "battleMode": { "type": "string", "enum": ["singles", "doubles"] },
+    "season": { "type": "string", "minLength": 1 },
+    "regulation": { "type": "string", "minLength": 1 },
+    "officialSources": {
+      "type": "array",
+      "items": { "$ref": "common.schema.json#/$defs/sourceRef" }
+    },
+    "secondarySources": {
+      "type": "array",
+      "items": { "$ref": "common.schema.json#/$defs/sourceRef" }
+    },
+    "legalPokemon": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "legalForms": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "legalMegas": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "legalItems": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "legalMoves": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "bannedElements": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "teamConstraints": { "type": "array", "items": { "type": "string" } },
+    "metaNotes": { "type": "array", "items": { "type": "string" } },
+    "topArchetypes": { "type": "array", "items": { "type": "string" } },
+    "topThreats": { "type": "array", "items": { "type": "string" } },
+    "uncertainties": { "type": "array", "items": { "type": "string" } }
+  }
+}

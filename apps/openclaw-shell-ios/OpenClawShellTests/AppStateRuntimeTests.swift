@@ -97,11 +97,33 @@ final class AppStateRuntimeTests: XCTestCase {
 
         XCTAssertEqual(appState.activeRouteModeLabel, "Direct cloud model route")
         XCTAssertTrue(appState.operatorSummary.contains("routed through OpenAI"))
-        XCTAssertTrue(appState.operatorSummary.contains("Workspace actions use the built-in OpenClaw runtime"))
+        XCTAssertTrue(appState.operatorSummary.contains("Workspace actions use the built-in BeMore runtime"))
         XCTAssertTrue(appState.routeHealthSummary.contains("Cloud chat is ready"))
     }
 
-    func testCloudSystemPromptDoesNotConfineAgentToAppOnly() {
+    func testCompactTabOrderAvoidsMoreTabNavigationTrap() {
+        let appState = AppState(engine: FakeLocalLLMEngine())
+
+        XCTAssertEqual(appState.compactTabOrder, [.missionControl, .chat, .buddy, .settings])
+        XCTAssertLessThanOrEqual(appState.compactTabOrder.count, 4)
+    }
+
+    func testOpenChatStoresReturnSurfaceAndLeaveChatRestoresIt() {
+        let appState = AppState(engine: FakeLocalLLMEngine())
+        appState.selectedTab = .buddy
+
+        appState.openChat(from: .buddy)
+
+        XCTAssertEqual(appState.selectedTab, .chat)
+        XCTAssertEqual(appState.chatReturnTab, .buddy)
+
+        appState.leaveChat()
+
+        XCTAssertEqual(appState.selectedTab, .buddy)
+        XCTAssertNil(appState.chatReturnTab)
+    }
+
+    func testCloudSystemPromptLeadsWithCompanionValueBeforeOperatorDepth() {
         var config = StackConfig.default
         config.stackName = "BeMoreAgent"
         config.gatewayURL = "https://gateway.example.test"
@@ -114,11 +136,31 @@ final class AppStateRuntimeTests: XCTestCase {
             routeLabel: "OpenAI using gpt-4.1"
         )
 
-        XCTAssertTrue(prompt.contains("not confined to the iOS app"))
-        XCTAssertTrue(prompt.contains("full OpenClaw/operator context"))
-        XCTAssertTrue(prompt.contains("Workspace Runtime receipts"))
+        XCTAssertTrue(prompt.contains("Buddy-first companion"))
+        XCTAssertTrue(prompt.contains("Start with everyday help"))
+        XCTAssertTrue(prompt.contains("Companion mode helps decide what matters"))
+        XCTAssertTrue(prompt.contains("Operator mode handles technical execution"))
+        XCTAssertTrue(prompt.contains("repo work"))
+        XCTAssertTrue(prompt.contains("confirmed BeMore Workspace Runtime action"))
         XCTAssertTrue(prompt.contains("Do not reveal hidden reasoning"))
         XCTAssertFalse(prompt.contains("only perform functions inside the app"))
+        XCTAssertFalse(prompt.contains("Canonical artifacts"))
+    }
+
+    func testBuddyIntroCopyAnswersCapabilitiesWithTrainingBeforeRuntimeMechanics() {
+        let reply = BuddyIntroCopy.response(
+            for: "What can you do for me and how can I make you better?",
+            buddyName: "Prism"
+        )
+
+        XCTAssertNotNil(reply)
+        XCTAssertTrue(reply!.contains("planning the day"))
+        XCTAssertTrue(reply!.contains("teaching preferences"))
+        XCTAssertTrue(reply!.contains("Skills and memory are how I grow"))
+        XCTAssertTrue(reply!.contains("operator mode"))
+        XCTAssertTrue(reply!.contains("Start with one thing"))
+        XCTAssertFalse(reply!.localizedCaseInsensitiveContains("canonical artifacts"))
+        XCTAssertFalse(reply!.localizedCaseInsensitiveContains("receipts"))
     }
 
     func testAgentReplySanitizerRemovesThoughtBlocks() {
@@ -136,10 +178,10 @@ final class AppStateRuntimeTests: XCTestCase {
         XCTAssertFalse(cleaned.localizedCaseInsensitiveContains("private chain"))
     }
 
-    func testWorkspaceBootstrapCreatesCanonicalOpenClawArtifacts() throws {
+    func testWorkspaceBootstrapCreatesCanonicalBeMoreArtifacts() throws {
         let runtime = OpenClawWorkspaceRuntime()
         var config = StackConfig.default
-        config.stackName = "OpenClaw"
+        config.stackName = "BeMore"
         config.role = "operator"
         config.goal = "build a real workspace"
 
@@ -153,7 +195,7 @@ final class AppStateRuntimeTests: XCTestCase {
         XCTAssertTrue(soul.contains("one agent, one workspace"))
         let skillsMarkdown = try runtime.readFile("skills.md")
         XCTAssertTrue(skillsMarkdown.contains("## Installed skills"))
-        XCTAssertTrue(skillsMarkdown.contains("## ClawHub starters"))
+        XCTAssertTrue(skillsMarkdown.contains("## Buddy Skill Hub starters"))
         XCTAssertTrue(skillsMarkdown.contains("File Crafter"))
         XCTAssertTrue(skillsMarkdown.contains("Chat should not treat old skill artifacts as active context"))
         XCTAssertTrue(runtime.skills.contains(where: { $0.id == BuiltInSkillRegistry.pokemonTeamBuilderID }))
@@ -252,7 +294,12 @@ private final class FakeLocalLLMEngine: LocalLLMEngine {
         isRuntimeReady = config != nil && supportsLocalModels
     }
 
-    func generate(prompt: String, fileContexts: [WorkspaceFile], chatHistory: [ChatMessage]) async throws -> String {
+    func generate(
+        prompt: String,
+        fileContexts: [WorkspaceFile],
+        chatHistory: [ChatMessage],
+        activeStack: CompiledStack?
+    ) async throws -> String {
         "ok"
     }
 }

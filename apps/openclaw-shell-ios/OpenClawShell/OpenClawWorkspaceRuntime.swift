@@ -28,6 +28,7 @@ enum OpenClawActionKind: String, Codable, CaseIterable, Hashable {
     case artifactRegenerate = "artifact.regenerate"
     case memoryRefresh = "memory.refresh"
     case sandboxRun = "sandbox.run"
+    case buddyMutation = "buddy.mutation"
     case workspaceWrite = "workspace.write"
     case workspaceRead = "workspace.read"
 }
@@ -167,7 +168,7 @@ enum BuiltInSkillRegistry {
             SkillManifest(
                 id: pokemonTeamBuilderID,
                 name: "Pokemon Team Builder",
-                description: "Draft, analyze, save, and export structured Pokemon teams as OpenClaw artifacts.",
+                description: "Draft, analyze, save, and export structured Pokemon teams as BeMore workspace artifacts.",
                 version: "1.0.0",
                 category: "Games",
                 tags: ["pokemon", "team-builder", "strategy"],
@@ -175,8 +176,11 @@ enum BuiltInSkillRegistry {
                 inputSchema: [
                     "format": "string",
                     "strategy": "string",
-                    "mustInclude": "comma-separated string",
-                    "avoid": "comma-separated string"
+                    "summary": "string",
+                    "members": "JSON array of PokemonTeamMember",
+                    "battleStrategy": "JSON array of strings",
+                    "weaknesses": "JSON array of strings",
+                    "suggestions": "JSON array of strings"
                 ],
                 outputSchema: [
                     "teamMembers": "array",
@@ -190,7 +194,7 @@ enum BuiltInSkillRegistry {
             SkillManifest(
                 id: artifactRebuilderID,
                 name: "Artifact Rebuilder",
-                description: "Regenerate canonical soul, user, memory, session, and skills artifacts from current OpenClaw state.",
+                description: "Regenerate canonical soul, user, memory, session, and skills artifacts from current BeMore workspace state.",
                 version: "1.0.0",
                 category: "System",
                 tags: ["artifacts", "memory", "workspace"],
@@ -224,7 +228,7 @@ enum ClawHubCatalog {
         ClawHubSkillTemplate(
             id: "clawhub-skill-composer",
             name: "Skill Composer",
-            description: "Draft and evolve custom OpenClaw skills as manifest-backed workspace artifacts.",
+            description: "Draft and evolve custom BeMore skills as manifest-backed workspace artifacts.",
             category: "Authoring",
             tags: ["skills", "authoring", "clawhub"],
             starterMarkdown: """
@@ -409,7 +413,7 @@ final class OpenClawWorkspaceRuntime: ObservableObject {
         ensureStateStores(config: config, preferences: preferences, routeSummary: routeSummary)
         regenerateCanonicalArtifactsIfMissing(config: config, preferences: preferences, routeSummary: routeSummary)
         refreshMetadata()
-        appendEvent(type: "workspace.bootstrapped", message: "OpenClaw workspace runtime bootstrapped.")
+        appendEvent(type: "workspace.bootstrapped", message: "BeMore workspace runtime bootstrapped.")
     }
 
     func readFile(_ path: String) throws -> String {
@@ -442,6 +446,59 @@ final class OpenClawWorkspaceRuntime: ObservableObject {
             return finish(action, status: .persisted, summary: "Deleted \(path)", output: ["path": path], artifacts: [path])
         } catch {
             return finish(action, status: .failed, summary: "Could not delete \(path)", error: error.localizedDescription)
+        }
+    }
+
+    func persistBuddyBundle(_ bundle: BuddyPersistenceBundle, source: String = "buddy.runtime") -> OpenClawReceipt {
+        let action = begin(kind: .buddyMutation, source: source, title: bundle.actionTitle, input: ["summary": bundle.summary])
+
+        do {
+            let stateURL = Paths.stateDirectory.appendingPathComponent("buddy-instances.json")
+            try fileManager.createDirectory(at: stateURL.deletingLastPathComponent(), withIntermediateDirectories: true)
+            try encoder.encode(bundle.libraryState).write(to: stateURL, options: [.atomic])
+
+            let eventURL = try resolve("state/buddy-runtime-events.json")
+            try fileManager.createDirectory(at: eventURL.deletingLastPathComponent(), withIntermediateDirectories: true)
+            try encoder.encode(bundle.eventLog).write(to: eventURL, options: [.atomic])
+
+            if let activeMarkdown = bundle.activeBuddyMarkdown {
+                let buddyURL = try resolve("buddy.md")
+                try activeMarkdown.write(to: buddyURL, atomically: true, encoding: .utf8)
+            } else {
+                let buddyURL = try resolve("buddy.md")
+                if fileManager.fileExists(atPath: buddyURL.path) {
+                    try fileManager.removeItem(at: buddyURL)
+                }
+            }
+
+            let buddiesURL = try resolve("buddies.md")
+            try bundle.rosterMarkdown.write(to: buddiesURL, atomically: true, encoding: .utf8)
+            appendEvent(
+                type: "buddy.state.persisted",
+                message: bundle.summary,
+                metadata: [
+                    "activeBuddyInstanceId": bundle.libraryState.activeBuddyInstanceId ?? "",
+                    "installedCount": String(bundle.libraryState.instances.count)
+                ]
+            )
+
+            var artifacts = ["state/buddy-instances.json", "state/buddy-runtime-events.json", "buddies.md"]
+            if bundle.activeBuddyMarkdown != nil {
+                artifacts.append("buddy.md")
+            }
+            return finish(
+                action,
+                status: .persisted,
+                summary: bundle.summary,
+                output: [
+                    "stateFile": stateURL.path,
+                    "activeBuddyInstanceId": bundle.libraryState.activeBuddyInstanceId ?? "",
+                    "installedCount": String(bundle.libraryState.instances.count)
+                ],
+                artifacts: artifacts
+            )
+        } catch {
+            return finish(action, status: .failed, summary: "Could not persist Buddy state", error: error.localizedDescription)
         }
     }
 
@@ -545,8 +602,8 @@ final class OpenClawWorkspaceRuntime: ObservableObject {
             let manifestData = try encoder.encode(manifest)
             _ = try writeFile("\(folder)/manifest.json", content: String(data: manifestData, encoding: .utf8) ?? "{}", source: "clawhub")
             refreshMetadata()
-            appendEvent(type: "skill.installed", message: "Installed \(template.name) from ClawHub.", metadata: ["skillId": template.id])
-            return finish(action, status: .persisted, summary: "Installed \(template.name) from ClawHub", output: ["skillId": template.id], artifacts: ["registry/skills.json", "\(folder)/README.md", "\(folder)/manifest.json"])
+            appendEvent(type: "skill.installed", message: "Installed \(template.name) from Buddy Skill Hub.", metadata: ["skillId": template.id])
+            return finish(action, status: .persisted, summary: "Installed \(template.name) from Buddy Skill Hub", output: ["skillId": template.id], artifacts: ["registry/skills.json", "\(folder)/README.md", "\(folder)/manifest.json"])
         } catch {
             return finish(action, status: .failed, summary: "Could not install \(template.name)", error: error.localizedDescription)
         }
@@ -600,7 +657,7 @@ final class OpenClawWorkspaceRuntime: ObservableObject {
                 status: .failed,
                 summary: "Arbitrary shell execution is unavailable in the iOS sandbox",
                 output: ["exitCode": "127"],
-                error: "Unsupported command '\(op)'. Build 17 exposes a controlled OpenClaw command surface; TODO: connect a hardened process runner where platform policy allows it."
+                error: "Unsupported command '\(op)'. iPhone uses a controlled BeMore command surface; pair with Mac for full process execution."
             )
         }
     }
@@ -616,11 +673,23 @@ final class OpenClawWorkspaceRuntime: ObservableObject {
         let canonical = artifacts.filter { canonicalArtifactPaths.contains($0.path) }
         let failed = recentActions.filter { $0.status == .failed }
         let missing = canonical.filter { $0.freshness == .missing }.map(\.path)
+        let buddyState = loadBuddyLibraryState()
+        let buddyArtifactPaths = ["buddy.md", "buddies.md", "state/buddy-runtime-events.json"]
+        let missingBuddyArtifacts = buddyArtifactPaths.filter { path in
+            fileManager.fileExists(atPath: rootURL.appendingPathComponent(path).path) == false
+        }
         var suggestions: [String] = []
         if missing.isEmpty {
             suggestions.append("Open Skills and run Pokemon Team Builder to create a saved team artifact.")
         } else {
             suggestions.append("Regenerate missing artifacts: \(missing.joined(separator: ", ")).")
+        }
+        if buddyState.instances.isEmpty {
+            suggestions.insert("Install a Council Starter Pack Buddy from the Buddy tab.", at: 0)
+        } else if buddyState.activeBuddyInstanceId == nil {
+            suggestions.insert("Choose one installed Buddy as the active primary Buddy.", at: 0)
+        } else if missingBuddyArtifacts.isEmpty == false {
+            suggestions.insert("Re-run a Buddy action to refresh \(missingBuddyArtifacts.joined(separator: ", ")).", at: 0)
         }
         if failed.isEmpty == false {
             suggestions.append("Review failed action receipts before trusting generated summaries.")
@@ -635,6 +704,8 @@ final class OpenClawWorkspaceRuntime: ObservableObject {
             runtimeAvailable: runtimeAvailable,
             memoryHealthy: missing.isEmpty && fileManager.fileExists(atPath: rootURL.appendingPathComponent("state/facts.json").path),
             artifacts: canonical,
+            installedBuddyCount: buddyState.instances.count,
+            hasActiveBuddy: buddyState.activeBuddyInstanceId != nil,
             registeredSkillCount: skills.count,
             recentChanges: Array(recentEvents.prefix(5)),
             failedActions: Array(failed.prefix(5)),
@@ -678,7 +749,7 @@ final class OpenClawWorkspaceRuntime: ObservableObject {
         }
         let latestLog = rootURL.appendingPathComponent("logs/latest-actions.log")
         if !fileManager.fileExists(atPath: latestLog.path) {
-            try? "OpenClaw action log initialized.\n".write(to: latestLog, atomically: true, encoding: .utf8)
+            try? "BeMore action log initialized.\n".write(to: latestLog, atomically: true, encoding: .utf8)
         }
     }
 
@@ -686,8 +757,8 @@ final class OpenClawWorkspaceRuntime: ObservableObject {
         writeJSON([
             "identity": [preferences.preferredName.nilIfBlank ?? config.operatorName.nilIfBlank ?? "operator"],
             "project": [config.stackName],
-            "workflow": [config.goal.nilIfBlank ?? "Build and operate an OpenClaw workspace"],
-            "tooling": ["OpenClaw iOS workspace runtime", routeSummary],
+            "workflow": [config.goal.nilIfBlank ?? "Build and operate a BeMore workspace"],
+            "tooling": ["BeMore iOS workspace runtime", routeSummary],
             "game": ["Pokemon Team Builder is a registered skill"]
         ], to: rootURL.appendingPathComponent("state/facts.json"))
 
@@ -733,7 +804,7 @@ final class OpenClawWorkspaceRuntime: ObservableObject {
             "soul.md": """
             # soul.md
 
-            OpenClaw is one agent, one workspace, one sandbox, and one capability surface.
+            BeMore is one agent, one workspace, one sandbox, and one capability surface.
 
             ## Operating posture
             - Prefer confirmed runtime receipts over fluent claims.
@@ -765,7 +836,7 @@ final class OpenClawWorkspaceRuntime: ObservableObject {
             # memory.md
 
             ## Durable facts
-            - OpenClaw should feel like a real agent workspace, not a chat-only shell.
+            - BeMore should feel like a real agent workspace, not a chat-only shell.
             - Canonical artifacts live under `.openclaw/`.
             - Pokemon Team Builder is a first-class skill and saves artifacts.
             - Completion language must be receipt-aware.
@@ -791,14 +862,14 @@ final class OpenClawWorkspaceRuntime: ObservableObject {
             "skills.md": """
             # skills.md
 
-            Skills are registry-backed and can be extended through ClawHub installs or user-authored manifests.
+            Skills are registry-backed and can be extended through Buddy Skill Hub installs or user-authored manifests.
 
             ## Installed skills
             \(skills.map { skill in
                 "- **\(skill.name)** (`\(skill.id)`): \(skill.description)\n  - Category: \(skill.category)\n  - Entrypoint: \(skill.entrypoint)\n  - Permissions: \(skill.permissions.joined(separator: ", "))"
             }.joined(separator: "\n"))
 
-            ## ClawHub starters
+            ## Buddy Skill Hub starters
             \(ClawHubCatalog.templates.map { "- **\($0.name)** (`\($0.id)`): \($0.description)" }.joined(separator: "\n"))
 
             ## Skill authoring rules
@@ -813,69 +884,56 @@ final class OpenClawWorkspaceRuntime: ObservableObject {
 
     private func runPokemonTeamBuilder(input: [String: String], manifest: SkillManifest) -> OpenClawReceipt {
         let action = begin(kind: .skillRun, source: "skill.\(manifest.id)", title: manifest.name, input: input)
-        let format = input["format"].nilIfBlank ?? "Singles"
-        let strategy = input["strategy"].nilIfBlank ?? "balanced offense"
-        let mustInclude = splitList(input["mustInclude"])
-        let avoid = Set(splitList(input["avoid"]).map { $0.lowercased() })
-        let candidates = ["Pikachu", "Charizard", "Venusaur", "Blastoise", "Gengar", "Dragonite", "Lucario", "Garchomp", "Rotom-Wash", "Corviknight", "Togekiss", "Snorlax"]
-        let roles = ["Lead / speed control", "Physical breaker", "Special attacker", "Defensive pivot", "Utility support", "Late-game cleaner"]
-        var selected: [String] = []
-        for name in mustInclude where !avoid.contains(name.lowercased()) {
-            if !selected.contains(name) { selected.append(name) }
-        }
-        for candidate in candidates where selected.count < 6 {
-            guard !avoid.contains(candidate.lowercased()), !selected.contains(candidate) else { continue }
-            selected.append(candidate)
-        }
-        let team = selected.prefix(6).enumerated().map { index, name in
-            let role = roles[index % roles.count]
-            return PokemonTeamMember(
-                name: name,
-                role: role,
-                notes: "\(format) pick for \(strategy).",
-                reason: selectionReason(for: name, role: role, strategy: strategy, mustInclude: mustInclude),
-                battlePlan: battlePlan(for: name, role: role, format: format, strategy: strategy)
-            )
-        }
-        let battleStrategy = [
-            "Open with \(team.first?.name ?? "the lead") to establish \(team.first?.role.lowercased() ?? "tempo").",
-            "Use pivots and utility picks to protect the main breakers until the opponent's answers are weakened.",
-            "Preserve \(team.last?.name ?? "the cleaner") for the final turn cycle instead of trading it early."
-        ]
-        let weaknesses = [
-            "Validate exact legality, moves, items, and EVs against the target format before competitive use.",
-            "This MVP uses curated role coverage rather than a full damage calculator or matchup database."
-        ]
-        let suggestions = [
-            "Add exact movesets after choosing the battle format.",
-            "Run a future simulator-backed pass for type chart and usage data."
-        ]
-        let output = PokemonTeamOutput(
-            teamMembers: Array(team),
-            roleBreakdown: team.map { "\($0.name): \($0.role)" },
-            selectionRationale: team.map { "\($0.name): \($0.reason)" },
-            battleStrategy: battleStrategy,
-            summary: "Drafted a \(format) team around \(strategy).",
-            weaknesses: weaknesses,
-            suggestions: suggestions,
-            artifactPath: nil
-        )
-
+        
         do {
+            let format = input["format"].nilIfBlank ?? "Singles"
+            let strategy = input["strategy"].nilIfBlank ?? "Balanced"
+            let summary = input["summary"].nilIfBlank ?? "Drafted Pokemon team."
+            
+            guard let membersString = input["members"],
+                  let membersData = membersString.data(using: .utf8) else {
+                throw NSError(domain: "PokemonTeamBuilder", code: 1, userInfo: [NSLocalizedDescriptionKey: "Missing or invalid 'members' JSON input."])
+            }
+            let members = try decoder.decode([PokemonTeamMember].self, from: membersData)
+            
+            let battleStrategyString = input["battleStrategy"] ?? "[]"
+            let battleStrategy = try decoder.decode([String].self, from: battleStrategyString.data(using: .utf8) ?? Data())
+            
+            let weaknessesString = input["weaknesses"] ?? "[]"
+            let weaknesses = try decoder.decode([String].self, from: weaknessesString.data(using: .utf8) ?? Data())
+            
+            let suggestionsString = input["suggestions"] ?? "[]"
+            let suggestions = try decoder.decode([String].self, from: suggestionsString.data(using: .utf8) ?? Data())
+            
+            let output = PokemonTeamOutput(
+                teamMembers: members,
+                roleBreakdown: members.map { "\($0.name): \($0.role)" },
+                selectionRationale: members.map { "\($0.name): \($0.reason)" },
+                battleStrategy: battleStrategy,
+                summary: summary,
+                weaknesses: weaknesses,
+                suggestions: suggestions,
+                artifactPath: nil
+            )
+            
             let slug = safeSlug([format, strategy, String(Int(Date().timeIntervalSince1970))].joined(separator: "-"))
             let jsonPath = "skills/pokemon-team-builder/teams/\(slug).json"
             let mdPath = "skills/pokemon-team-builder/teams/\(slug).md"
+            
             var saved = output
             saved.artifactPath = mdPath
+            
             let jsonData = try encoder.encode(saved)
             try jsonData.write(to: resolve(jsonPath), options: [.atomic])
             try pokemonMarkdown(output: saved, format: format, strategy: strategy).write(to: resolve(mdPath), atomically: true, encoding: .utf8)
+            
             appendEvent(type: "skill.completed", message: "Pokemon Team Builder saved \(mdPath).", metadata: ["skillId": manifest.id, "artifact": mdPath])
             refreshMetadata()
+            
             return finish(
                 action,
                 status: .persisted,
-                summary: "Pokemon team drafted and saved",
+                summary: "Pokemon team persisted to workspace",
                 output: [
                     "summary": saved.summary,
                     "members": saved.teamMembers.map(\.name).joined(separator: ", "),
@@ -885,7 +943,7 @@ final class OpenClawWorkspaceRuntime: ObservableObject {
                 artifacts: [jsonPath, mdPath]
             )
         } catch {
-            return finish(action, status: .failed, summary: "Pokemon team draft failed to save", error: error.localizedDescription)
+            return finish(action, status: .failed, summary: "Pokemon team persistence failed", error: error.localizedDescription)
         }
     }
 
@@ -911,7 +969,7 @@ final class OpenClawWorkspaceRuntime: ObservableObject {
         - Status: completed with local workspace receipt
 
         ## Result
-        This ClawHub skill is installed and callable through the generic skill runner. Connect deeper domain logic by editing `skills/\(manifest.id)/README.md` and its manifest.
+        This Buddy Skill Hub skill is installed and callable through the generic skill runner. Connect deeper domain logic by editing `skills/\(manifest.id)/README.md` and its manifest.
         """
         do {
             let url = try resolve(path)
@@ -962,22 +1020,7 @@ final class OpenClawWorkspaceRuntime: ObservableObject {
         return "Chosen to cover \(role.lowercased()) while supporting the \(strategy) plan."
     }
 
-    private func battlePlan(for name: String, role: String, format: String, strategy: String) -> String {
-        switch role {
-        case "Lead / speed control":
-            return "Start or enter early, force tempo, and create the first safe switch for the \(strategy) core."
-        case "Physical breaker":
-            return "Pressure special walls and punish passive turns so the cleaner has an easier endgame."
-        case "Special attacker":
-            return "Attack from the opposite damage axis and exploit defensive pivots that wall the physical breaker."
-        case "Defensive pivot":
-            return "Absorb risky hits, scout the opponent's plan, and bring attackers in without spending momentum."
-        case "Utility support":
-            return "Patch matchup gaps with status, redirection, hazard control, screens, or emergency disruption."
-        default:
-            return "Stay healthy until the opponent's checks are weakened, then close the \(format.lowercased()) game."
-        }
-    }
+
 
     private func begin(kind: OpenClawActionKind, source: String, title: String, input: [String: String]) -> OpenClawActionRecord {
         let action = OpenClawActionRecord(id: UUID(), kind: kind, source: source, title: title, status: .queued, createdAt: .now, updatedAt: .now, input: input, output: [:], error: nil, artifacts: [], logs: [])
@@ -1130,6 +1173,15 @@ final class OpenClawWorkspaceRuntime: ObservableObject {
             return partial + String(character)
         }.trimmingCharacters(in: CharacterSet(charactersIn: "-"))
     }
+
+    private func loadBuddyLibraryState() -> BuddyLibraryState {
+        let url = Paths.stateDirectory.appendingPathComponent("buddy-instances.json")
+        guard let data = try? Data(contentsOf: url),
+              let state = try? decoder.decode(BuddyLibraryState.self, from: data) else {
+            return BuddyLibraryState()
+        }
+        return state
+    }
 }
 
 struct BuddyRuntimeStatus {
@@ -1138,6 +1190,8 @@ struct BuddyRuntimeStatus {
     var runtimeAvailable: Bool
     var memoryHealthy: Bool
     var artifacts: [OpenClawArtifactMetadata]
+    var installedBuddyCount: Int
+    var hasActiveBuddy: Bool
     var registeredSkillCount: Int
     var recentChanges: [OpenClawEventRecord]
     var failedActions: [OpenClawActionRecord]

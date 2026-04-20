@@ -1,0 +1,74 @@
+openapi: 3.1.0
+info:
+  title: BeMore Pokemon Champions Team Builder API
+  version: 0.1.0
+  description: |
+    Contract-first API spec for the BeMore Pokemon Champions team builder.
+    Legality and optimization are deterministic and snapshot-backed.
+    Live-source team audit is official-first and must label secondary or unconfirmed data.
+servers:
+  - url: https://api.bemore.dev
+paths:
+  /v1/pokemon-champions/format-snapshots/{snapshotId}:
+    get:
+      operationId: getPokemonChampionsFormatSnapshot
+      summary: Fetch a versioned format snapshot used by the builder.
+      parameters:
+        - name: snapshotId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Format snapshot
+          content:
+            application/json:
+              schema:
+                $ref: ../../contracts/pokemon-champions/format-snapshot.schema.json
+  /v1/pokemon-champions/team-builder/build:
+    post:
+      operationId: buildPokemonChampionsTeam
+      summary: Build a best-fit legal team from a published snapshot.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ../../contracts/pokemon-champions/team-build-request.schema.json
+      responses:
+        '200':
+          description: Team build result
+          content:
+            application/json:
+              schema:
+                $ref: ../../contracts/pokemon-champions/team-build-response.schema.json
+        '422':
+          description: Request references illegal or unavailable content in the selected snapshot.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  warnings:
+                    type: array
+                    items:
+                      $ref: ../../contracts/pokemon-champions/common.schema.json#/$defs/warning
+  /v1/pokemon-champions/team-builder/audit:
+    post:
+      operationId: auditPokemonChampionsTeams
+      summary: Audit pasted teams against the latest verified official-first Pokemon Champions data.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ../../contracts/pokemon-champions/team-audit-request.schema.json
+      responses:
+        '200':
+          description: Team audit result
+          content:
+            application/json:
+              schema:
+                $ref: ../../contracts/pokemon-champions/team-audit-response.schema.json
+components: {}

@@ -20,12 +20,16 @@ struct SettingsView: View {
                     }
                     .listRowBackground(BMOTheme.backgroundCard)
 
-                    Button("Reconfigure Agent") {
+                    Button("Restart Onboarding") {
                         appState.resetOnboardingAndReturnToSetup()
                         dismiss()
                     }
                     .foregroundColor(BMOTheme.accent)
                     .listRowBackground(BMOTheme.backgroundCard)
+                    Text("Run the Buddy-first onboarding flow again without deleting your existing workspace data.")
+                        .font(.caption)
+                        .foregroundColor(BMOTheme.textSecondary)
+                        .listRowBackground(BMOTheme.backgroundCard)
                 }
 
                 Section("Chat Runtime") {

@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bemore.dev/contracts/pokemon-champions/team-audit-request.schema.json",
+  "title": "Pokemon Champions Team Audit Request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["checkedAt", "strictOfficialFirst", "teams"],
+  "properties": {
+    "checkedAt": { "type": "string", "format": "date-time" },
+    "strictOfficialFirst": { "type": "boolean", "const": true },
+    "teams": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["teamName", "format", "rawPaste"],
+        "properties": {
+          "teamName": { "type": "string", "minLength": 1 },
+          "format": { "type": "string", "enum": ["singles", "doubles"] },
+          "rawPaste": { "type": "string", "minLength": 1 },
+          "preserveIdentity": { "type": "boolean", "default": true },
+          "styleNotes": { "type": "string" }
+        }
+      }
+    }
+  }
+}

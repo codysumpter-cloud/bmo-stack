@@ -1,0 +1,183 @@
+{
+  "currentFormatSnapshot": {
+    "dateChecked": "2026-04-16T12:00:00Z",
+    "sourcesUsed": [
+      {
+        "label": "Pokemon Champions gameplay",
+        "url": "https://champions.pokemon.com/en-gb/gameplay",
+        "tier": "official"
+      },
+      {
+        "label": "Play! Pokemon VGC transition page",
+        "url": "https://www.pokemon.com/uk/pokemon-news/play-pokemon-competitions-transition-to-pokemon-champions-on-april-and-may-2026",
+        "tier": "official"
+      },
+      {
+        "label": "Current team examples and strategy notes",
+        "url": "https://example.invalid/local-fixture",
+        "tier": "secondary",
+        "notes": "Local seeded example derived from uploaded team fixture text."
+      }
+    ],
+    "activeRegulation": "unconfirmed-public-regulation-label",
+    "keyLegalityNotes": [
+      "Mega Evolution is officially confirmed for the first Ranked ruleset.",
+      "Unsupported or speculative Mega forms must be treated as illegal until verified."
+    ],
+    "keyMetaNotes": [
+      "Doubles has the strongest current tournament signal.",
+      "Builder and audit output must preserve fun identity while replacing unsupported content."
+    ],
+    "confidence": "medium",
+    "unresolvedUncertainties": [
+      "The current public official pages do not fully expose a complete live legality table.",
+      "Exact live regulation label remains secondary or unconfirmed unless surfaced by official pages."
+    ]
+  },
+  "teamAudits": [
+    {
+      "teamName": "Balanced Pivot Offense",
+      "format": "singles",
+      "originalConceptSummary": "A stable Singles pivot offense shell that preserves weird Hisuian Zoroark pressure without overloading on Ghosts.",
+      "legalityAudit": [
+        "Core species appear plausible for Champions-style roster use but exact live legality remains unconfirmed in this seeded example.",
+        "No speculative custom Mega is present in the original concept."
+      ],
+      "structuralDiagnosis": {
+        "roleCompression": "Good overall. Palafin, Bellibolt, and Garganacl naturally cover pivoting, glue, and long-game progress.",
+        "speedControl": "Mostly limited to raw Speed tiers and Jet Punch; no dedicated teamwide speed control.",
+        "defensiveBackbone": "Bellibolt plus Garganacl forms the real backbone.",
+        "pivoting": "Strong. Flip Turn, Volt Switch, and U-turn keep tempo flowing.",
+        "winConditions": "Palafin cleanup or Dragonite endgame after chip.",
+        "matchupWeaknesses": ["Fast Electric offense", "Dedicated status stall"],
+        "redundancyOrAntiSynergy": ["Can become too reactive if Zoroark is spent early."]
+      },
+      "keepChangeDecisions": {
+        "stays": ["Palafin", "Bellibolt", "Garganacl", "Dragonite"],
+        "changes": ["Tune Hisuian Zoroark coverage", "Keep the pivot shell but tighten the cleaner plan"],
+        "why": ["The original engine is already coherent.", "The goal is to preserve identity while removing dead overlap."]
+      },
+      "refinedTeam": {
+        "name": "Balanced Pivot Offense",
+        "format": "singles",
+        "archetype": "balanced pivot offense",
+        "roster": [
+          {
+            "species": "Palafin",
+            "ability": "Unconfirmed",
+            "item": "Unconfirmed",
+            "nature": "Unconfirmed",
+            "moves": ["Jet Punch", "Wave Crash", "Flip Turn", "Close Combat"],
+            "roleTag": "pivot"
+          },
+          {
+            "species": "Bellibolt",
+            "ability": "Unconfirmed",
+            "item": "Unconfirmed",
+            "nature": "Unconfirmed",
+            "moves": ["Thunderbolt", "Volt Switch", "Acid Spray", "Slack Off"],
+            "roleTag": "glue"
+          },
+          {
+            "species": "Garganacl",
+            "ability": "Unconfirmed",
+            "item": "Unconfirmed",
+            "nature": "Unconfirmed",
+            "moves": ["Salt Cure", "Recover", "Body Press", "Stealth Rock"],
+            "roleTag": "rocker"
+          },
+          {
+            "species": "Hisuian Zoroark",
+            "ability": "Unconfirmed",
+            "item": "Unconfirmed",
+            "nature": "Unconfirmed",
+            "moves": ["Nasty Plot", "Shadow Ball", "Flamethrower", "Grass Knot"],
+            "roleTag": "breaker"
+          },
+          {
+            "species": "Meowscarada",
+            "ability": "Unconfirmed",
+            "item": "Unconfirmed",
+            "nature": "Unconfirmed",
+            "moves": ["Flower Trick", "Knock Off", "U-turn", "Triple Axel"],
+            "roleTag": "pivot"
+          },
+          {
+            "species": "Dragonite",
+            "ability": "Unconfirmed",
+            "item": "Unconfirmed",
+            "nature": "Unconfirmed",
+            "moves": ["Dragon Dance", "Extreme Speed", "Earthquake", "Dual Wingbeat"],
+            "roleTag": "wincon"
+          }
+        ],
+        "whyChosen": [
+          "Keeps the original stable shell intact.",
+          "Preserves weird pressure without turning the team into generic sludge."
+        ]
+      },
+      "whyBetter": "The refined version keeps the team’s identity but makes the cleaner routes and pivot shell more explicit.",
+      "pilotNotes": {
+        "bestLeads": ["Palafin", "Bellibolt", "Garganacl"],
+        "midgamePlan": ["Pivot early", "Force Salt Cure chip", "Hide Zoroark until disguise matters"],
+        "endgameRoutes": ["Palafin cleanup", "Dragonite endgame"]
+      },
+      "threatChecklist": {
+        "stillHates": ["Fast Electric offense", "Hard status stall"],
+        "playAround": ["Preserve Palafin health", "Do not reveal Zoroark too early"]
+      },
+      "biggestImprovements": [
+        "Cleaner pivot shell",
+        "Better defined win conditions",
+        "Preserved weird identity without overloading Ghost overlap"
+      ],
+      "biggestRemainingRisks": [
+        "No explicit speed control button",
+        "Electric pressure can still stress the shell",
+        "Exact live legality remains snapshot-dependent"
+      ],
+      "easierAlternativeBuild": {
+        "name": "Safer Pivot Offense",
+        "format": "singles",
+        "roster": [
+          {
+            "species": "Palafin",
+            "ability": "Unconfirmed",
+            "item": "Unconfirmed",
+            "nature": "Unconfirmed",
+            "moves": ["Jet Punch", "Wave Crash", "Flip Turn", "Close Combat"],
+            "roleTag": "pivot"
+          }
+        ]
+      }
+    }
+  ],
+  "ranking": {
+    "bestOverall": "Balanced Pivot Offense",
+    "bestForConsistentPlay": "Balanced Pivot Offense",
+    "bestDoublesBuild": "Mega Scovillain Room Balance",
+    "mostFunWhileStillReal": "Snow Pivot Brawl",
+    "justifications": [
+      "Balanced Pivot Offense is the safest seeded example.",
+      "Mega Scovillain Room Balance is the clearest tournament-shaped Doubles shell if the Mega is verified legal.",
+      "Snow Pivot Brawl is the strangest but most stylish option."
+    ]
+  },
+  "repeatableFramework": {
+    "whatChangedFromOriginal": [
+      "Illegal or speculative content must be flagged and replaced.",
+      "Role clarity and matchup plans were made explicit."
+    ],
+    "howToRerunNextMonth": [
+      "Check the latest official Champions pages first.",
+      "Refresh the snapshot before rebuilding or re-auditing teams."
+    ],
+    "futureChecklist": [
+      "Verify legality first.",
+      "Check role coverage.",
+      "Check speed control.",
+      "Flag unsupported Megas immediately.",
+      "Preserve team identity where possible."
+    ]
+  }
+}

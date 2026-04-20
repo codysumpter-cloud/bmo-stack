@@ -2,12 +2,15 @@ import SwiftUI
 
 struct ChatView: View {
     @EnvironmentObject private var appState: AppState
+    @ObservedObject var store: BuddyProfileStore
     @State private var prompt = ""
     @FocusState private var isInputFocused: Bool
 
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
+                buddyChatHeader
+
                 ScrollViewReader { proxy in
                     ScrollView {
                         LazyVStack(spacing: 12) {
@@ -58,8 +61,16 @@ struct ChatView: View {
             .background(BMOTheme.backgroundPrimary)
             .navigationTitle("")
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        appState.leaveChat()
+                    } label: {
+                        Label(appState.chatReturnTab == nil ? "Home" : "Back", systemImage: "chevron.left")
+                            .foregroundColor(BMOTheme.textSecondary)
+                    }
+                }
                 ToolbarItem(placement: .principal) {
-                    Text("Chat")
+                    Text(store.activeBuddy?.displayName ?? "Buddy Chat")
                         .font(.headline)
                         .foregroundColor(BMOTheme.textPrimary)
                 }
@@ -85,8 +96,33 @@ struct ChatView: View {
             }
             .onAppear {
                 appState.workspaceRuntime.refreshMetadata()
+                store.load(for: appState.stackConfig)
             }
         }
+    }
+
+    private var buddyChatHeader: some View {
+        HStack(alignment: .center, spacing: 12) {
+            BuddyAsciiView(buddy: store.activeBuddy, template: store.activeBuddy.flatMap { store.contracts?.templateForInstance($0) }, mood: buddyMood, compact: true)
+                .frame(width: 126)
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Chatting with \(store.activeBuddy?.displayName ?? "your Buddy")")
+                    .font(.headline)
+                    .foregroundColor(BMOTheme.textPrimary)
+                Text(buddyChatSubtitle)
+                    .font(.caption)
+                    .foregroundColor(BMOTheme.textSecondary)
+                    .lineLimit(2)
+            }
+            Spacer()
+            Button("Switch") {
+                appState.chatReturnTab = .buddy
+                appState.leaveChat()
+            }
+            .buttonStyle(BMOButtonStyle(isPrimary: false))
+        }
+        .padding(BMOTheme.spacingMD)
+        .background(BMOTheme.backgroundSecondary)
     }
 
     private var fileChipsBar: some View {
@@ -135,7 +171,7 @@ struct ChatView: View {
             }
 
             HStack(alignment: .bottom, spacing: 10) {
-                TextField("Message your agent...", text: $prompt, axis: .vertical)
+                TextField("Message \(store.activeBuddy?.displayName ?? "your Buddy")...", text: $prompt, axis: .vertical)
                     .focused($isInputFocused)
                     .textFieldStyle(.plain)
                     .font(.body)
@@ -165,9 +201,14 @@ struct ChatView: View {
     }
 
     private var canSend: Bool {
-        !appState.chatStore.isGenerating &&
-        !prompt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
-        (appState.selectedProviderAccount != nil || (appState.selectedInstalledModel != nil && !appState.usesStubRuntime))
+        let trimmedPrompt = prompt.trimmingCharacters(in: .whitespacesAndNewlines)
+        return !appState.chatStore.isGenerating &&
+        !trimmedPrompt.isEmpty &&
+        (
+            BuddyIntroCopy.response(for: trimmedPrompt, buddyName: store.activeBuddy?.displayName ?? "Buddy") != nil ||
+            appState.selectedProviderAccount != nil ||
+            (appState.selectedInstalledModel != nil && !appState.usesStubRuntime)
+        )
     }
 
     private var chatScopedActions: [OpenClawActionRecord] {
@@ -179,12 +220,37 @@ struct ChatView: View {
 
     private var statusLine: String {
         if let account = appState.selectedProviderAccount {
-            return "Direct cloud chat via \(account.provider.displayName) • \(account.modelSlug)"
+            return "\(store.activeBuddy?.displayName ?? "Buddy") via \(account.provider.displayName) • \(account.modelSlug)"
         }
         if let model = appState.selectedInstalledModel {
-            return appState.usesStubRuntime ? "Local model selected, runtime not included in this build" : "On-device model • \(model.displayName)"
+            return appState.usesStubRuntime ? "Local model selected, runtime not included in this build" : "\(store.activeBuddy?.displayName ?? "Buddy") on-device • \(model.displayName)"
         }
-        return "Route not configured. Link a cloud provider to chat in this build."
+        return "Ask what Buddy can do, or link a cloud provider for open-ended live chat."
+    }
+
+    private var buddyChatSubtitle: String {
+        guard let buddy = store.activeBuddy else {
+            return "Create a Buddy so chat has a real companion identity."
+        }
+        return "\(buddy.identity.role) • \(buddy.state.currentFocus ?? "ready for the next useful step")"
+    }
+
+    private var buddyMood: BuddyAnimationMood {
+        guard let buddy = store.activeBuddy else { return .thinking }
+        switch buddy.state.mood.lowercased() {
+        case "happy", "excited":
+            return .happy
+        case "working":
+            return .working
+        case "thinking":
+            return .thinking
+        case "sleepy", "tired":
+            return .sleepy
+        case "needsattention", "needs attention", "stressed":
+            return .needsAttention
+        default:
+            return appState.chatStore.isGenerating ? .thinking : .idle
+        }
     }
 }
 

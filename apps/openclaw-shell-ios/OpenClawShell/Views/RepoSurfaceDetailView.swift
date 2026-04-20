@@ -115,11 +115,28 @@ private enum RepoSurfaceDocumentStore {
     }
 
     private static func loadMarkdown(for surface: RepoSurface) -> String {
-        guard let url = Bundle.main.url(forResource: surface.resourceName, withExtension: "md"),
+        guard let url = bundledMarkdownURL(named: surface.resourceName),
               let text = try? String(contentsOf: url, encoding: .utf8) else {
             return "Missing bundled source document for \(surface.sourcePath)."
         }
         return text
+    }
+
+    private static func bundledMarkdownURL(named resourceName: String) -> URL? {
+        if let direct = Bundle.main.url(forResource: resourceName, withExtension: "md") {
+            return direct
+        }
+
+        guard let root = Bundle.main.resourceURL,
+              let enumerator = FileManager.default.enumerator(at: root, includingPropertiesForKeys: nil) else {
+            return nil
+        }
+
+        let filename = "\(resourceName).md"
+        for case let url as URL in enumerator where url.lastPathComponent == filename {
+            return url
+        }
+        return nil
     }
 
     private static func extractSection(named heading: String, in markdown: String) -> String? {

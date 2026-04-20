@@ -59,6 +59,7 @@ enum Paths {
     static var chatStateFile: URL { stateDirectory.appendingPathComponent("chat.json") }
     static var providersFile: URL { stateDirectory.appendingPathComponent("providers.json") }
     static var runtimeSelectionFile: URL { stateDirectory.appendingPathComponent("runtime-selection.json") }
+    static var stackBuilderStateFile: URL { stateDirectory.appendingPathComponent("stack-builder.json") }
     static var stackConfigFile: URL { stateDirectory.appendingPathComponent("stack-config.json") }
     static var tabPreferencesFile: URL { stateDirectory.appendingPathComponent("tab-preferences.json") }
     static var userPreferencesFile: URL { stateDirectory.appendingPathComponent("user-preferences.json") }
@@ -225,7 +226,7 @@ protocol LocalLLMEngine {
 
     func bootstrap() async throws
     func configureRuntime(_ config: EngineRuntimeConfig?) async throws
-    func generate(prompt: String, fileContexts: [WorkspaceFile], chatHistory: [ChatMessage]) async throws -> String
+    func generate(prompt: String, fileContexts: [WorkspaceFile], chatHistory: [ChatMessage], activeStack: CompiledStack?) async throws -> String
 }
 
 // MARK: - MLC / Stub engine
@@ -278,8 +279,8 @@ final class MLCBridgeEngine: LocalLLMEngine {
         #endif
     }
 
-    func generate(prompt: String, fileContexts: [WorkspaceFile], chatHistory: [ChatMessage]) async throws -> String {
-        let contextPrefix = buildContextPrefix(fileContexts: fileContexts, chatHistory: chatHistory)
+    func generate(prompt: String, fileContexts: [WorkspaceFile], chatHistory: [ChatMessage], activeStack: CompiledStack?) async throws -> String {
+        let contextPrefix = buildContextPrefix(fileContexts: fileContexts, chatHistory: chatHistory, activeStack: activeStack)
         let finalPrompt = contextPrefix + prompt
 
         #if canImport(MLCSwift)
@@ -318,9 +319,13 @@ final class MLCBridgeEngine: LocalLLMEngine {
         #endif
     }
 
-    private func buildContextPrefix(fileContexts: [WorkspaceFile], chatHistory: [ChatMessage]) -> String {
+    private func buildContextPrefix(fileContexts: [WorkspaceFile], chatHistory: [ChatMessage], activeStack: CompiledStack?) -> String {
         var parts: [String] = []
-
+        
+        if let activeStack {
+            parts.append("STACK SUMMARY:\n\(activeStack.summary)\nMODEL STRATEGY:\n\(activeStack.recommendedModelStrategy)\nWORKSPACE GUIDANCE:\n\(activeStack.workspaceGuidance)\nSYSTEM PROMPT:\n\(activeStack.chatSystemPrompt)")
+        }
+        
         if !fileContexts.isEmpty {
             let rendered = fileContexts.map { file -> String in
                 let text = (try? String(contentsOf: file.localURL, encoding: .utf8)) ?? "[binary or unreadable file]"
@@ -328,14 +333,15 @@ final class MLCBridgeEngine: LocalLLMEngine {
             }
             parts.append(rendered.joined(separator: "\n\n"))
         }
-
+        
         if !chatHistory.isEmpty {
-            let clipped = chatHistory.suffix(8).map { "\($0.role.rawValue.uppercased()): \($0.content)" }.joined(separator: "\n")
-            parts.append("RECENT CHAT:\n\(clipped)")
+            let history = chatHistory.map { msg in
+                "\(msg.role.rawValue.capitalized): \(msg.content)"
+            }.joined(separator: "\n\n")
+            parts.append("CHAT HISTORY:\n\(history)")
         }
-
-        guard !parts.isEmpty else { return "" }
-        return parts.joined(separator: "\n\n") + "\n\nUSER REQUEST:\n"
+        
+        return parts.joined(separator: "\n\n")
     }
 }
 
@@ -778,13 +784,18 @@ enum CloudPromptBuilder {
         let name = operatorName.trimmingCharacters(in: .whitespacesAndNewlines)
         let displayName = name.isEmpty ? "the operator" : name
         let toolPosture = config.toolsEnabled
-            ? "The operator intends to use tool-capable OpenClaw routes through the built-in Workspace Runtime as capabilities become available."
-            : "The operator has not enabled tool-capable behavior for this stack profile."
+            ? "Operator mode can use tool-capable BeMore routes when the Workspace Runtime has confirmed support."
+            : "Tool-capable operator actions are not enabled for this stack profile."
 
         return """
-        You are BeMoreAgent, the BMO-style operator agent for \(displayName)'s OpenClaw stack.
+        You are BeMoreAgent, \(displayName)'s Buddy-first companion for the BeMore stack.
 
-        You are not confined to the iOS app. Do not frame yourself as app-only. Help with the full OpenClaw/operator context: planning, repo work, runtime diagnosis, provider setup, deployment reasoning, and stack operations.
+        Front-door behavior:
+        1. Start with everyday help: planning the day, breaking down work, staying on track, drafting reminders, notes, follow-ups, and messages.
+        2. Explain how you can learn: preferences, routines, communication style, corrections, and what good help looks like.
+        3. Explain growth through trained skills, repeated use, visible memory, and useful routines.
+        4. Mention deeper operator powers only after the user value is clear: repo work, runtime diagnosis, debugging, provider setup, deployment reasoning, skill execution, and stack operations.
+        5. Invite one concrete next action: a task to help with today or one thing to learn about how \(displayName) works.
 
         Current route: \(routeLabel).
         Stack name: \(config.stackName).
@@ -792,10 +803,67 @@ enum CloudPromptBuilder {
         Admin/public domain: \(config.adminDomain).
         \(toolPosture)
 
-        Be honest about capabilities. This direct cloud chat route can reason and use attached file context. Real filesystem, memory, skill, and sandbox changes must go through OpenClaw Workspace Runtime receipts. If a capability is unavailable in this iOS runtime, say unavailable or failed instead of claiming completion.
+        Mode framing:
+        - Companion mode helps decide what matters, plan, reflect, teach, remember preferences, and stay aligned.
+        - Operator mode handles technical execution, repo/runtime reasoning, debugging, structured work, and confirmed skill or workspace actions.
+
+        Be honest about capabilities. This direct cloud chat route can reason and use attached file context. Real filesystem, durable memory, skill, and sandbox changes require confirmed BeMore Workspace Runtime action. If a capability is unavailable in this iOS runtime, say unavailable or failed instead of claiming completion.
 
         Reply with the answer only. Do not reveal hidden reasoning, chain-of-thought, scratchpad notes, analysis sections, or internal deliberation unless the operator explicitly asks for an explanation. If asked to explain, give a concise rationale, not private step-by-step thoughts.
         """
+    }
+}
+
+enum BuddyIntroCopy {
+    static func response(for prompt: String, buddyName: String) -> String? {
+        let text = prompt.lowercased()
+        let asksCapability = containsAny(text, ["what can you do", "what are you good at", "what should i use you for", "how should i use you", "how do you work"])
+        let asksTraining = containsAny(text, ["make you better", "train you", "how do i train", "teach you", "improve you"])
+        let asksModes = containsAny(text, ["companion mode", "operator mode", "difference between", "power mode"])
+
+        guard asksCapability || asksTraining || asksModes else { return nil }
+
+        if asksModes {
+            return """
+            I have two useful gears.
+
+            Companion mode is for deciding what matters, planning your day, reflecting, remembering preferences, drafting notes or follow-ups, and helping you stay aligned without turning everything into a project.
+
+            Operator mode is for structured technical work: repo changes, debugging, runtime checks, provider setup, skill execution, and careful verification. You do not need to know the internals to use it; just ask for the outcome and I will surface the mechanics only when they matter.
+
+            A good next step: tell \(buddyName) what you want help with today, or teach one preference about how you like plans, reminders, or follow-ups handled.
+            """
+        }
+
+        if asksTraining && !asksCapability {
+            return """
+            You make \(buddyName) better by teaching me how good help should feel in your life.
+
+            Start with preferences: how you like your day planned, how direct I should be, what reminders are useful, what tone helps, and what I should avoid. Correct me when I miss. Show me your routines. Tell me which drafts, notes, plans, or follow-ups were actually useful.
+
+            Over time, that teaching becomes visible memory, stronger routines, and trained skills like planning, journaling, reminders, message drafting, research, or project support. Deeper operator tools still exist for repo and runtime work, but the first upgrade path is simple: teach, correct, repeat.
+
+            Give me one thing to learn about how you work, and I will use it on the next plan or draft.
+            """
+        }
+
+        return """
+        I can help with your day, your work, your plans, your follow-through, and your thinking.
+
+        Use \(buddyName) for planning the day, breaking down messy work, staying on track, capturing notes, drafting reminders, journaling, preparing follow-ups, and shaping messages before you send them. I can also help with product thinking, implementation thinking, and system work when you ask for that depth.
+
+        You can make me better by teaching preferences, routines, communication style, and corrections. Tell me what good help looks like, what to avoid, and which reminders or drafts were useful. I should become more aligned because you taught me, not because I pretend to know you.
+
+        Skills and memory are how I grow: planning, reminders, journaling, message drafting, research, project support, and careful review can become stronger through repeated use and visible training.
+
+        When you want operator mode, I can go deeper into repo work, runtime reasoning, debugging, skill execution, and verification. I will keep those mechanics behind the front door until they are useful.
+
+        Start with one thing you want help with today, or one thing you want \(buddyName) to learn about how you work.
+        """
+    }
+
+    private static func containsAny(_ text: String, _ needles: [String]) -> Bool {
+        needles.contains { text.contains($0) }
     }
 }
 
@@ -1149,23 +1217,32 @@ final class UserPreferencesStore: ObservableObject {
 
 // MARK: - App state
 
-@MainActor
+  @MainActor
 final class AppState: ObservableObject {
+    @Published var stackStore = StackBuilderStore()
+    @Published var pendingPrompt: String?
     // MARK: Stored properties – declared before the initializer so they are in scope
     @Published var modelStore = ModelCatalogStore()
     @Published var workspaceStore = WorkspaceStore()
     @Published var chatStore = ChatStore()
+    @Published var buddyStore = BuddyProfileStore()
     @Published var providerStore = ProviderStore()
     @Published var runtimePreferences = RuntimePreferencesStore()
     @Published var tabPreferencesStore = TabPreferencesStore()
     @Published var userPreferencesStore = UserPreferencesStore()
     @Published var runtimeStatus = "Not configured"
+    var activeStack: CompiledStack? {
+        stackStore.compiledStack
+    }
     @Published var stackConfig = StackConfig.default
     @Published var gemmaDownloadState: ModelDownloadState = .notInstalled
     @Published var providerModels: [ProviderKind: [CloudModel]] = [:]
     @Published var providerModelLoading = Set<ProviderKind>()
     @Published var providerModelErrors: [ProviderKind: String] = [:]
     @Published var workspaceRuntime = OpenClawWorkspaceRuntime()
+    @Published var macRuntimeSnapshot: MacRuntimeSnapshot?
+    @Published var macRuntimeStatus = "Mac not inspected"
+    @Published var chatReturnTab: AppTab?
 
     // MARK: Initializer – now placed after property declarations
     init(engine: LocalLLMEngine) {
@@ -1174,6 +1251,18 @@ final class AppState: ObservableObject {
 
     var orderedVisibleTabs: [AppTab] {
         tabPreferencesStore.preferences.visibleTabs
+    }
+
+    var compactTabOrder: [AppTab] {
+        [.missionControl, .chat, .buddy, .settings]
+    }
+
+    var desktopTabOrder: [AppTab] {
+        [.missionControl, .buddy, .chat, .files, .skills, .artifacts, .settings]
+    }
+
+    var stableHomeTab: AppTab {
+        .missionControl
     }
 
     var selectedTab: AppTab {
@@ -1218,7 +1307,7 @@ final class AppState: ObservableObject {
 
     var operatorSummary: String {
         if let account = selectedProviderAccount {
-            return "Chat is routed through \(account.provider.displayName) using \(account.modelSlug). Workspace actions use the built-in OpenClaw runtime and receipts."
+            return "Chat is routed through \(account.provider.displayName) using \(account.modelSlug). Workspace actions use the built-in BeMore runtime and receipts."
         } else if let model = selectedInstalledModel {
             if usesStubRuntime {
                 return "\(model.displayName) is selected, but local inference is unavailable in this build."
@@ -1275,7 +1364,7 @@ final class AppState: ObservableObject {
 
     var routeHealthSummary: String {
         if selectedProviderAccount != nil {
-            return "Cloud chat is ready. Workspace actions require OpenClaw runtime receipts."
+            return "Cloud chat is ready. Workspace actions require BeMore runtime receipts."
         }
         if let model = selectedInstalledModel {
             return usesStubRuntime
@@ -1291,8 +1380,55 @@ final class AppState: ObservableObject {
         "Files, chat history, provider metadata, buddy state, onboarding stack profile, and tab preferences persist locally inside the app container."
     }
 
+    var macPairingEndpoint: String {
+        stackConfig.gatewayURL.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    var macPowerModeSummary: String {
+        guard let snapshot = macRuntimeSnapshot else {
+            return "Pair with BeMore Mac to inspect workspace state, tasks, command output, artifacts, receipts, and diffs from the phone."
+        }
+        let workspace = snapshot.workspaceRoot ?? "no workspace"
+        return "\(snapshot.pairing.hostName) is \(snapshot.pairing.status); \(workspace); \(snapshot.tasks.count) task\(snapshot.tasks.count == 1 ? "" : "s"), \(snapshot.processes.count) process\(snapshot.processes.count == 1 ? "" : "es"), \(snapshot.receipts.count) receipt\(snapshot.receipts.count == 1 ? "" : "s")."
+    }
+
     weak var buddyProfileStore: BuddyProfileStore?
 
+    func compileStack() {
+        _ = stackStore.compileCurrentStack()
+        configureConversationForCurrentStack()
+        selectedTab = .missionControl
+    }
+    
+    func reopenStackOnboarding() {
+        stackStore.reopenOnboarding()
+        selectedTab = .missionControl
+    }
+    
+    func resetStackBuilder() {
+        stackStore.reset()
+        configureConversationForCurrentStack(forceReplace: true)
+        selectedTab = .missionControl
+    }
+    
+    func clearConversation() {
+        chatStore.clear()
+    }
+    
+    func route(to tab: AppTab) {
+        selectedTab = tab
+    }
+    
+    func openChat(with prompt: String) {
+        pendingPrompt = prompt
+        selectedTab = .chat
+    }
+    
+    func consumePendingPrompt() -> String? {
+        defer { pendingPrompt = nil }
+        return pendingPrompt
+    }
+    
     private let engine: LocalLLMEngine
     private let cloudExecutionService = CloudExecutionService()
 
@@ -1307,6 +1443,7 @@ final class AppState: ObservableObject {
 
     func bootstrap() async {
         loadStackConfig()
+        stackStore.load()
         modelStore.load()
         workspaceStore.load()
         chatStore.load()
@@ -1314,6 +1451,7 @@ final class AppState: ObservableObject {
         runtimePreferences.load()
         tabPreferencesStore.load()
         userPreferencesStore.load()
+        buddyStore.load(for: stackConfig)
         workspaceRuntime.bootstrap(config: stackConfig, preferences: userPreferencesStore.preferences, routeSummary: activeRouteModeLabel)
         refreshGemmaState()
         refreshRuntimeSummary()
@@ -1323,7 +1461,7 @@ final class AppState: ObservableObject {
         do {
             try await engine.bootstrap()
             try await applySelectedModelIfPossible()
-            refreshRuntimeSummary()
+            configureConversationForCurrentStack()
         } catch {
             chatStore.errorMessage = error.localizedDescription
             runtimeStatus = "Runtime error"
@@ -1340,7 +1478,9 @@ final class AppState: ObservableObject {
         }
         persistStackConfig()
         workspaceRuntime.bootstrap(config: stackConfig, preferences: userPreferencesStore.preferences, routeSummary: activeRouteModeLabel)
+        buddyStore.load(for: config)
         buddyProfileStore?.load(for: config)
+        chatReturnTab = nil
         refreshRuntimeSummary()
     }
 
@@ -1448,7 +1588,7 @@ final class AppState: ObservableObject {
         }
         tabPreferencesStore.persist()
         if !orderedVisibleTabs.contains(selectedTab) {
-            selectedTab = orderedVisibleTabs.first ?? .missionControl
+            selectedTab = orderedVisibleTabs.first ?? stableHomeTab
         }
     }
 
@@ -1458,6 +1598,23 @@ final class AppState: ObservableObject {
         let hiddenTabs = tabPreferencesStore.preferences.orderedTabs.filter { tabPreferencesStore.preferences.hiddenTabs.contains($0) }
         tabPreferencesStore.preferences.orderedTabs = visibleTabs + hiddenTabs
         tabPreferencesStore.persist()
+    }
+
+    func openChat(from source: AppTab? = nil, resetConversation: Bool = false) {
+        let origin = source ?? (selectedTab == .chat ? chatReturnTab : selectedTab)
+        if origin != .chat {
+            chatReturnTab = origin
+        }
+        if resetConversation {
+            chatStore.clear()
+        }
+        selectedTab = .chat
+    }
+
+    func leaveChat() {
+        let destination = chatReturnTab ?? stableHomeTab
+        chatReturnTab = nil
+        selectedTab = destination
     }
 
     func removeProvider(_ provider: ProviderKind) {
@@ -1530,7 +1687,7 @@ final class AppState: ObservableObject {
             let reply = try await cloudExecutionService.send(
                 account: account,
                 messages: [
-                    CloudExecutionMessage(role: .system, content: "You are verifying BeMoreAgent's direct cloud chat route for an OpenClaw operator stack. Reply with exactly: ROUTE_OK"),
+                    CloudExecutionMessage(role: .system, content: "You are verifying BeMoreAgent's direct cloud chat route for a BeMore operator stack. Reply with exactly: ROUTE_OK"),
                     CloudExecutionMessage(role: .user, content: "Return ROUTE_OK")
                 ],
                 temperature: 0,
@@ -1550,11 +1707,53 @@ final class AppState: ObservableObject {
         }
     }
 
+    // MARK: - BeMore Mac pairing
+
+    func refreshMacRuntimeSnapshot() async {
+        let endpoint = macPairingEndpoint
+        guard var components = URLComponents(string: endpoint), !endpoint.isEmpty else {
+            macRuntimeStatus = "Add a BeMore Mac endpoint in onboarding or settings."
+            return
+        }
+
+        if components.scheme == nil {
+            components.scheme = "https"
+        }
+
+        let normalizedPath = components.path.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+        components.path = normalizedPath.hasSuffix("api/snapshot") ? components.path : "/api/snapshot"
+
+        guard let url = components.url else {
+            macRuntimeStatus = "Mac endpoint is not a valid URL."
+            return
+        }
+
+        do {
+            macRuntimeStatus = "Inspecting BeMore Mac..."
+            let (data, response) = try await URLSession.shared.data(from: url)
+            if let http = response as? HTTPURLResponse, !(200..<300).contains(http.statusCode) {
+                macRuntimeStatus = "Mac runtime returned HTTP \(http.statusCode)."
+                return
+            }
+            macRuntimeSnapshot = try JSONDecoder().decode(MacRuntimeSnapshot.self, from: data)
+            macRuntimeStatus = "Paired power mode ready"
+        } catch {
+            macRuntimeStatus = "Mac unavailable: \(error.localizedDescription)"
+        }
+    }
+
     // MARK: - Chat
 
     func send(prompt: String) async {
         let cleaned = prompt.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !cleaned.isEmpty else { return }
+
+        if let intro = BuddyIntroCopy.response(for: cleaned, buddyName: buddyStore.activeBuddy?.displayName ?? "Buddy") {
+            chatStore.messages.append(ChatMessage(role: .user, content: cleaned))
+            chatStore.messages.append(ChatMessage(role: .assistant, content: intro))
+            chatStore.persist()
+            return
+        }
 
         if selectedProviderAccount == nil && engine.requiresModelSelection && selectedInstalledModel == nil {
             chatStore.errorMessage = "Link a provider in Settings or select an installed model in Models before sending."
@@ -1585,7 +1784,7 @@ final class AppState: ObservableObject {
                 ))
             } else {
                 if usesStubRuntime { runtimeStatus = "Stub preview" }
-                reply = AgentReplySanitizer.userVisibleAnswer(from: try await engine.generate(prompt: cleaned, fileContexts: attachedFiles, chatHistory: chatStore.messages))
+                reply = AgentReplySanitizer.userVisibleAnswer(from: try await engine.generate(prompt: cleaned, fileContexts: attachedFiles, chatHistory: chatStore.messages, activeStack: activeStack))
             }
             chatStore.messages.append(ChatMessage(role: .assistant, content: reply))
             workspaceRuntime.refreshMetadata()
@@ -1629,6 +1828,13 @@ final class AppState: ObservableObject {
         } catch {
             receipt = OpenClawReceipt(actionId: UUID(), status: .failed, title: "Write \(path)", summary: "Could not write \(path)", output: [:], artifacts: [], logs: [], error: error.localizedDescription)
         }
+        chatStore.messages.append(ChatMessage(role: .system, content: ReceiptFormatter.confirmedSummary(for: receipt)))
+        chatStore.persist()
+        return receipt
+    }
+
+    func persistBuddyBundle(_ bundle: BuddyPersistenceBundle) -> OpenClawReceipt {
+        let receipt = workspaceRuntime.persistBuddyBundle(bundle, source: "buddy.user")
         chatStore.messages.append(ChatMessage(role: .system, content: ReceiptFormatter.confirmedSummary(for: receipt)))
         chatStore.persist()
         return receipt
@@ -1684,7 +1890,7 @@ final class AppState: ObservableObject {
                     config: stackConfig,
                     operatorName: operatorDisplayName,
                     routeLabel: routeLabel
-                ) + "\n\nWorkspace Runtime: Available inside OpenClaw. Ask for actions through the runtime contract; do not claim files, memory, skills, or sandbox commands changed unless an OpenClaw receipt confirms it. Registered skills: \(workspaceRuntime.skills.map(\.name).joined(separator: ", ")). Canonical artifacts: soul.md, user.md, memory.md, session.md, skills.md."
+                ) + "\n\n\(activeBuddyChatContext)\n\nOperator depth, when requested: BeMore can coordinate workspace actions, memory updates, skill runs, sandbox commands, and repo/runtime work only when confirmed by the Workspace Runtime. Registered skills: \(workspaceRuntime.skills.map(\.name).joined(separator: ", ")). Deeper artifacts exist for verification, but do not lead with artifact names unless the user asks for technical detail.\n\nMac power: \(macPowerModeSummary)"
             )
         ]
 
@@ -1708,13 +1914,21 @@ final class AppState: ObservableObject {
         return messages
     }
 
+    private var activeBuddyChatContext: String {
+        guard let buddy = buddyStore.activeBuddy else {
+            return "Active Buddy: none yet. Encourage the user to create or install a Buddy before treating chat as personalized."
+        }
+        let focus = buddy.state.currentFocus ?? "no active focus"
+        return "Active Buddy: \(buddy.displayName). Role: \(buddy.identity.role). Class: \(buddy.identity.class). Mood: \(buddy.state.mood). Focus: \(focus). Reply as a practical companion first: help with the user's day, work, plans, follow-through, memory, and training. Technical work can still use Buddy tasks, skills, results, and verified operator actions when requested."
+    }
+
     private func generatedSetupChecklist(for config: StackConfig) -> [String] {
         var items: [String] = []
         if config.deploymentMode == .bootstrapSelfHosted {
-            items.append("Provision or verify the OpenClaw runtime endpoint at \(config.gatewayURL).")
+            items.append("Provision or verify the BeMore Mac runtime endpoint at \(config.gatewayURL).")
             items.append("Set runtime and pairing/public URL values to match \(config.adminDomain).")
         } else {
-            items.append("Pair this app to the existing OpenClaw runtime endpoint at \(config.gatewayURL).")
+            items.append("Pair this app to the existing BeMore Mac runtime endpoint at \(config.gatewayURL).")
         }
         if config.installNodeOnThisPhone {
             items.append("Treat this iPhone as a node surface and grant notification or device permissions as needed.")
@@ -1752,5 +1966,21 @@ final class AppState: ObservableObject {
             EngineRuntimeConfig(modelURL: installed.localURL, modelID: installed.modelID, modelLib: installed.modelLib)
         )
         runtimeStatus = installed.modelID.isEmpty ? "On-device: \(installed.localFilename)" : "On-device: \(installed.modelID)"
+    }
+    private func configureConversationForCurrentStack(forceReplace: Bool = false) {
+        if let activeStack {
+            let currentFirst = chatStore.messages.first?.content ?? ""
+            let shouldReplace = forceReplace || chatStore.messages.isEmpty || currentFirst.contains("OpenClawShell is ready.") || currentFirst.contains("Conversation cleared.")
+            if shouldReplace {
+                chatStore.messages = [ChatMessage(role: .system, content: activeStack.chatSystemPrompt)]
+                chatStore.persist()
+            }
+            return
+        }
+        
+        if forceReplace || chatStore.messages.isEmpty {
+            chatStore.messages = [ChatMessage(role: .system, content: "OpenClawShell is ready. Add a packaged MLC runtime or use the stub path until then.")]
+            chatStore.persist()
+        }
     }
 }

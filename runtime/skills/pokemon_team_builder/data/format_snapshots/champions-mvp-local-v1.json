@@ -1,0 +1,41 @@
+{
+  "formatId": "champions-mvp-local-v1",
+  "checkedAt": "2026-04-16T00:00:00Z",
+  "sourceConfidence": "mixed_with_uncertainty",
+  "battleMode": "singles",
+  "season": "unresolved-current-season",
+  "regulation": "mvp-local",
+  "officialSources": [],
+  "secondarySources": [],
+  "legalPokemon": [
+    "Pikachu",
+    "Charizard",
+    "Venusaur",
+    "Blastoise",
+    "Gengar",
+    "Dragonite",
+    "Lucario",
+    "Garchomp",
+    "Rotom-Wash",
+    "Corviknight",
+    "Togekiss",
+    "Snorlax"
+  ],
+  "legalForms": [],
+  "legalMegas": [],
+  "legalItems": [],
+  "legalMoves": [],
+  "bannedElements": [],
+  "teamConstraints": [
+    "MVP local snapshot only; not a complete live Champions legality table."
+  ],
+  "metaNotes": [
+    "This bundled snapshot is a deterministic local fallback for builder development."
+  ],
+  "topArchetypes": [],
+  "topThreats": [],
+  "uncertainties": [
+    "Current official Pokemon Champions legality coverage is not fully encoded in this bundled MVP snapshot.",
+    "Use audit mode with official-first source verification for live-format team review."
+  ]
+}

@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bemore.dev/contracts/capabilities/app-package.schema.json",
+  "title": "BeMore App Package",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "name",
+    "version",
+    "owner",
+    "requiredSkills",
+    "routes",
+    "install",
+    "artifacts",
+    "persistence",
+    "supervision",
+    "packaging"
+  ],
+  "properties": {
+    "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9.-]*$" },
+    "name": { "type": "string" },
+    "description": { "type": "string" },
+    "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "owner": {
+      "type": "object",
+      "required": ["repo", "domain"],
+      "properties": {
+        "repo": { "type": "string", "enum": ["prismtek-apps"] },
+        "domain": { "type": "string", "enum": ["apps"] }
+      }
+    },
+    "requiredSkills": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "versionRange"],
+        "properties": {
+          "id": { "type": "string" },
+          "versionRange": { "type": "string" }
+        }
+      }
+    },
+    "routes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "path", "kind"],
+        "properties": {
+          "id": { "type": "string" },
+          "path": { "type": "string" },
+          "kind": { "type": "string", "enum": ["launch", "configure", "workbench", "artifact", "supervision"] }
+        }
+      }
+    },
+    "install": {
+      "type": "object",
+      "required": ["configSchema", "approvalRequired"],
+      "properties": {
+        "configSchema": { "type": "string" },
+        "approvalRequired": { "type": "boolean" }
+      }
+    },
+    "artifacts": {
+      "type": "object",
+      "required": ["presentation"],
+      "properties": {
+        "presentation": {
+          "type": "array",
+          "items": { "type": "string" },
+          "uniqueItems": true
+        }
+      }
+    },
+    "persistence": {
+      "type": "object",
+      "required": ["runtimeOwned", "appOwned"],
+      "properties": {
+        "runtimeOwned": { "type": "array", "items": { "type": "string" } },
+        "appOwned": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "supervision": {
+      "type": "object",
+      "properties": {
+        "approvalHooks": { "type": "array", "items": { "type": "string" } },
+        "eventFilters": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "packaging": {
+      "type": "object",
+      "required": ["noHiddenServices", "noMiniRuntime", "releaseOwnerRepo"],
+      "properties": {
+        "noHiddenServices": { "type": "boolean", "const": true },
+        "noMiniRuntime": { "type": "boolean", "const": true },
+        "releaseOwnerRepo": { "type": "string", "const": "prismtek-apps" }
+      }
+    }
+  }
+}
+

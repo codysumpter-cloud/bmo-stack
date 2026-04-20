@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bemore.dev/contracts/capabilities/runtime-registry.schema.json",
+  "title": "BeMore Runtime Registry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["registryVersion", "ownerRepo", "skills", "apps", "bindings", "permissions", "handlers"],
+  "properties": {
+    "registryVersion": { "type": "string" },
+    "ownerRepo": { "type": "string", "const": "BeMore-stack" },
+    "skills": {
+      "type": "array",
+      "items": { "type": "string" },
+      "uniqueItems": true
+    },
+    "apps": {
+      "type": "array",
+      "items": { "type": "string" },
+      "uniqueItems": true
+    },
+    "bindings": {
+      "type": "array",
+      "items": { "type": "string" },
+      "uniqueItems": true
+    },
+    "permissions": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "description": { "type": "string" },
+          "approval": { "type": "string", "enum": ["none", "install", "run", "per-action"] }
+        }
+      }
+    },
+    "handlers": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["ownerRepo", "entrypoint", "capabilities"],
+        "properties": {
+          "ownerRepo": { "type": "string", "const": "BeMore-stack" },
+          "entrypoint": { "type": "string" },
+          "capabilities": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "installStatus": {
+      "type": "object",
+      "additionalProperties": { "type": "string", "enum": ["available", "installed", "disabled", "revoked"] }
+    },
+    "uiHooks": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "surface": { "type": "string" },
+          "route": { "type": "string" }
+        }
+      }
+    }
+  }
+}

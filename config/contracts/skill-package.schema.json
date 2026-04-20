@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Skill Package",
+  "type": "object",
+  "required": ["kind", "apiVersion", "id", "version", "metadata", "permissions", "inputs", "outputs", "artifactTypes", "eventTypes", "uiHooks", "install", "runtimeBindingRules"],
+  "additionalProperties": false,
+  "properties": {
+    "kind": { "const": "skill-package" },
+    "apiVersion": { "const": "buddy.prismtek/v1" },
+    "id": { "type": "string" },
+    "version": { "type": "string" },
+    "metadata": { "type": "object" },
+    "permissions": { "type": "object" },
+    "inputs": { "type": "object" },
+    "outputs": { "type": "object" },
+    "artifactTypes": { "type": "array", "items": { "type": "string" } },
+    "eventTypes": { "type": "array", "items": { "type": "string" } },
+    "uiHooks": { "type": "object" },
+    "install": { "type": "object" },
+    "runtimeBindingRules": {
+      "type": "object",
+      "required": ["memoryPolicy", "routingPolicy"],
+      "properties": {
+        "memoryPolicy": { "const": "shared-runtime-only" },
+        "routingPolicy": { "const": "shared-runtime-only" }
+      }
+    }
+  }
+}

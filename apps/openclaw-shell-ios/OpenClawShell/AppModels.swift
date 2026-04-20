@@ -242,6 +242,74 @@ struct EngineRuntimeConfig: Sendable {
     let modelLib: String
 }
 
+// MARK: - BeMore Mac pairing
+
+struct MacRuntimeTask: Codable, Hashable, Identifiable {
+    let id: String
+    let title: String
+    let status: String
+    let detail: String?
+    let command: String?
+}
+
+struct MacRuntimeProcess: Codable, Hashable, Identifiable {
+    let id: String
+    let command: String
+    let status: String
+    let stdout: String?
+    let stderr: String?
+    let exitCode: Int?
+}
+
+struct MacRuntimeDiffFile: Codable, Hashable, Identifiable {
+    var id: String { path }
+    let path: String
+    let status: String
+    let summary: String
+}
+
+struct MacRuntimeDiff: Codable, Hashable {
+    let files: [MacRuntimeDiffFile]
+    let unifiedDiff: String?
+}
+
+struct MacRuntimeArtifact: Codable, Hashable, Identifiable {
+    let id: String
+    let name: String
+    let relativePath: String
+    let kind: String
+}
+
+struct MacRuntimeReceipt: Codable, Hashable, Identifiable {
+    let id: String
+    let action: String
+    let status: String
+    let summary: String
+}
+
+struct MacRuntimeBuddy: Codable, Hashable {
+    let mode: String
+    let activeFocus: String
+    let guidance: [String]
+}
+
+struct MacRuntimePairing: Codable, Hashable {
+    let hostName: String
+    let status: String
+    let pairingCode: String?
+}
+
+struct MacRuntimeSnapshot: Codable, Hashable {
+    let workspaceRoot: String?
+    let tasks: [MacRuntimeTask]
+    let processes: [MacRuntimeProcess]
+    let artifacts: [MacRuntimeArtifact]
+    let receipts: [MacRuntimeReceipt]
+    let diff: MacRuntimeDiff
+    let buddy: MacRuntimeBuddy
+    let pairing: MacRuntimePairing
+}
+
 // MARK: - Onboarding / Stack
 
 enum StackDeploymentMode: String, Codable, CaseIterable, Hashable, Identifiable {
@@ -253,16 +321,51 @@ enum StackDeploymentMode: String, Codable, CaseIterable, Hashable, Identifiable 
     var title: String {
         switch self {
         case .pairToExistingGateway: return "Pair to an existing runtime"
-        case .bootstrapSelfHosted: return "Set up a self-hosted OpenClaw stack"
+        case .bootstrapSelfHosted: return "Set up a self-hosted BeMore stack"
         }
     }
 
     var subtitle: String {
         switch self {
         case .pairToExistingGateway:
-            return "Connect this iPhone to an OpenClaw runtime endpoint you already run elsewhere."
+            return "Connect this iPhone to a BeMore Mac runtime endpoint you already run."
         case .bootstrapSelfHosted:
             return "Use onboarding answers to generate the exact stack profile, runtime target, and next setup steps for a self-hosted deployment."
+        }
+    }
+}
+
+enum BuddyPowerMode: String, Codable, CaseIterable, Hashable, Identifiable {
+    case gentle
+    case balanced
+    case turbo
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .gentle: return "Easy Start"
+        case .balanced: return "Balanced"
+        case .turbo: return "Power Mode"
+        }
+    }
+
+    var subtitle: String {
+        switch self {
+        case .gentle:
+            return "Keep the experience calm: planning, reminders, notes, and teaching Buddy what helps."
+        case .balanced:
+            return "Keep Buddy, chat, skills, and results visible without making setup feel heavy."
+        case .turbo:
+            return "Keep deeper operator tools close for repo, runtime, debugging, and skill work."
+        }
+    }
+
+    var optimizationMode: String {
+        switch self {
+        case .gentle: return "balanced"
+        case .balanced: return "balanced"
+        case .turbo: return "quality"
         }
     }
 }
@@ -271,6 +374,10 @@ struct StackConfig: Codable {
     var stackName: String
     var goal: String
     var role: String
+    var onboardingBuddyName: String?
+    var onboardingBuddyTemplateID: String?
+    var onboardingBuddyFocus: String?
+    var onboardingPowerMode: BuddyPowerMode?
     var autonomyLevel: Int // 1-5
     var memoryEnabled: Bool
     var toolsEnabled: Bool
@@ -289,6 +396,10 @@ struct StackConfig: Codable {
         stackName: "BeMoreAgent",
         goal: "",
         role: "",
+        onboardingBuddyName: nil,
+        onboardingBuddyTemplateID: nil,
+        onboardingBuddyFocus: nil,
+        onboardingPowerMode: nil,
         autonomyLevel: 3,
         memoryEnabled: true,
         toolsEnabled: true,
@@ -353,38 +464,47 @@ struct KnownModel: Identifiable {
 
 enum AppTab: String, Codable, CaseIterable, Hashable, Identifiable {
     case missionControl
-    case models
-    case chat
-    case skills
-    case artifacts
+    case editor
     case buddy
     case files
+    case skills
+    case artifacts
+    case pairing
+    case models
+    case chat
+    case pricing
     case settings
 
     var id: String { rawValue }
 
     var title: String {
         switch self {
-        case .missionControl: return "Control"
+        case .missionControl: return "Home"
+        case .editor: return "Editor"
+        case .buddy: return "Buddy"
+        case .files: return "Workspace"
+        case .skills: return "Skills"
+        case .artifacts: return "Results"
+        case .pairing: return "Mac"
         case .models: return "Models"
         case .chat: return "Chat"
-        case .skills: return "Skills"
-        case .artifacts: return "Artifacts"
-        case .buddy: return "Buddy"
-        case .files: return "Files"
+        case .pricing: return "Pricing"
         case .settings: return "Settings"
         }
     }
 
     var systemImage: String {
         switch self {
-        case .missionControl: return "switch.2"
+        case .missionControl: return "heart.text.square.fill"
+        case .editor: return "doc.text.fill"
+        case .buddy: return "person.crop.circle.badge.checkmark"
+        case .files: return "folder.fill"
+        case .skills: return "sparkles.rectangle.stack.fill"
+        case .artifacts: return "checklist.checked"
+        case .pairing: return "macbook.and.iphone"
         case .models: return "cpu"
         case .chat: return "message.fill"
-        case .skills: return "sparkles.rectangle.stack.fill"
-        case .artifacts: return "doc.richtext.fill"
-        case .buddy: return "person.2.fill"
-        case .files: return "folder.fill"
+        case .pricing: return "creditcard.fill"
         case .settings: return "gearshape.fill"
         }
     }
@@ -400,8 +520,8 @@ struct ShellPreferences: Codable, Hashable {
     var selectedTab: AppTab
 
     static let `default` = ShellPreferences(
-        orderedTabs: AppTab.allCases,
-        hiddenTabs: [],
+        orderedTabs: [.missionControl, .buddy, .chat, .skills, .artifacts, .files, .pairing, .pricing, .models, .settings],
+        hiddenTabs: [.pairing, .pricing, .models],
         selectedTab: .missionControl
     )
 

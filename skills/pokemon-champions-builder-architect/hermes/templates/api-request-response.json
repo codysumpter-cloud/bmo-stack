@@ -1,0 +1,20 @@
+{
+  "request": {
+    "format": "doubles",
+    "regulation_snapshot_id": "champions_reg_ma_2026_04_08",
+    "locked_pokemon": ["palafin", "dragonite"],
+    "style_preference": "balanced_pivot_offense",
+    "risk_tolerance": "stable",
+    "goal": "ladder"
+  },
+  "response": {
+    "team": {
+      "name": "Balanced Pivot Offense",
+      "score": 87.4,
+      "slots": []
+    },
+    "replacements": [],
+    "strategy": {},
+    "warnings": []
+  }
+}

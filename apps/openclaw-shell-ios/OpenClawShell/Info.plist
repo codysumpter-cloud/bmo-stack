@@ -14,8 +14,7 @@
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
 	<string>0.2</string>
-	<key>CFBundleVersion</key>
-	<string>18</string>
+	<key>CFBundleVersion</key>\n	<string>24</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>LSApplicationCategoryType</key>
@@ -24,6 +23,8 @@
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>
 		<false/>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
 		<key>NSExceptionDomains</key>
 		<dict>
 			<key>huggingface.co</key>

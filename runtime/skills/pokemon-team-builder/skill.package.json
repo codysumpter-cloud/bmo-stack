@@ -1,0 +1,84 @@
+{
+  "id": "pokemon-team-builder",
+  "name": "Pokemon Team Builder",
+  "description": "Create, edit, analyze, explain, iterate, save, resume, and export bounded Pokemon teams through the Buddy Runtime.",
+  "version": "0.1.0",
+  "stability": "draft",
+  "owner": {
+    "repo": "BeMore-stack",
+    "domain": "brain",
+    "maintainers": ["BeMore Runtime"]
+  },
+  "permissions": [
+    "workspace.read",
+    "workspace.write",
+    "artifact.write",
+    "event.emit"
+  ],
+  "requiredTools": [
+    "pokemon.type-chart.v1",
+    "pokemon.mvp-dataset.v1",
+    "artifact-store",
+    "buddy-reasoning"
+  ],
+  "runtime": {
+    "handler": "runtime.skills.pokemon_team_builder.handler",
+    "capabilities": [
+      "team.generate",
+      "team.edit",
+      "team.analyze",
+      "team.export",
+      "artifact.persist",
+      "session.resume"
+    ],
+    "noMiniRuntime": true
+  },
+  "schemas": {
+    "input": "runtime/skills/pokemon_team_builder/schemas/input.schema.json",
+    "output": "runtime/skills/pokemon_team_builder/schemas/output.schema.json",
+    "config": "runtime/skills/pokemon_team_builder/schemas/config.schema.json"
+  },
+  "artifacts": [
+    "pokemon.team.v1+json",
+    "pokemon.team.report.v1+markdown",
+    "pokemon.team.export.v1+text"
+  ],
+  "events": [
+    "skill.run.started",
+    "pokemon.team.generated",
+    "pokemon.team.edited",
+    "pokemon.team.analyzed",
+    "artifact.created",
+    "skill.run.completed",
+    "skill.run.failed"
+  ],
+  "install": {
+    "configSchema": "runtime/skills/pokemon_team_builder/schemas/config.schema.json",
+    "approvalRequired": false,
+    "defaultConfig": {
+      "format": "singles",
+      "snapshot": "mvp-local-v1"
+    }
+  },
+  "validationHooks": {
+    "preInstall": "pokemonTeamBuilder.validateInstall",
+    "preRun": "pokemonTeamBuilder.validateInput",
+    "postRun": "pokemonTeamBuilder.validateArtifacts"
+  },
+  "ui": {
+    "discovery": true,
+    "launchRoute": "ibemore://apps/pokemon-team-builder",
+    "icon": "gamecontroller.fill",
+    "surfaceHooks": [
+      "discovery.card",
+      "workbench.teamEditor",
+      "supervision.timeline",
+      "artifact.preview"
+    ]
+  },
+  "binding": {
+    "allowedTargetKinds": ["skill", "app"],
+    "defaultRole": "team_coach",
+    "resumePolicy": "latest-artifact"
+  }
+}

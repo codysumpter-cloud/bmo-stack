@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bemore.dev/runtime/skills/pokemon-team-builder/config.schema.json",
+  "title": "Pokemon Team Builder Config",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "snapshot": { "type": "string", "const": "mvp-local-v1" },
+    "allowUnsupportedPokemon": { "type": "boolean", "default": false }
+  }
+}
+
