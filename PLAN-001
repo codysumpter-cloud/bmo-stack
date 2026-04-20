@@ -1,0 +1,4 @@
+Plan to resolve BuddyAnimationMood redeclaration:
+1. Identify duplicate declarations of BuddyAnimationMood.
+2. Remove declaration from BuddyAsciiView.swift.
+3. Verify build passes locally and in CI.
