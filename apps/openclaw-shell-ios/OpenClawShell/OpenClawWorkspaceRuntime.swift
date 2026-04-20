@@ -176,8 +176,11 @@ enum BuiltInSkillRegistry {
                 inputSchema: [
                     "format": "string",
                     "strategy": "string",
-                    "mustInclude": "comma-separated string",
-                    "avoid": "comma-separated string"
+                    "summary": "string",
+                    "members": "JSON array of PokemonTeamMember",
+                    "battleStrategy": "JSON array of strings",
+                    "weaknesses": "JSON array of strings",
+                    "suggestions": "JSON array of strings"
                 ],
                 outputSchema: [
                     "teamMembers": "array",
@@ -881,69 +884,56 @@ final class OpenClawWorkspaceRuntime: ObservableObject {
 
     private func runPokemonTeamBuilder(input: [String: String], manifest: SkillManifest) -> OpenClawReceipt {
         let action = begin(kind: .skillRun, source: "skill.\(manifest.id)", title: manifest.name, input: input)
-        let format = input["format"].nilIfBlank ?? "Singles"
-        let strategy = input["strategy"].nilIfBlank ?? "balanced offense"
-        let mustInclude = splitList(input["mustInclude"])
-        let avoid = Set(splitList(input["avoid"]).map { $0.lowercased() })
-        let candidates = ["Pikachu", "Charizard", "Venusaur", "Blastoise", "Gengar", "Dragonite", "Lucario", "Garchomp", "Rotom-Wash", "Corviknight", "Togekiss", "Snorlax"]
-        let roles = ["Lead / speed control", "Physical breaker", "Special attacker", "Defensive pivot", "Utility support", "Late-game cleaner"]
-        var selected: [String] = []
-        for name in mustInclude where !avoid.contains(name.lowercased()) {
-            if !selected.contains(name) { selected.append(name) }
-        }
-        for candidate in candidates where selected.count < 6 {
-            guard !avoid.contains(candidate.lowercased()), !selected.contains(candidate) else { continue }
-            selected.append(candidate)
-        }
-        let team = selected.prefix(6).enumerated().map { index, name in
-            let role = roles[index % roles.count]
-            return PokemonTeamMember(
-                name: name,
-                role: role,
-                notes: "\(format) pick for \(strategy).",
-                reason: selectionReason(for: name, role: role, strategy: strategy, mustInclude: mustInclude),
-                battlePlan: battlePlan(for: name, role: role, format: format, strategy: strategy)
-            )
-        }
-        let battleStrategy = [
-            "Open with \(team.first?.name ?? "the lead") to establish \(team.first?.role.lowercased() ?? "tempo").",
-            "Use pivots and utility picks to protect the main breakers until the opponent's answers are weakened.",
-            "Preserve \(team.last?.name ?? "the cleaner") for the final turn cycle instead of trading it early."
-        ]
-        let weaknesses = [
-            "Validate exact legality, moves, items, and EVs against the target format before competitive use.",
-            "This MVP uses curated role coverage rather than a full damage calculator or matchup database."
-        ]
-        let suggestions = [
-            "Add exact movesets after choosing the battle format.",
-            "Run a future simulator-backed pass for type chart and usage data."
-        ]
-        let output = PokemonTeamOutput(
-            teamMembers: Array(team),
-            roleBreakdown: team.map { "\($0.name): \($0.role)" },
-            selectionRationale: team.map { "\($0.name): \($0.reason)" },
-            battleStrategy: battleStrategy,
-            summary: "Drafted a \(format) team around \(strategy).",
-            weaknesses: weaknesses,
-            suggestions: suggestions,
-            artifactPath: nil
-        )
-
+        
         do {
+            let format = input["format"].nilIfBlank ?? "Singles"
+            let strategy = input["strategy"].nilIfBlank ?? "Balanced"
+            let summary = input["summary"].nilIfBlank ?? "Drafted Pokemon team."
+            
+            guard let membersString = input["members"],
+                  let membersData = membersString.data(using: .utf8) else {
+                throw NSError(domain: "PokemonTeamBuilder", code: 1, userInfo: [NSLocalizedDescriptionKey: "Missing or invalid 'members' JSON input."])
+            }
+            let members = try decoder.decode([PokemonTeamMember].self, from: membersData)
+            
+            let battleStrategyString = input["battleStrategy"] ?? "[]"
+            let battleStrategy = try decoder.decode([String].self, from: battleStrategyString.data(using: .utf8) ?? Data())
+            
+            let weaknessesString = input["weaknesses"] ?? "[]"
+            let weaknesses = try decoder.decode([String].self, from: weaknessesString.data(using: .utf8) ?? Data())
+            
+            let suggestionsString = input["suggestions"] ?? "[]"
+            let suggestions = try decoder.decode([String].self, from: suggestionsString.data(using: .utf8) ?? Data())
+            
+            let output = PokemonTeamOutput(
+                teamMembers: members,
+                roleBreakdown: members.map { "\($0.name): \($0.role)" },
+                selectionRationale: members.map { "\($0.name): \($0.reason)" },
+                battleStrategy: battleStrategy,
+                summary: summary,
+                weaknesses: weaknesses,
+                suggestions: suggestions,
+                artifactPath: nil
+            )
+            
             let slug = safeSlug([format, strategy, String(Int(Date().timeIntervalSince1970))].joined(separator: "-"))
             let jsonPath = "skills/pokemon-team-builder/teams/\(slug).json"
             let mdPath = "skills/pokemon-team-builder/teams/\(slug).md"
+            
             var saved = output
             saved.artifactPath = mdPath
+            
             let jsonData = try encoder.encode(saved)
             try jsonData.write(to: resolve(jsonPath), options: [.atomic])
             try pokemonMarkdown(output: saved, format: format, strategy: strategy).write(to: resolve(mdPath), atomically: true, encoding: .utf8)
+            
             appendEvent(type: "skill.completed", message: "Pokemon Team Builder saved \(mdPath).", metadata: ["skillId": manifest.id, "artifact": mdPath])
             refreshMetadata()
+            
             return finish(
                 action,
                 status: .persisted,
-                summary: "Pokemon team drafted and saved",
+                summary: "Pokemon team persisted to workspace",
                 output: [
                     "summary": saved.summary,
                     "members": saved.teamMembers.map(\.name).joined(separator: ", "),
@@ -953,7 +943,7 @@ final class OpenClawWorkspaceRuntime: ObservableObject {
                 artifacts: [jsonPath, mdPath]
             )
         } catch {
-            return finish(action, status: .failed, summary: "Pokemon team draft failed to save", error: error.localizedDescription)
+            return finish(action, status: .failed, summary: "Pokemon team persistence failed", error: error.localizedDescription)
         }
     }
 
@@ -1030,22 +1020,7 @@ final class OpenClawWorkspaceRuntime: ObservableObject {
         return "Chosen to cover \(role.lowercased()) while supporting the \(strategy) plan."
     }
 
-    private func battlePlan(for name: String, role: String, format: String, strategy: String) -> String {
-        switch role {
-        case "Lead / speed control":
-            return "Start or enter early, force tempo, and create the first safe switch for the \(strategy) core."
-        case "Physical breaker":
-            return "Pressure special walls and punish passive turns so the cleaner has an easier endgame."
-        case "Special attacker":
-            return "Attack from the opposite damage axis and exploit defensive pivots that wall the physical breaker."
-        case "Defensive pivot":
-            return "Absorb risky hits, scout the opponent's plan, and bring attackers in without spending momentum."
-        case "Utility support":
-            return "Patch matchup gaps with status, redirection, hazard control, screens, or emergency disruption."
-        default:
-            return "Stay healthy until the opponent's checks are weakened, then close the \(format.lowercased()) game."
-        }
-    }
+
 
     private func begin(kind: OpenClawActionKind, source: String, title: String, input: [String: String]) -> OpenClawActionRecord {
         let action = OpenClawActionRecord(id: UUID(), kind: kind, source: source, title: title, status: .queued, createdAt: .now, updatedAt: .now, input: input, output: [:], error: nil, artifacts: [], logs: [])
