@@ -1,15 +1,5 @@
 import SwiftUI
 
-enum BuddyAnimationMood {
-    case idle
-    case happy
-    case thinking
-    case working
-    case sleepy
-    case levelUp
-    case needsAttention
-}
-
 struct BuddyAsciiView: View {
     var buddy: BuddyInstance?
     var template: CouncilStarterBuddyTemplate?
