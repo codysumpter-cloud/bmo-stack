@@ -1,0 +1,292 @@
+{
+  "version": "1.0.0",
+  "ownerRepo": "BeMore-stack",
+  "canonicalRuntimeIdentity": "BeMore-stack",
+  "summary": "Canonical capability parity map for Hermes-style Buddy operation across iPhone app, linked accounts, linked runtime, and web/admin surfaces.",
+  "groups": [
+    {
+      "id": "companion",
+      "title": "Companion",
+      "description": "Day planning, follow-through, teaching, memory shaping, and Buddy care/training."
+    },
+    {
+      "id": "workspace",
+      "title": "Workspace",
+      "description": "Reading, writing, supervising, and exporting workspace artifacts."
+    },
+    {
+      "id": "research",
+      "title": "Research",
+      "description": "Web, docs, and repository discovery."
+    },
+    {
+      "id": "repo",
+      "title": "Repo",
+      "description": "GitHub/private repo access and git mutation through approved routes."
+    },
+    {
+      "id": "skills",
+      "title": "Skills",
+      "description": "Skill authoring, validation, install, equip, run, and supervision."
+    },
+    {
+      "id": "studio",
+      "title": "Studio",
+      "description": "Pixel Studio, animation planning, Builder Studio, and user-creation surfaces."
+    },
+    {
+      "id": "admin",
+      "title": "Admin",
+      "description": "Mission Control, builder/admin tools, profile management, and operator settings."
+    },
+    {
+      "id": "runtime",
+      "title": "Runtime",
+      "description": "Terminal/process execution, safe command routing, runtime resume, and deep operator actions."
+    }
+  ],
+  "trustBoundaries": [
+    {
+      "id": "native_app",
+      "title": "Native app",
+      "description": "Runs completely inside the iPhone BeMore app without external runtime requirements."
+    },
+    {
+      "id": "linked_account",
+      "title": "Linked account",
+      "description": "Requires a user-linked external account such as GitHub or ChatGPT/OpenAI."
+    },
+    {
+      "id": "linked_runtime",
+      "title": "Linked runtime",
+      "description": "Requires a paired BeMore/Hermes runtime such as the Mac/runtime layer."
+    },
+    {
+      "id": "web_shell",
+      "title": "Web shell",
+      "description": "Available through website/admin surfaces hosted in prismtek-site."
+    }
+  ],
+  "capabilities": [
+    {
+      "id": "buddy.chat",
+      "title": "Buddy Chat",
+      "group": "companion",
+      "permissions": ["event.emit"],
+      "routeMode": "native",
+      "trustBoundary": "native_app",
+      "appSurface": "Chat",
+      "notes": "Core Buddy conversation and everyday help."
+    },
+    {
+      "id": "buddy.train",
+      "title": "Buddy Training",
+      "group": "companion",
+      "permissions": ["workspace.write", "artifact.write"],
+      "routeMode": "native",
+      "trustBoundary": "native_app",
+      "appSurface": "Buddy",
+      "notes": "Tamagotchi-style care, growth, memory shaping, and training loops."
+    },
+    {
+      "id": "buddy.memory",
+      "title": "Buddy Memory",
+      "group": "companion",
+      "permissions": ["workspace.read", "workspace.write", "artifact.write"],
+      "routeMode": "native",
+      "trustBoundary": "native_app",
+      "appSurface": "Buddy / Results",
+      "notes": "Facts, preferences, session state, and durable memory artifacts."
+    },
+    {
+      "id": "workspace.read",
+      "title": "Workspace Read",
+      "group": "workspace",
+      "permissions": ["workspace.read"],
+      "routeMode": "native",
+      "trustBoundary": "native_app",
+      "appSurface": "Workspace / Results",
+      "notes": "Read app-owned BeMore workspace files and runtime-owned artifacts."
+    },
+    {
+      "id": "workspace.write",
+      "title": "Workspace Write",
+      "group": "workspace",
+      "permissions": ["workspace.write", "artifact.write"],
+      "routeMode": "native",
+      "trustBoundary": "native_app",
+      "appSurface": "Workspace / Results",
+      "notes": "Persist workspace edits and Buddy-created artifacts with receipts."
+    },
+    {
+      "id": "artifact.supervise",
+      "title": "Artifact Supervision",
+      "group": "workspace",
+      "permissions": ["workspace.read", "event.emit"],
+      "routeMode": "native",
+      "trustBoundary": "native_app",
+      "appSurface": "Results",
+      "notes": "Preview, inspect, and export generated artifacts."
+    },
+    {
+      "id": "web.read",
+      "title": "Web Research",
+      "group": "research",
+      "permissions": ["network.read", "event.emit"],
+      "routeMode": "native",
+      "trustBoundary": "native_app",
+      "appSurface": "Chat / Studio",
+      "notes": "Web browsing and documentation lookup."
+    },
+    {
+      "id": "github.read.public",
+      "title": "GitHub Public Read",
+      "group": "repo",
+      "permissions": ["network.read", "event.emit"],
+      "routeMode": "native",
+      "trustBoundary": "native_app",
+      "appSurface": "Chat / Studio",
+      "notes": "Search public repositories, issues, and code metadata."
+    },
+    {
+      "id": "github.read.private",
+      "title": "GitHub Private Read",
+      "group": "repo",
+      "permissions": ["network.read", "approval.request"],
+      "routeMode": "linked-account",
+      "trustBoundary": "linked_account",
+      "appSurface": "Settings / Chat",
+      "notes": "Requires linked GitHub account or approved runtime credentials."
+    },
+    {
+      "id": "git.mutate",
+      "title": "Git Mutate",
+      "group": "repo",
+      "permissions": ["workspace.write", "approval.request"],
+      "routeMode": "linked-runtime",
+      "trustBoundary": "linked_runtime",
+      "appSurface": "Mission Control / Chat",
+      "notes": "Requires paired runtime for real repo mutation and patch application."
+    },
+    {
+      "id": "skill.author",
+      "title": "Skill Authoring",
+      "group": "skills",
+      "permissions": ["workspace.write", "artifact.write", "approval.request"],
+      "routeMode": "native",
+      "trustBoundary": "native_app",
+      "appSurface": "Chat / Results",
+      "notes": "Teach, review, refine, validate, and approve reusable Buddy skills."
+    },
+    {
+      "id": "skill.run",
+      "title": "Skill Run",
+      "group": "skills",
+      "permissions": ["workspace.read", "workspace.write", "artifact.write"],
+      "routeMode": "native",
+      "trustBoundary": "native_app",
+      "appSurface": "Skills / Results",
+      "notes": "Run approved manifest-backed skills and persist their outputs."
+    },
+    {
+      "id": "pokemon.team-builder",
+      "title": "Pokemon Team Builder",
+      "group": "skills",
+      "permissions": ["workspace.read", "workspace.write", "artifact.write"],
+      "routeMode": "native",
+      "trustBoundary": "native_app",
+      "appSurface": "Skills / Results",
+      "notes": "Flagship real skill backed by receipts and saved artifacts."
+    },
+    {
+      "id": "studio.pixel",
+      "title": "Pixel Studio",
+      "group": "studio",
+      "permissions": ["workspace.write", "artifact.write"],
+      "routeMode": "native+web-shell",
+      "trustBoundary": "native_app",
+      "appSurface": "Studio",
+      "notes": "Pixel project brief, Buddy finish/improve/animate artifacts, and web Pixel Studio surface."
+    },
+    {
+      "id": "studio.pixel.animate",
+      "title": "Pixel Animation Assist",
+      "group": "studio",
+      "permissions": ["workspace.write", "artifact.write"],
+      "routeMode": "native",
+      "trustBoundary": "native_app",
+      "appSurface": "Studio / Chat",
+      "notes": "Buddy animation plans and finish passes for pixel projects."
+    },
+    {
+      "id": "admin.builder",
+      "title": "Builder Studio",
+      "group": "admin",
+      "permissions": ["admin.access"],
+      "routeMode": "web-shell",
+      "trustBoundary": "web_shell",
+      "appSurface": "Studio",
+      "notes": "Website builder/admin tool surfaced inside the app shell."
+    },
+    {
+      "id": "admin.mission-control",
+      "title": "Admin Mission Control",
+      "group": "admin",
+      "permissions": ["admin.access"],
+      "routeMode": "web-shell",
+      "trustBoundary": "web_shell",
+      "appSurface": "Studio",
+      "notes": "Website admin Mission Control surfaced inside the app shell."
+    },
+    {
+      "id": "profile.manage",
+      "title": "Profile Management",
+      "group": "admin",
+      "permissions": ["profile.manage"],
+      "routeMode": "web-shell",
+      "trustBoundary": "web_shell",
+      "appSurface": "Studio / Settings",
+      "notes": "User-created profiles and account surfaces."
+    },
+    {
+      "id": "runtime.exec.safe",
+      "title": "Safe Runtime Exec",
+      "group": "runtime",
+      "permissions": ["approval.request", "event.emit"],
+      "routeMode": "linked-runtime",
+      "trustBoundary": "linked_runtime",
+      "appSurface": "Mission Control / Chat",
+      "notes": "Controlled command execution routed through paired runtime."
+    },
+    {
+      "id": "runtime.exec.full",
+      "title": "Full Runtime Exec",
+      "group": "runtime",
+      "permissions": ["approval.request", "event.emit"],
+      "routeMode": "linked-runtime",
+      "trustBoundary": "linked_runtime",
+      "appSurface": "Mission Control",
+      "notes": "Deep operator execution only through paired runtime, never hidden in the app."
+    },
+    {
+      "id": "runtime.resume",
+      "title": "Runtime Resume",
+      "group": "runtime",
+      "permissions": ["workspace.read", "event.emit"],
+      "routeMode": "linked-runtime",
+      "trustBoundary": "linked_runtime",
+      "appSurface": "Mission Control / Results",
+      "notes": "Resume sessions, task/results, and open approvals from paired runtime."
+    },
+    {
+      "id": "account.chatgpt-link",
+      "title": "ChatGPT/OpenAI Account Link",
+      "group": "runtime",
+      "permissions": ["approval.request"],
+      "routeMode": "linked-account",
+      "trustBoundary": "linked_account",
+      "appSurface": "Settings",
+      "notes": "Requires a real OAuth client flow; contract present even if the app has not shipped it yet."
+    }
+  ]
+}
