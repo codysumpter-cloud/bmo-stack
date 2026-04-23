@@ -311,6 +311,17 @@
         "memory tier"
       ],
       "default_action": "run"
+    },
+    "sovereign-state-snapshot": {
+      "actions": [
+        "run"
+      ],
+      "triggers": [
+        "snapshot",
+        "save state",
+        "restore"
+      ],
+      "default_action": "run"
     }
   }
 }
