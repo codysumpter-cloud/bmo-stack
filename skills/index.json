@@ -263,6 +263,54 @@
         "pokemon champions generator"
       ],
       "default_action": "prd"
+    },
+    "memory-crystallization": {
+      "actions": [
+        "run"
+      ],
+      "triggers": [
+        "memory crystallization",
+        "crystallize memory",
+        "refine memory",
+        "consolidate memory"
+      ],
+      "default_action": "run"
+    },
+    "tool-failure-diagnostic": {
+      "actions": [
+        "run"
+      ],
+      "triggers": [
+        "tool failure",
+        "diagnostic",
+        "error recovery",
+        "failure analysis"
+      ],
+      "default_action": "run"
+    },
+    "local-inference-bridge": {
+      "actions": [
+        "run"
+      ],
+      "triggers": [
+        "local inference",
+        "bridge",
+        "offload",
+        "route to local"
+      ],
+      "default_action": "run"
+    },
+    "hierarchical-memory-index": {
+      "actions": [
+        "run"
+      ],
+      "triggers": [
+        "hierarchical memory",
+        "memory index",
+        "l1 l2 l3",
+        "memory tier"
+      ],
+      "default_action": "run"
     }
   }
 }
