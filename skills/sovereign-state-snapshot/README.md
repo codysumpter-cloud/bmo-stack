@@ -8,7 +8,8 @@ tags: [state, snapshot, risk-management, simulation]
 
 # Sovereign State Snapshotting
 
-This skill treats the agent's current session, memory, and tool-state as a single 'Save Game' file.
+## Purpose
+Provides a reliable mechanism to snapshot the agent's current state (including memory, task state, and tool state) to enable safe experimentation, risk-free refactoring, and instant rollback to a known-good state.
 
 ## The Snapshot Loop
 
