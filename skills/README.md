@@ -43,42 +43,28 @@ It is meant to make a focused workflow easier to execute correctly.
 
 ## Current skill set
   - `agent-automation/`
-    - Agent automation routines for scheduled council meetings and maintenance tasks
-  - `mission-control-enhancement/`
-    - Enhanced mission control with agent heartbeats, local token usage, and skill execution logs
+  - `bootstrap-recovery/`
+  - `browser-automation/`
+  - `ci-failure-diagnosis/`
   - `claw-code-harness/`
-    - repo-local wrapper around community `claw-code` manifest, command inventory, and tool inventory
+  - `context-sync/`
+  - `hierarchical-memory-index/`
+  - `local-inference-bridge/`
+  - `memory-crystallization/`
+  - `mission-control-enhancement/`
   - `omx-nim-coding/`
-    - Mission Control-facing OMX + Codex CLI + claw-code dispatch path using NVIDIA NIM free endpoints
+  - `openclaw-agent-split/`
+  - `pokemon-champions-builder-architect/`
+  - `pokemon-champions-builder-generator/`
+  - `pokemon-champions-team-lab/`
+  - `sandbox-debugging/`
+  - `skills-access-diagnosis/`
+  - `sovereign-state-snapshot/`
   - `telegram-coding-dispatch/`
-    - Telegram-friendly coding brief normalization and safe backend dispatch for vague phone-style requests
-
-- `openclaw-agent-split/`
-  - host-facing `main` plus sandboxed `bmo-tron` worker topology
-- `telegram-routing/`
-  - how Telegram should bind to `main` and what to do when it drifts
-- `bootstrap-recovery/`
-  - recovery steps for missing `.env`, Docker not running, or broken local bootstrap state
-- `context-sync/`
-  - host and repo context synchronization and when to use each sync mode
-- `browser-automation/`
-  - optional browser and UI automation guidance for sanctioned tasks
-- `skills-access-diagnosis/`
-  - diagnose why installed skills are missing, stuck, or not visible to the agent
-- `sandbox-debugging/`
-  - inspect and repair worker sandbox drift, policy mismatches, and missing containers
-- `ci-failure-diagnosis/`
-  - quickly classify failing GitHub checks before fixing the real owner path
-- `universal-intake/`
-  - read arbitrary user-provided links/files/media with best-effort fallbacks (web fetch, browser relay, yt-dlp, ffmpeg keyframes), then return actionable summaries and blockers
-- `video-review/`
-  - review and summarize online videos (especially YouTube) by extracting transcript + keyframes with local tools
-- `pokemon-champions-team-lab/`
-  - Hermes-ready live format team audit and legality-checking pack for Pokémon Champions
-- `pokemon-champions-builder-architect/`
-  - Hermes-ready deterministic builder/product architecture pack for Champions team-builder systems
-- `pokemon-champions-builder-generator/`
-  - Hermes-ready deliverables pack for PRDs, API specs, SwiftUI architecture, and JSON-schema-only contracts
+  - `telegram-routing/`
+  - `tool-failure-diagnostic/`
+  - `universal-intake/`
+  - `video-review/`
 
 ## Suggested skill format
 
