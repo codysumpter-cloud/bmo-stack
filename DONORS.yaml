@@ -1,8 +1,8 @@
 version: 1
 owner: 'codysumpter-cloud'
 generated_by: 'scripts/fork-governor.mjs'
-generated_at: '2026-04-24T13:37:51.186Z'
-total_forks: 34
+generated_at: '2026-04-24T17:56:36.124Z'
+total_forks: 44
 forks:
   - name: 'agentic-stack'
     full_name: 'codysumpter-cloud/agentic-stack'
@@ -30,6 +30,15 @@ forks:
     upstream_full_name: null
     archived: false
     sync_workflow_status: 'unchanged'
+    sync_workflow_path: '.github/workflows/sync-fork-upstream.yml'
+  - name: 'aseprite-windows-docker-build'
+    full_name: 'codysumpter-cloud/aseprite-windows-docker-build'
+    visibility: 'public'
+    default_branch: 'master'
+    html_url: 'https://github.com/codysumpter-cloud/aseprite-windows-docker-build'
+    upstream_full_name: null
+    archived: false
+    sync_workflow_status: 'created'
     sync_workflow_path: '.github/workflows/sync-fork-upstream.yml'
   - name: 'autoresearch'
     full_name: 'codysumpter-cloud/autoresearch'
@@ -67,6 +76,15 @@ forks:
     archived: false
     sync_workflow_status: 'unchanged'
     sync_workflow_path: '.github/workflows/sync-fork-upstream.yml'
+  - name: 'chumpy'
+    full_name: 'codysumpter-cloud/chumpy'
+    visibility: 'public'
+    default_branch: 'master'
+    html_url: 'https://github.com/codysumpter-cloud/chumpy'
+    upstream_full_name: null
+    archived: false
+    sync_workflow_status: 'created'
+    sync_workflow_path: '.github/workflows/sync-fork-upstream.yml'
   - name: 'claw-code'
     full_name: 'codysumpter-cloud/claw-code'
     visibility: 'public'
@@ -84,6 +102,15 @@ forks:
     upstream_full_name: null
     archived: false
     sync_workflow_status: 'unchanged'
+    sync_workflow_path: '.github/workflows/sync-fork-upstream.yml'
+  - name: 'docker-aseprite-linux'
+    full_name: 'codysumpter-cloud/docker-aseprite-linux'
+    visibility: 'public'
+    default_branch: 'master'
+    html_url: 'https://github.com/codysumpter-cloud/docker-aseprite-linux'
+    upstream_full_name: null
+    archived: false
+    sync_workflow_status: 'created'
     sync_workflow_path: '.github/workflows/sync-fork-upstream.yml'
   - name: 'gbrain'
     full_name: 'codysumpter-cloud/gbrain'
@@ -256,6 +283,33 @@ forks:
     archived: false
     sync_workflow_status: 'unchanged'
     sync_workflow_path: '.github/workflows/sync-fork-upstream.yml'
+  - name: 'mlc-llm'
+    full_name: 'codysumpter-cloud/mlc-llm'
+    visibility: 'public'
+    default_branch: 'main'
+    html_url: 'https://github.com/codysumpter-cloud/mlc-llm'
+    upstream_full_name: null
+    archived: false
+    sync_workflow_status: 'created'
+    sync_workflow_path: '.github/workflows/sync-fork-upstream.yml'
+  - name: 'mlx-swift'
+    full_name: 'codysumpter-cloud/mlx-swift'
+    visibility: 'public'
+    default_branch: 'main'
+    html_url: 'https://github.com/codysumpter-cloud/mlx-swift'
+    upstream_full_name: null
+    archived: false
+    sync_workflow_status: 'created'
+    sync_workflow_path: '.github/workflows/sync-fork-upstream.yml'
+  - name: 'mlx-swift-examples'
+    full_name: 'codysumpter-cloud/mlx-swift-examples'
+    visibility: 'public'
+    default_branch: 'main'
+    html_url: 'https://github.com/codysumpter-cloud/mlx-swift-examples'
+    upstream_full_name: null
+    archived: false
+    sync_workflow_status: 'created'
+    sync_workflow_path: '.github/workflows/sync-fork-upstream.yml'
   - name: 'moonlight-docs'
     full_name: 'codysumpter-cloud/moonlight-docs'
     visibility: 'public'
@@ -283,6 +337,33 @@ forks:
     archived: false
     sync_workflow_status: 'unchanged'
     sync_workflow_path: '.github/workflows/sync-fork-upstream.yml'
+  - name: 'pixellab-js'
+    full_name: 'codysumpter-cloud/pixellab-js'
+    visibility: 'public'
+    default_branch: 'master'
+    html_url: 'https://github.com/codysumpter-cloud/pixellab-js'
+    upstream_full_name: null
+    archived: false
+    sync_workflow_status: 'created'
+    sync_workflow_path: '.github/workflows/sync-fork-upstream.yml'
+  - name: 'pixellab-mcp'
+    full_name: 'codysumpter-cloud/pixellab-mcp'
+    visibility: 'public'
+    default_branch: 'master'
+    html_url: 'https://github.com/codysumpter-cloud/pixellab-mcp'
+    upstream_full_name: null
+    archived: false
+    sync_workflow_status: 'created'
+    sync_workflow_path: '.github/workflows/sync-fork-upstream.yml'
+  - name: 'pixellab-python'
+    full_name: 'codysumpter-cloud/pixellab-python'
+    visibility: 'public'
+    default_branch: 'master'
+    html_url: 'https://github.com/codysumpter-cloud/pixellab-python'
+    upstream_full_name: null
+    archived: false
+    sync_workflow_status: 'created'
+    sync_workflow_path: '.github/workflows/sync-fork-upstream.yml'
   - name: 'sideband'
     full_name: 'codysumpter-cloud/sideband'
     visibility: 'public'
@@ -300,6 +381,15 @@ forks:
     upstream_full_name: null
     archived: false
     sync_workflow_status: 'unchanged'
+    sync_workflow_path: '.github/workflows/sync-fork-upstream.yml'
+  - name: 'tamagoscii'
+    full_name: 'codysumpter-cloud/tamagoscii'
+    visibility: 'public'
+    default_branch: 'claude/ascii-tamagotchi-game-kQSLl'
+    html_url: 'https://github.com/codysumpter-cloud/tamagoscii'
+    upstream_full_name: null
+    archived: false
+    sync_workflow_status: 'created'
     sync_workflow_path: '.github/workflows/sync-fork-upstream.yml'
   - name: 'twenty'
     full_name: 'codysumpter-cloud/twenty'
