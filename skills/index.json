@@ -322,6 +322,97 @@
         "restore"
       ],
       "default_action": "run"
+    },
+    "skillify": {
+      "actions": [
+        "run"
+      ],
+      "triggers": [
+        "skillify this",
+        "skillify",
+        "is this a skill?",
+        "make this proper",
+        "add tests and evals for this",
+        "check skill completeness"
+      ],
+      "default_action": "run"
+    },
+    "cron-scheduler": {
+      "actions": [
+        "doctor",
+        "schedule",
+        "list",
+        "run"
+      ],
+      "triggers": [
+        "schedule a job",
+        "cron",
+        "quiet hours",
+        "what jobs are running"
+      ],
+      "default_action": "doctor"
+    },
+    "mcp-integration": {
+      "actions": [
+        "list",
+        "call",
+        "generate-cli",
+        "inspect",
+        "emit-ts"
+      ],
+      "triggers": [
+        "mcp list",
+        "mcp call",
+        "mcp generate-cli",
+        "mcp inspect",
+        "mcp emit-ts"
+      ],
+      "default_action": "list"
+    },
+    "idea-ingest": {
+      "actions": [
+        "run"
+      ],
+      "triggers": [
+        "idea ingest"
+      ],
+      "default_action": "run"
+    },
+    "media-ingest": {
+      "actions": [
+        "run"
+      ],
+      "triggers": [
+        "media ingest"
+      ],
+      "default_action": "run"
+    },
+    "meeting-ingestion": {
+      "actions": [
+        "run"
+      ],
+      "triggers": [
+        "meeting ingestion"
+      ],
+      "default_action": "run"
+    },
+    "enrich": {
+      "actions": [
+        "run"
+      ],
+      "triggers": [
+        "enrich"
+      ],
+      "default_action": "run"
+    },
+    "daily-task-manager": {
+      "actions": [
+        "run"
+      ],
+      "triggers": [
+        "daily task manager"
+      ],
+      "default_action": "run"
     }
   }
 }
