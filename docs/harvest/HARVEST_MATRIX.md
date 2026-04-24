@@ -1,5 +1,7 @@
 # Donor Harvest Matrix & Assimilation Roadmap
 
+## Problem
+The capability harvest process was manual and undocumented, making it hard to track which donors had which features and the order of assimilation.
 This document tracks the systematic assimilation of capabilities from donor forks into the canonical repos.
 
 ## Canonical Boundary Mapping
