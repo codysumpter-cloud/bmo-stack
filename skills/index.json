@@ -263,6 +263,19 @@
         "pokemon champions generator"
       ],
       "default_action": "prd"
+    },
+    "evolution": {
+      "actions": [
+        "plan",
+        "execute",
+        "status"
+      ],
+      "triggers": [
+        "evolution plan",
+        "execute evolution",
+        "evolution status"
+      ],
+      "default_action": "status"
     }
   }
 }
