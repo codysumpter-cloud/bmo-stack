@@ -1,0 +1,61 @@
+version: 1
+owner: codysumpter-cloud
+generated_by: scripts/fork-governor.mjs
+status: bootstrap_snapshot
+notes:
+  - This file is maintained by the fork governor workflow.
+  - The bootstrap snapshot below reflects the currently visible fork inventory available during setup.
+  - The first successful authenticated governor run will refresh this file from live owner-visible GitHub state, including newly added forks.
+generated_at: 2026-04-24T00:00:00Z
+bootstrap_snapshot_count: 25
+forks:
+  - name: claw-code
+    full_name: codysumpter-cloud/claw-code
+  - name: nemoclaw
+    full_name: codysumpter-cloud/nemoclaw
+  - name: hermes-ecosystem
+    full_name: codysumpter-cloud/hermes-ecosystem
+  - name: hermes-hudui
+    full_name: codysumpter-cloud/hermes-hudui
+  - name: hermes-webui
+    full_name: codysumpter-cloud/hermes-webui
+  - name: gbrain
+    full_name: codysumpter-cloud/gbrain
+  - name: agentic-stack
+    full_name: codysumpter-cloud/agentic-stack
+  - name: hermes-workspace
+    full_name: codysumpter-cloud/hermes-workspace
+  - name: hermes-control-interface
+    full_name: codysumpter-cloud/hermes-control-interface
+  - name: awesome-hermes-agent
+    full_name: codysumpter-cloud/awesome-hermes-agent
+  - name: hermes-desktop
+    full_name: codysumpter-cloud/hermes-desktop
+  - name: bevy
+    full_name: codysumpter-cloud/bevy
+  - name: mcporter
+    full_name: codysumpter-cloud/mcporter
+  - name: hermes-paperclip-adapter
+    full_name: codysumpter-cloud/hermes-paperclip-adapter
+  - name: hermes-agent-self-evolution
+    full_name: codysumpter-cloud/hermes-agent-self-evolution
+  - name: superpowers-zh
+    full_name: codysumpter-cloud/superpowers-zh
+  - name: ml-intern
+    full_name: codysumpter-cloud/ml-intern
+  - name: hermes-lcm
+    full_name: codysumpter-cloud/hermes-lcm
+  - name: hermes-agent-orange-book
+    full_name: codysumpter-cloud/hermes-agent-orange-book
+  - name: hermes-agent
+    full_name: codysumpter-cloud/hermes-agent
+  - name: context-mode
+    full_name: codysumpter-cloud/context-mode
+  - name: learn-hermes-agent
+    full_name: codysumpter-cloud/learn-hermes-agent
+  - name: agentmemory
+    full_name: codysumpter-cloud/agentmemory
+  - name: LiteRT-LM
+    full_name: codysumpter-cloud/LiteRT-LM
+  - name: Hermes-Wiki
+    full_name: codysumpter-cloud/Hermes-Wiki
