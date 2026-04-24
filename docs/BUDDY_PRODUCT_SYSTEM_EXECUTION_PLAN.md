@@ -2,6 +2,9 @@
 
 This document turns the Buddy manifesto into a repo-by-repo execution plan.
 
+
+## Problem
+Buddy product architecture, repo ownership, and crown-jewel logic boundaries were drifting across repos without one explicit execution map.
 ## Goal
 
 Build Buddies as a real Prismtek product family with clear repo boundaries:
