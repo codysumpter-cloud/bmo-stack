@@ -413,6 +413,195 @@
         "daily task manager"
       ],
       "default_action": "run"
+    },
+    "receiving-code-review": {
+      "actions": [
+        "run"
+      ],
+      "triggers": [
+        "receiving-code-review"
+      ],
+      "default_action": "run"
+    },
+    "systematic-debugging": {
+      "actions": [
+        "run"
+      ],
+      "triggers": [
+        "systematic-debugging"
+      ],
+      "default_action": "run"
+    },
+    "chinese-git-workflow": {
+      "actions": [
+        "run"
+      ],
+      "triggers": [
+        "chinese-git-workflow"
+      ],
+      "default_action": "run"
+    },
+    "test-driven-development": {
+      "actions": [
+        "run"
+      ],
+      "triggers": [
+        "test-driven-development"
+      ],
+      "default_action": "run"
+    },
+    "brainstorming": {
+      "actions": [
+        "run"
+      ],
+      "triggers": [
+        "brainstorming"
+      ],
+      "default_action": "run"
+    },
+    "writing-plans": {
+      "actions": [
+        "run"
+      ],
+      "triggers": [
+        "writing-plans"
+      ],
+      "default_action": "run"
+    },
+    "dispatching-parallel-agents": {
+      "actions": [
+        "run"
+      ],
+      "triggers": [
+        "dispatching-parallel-agents"
+      ],
+      "default_action": "run"
+    },
+    "chinese-documentation": {
+      "actions": [
+        "run"
+      ],
+      "triggers": [
+        "chinese-documentation"
+      ],
+      "default_action": "run"
+    },
+    "requesting-code-review": {
+      "actions": [
+        "run"
+      ],
+      "triggers": [
+        "requesting-code-review"
+      ],
+      "default_action": "run"
+    },
+    "verification-before-completion": {
+      "actions": [
+        "run"
+      ],
+      "triggers": [
+        "verification-before-completion"
+      ],
+      "default_action": "run"
+    },
+    "workspace-dispatch": {
+      "actions": [
+        "run"
+      ],
+      "triggers": [
+        "workspace-dispatch"
+      ],
+      "default_action": "run"
+    },
+    "finishing-a-development-branch": {
+      "actions": [
+        "run"
+      ],
+      "triggers": [
+        "finishing-a-development-branch"
+      ],
+      "default_action": "run"
+    },
+    "using-superpowers": {
+      "actions": [
+        "run"
+      ],
+      "triggers": [
+        "using-superpowers"
+      ],
+      "default_action": "run"
+    },
+    "using-git-worktrees": {
+      "actions": [
+        "run"
+      ],
+      "triggers": [
+        "using-git-worktrees"
+      ],
+      "default_action": "run"
+    },
+    "writing-skills": {
+      "actions": [
+        "run"
+      ],
+      "triggers": [
+        "writing-skills"
+      ],
+      "default_action": "run"
+    },
+    "chinese-code-review": {
+      "actions": [
+        "run"
+      ],
+      "triggers": [
+        "chinese-code-review"
+      ],
+      "default_action": "run"
+    },
+    "mcp-builder": {
+      "actions": [
+        "run"
+      ],
+      "triggers": [
+        "mcp-builder"
+      ],
+      "default_action": "run"
+    },
+    "workflow-runner": {
+      "actions": [
+        "run"
+      ],
+      "triggers": [
+        "workflow-runner"
+      ],
+      "default_action": "run"
+    },
+    "subagent-driven-development": {
+      "actions": [
+        "run"
+      ],
+      "triggers": [
+        "subagent-driven-development"
+      ],
+      "default_action": "run"
+    },
+    "executing-plans": {
+      "actions": [
+        "run"
+      ],
+      "triggers": [
+        "executing-plans"
+      ],
+      "default_action": "run"
+    },
+    "chinese-commit-conventions": {
+      "actions": [
+        "run"
+      ],
+      "triggers": [
+        "chinese-commit-conventions"
+      ],
+      "default_action": "run"
     }
   }
 }
