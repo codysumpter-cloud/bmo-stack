@@ -1,5 +1,14 @@
 # Donor Harvest Matrix & Assimilation Roadmap
 
+
+## Rollback plan
+Revert the PR to remove the harvest matrix.
+
+## Verification plan
+Ensure readiness check passes and verify file exists and is properly formatted.
+
+## Smallest useful wedge
+Land the HARVEST_MATRIX.md to freeze the capability map.
 ## Problem
 The capability harvest process was manual and undocumented, making it hard to track which donors had which features and the order of assimilation.
 This document tracks the systematic assimilation of capabilities from donor forks into the canonical repos.
