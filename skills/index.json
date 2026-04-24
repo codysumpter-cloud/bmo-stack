@@ -605,17 +605,16 @@
     },
     "evolution": {
       "actions": [
-        "audit",
-        "mutate",
-        "run"
+        "plan",
+        "execute",
+        "status"
       ],
       "triggers": [
-        "evolution",
-        "self-recursive evolution",
-        "kernel mutation",
-        "buddy-evolve"
+        "evolution plan",
+        "execute evolution",
+        "evolution status"
       ],
-      "default_action": "audit"
+      "default_action": "status"
     }
   }
 }
