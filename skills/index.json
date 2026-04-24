@@ -602,6 +602,20 @@
         "chinese-commit-conventions"
       ],
       "default_action": "run"
+    },
+    "evolution": {
+      "actions": [
+        "audit",
+        "mutate",
+        "run"
+      ],
+      "triggers": [
+        "evolution",
+        "self-recursive evolution",
+        "kernel mutation",
+        "buddy-evolve"
+      ],
+      "default_action": "audit"
     }
   }
 }
