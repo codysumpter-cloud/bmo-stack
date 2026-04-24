@@ -7,6 +7,7 @@ from __future__ import annotations
 import logging
 import os
 import sqlite3
+import re
 from typing import Iterable, Sequence
 
 logger = logging.getLogger(__name__)
@@ -213,34 +214,49 @@ def _fts_needs_rebuild(conn: sqlite3.Connection, spec: ExternalContentFtsSpec) -
 def _drop_fts_table(conn: sqlite3.Connection, table_name: str) -> None:
     conn.execute(f"DROP TABLE IF EXISTS {quote_sql_identifier(table_name)}")
     for shadow_name in get_fts_shadow_table_names(table_name):
-        conn.execute(f"DROP TABLE IF EXISTS {quote_sql_identifier(shadow_name)}")\n\n\ndef _extract_trigger_name(trigger_sql: str) -> str | None:
+        conn.execute(f"DROP TABLE IF EXISTS {quote_sql_identifier(shadow_name)}")
+
+
+def _extract_trigger_name(trigger_sql: str) -> str | None:
     match = re.search(
-        r\"CREATE\\s+TRIGGER\\s+(?:IF\\s+NOT\\s+EXISTS\\s+)?(?:\\\"([^\\\"]+)\\\"|([A-Za-z_][A-Za-z0-9_]*))\",
+        r"CREATE\s+TRIGGER\s+(?:IF\s+NOT\s+EXISTS\s+)?(?:\"([^\"]+)\"|([A-Za-z_][A-Za-z0-9_]*))",
         trigger_sql,
         re.IGNORECASE | re.DOTALL,
     )
     if not match:
         return None
-    return match.group(1) or match.group(2)\n\n\ndef _drop_fts_triggers(conn: sqlite3.Connection, trigger_sqls: Sequence[str]) -> None:
+    return match.group(1) or match.group(2)
+
+
+def _drop_fts_triggers(conn: sqlite3.Connection, trigger_sqls: Sequence[str]) -> None:
     for trigger_sql in trigger_sqls:
         trigger_name = _extract_trigger_name(trigger_sql)
         if trigger_name:
-            conn.execute(f\"DROP TRIGGER IF EXISTS {quote_sql_identifier(trigger_name)}\")\n\n\ndef _drop_fts_artifacts(conn: sqlite3.Connection, spec: ExternalContentFtsSpec) -> None:
+            conn.execute(f"DROP TRIGGER IF EXISTS {quote_sql_identifier(trigger_name)}")
+
+
+def _drop_fts_artifacts(conn: sqlite3.Connection, spec: ExternalContentFtsSpec) -> None:
     _drop_fts_triggers(conn, spec.trigger_sqls)
-    _drop_fts_table(conn, spec.table_name)\n\n\ndef _check_disk_space(db_path: str) -> bool:
+    _drop_fts_table(conn, spec.table_name)
+
+
+def _check_disk_space(db_path: str) -> bool:
     try:
-        parent = os.path.dirname(os.path.abspath(db_path)) or \".\"
+        parent = os.path.dirname(os.path.abspath(db_path)) or "."
         usage = os.statvfs(parent)
         return usage.f_bavail * usage.f_frsize >= _MIN_DISK_SPACE_BYTES
     except OSError:
-        return True\n\n\ndef ensure_external_content_fts(conn: sqlite3.Connection, spec: ExternalContentFtsSpec) -> None:
+        return True
+
+
+def ensure_external_content_fts(conn: sqlite3.Connection, spec: ExternalContentFtsSpec) -> None:
     if _fts_needs_rebuild(conn, spec):
-        db_path = conn.execute(\"PRAGMA database_list\").fetchone()
+        db_path = conn.execute("PRAGMA database_list").fetchone()
         if db_path:
             db_file = db_path[2]
             if db_file and not _check_disk_space(db_file):
                 logger.warning(
-                    \"Low disk space for FTS rebuild of '%s' (%d MB needed), degrading to LIKE search\",
+                    "Low disk space for FTS rebuild of '%s' (%d MB needed), degrading to LIKE search",
                     spec.table_name,
                     _MIN_DISK_SPACE_BYTES // (1024 * 1024),
                 )
@@ -248,10 +264,62 @@ def _drop_fts_table(conn: sqlite3.Connection, table_name: str) -> None:
                 return
         _drop_fts_table(conn, spec.table_name)
         conn.execute(
-            f\"\"\"\n            CREATE VIRTUAL TABLE {quote_sql_identifier(spec.table_name)} USING fts5(\n                {quote_sql_identifier(spec.indexed_column)},\n                content={quote_sql_identifier(spec.content_table)},\n                content_rowid={quote_sql_identifier(spec.content_rowid)}\n            )\n            \"\"\"\n        )
+            f"""
+            CREATE VIRTUAL TABLE {quote_sql_identifier(spec.table_name)} USING fts5(
+                {quote_sql_identifier(spec.indexed_column)},
+                content={quote_sql_identifier(spec.content_table)},
+                content_rowid={quote_sql_identifier(spec.content_rowid)}
+            )
+            """
+        )
         conn.execute(
-            f\"INSERT INTO {quote_sql_identifier(spec.table_name)}({quote_sql_identifier(spec.table_name)}) VALUES('rebuild')\"\n        )
-\n\n    for trigger_sql in spec.trigger_sqls:
-        conn.execute(trigger_sql)\n\n\ndef run_versioned_migrations(conn: sqlite3.Connection) -> None:
+            f"INSERT INTO {quote_sql_identifier(spec.table_name)}({quote_sql_identifier(spec.table_name)}) VALUES('rebuild')"
+        )
+
+    for trigger_sql in spec.trigger_sqls:
+        conn.execute(trigger_sql)
+
+
+def run_versioned_migrations(conn: sqlite3.Connection) -> None:
     ensure_metadata_table(conn)
-    ensure_migration_state_table(conn)\n\n    current_version = get_schema_version(conn)\n    if current_version < 2:\n        mark_migration_step_complete(conn, \"v2_external_content_fts_triggers\")\n        current_version = 2\n\n    if current_version < 3:\n        ensure_lifecycle_state_table(conn)\n        mark_migration_step_complete(conn, \"v3_lifecycle_state\")\n        current_version = 3\n    else:\n        ensure_lifecycle_state_table(conn)\n\n    ensure_lifecycle_state_columns(conn)\n    if current_version < 4:\n        mark_migration_step_complete(conn, \"v4_lifecycle_debt_columns\")\n        current_version = 4\n\n    set_schema_version(conn, current_version)\n
+    ensure_migration_state_table(conn)
+
+    # Ensure the core nodes table exists before any other migrations/updates
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS summary_nodes (
+            node_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            session_id TEXT NOT NULL,
+            depth INTEGER NOT NULL,
+            summary TEXT,
+            token_count INTEGER NOT NULL DEFAULT 0,
+            source_token_count INTEGER NOT NULL DEFAULT 0,
+            source_ids TEXT,
+            source_type TEXT,
+            created_at REAL NOT NULL DEFAULT (strftime('%s','now')),
+            earliest_at REAL,
+            latest_at REAL,
+            expand_hint TEXT
+        )
+        """
+    )
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_nodes_session_depth ON summary_nodes(session_id, depth)")
+
+    current_version = get_schema_version(conn)
+    if current_version < 2:
+        mark_migration_step_complete(conn, "v2_external_content_fts_triggers")
+        current_version = 2
+
+    if current_version < 3:
+        ensure_lifecycle_state_table(conn)
+        mark_migration_step_complete(conn, "v3_lifecycle_state")
+        current_version = 3
+    else:
+        ensure_lifecycle_state_table(conn)
+
+    ensure_lifecycle_state_columns(conn)
+    if current_version < 4:
+        mark_migration_step_complete(conn, "v4_lifecycle_debt_columns")
+        current_version = 4
+
+    set_schema_version(conn, current_version)

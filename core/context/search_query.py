@@ -7,80 +7,82 @@ from __future__ import annotations
 import re
 from typing import List
 
+AGE_DECAY_RATE = 0.001
+
 _CJK_RE = re.compile(
     r"["
-    r"\\u3400-\\u4dbf"
-    r"\\u4e00-\\u9fff"
-    r"\\u3000-\\u303f"
-    r"\\u3040-\\u30ff"
-    r"\\uac00-\\ud7af"
-    r"\\uff00-\\uffef"
+    r"\u3400-\u4dbf"
+    r"\u4e00-\u9fff"
+    r"\u3000-\u303f"
+    r"\u3040-\u30ff"
+    r"\uac00-\ud7af"
+    r"\uff00-\uffef"
     r"]"
 )
 _EMOJI_RE = re.compile(
     r"["
-    r"\\u2600-\\u27bf"
-    r"\\U0001F300-\\U0001FAFF"
+    r"\u2600-\u27bf"
+    r"\U0001F300-\U0001FAFF"
     r"]"
 )
 _QUOTED_PHRASE_RE = re.compile(r'\"([^\"]+)\"')
 _BOOLEAN_OPERATORS = {"AND", "OR", "NOT", "NEAR"}
 _RISKY_FTS_TOKEN_RE = re.compile(r"[\u0000-\u001f\u007f-\u009f]")
 _SPLIT_PUNCT_RE = re.compile(r"[-:/]+")
-_STRIP_EDGE_PUNCT = \"\\\"'()[]{}.,;\"
-_FTS5_SPECIAL_CHARS = frozenset('\"()*^-:{}')
+_STRIP_EDGE_PUNCT = "\"'()[]{}.,;"
+_FTS5_SPECIAL_CHARS = frozenset('"()*^-:{}')
 
 
 def _sanitize_unquoted_fts5_fragment(text: str) -> str:
-    return \"\".join(\" \" if char in _FTS5_SPECIAL_CHARS else char for char in text)
+    return " ".join(" " if char in _FTS5_SPECIAL_CHARS else char for char in text)
 
 
 def sanitize_fts5_query(query: str) -> str:
-    \"\"\"Strip FTS5 syntax operators while preserving balanced phrase quotes.\"\"\"
+    """Strip FTS5 syntax operators while preserving balanced phrase quotes."""
     if not query:
-        return \"\"
+        return ""
 
     result: list[str] = []
     quote_buffer: list[str] = []
     in_quote = False
     for char in query:
-        if char == '\"':
+        if char == '"':
             if in_quote:
-                result.append('\"')
+                result.append('"')
                 result.extend(quote_buffer)
-                result.append('\"')
+                result.append('"')
                 quote_buffer = []
                 in_quote = False
             else:
                 if result and not result[-1].isspace():
-                    result.append(\" \")
+                    result.append(" ")
                 in_quote = True
                 quote_buffer = []
             continue
         if in_quote:
             quote_buffer.append(char)
             continue
-        result.append(\" \" if char in _FTS5_SPECIAL_CHARS else char)
+        result.append(" " if char in _FTS5_SPECIAL_CHARS else char)
     if in_quote and quote_buffer:
-        result.extend(_sanitize_unquoted_fts5_fragment(\"\".join(quote_buffer)))
-    return \"\".join(result).strip()
+        result.extend(_sanitize_unquoted_fts5_fragment("".join(quote_buffer)))
+    return "".join(result).strip()
 
 
 def contains_cjk(text: str) -> bool:
-    return bool(_CJK_RE.search(text or \"\"))
+    return bool(_CJK_RE.search(text or ""))
 
 
 def contains_emoji(text: str) -> bool:
-    return bool(_EMOJI_RE.search(text or \"\"))
+    return bool(_EMOJI_RE.search(text or ""))
 
 
 def contains_risky_fts_ascii(text: str) -> bool:
-    raw = (text or \"\").strip()
+    raw = (text or "").strip()
     if not raw:
         return False
-    if raw.count('\"') % 2:
+    if raw.count('"') % 2:
         return True
-    text_without_phrases = _QUOTED_PHRASE_RE.sub(\" \", raw)
+    text_without_phrases = _QUOTED_PHRASE_RE.sub(" ", raw)
     return bool(_RISKY_FTS_TOKEN_RE.search(text_without_phrases))
 
 
@@ -89,7 +91,7 @@ def requires_like_fallback(query: str) -> bool:
 
 
 def _token_variants(token: str) -> List[str]:
-    cleaned = (token or \"\").strip().strip(_STRIP_EDGE_PUNCT)
+    cleaned = (token or "").strip().strip(_STRIP_EDGE_PUNCT)
     if not cleaned:
         return []
     if cleaned.upper() in _BOOLEAN_OPERATORS:
@@ -111,7 +113,7 @@ def _token_variants(token: str) -> List[str]:
 
 
 def extract_search_terms(query: str) -> List[str]:
-    text = (query or \"\").strip()
+    text = (query or "").strip()
     if not text:
         return []
 
@@ -121,7 +123,7 @@ def extract_search_terms(query: str) -> List[str]:
         if cleaned:
             terms.append(cleaned)
 
-    text_without_phrases = _QUOTED_PHRASE_RE.sub(\" \", text)
+    text_without_phrases = _QUOTED_PHRASE_RE.sub(" ", text)
     for token in text_without_phrases.split():
         terms.extend(_token_variants(token))
 
@@ -140,23 +142,24 @@ def extract_search_terms(query: str) -> List[str]:
 
 
 def extract_quoted_phrases(query: str) -> List[str]:
-    return [phrase.strip() for phrase in _QUOTED_PHRASE_RE.findall(query or \"\") if phrase.strip()]
+    return [phrase.strip() for phrase in _QUOTED_PHRASE_RE.findall(query or "") if phrase.strip()]
 
 
 def escape_like(term: str) -> str:
-    return term.replace(\"\\\\\", \"\\\\\\\\\").replace(\"%\", \"\\\\%\").replace(\"_\", \"\\\\_\")
+    # Escape the escape character first, then the wildcards.
+    return term.replace("|", "||").replace("%", "|%").replace("_", "|_")
 
 
 def count_term_matches(text: str, term: str) -> int:
-    haystack = (text or \"\")
-    needle = (term or \"\")
+    haystack = (text or "")
+    needle = (term or "")
     if not haystack or not needle:
         return 0
     return haystack.lower().count(needle.lower())
 
 
 def compute_directness_score(text: str, terms: List[str], phrases: List[str] | None = None) -> float:
-    content = text or \"\"
+    content = text or ""
     if not content:
         return 0.0
 
@@ -164,7 +167,7 @@ def compute_directness_score(text: str, terms: List[str], phrases: List[str] | N
     total_hits = 0
     non_phrase_unique_hits = 0
     non_phrase_total_hits = 0
-    normalized_phrases = {(phrase or \"\").strip().lower() for phrase in (phrases or []) if (phrase or \"\").strip()}
+    normalized_phrases = {(phrase or "").strip().lower() for phrase in (phrases or []) if (phrase or "").strip()}
     for term in terms:
         matches = count_term_matches(content, term)
         if matches > 0:
@@ -190,7 +193,7 @@ def compute_directness_score(text: str, terms: List[str], phrases: List[str] | N
 
     if phrases:
         for phrase in phrases:
-            normalized_phrase = (phrase or \"\").strip().lower()
+            normalized_phrase = (phrase or "").strip().lower()
             if not normalized_phrase:
                 continue
             phrase_occurrences = lowered.count(normalized_phrase)
@@ -201,7 +204,7 @@ def compute_directness_score(text: str, terms: List[str], phrases: List[str] | N
             for segment in segments:
                 segment_tokens = [
                     token.lower()
-                    for token in _WORD_RE.findall(segment)
+                    for token in re.findall(r'\w+', segment)
                     if any(char.isalpha() for char in token)
                 ]
                 gap_unique_counts.append(len(set(segment_tokens)))
@@ -213,4 +216,65 @@ def compute_directness_score(text: str, terms: List[str], phrases: List[str] | N
             if all(count == 0 for count in interior_gap_counts) and tail_gap_count <= 2:
                 score -= min(extra_occurrences, 3) * 1.0
 
-    return score\n\n\ndef _is_precise_query_shape(terms: List[str], phrases: List[str] | None = None) -> bool:\n    if len(terms) == 1:\n        return True\n    return len(phrases or []) == 1 and len(terms) <= 2\n\n\ndef should_widen_candidate_fetch(terms: List[str], phrases: List[str] | None = None) -> bool:\n    return _is_precise_query_shape(terms, phrases)\n\n\ndef should_apply_directness_rank_adjustment(terms: List[str], phrases: List[str] | None = None) -> bool:\n    return _is_precise_query_shape(terms, phrases)\n\n\ndef compute_directness_rank_bonus_upper_bound(terms: List[str], phrases: List[str] | None = None) -> float:\n    return float((len(terms) * 5) + (len(phrases or []) * 8))\n\n\ndef compute_search_fetch_limit(limit: int, terms: List[str], phrases: List[str] | None = None) -> int:\n    base = max(limit * 5, limit, 20)\n    if should_widen_candidate_fetch(terms, phrases):\n        return max(base, limit * 10, 50)\n    return base\n\n\ndef compute_like_fallback_fetch_limit(limit: int, terms: List[str], phrases: List[str] | None = None) -> int:\n    \\\"\\\"\\\"Bound LIKE fallback candidate rows before Python-side scoring/sorting.\\\"\\\"\\\"\\n    return compute_search_fetch_limit(limit, terms, phrases)\n\n\ndef compute_search_candidate_cap(limit: int, terms: List[str], phrases: List[str] | None = None) -> int:\n    return min(max(limit * 20, limit, 50), 5_000)\n\n\ndef normalize_search_sort(sort: str | None) -> str:\n    \\\"\\\"\\\"Normalize sort parameter to one of: recency, relevance, hybrid.\\\"\\\"\\\"\\n    normalized = (sort or \\\"recency\\\").strip().lower()\n    return normalized if normalized in {\\\"recency\\\", \\\"relevance\\\", \\\"hybrid\\\"} else \\\"recency\\\"\n\n\ndef build_snippet(text: str, terms: List[str], width: int = 80) -> str:\n    content = (text or \\\"\\\")\n    if not content:\n        return \\\"\\\"\n    lowered = content.lower()\n    for term in terms:\n    if not term:\n        continue\n    idx = lowered.find(term.lower())\n    if idx >= 0:\n        start = max(0, idx - width // 2)\n        end = min(len(content), idx + len(term) + width // 2)\n        snippet = content[start:end]\n        if start > 0:\n            snippet = \\\"...\\\" + snippet\n        if end < len(content):\n            snippet = snippet + \\\"...\\\"\n        return snippet\n    return content[:width] + (\\\"...\\\" if len(content) > width else \\\"\\\")\n
+    return score
+
+
+def _is_precise_query_shape(terms: List[str], phrases: List[str] | None = None) -> bool:
+    if len(terms) == 1:
+        return True
+    return len(phrases or []) == 1 and len(terms) <= 2
+
+
+def should_widen_candidate_fetch(terms: List[str], phrases: List[str] | None = None) -> bool:
+    return _is_precise_query_shape(terms, phrases)
+
+
+def should_apply_directness_rank_adjustment(terms: List[str], phrases: List[str] | None = None) -> bool:
+    return _is_precise_query_shape(terms, phrases)
+
+
+def compute_directness_rank_bonus_upper_bound(terms: List[str], phrases: List[str] | None = None) -> float:
+    return float((len(terms) * 5) + (len(phrases or []) * 8))
+
+
+def compute_search_fetch_limit(limit: int, terms: List[str], phrases: List[str] | None = None) -> int:
+    base = max(limit * 5, limit, 20)
+    if should_widen_candidate_fetch(terms, phrases):
+        return max(base, limit * 10, 50)
+    return base
+
+
+def compute_like_fallback_fetch_limit(limit: int, terms: List[str], phrases: List[str] | None = None) -> int:
+    """Bound LIKE fallback candidate rows before Python-side scoring/sorting."""
+    return compute_search_fetch_limit(limit, terms, phrases)
+
+
+def compute_search_candidate_cap(limit: int, terms: List[str], phrases: List[str] | None = None) -> int:
+    return min(max(limit * 20, limit, 50), 5_000)
+
+
+def normalize_search_sort(sort: str | None) -> str:
+    """Normalize sort parameter to one of: recency, relevance, hybrid."""
+    normalized = (sort or "recency").strip().lower()
+    return normalized if normalized in {"recency", "relevance", "hybrid"} else "recency"
+
+
+def build_snippet(text: str, terms: List[str], width: int = 80) -> str:
+    content = (text or "")
+    if not content:
+        return ""
+    lowered = content.lower()
+    for term in terms:
+        if not term:
+            continue
+        idx = lowered.find(term.lower())
+        if not idx >= 0:
+            return content[:width] + ("..." if len(content) > width else "")
+        start = max(0, idx - width // 2)
+        end = min(len(content), idx + len(term) + width // 2)
+        snippet = content[start:end]
+        if start > 0:
+            snippet = "..." + snippet
+        if end < len(content):
+            snippet = snippet + "..."
+        return snippet

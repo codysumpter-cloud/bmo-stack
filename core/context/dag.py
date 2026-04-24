@@ -125,9 +125,8 @@ class SummaryDAG:
 
     def _init_db(self):
         self._conn = sqlite3.connect(str(self.db_path), timeout=5.0, check_same_thread=False)
+        self._conn.row_factory = sqlite3.Row
         configure_connection(self._conn)
-        self._conn.execute("``") # Placeholder to satisfy the structure
-        # Actually using the logic from db_bootstrap
         run_versioned_migrations(self._conn)
         self._ensure_source_window_columns()
         self._conn.commit()
@@ -262,7 +261,7 @@ class SummaryDAG:
 
         order_by = _build_search_order_by(sort, "COALESCE(n.latest_at, n.created_at)")
         fetch_limit = compute_search_fetch_limit(limit, terms, phrases)
-        candidate_cap = compute_search_candidate_cap(limit)
+        candidate_cap = compute_search_candidate_cap(limit, terms, phrases)
         apply_directness_adjustment = should_apply_directness_rank_adjustment(terms, phrases)
         max_rank_bonus = compute_directness_rank_bonus_upper_bound(terms, phrases) * 2e-7
         offset = 0
@@ -340,7 +339,7 @@ class SummaryDAG:
             args.append(session_id)
         like_clauses = []
         for term in terms:
-            like_clauses.append("summary LIKE ? ESCAPE '\\\\'")
+            like_clauses.append("summary LIKE ? ESCAPE '|'")
             args.append(f"%{escape_like(term)}%")
         where.append("(" + " OR ".join(like_clauses) + ")")
         fetch_limit = compute_like_fallback_fetch_limit(limit, terms, phrases)
