@@ -34,7 +34,7 @@ const syncWorkflowContent = [
   '          BRANCH: ${{ github.event.repository.default_branch }}',
   '        run: |',
   '          set -euo pipefail',
-  '          payload=$(printf '\''{"branch":"%s"}'\'' "$BRANCH")',
+  '          payload=$(printf \'{"branch":"%s"}\' "$BRANCH"),',
   '          status=$(curl -sS -o response.json -w "%{http_code}" \\',
   '            -X POST \\',
   '            -H "Accept: application/vnd.github+json" \\',
