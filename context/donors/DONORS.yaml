@@ -1,112 +1,34 @@
-version: 1
-lastReviewed: 2026-04-03
+version: 2
+lastReviewed: 2026-04-24
 
 notes: |
-  `BeMore-stack` evolved directly out of `PrismBot` and `omni-bmo`.
-  Treat those two repos as the primary donor sources when auditing missing features.
-  `prismtek.dev_mega-app` and `BMO-app` are now active private donor repos for browser operator
-  surfaces and companion UX ideas.
+  Authoritative donor set for Harvest Phase 2. 
+  Consists of 25 identified forks and reference repositories.
+  Goal: Assimilate high-leverage capabilities into canonical bmo-stack and prismtek-apps.
 
 repos:
-  - name: BeMore-stack
-    role: canonical_runtime
-    status: active
-    importPolicy:
-      allowed:
-        - host runtime contracts
-        - council rules
-        - delivery rules
-        - context and memory policy
-      forbidden:
-        - importing donor repo code without explicit review
-    notes: |
-      This repo is the source of truth for the live BMO/OpenClaw stack.
-
-  - name: prismtek-site
-    role: content_donor
-    status: active
-    importPolicy:
-      allowed:
-        - route inventory
-        - copy and content blocks
-        - static asset inventory
-        - Cloudflare Pages deploy assumptions
-      forbidden:
-        - runtime architecture
-        - agent policy
-        - worker logic
-    notes: |
-      Use this repo to preserve and migrate prismtek.dev content.
-      Treat it as a website or content donor, not as a runtime donor.
-
-  - name: omni-bmo
-    role: runtime_ops_donor
-    status: active
-    importPolicy:
-      allowed:
-        - runtime profile patterns
-        - validation matrix patterns
-        - doctor and launcher patterns
-        - local-first fallback ideas
-        - voice and reactive-face runtime ideas
-      forbidden:
-        - Pi or hardware-specific assumptions as global defaults
-        - enclosure-specific or device-specific policy as canonical stack behavior
-    notes: |
-      Mine this repo for runtime discipline and validation rigor.
-
-  - name: PrismBot
-    role: policy_product_donor
-    status: active
-    importPolicy:
-      allowed:
-        - AGENTS conventions
-        - memory and heartbeat patterns
-        - response guide patterns
-        - website factory standards
-        - operator UX concepts
-      forbidden:
-        - importing the monorepo app sprawl into BeMore-stack
-        - treating PrismBot runtime layout as the canonical BMO runtime
-    notes: |
-      Mine this repo for product patterns and operator ergonomics, not for direct stack structure.
-
-  - name: prismtek.dev_mega-app
-    role: private_operator_surface_donor
-    status: active
-    importPolicy:
-      allowed:
-        - app factory template catalog
-        - app factory model catalog
-        - browser operator IA and panel concepts
-        - backend auth and Firestore service concepts
-        - workspace lifecycle and sync posture
-        - sandbox session UX language
-        - admin and billing lane concepts
-        - imported prototype metadata
-      forbidden:
-        - replacing the live prismtek.dev site architecture wholesale
-        - treating localhost Express assumptions as production truth
-        - importing the whole monorepo shape into BeMore-stack as canonical runtime
-    notes: |
-      Mine this repo for Enterprise App Factory concepts, app catalog metadata, and browser-first
-      operator surface ideas. Treat it as a private donor, not the live deploy source of truth.
-
-  - name: BMO-app
-    role: private_companion_experience_donor
-    status: active
-    importPolicy:
-      allowed:
-        - BMO companion UX patterns
-        - creature and Prismo world concepts
-        - local-first provider fallback ideas
-        - account and persona interaction concepts
-        - network posture and graceful degradation cues
-        - companion command patterns
-      forbidden:
-        - importing Firebase assumptions as canonical stack storage
-        - replacing OpenClaw runtime ownership with this app
-        - treating AI Studio scaffolding as production architecture
-    notes: |
-      Mine this repo for BMO character experience, Tengu creature concepts, Kairos world ideas,
-      and multi-provider chat ergonomics.
+  - { name: "claw-code", role: "runtime_hardening", status: "active" }
+  - { name: "nemoclaw", role: "domain_specialization", status: "active" }
+  - { name: "hermes-ecosystem", role: "orchestration", status: "active" }
+  - { name: "hermes-hudui", role: "operator_surface", status: "active" }
+  - { name: "hermes-webui", role: "operator_surface", status: "active" }
+  - { name: "gbrain", role: "knowledge_runtime", status: "active" }
+  - { name: "agentic-stack", role: "core_architecture", status: "active" }
+  - { name: "hermes-workspace", role: "context_management", status: "active" }
+  - { name: "hermes-control-interface", role: "api_bridge", status: "active" }
+  - { name: "awesome-hermes-agent", role: "meta_donor", status: "active" }
+  - { name: "hermes-desktop", role: "os_automation", status: "active" }
+  - { name: "bevy", role: "state_engine", status: "active" }
+  - { name: "mcporter", role: "mcp_host", status: "active" }
+  - { name: "hermes-paperclip-adapter", role: "api_adapter", status: "active" }
+  - { name: "hermes-agent-self-evolution", role: "recursive_logic", status: "active" }
+  - { name: "superpowers-zh", role: "localization", status: "active" }
+  - { name: "ml-intern", role: "ml_utilities", status: "active" }
+  - { name: "hermes-lcm", role: "inference_optimization", status: "active" }
+  - { name: "hermes-agent-orange-book", role: "reference_patterns", status: "active" }
+  - { name: "hermes-agent", role: "core_donor", status: "active" }
+  - { name: "context-mode", role: "prompt_optimization", status: "active" }
+  - { name: "learn-hermes-agent", role: "onboarding", status: "active" }
+  - { name: "agentmemory", role: "memory_optimization", status: "active" }
+  - { name: "LiteRT-LM", role: "edge_runtime", status: "active" }
+  - { name: "Hermes-Wiki", role: "knowledge_compilation", status: "active" }
