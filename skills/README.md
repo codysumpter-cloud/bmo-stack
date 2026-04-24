@@ -58,6 +58,7 @@ It is meant to make a focused workflow easier to execute correctly.
   - `daily-task-manager/`
   - `dispatching-parallel-agents/`
   - `enrich/`
+  - `evolution/`
   - `executing-plans/`
   - `finishing-a-development-branch/`
   - `hierarchical-memory-index/`
