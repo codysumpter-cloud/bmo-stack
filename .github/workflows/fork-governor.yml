@@ -1,0 +1,10 @@
+name: Govern forks and donors
+
+on:
+  workflow_dispatch:
+
+jobs:
+  govern-forks:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo fork governor bootstrap
