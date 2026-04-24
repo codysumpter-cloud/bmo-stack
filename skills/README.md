@@ -1,18 +1,10 @@
 # BMO Stack Skills
 
-
-
 This directory defines reusable, task-scoped skill modules for `BeMore-stack`.
-
-
 
 The goal is to make common operational capabilities easy to discover, document, and reuse without forcing contributors to reverse-engineer shell scripts or scattered docs.
 
-
-
 ## Source of truth
-
-
 
 - `context/skills/SKILLS.md`
 
@@ -26,15 +18,9 @@ The goal is to make common operational capabilities easy to discover, document, 
 
   - task-scoped operating playbook for that specific skill
 
-
-
 If the registry and README drift, fix both before trusting skill discovery.
 
-
-
 Before ad hoc debugging, start with:
-
-
 
 - `routines.md`
 
@@ -42,29 +28,17 @@ Before ad hoc debugging, start with:
 
 - `context/skills/SKILLS.md`
 
-
-
 For donor comparisons against `PrismBot` and `omni-bmo`, use:
-
-
 
 - `context/skills/donor-ingest.skill.md`
 
 - `context/donors/BMO_FEATURE_CARRYOVER.md`
 
-
-
 ## What a skill is
-
-
 
 A skill is a small operational capability bundle.
 
-
-
 Each skill should explain:
-
-
 
 - what problem it solves
 
@@ -76,22 +50,45 @@ Each skill should explain:
 
 - related docs or follow-up steps
 
-
-
 A skill is not meant to replace canonical repo docs.
 
 It is meant to make a focused workflow easier to execute correctly.
 
-
-
 ## Current skill set
-  - `agent-automation/`  - `bootstrap-recovery/`  - `browser-automation/`  - `ci-failure-diagnosis/`  - `claw-code-harness/`  - `context-sync/`  - `cron-scheduler/`  - `daily-task-manager/`  - `enrich/`  - `hierarchical-memory-index/`  - `idea-ingest/`  - `local-inference-bridge/`  - `mcp-integration/`  - `media-ingest/`  - `meeting-ingestion/`  - `memory-crystallization/`  - `mission-control-enhancement/`  - `omx-nim-coding/`  - `openclaw-agent-split/`  - `pokemon-champions-builder-architect/`  - `pokemon-champions-builder-generator/`  - `pokemon-champions-team-lab/`  - `sandbox-debugging/`  - `skillify/`  - `skills-access-diagnosis/`  - `sovereign-state-snapshot/`  - `telegram-coding-dispatch/`  - `telegram-routing/`  - `tool-failure-diagnostic/`  - `universal-intake/`  - `video-review/`## Suggested skill format
 
-
+  - `agent-automation/`
+  - `bootstrap-recovery/`
+  - `browser-automation/`
+  - `ci-failure-diagnosis/`
+  - `claw-code-harness/`
+  - `context-sync/`
+  - `cron-scheduler/`
+  - `daily-task-manager/`
+  - `enrich/`
+  - `hierarchical-memory-index/`
+  - `idea-ingest/`
+  - `local-inference-bridge/`
+  - `mcp-integration/`
+  - `media-ingest/`
+  - `meeting-ingestion/`
+  - `memory-crystallization/`
+  - `mission-control-enhancement/`
+  - `omx-nim-coding/`
+  - `openclaw-agent-split/`
+  - `pokemon-champions-builder-architect/`
+  - `pokemon-champions-builder-generator/`
+  - `pokemon-champions-team-lab/`
+  - `sandbox-debugging/`
+  - `skillify/`
+  - `skills-access-diagnosis/`
+  - `sovereign-state-snapshot/`
+  - `telegram-coding-dispatch/`
+  - `telegram-routing/`
+  - `tool-failure-diagnostic/`
+  - `universal-intake/`
+  - `video-review/`
 
 Each skill directory should contain a `README.md` with:
-
-
 
 - purpose
 
@@ -109,15 +106,9 @@ Each skill directory should contain a `README.md` with:
 
 - related files
 
-
-
 ## Why this exists
 
-
-
 `BeMore-stack` has meaningful operational logic spread across:
-
-
 
 - bootstrap scripts
 
@@ -129,15 +120,9 @@ Each skill directory should contain a `README.md` with:
 
 - GitHub automation docs
 
-
-
 This skill layer makes that operational knowledge more modular and easier to reuse in future repos or agent-facing runtime systems.
 
-
-
 For operator rollout and external skill recommendations, start with:
-
-
 
 - `docs/SKILLS_INSTALL.md`
 
