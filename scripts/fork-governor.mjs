@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { writeFile } from 'node:fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
 
 const owner = process.env.GITHUB_OWNER || process.env.GITHUB_REPOSITORY_OWNER || 'codysumpter-cloud';
 const donorsPath = process.env.DONORS_PATH || 'DONORS.yaml';
@@ -34,7 +34,7 @@ const syncWorkflowContent = [
   '          BRANCH: ${{ github.event.repository.default_branch }}',
   '        run: |',
   '          set -euo pipefail',
-  '          payload=$(printf \'{"branch":"%s"}\' "$BRANCH"),',
+  '          payload=$(printf \'{"branch":"%s"}\' "$BRANCH")',
   '          status=$(curl -sS -o response.json -w "%{http_code}" \\',
   '            -X POST \\',
   '            -H "Accept: application/vnd.github+json" \\',
@@ -155,6 +155,33 @@ function renderDonorsYaml(forks) {
   return `${lines.join('\n')}\n`;
 }
 
+function normalizeGeneratedAt(content) {
+  return content.replace(/^generated_at: .+$/m, "generated_at: '<ignored>'");
+}
+
+async function readExistingDonors() {
+  try {
+    return await readFile(donorsPath, 'utf8');
+  } catch (error) {
+    if (error.code === 'ENOENT') return null;
+    throw error;
+  }
+}
+
+async function writeDonorsIfMateriallyChanged(nextDonors) {
+  const existingDonors = await readExistingDonors();
+  if (
+    existingDonors !== null &&
+    normalizeGeneratedAt(existingDonors) === normalizeGeneratedAt(nextDonors)
+  ) {
+    console.log('No material DONORS.yaml changes; preserving existing generated_at timestamp.');
+    return false;
+  }
+
+  await writeFile(donorsPath, nextDonors, 'utf8');
+  return true;
+}
+
 async function main() {
   if (!token) {
     throw new Error('Missing FORK_GOVERNOR_TOKEN (or GH_TOKEN / GITHUB_TOKEN).');
@@ -166,25 +193,34 @@ async function main() {
     .sort((a, b) => a.full_name.localeCompare(b.full_name));
 
   const materialized = [];
+  const operations = [];
 
   for (const repo of forks) {
     let syncStatus = 'skipped';
+    let syncOperation = 'skipped';
+
     if (repo.archived) {
       syncStatus = 'skipped_archived';
+      syncOperation = 'skipped_archived';
     } else {
       try {
-        syncStatus = await upsertFile(repo, syncWorkflowPath, syncWorkflowContent, 'Add scheduled upstream fork sync workflow');
+        syncOperation = await upsertFile(repo, syncWorkflowPath, syncWorkflowContent, 'Add scheduled upstream fork sync workflow');
+        syncStatus = 'managed';
       } catch (error) {
         if (error.status === 403 && /locked/i.test(error.data?.message || '')) {
           syncStatus = 'locked';
+          syncOperation = 'locked';
         } else if (error.status === 409 || error.status === 422) {
           syncStatus = 'manual_resolution_required';
+          syncOperation = 'manual_resolution_required';
         } else {
           syncStatus = `error:${error.status || 'unknown'}`;
+          syncOperation = syncStatus;
         }
       }
     }
 
+    operations.push(syncOperation);
     materialized.push({
       name: repo.name,
       full_name: repo.full_name,
@@ -197,12 +233,13 @@ async function main() {
     });
   }
 
-  await writeFile(donorsPath, renderDonorsYaml(materialized), 'utf8');
+  const donorsChanged = await writeDonorsIfMateriallyChanged(renderDonorsYaml(materialized));
 
-  const created = materialized.filter((fork) => fork.sync_workflow_status === 'created').length;
-  const updated = materialized.filter((fork) => fork.sync_workflow_status === 'updated').length;
-  const unchanged = materialized.filter((fork) => fork.sync_workflow_status === 'unchanged').length;
+  const created = operations.filter((operation) => operation === 'created').length;
+  const updated = operations.filter((operation) => operation === 'updated').length;
+  const unchanged = operations.filter((operation) => operation === 'unchanged').length;
   console.log(`Fork governor complete: ${materialized.length} forks scanned, ${created} created, ${updated} updated, ${unchanged} unchanged.`);
+  console.log(`DONORS.yaml ${donorsChanged ? 'updated' : 'unchanged'}.`);
 }
 
 main().catch((error) => {
