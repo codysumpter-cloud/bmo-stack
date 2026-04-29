@@ -31,7 +31,7 @@ git checkout -B "$BRANCH_NAME"
 git add "$DONORS_PATH"
 
 BODY_FILE="$(mktemp)"
-cat > "$BODY_FILE" <<'EOF'
+cat >"$BODY_FILE" <<'EOF'
 ## Summary
 - refresh `DONORS.yaml` from live fork inventory when the inventory materially changes
 - bootstrap the upstream sync workflow into newly discovered forks
