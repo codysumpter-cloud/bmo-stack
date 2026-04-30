@@ -44,6 +44,12 @@
       "name": "Companion UX and resilience cues",
       "owner": "shared",
       "description": "Carry companion modes, Kairos world-state, and graceful degraded-state cues across the public and local surfaces."
+    },
+    {
+      "id": "agentcraft-observability",
+      "name": "AgentCraft local observability",
+      "owner": "local",
+      "description": "Mirror approved BMO runtime lifecycle cues into a local HUD without changing runtime authority."
     }
   ],
   "documentShortcuts": [
@@ -64,6 +70,12 @@
       "name": "Private App Repo Integration",
       "path": "docs/PRIVATE_APP_REPO_INTEGRATION.md",
       "description": "How prismtek.dev_mega-app and BMO-app map into Builder Studio, Prism Agent, and BMO."
+    },
+    {
+      "id": "agentcraft-integration",
+      "name": "AgentCraft Integration",
+      "path": "docs/AGENTCRAFT_INTEGRATION.md",
+      "description": "Local-only AgentCraft HUD bridge, event mapping, and safety defaults."
     }
   ],
   "validationActions": [
@@ -90,6 +102,24 @@
       "name": "Runtime doctor",
       "command": "make runtime-doctor",
       "description": "Validate runtime profile and launch assumptions."
+    },
+    {
+      "id": "agentcraft-doctor",
+      "name": "AgentCraft doctor",
+      "command": "make agentcraft-doctor",
+      "description": "Validate the optional local AgentCraft HUD integration."
+    },
+    {
+      "id": "agentcraft-health",
+      "name": "AgentCraft health",
+      "command": "make agentcraft-health",
+      "description": "Check whether the local AgentCraft server is reachable."
+    },
+    {
+      "id": "agentcraft-smoke",
+      "name": "AgentCraft smoke events",
+      "command": "make agentcraft-smoke",
+      "description": "Emit redacted smoke events through the optional AgentCraft reporter."
     }
   ]
 }
