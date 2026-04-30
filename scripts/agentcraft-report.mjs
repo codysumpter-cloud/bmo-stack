@@ -17,10 +17,10 @@ function stableSessionId(cwd = process.cwd()) {
   return `bmo_${hash}`;
 }
 
-function isLocalEndpoint(value) {
+function isLocalHttpEndpoint(value) {
   try {
     const url = new URL(value);
-    return ["localhost", "127.0.0.1", "::1"].includes(url.hostname);
+    return ["http:", "https:"].includes(url.protocol) && ["localhost", "127.0.0.1", "::1"].includes(url.hostname);
   } catch {
     return false;
   }
@@ -90,13 +90,12 @@ function normalizeEvent(type, payload) {
 
 async function postEvent(event) {
   const endpoint = process.env.AGENTCRAFT_EVENT_URL ?? DEFAULT_ENDPOINT;
-  const allowRemote = envFlag("AGENTCRAFT_ALLOW_REMOTE", false);
 
-  if (!isLocalEndpoint(endpoint) && !allowRemote) {
+  if (!isLocalHttpEndpoint(endpoint)) {
     return {
       ok: false,
       skipped: true,
-      reason: "non-local endpoint rejected; set AGENTCRAFT_ALLOW_REMOTE=1 to override",
+      reason: "AgentCraft endpoint must be local HTTP(S).",
     };
   }
 
