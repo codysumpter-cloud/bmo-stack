@@ -615,6 +615,22 @@
         "evolution status"
       ],
       "default_action": "status"
+    },
+    "worldbox-agentcraft": {
+      "actions": [
+        "status",
+        "observe",
+        "propose",
+        "block",
+        "done"
+      ],
+      "triggers": [
+        "worldbox",
+        "agentcraft",
+        "god sim",
+        "safe tools"
+      ],
+      "default_action": "status"
     }
   },
   "worldbox-agentcraft": {
