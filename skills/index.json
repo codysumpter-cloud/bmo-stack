@@ -616,5 +616,10 @@
       ],
       "default_action": "status"
     }
+  },
+  "worldbox-agentcraft": {
+    "name": "WorldBox AgentCraft",
+    "description": "Safe tools for WorldBox orchestration and bridge planning.",
+    "category": "gaming"
   }
 }
