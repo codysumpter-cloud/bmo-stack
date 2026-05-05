@@ -1,5 +1,8 @@
 # WorldBox AgentCraft Skill
 
+## Purpose
+Provide a safe, audited interface for interacting with WorldBox and AgentCraft tooling, focusing on observation, planning, and bridge research while strictly forbidding autonomous gameplay clicking.
+
 Use this skill when working with WorldBox, AgentCraft, BMO runtime, or WorldBox bridge/mod tooling.
 
 ## Hard boundary
