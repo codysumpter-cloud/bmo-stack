@@ -44,6 +44,12 @@
       "name": "Companion UX and resilience cues",
       "owner": "shared",
       "description": "Carry companion modes, Kairos world-state, and graceful degraded-state cues across the public and local surfaces."
+    },
+    {
+      "id": "buddy-symphony",
+      "name": "Buddy Symphony orchestration",
+      "owner": "local",
+      "description": "Turn eligible work into isolated Buddy missions while BMO keeps policy, receipts, and state authority."
     }
   ],
   "documentShortcuts": [
@@ -64,6 +70,18 @@
       "name": "Private App Repo Integration",
       "path": "docs/PRIVATE_APP_REPO_INTEGRATION.md",
       "description": "How prismtek.dev_mega-app and BMO-app map into Builder Studio, Prism Agent, and BMO."
+    },
+    {
+      "id": "buddy-symphony-guide",
+      "name": "Buddy Symphony Integration",
+      "path": "docs/BUDDY_SYMPHONY.md",
+      "description": "How Symphony-style work orchestration maps into Buddy missions, proofs, receipts, and Mission Control."
+    },
+    {
+      "id": "buddy-symphony-contract",
+      "name": "Buddy Symphony Contract",
+      "path": "contracts/buddy_symphony.md",
+      "description": "Contract boundaries and event mapping for Buddy-safe Symphony runs."
     }
   ],
   "validationActions": [
@@ -90,6 +108,12 @@
       "name": "Runtime doctor",
       "command": "make runtime-doctor",
       "description": "Validate runtime profile and launch assumptions."
+    },
+    {
+      "id": "buddy-symphony-workflow-print",
+      "name": "Preview Buddy Symphony workflow",
+      "command": "node scripts/generate-buddy-symphony-workflow.mjs --print",
+      "description": "Render a Buddy-safe Symphony WORKFLOW template without writing files."
     }
   ]
 }
